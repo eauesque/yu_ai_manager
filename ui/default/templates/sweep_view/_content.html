@@ -1,0 +1,32 @@
+<main class="sweep-view" style="max-width:1400px;margin:0 auto;padding:16px;padding-top:calc(var(--nav-h, 50px) + 16px);">
+  <header class="sweep-view-header" style="display:flex;flex-wrap:wrap;gap:16px;align-items:baseline;margin-bottom:16px;">
+    <h1 style="margin:0;font-size:20px;display:flex;gap:8px;align-items:baseline;">
+      <span aria-hidden="true">🔁</span>
+      <span data-i18n="sweep_view.heading">Sweep</span>
+      <span class="sweep-view-id" id="sweepViewId" style="opacity:0.6;font-family:monospace;font-weight:normal;font-size:14px;"></span>
+    </h1>
+    <div class="sweep-view-bridge" id="sweepViewBridge" style="opacity:0.7;font-size:13px;"></div>
+    <div class="sweep-view-axis-summary" id="sweepViewAxisSummary" style="opacity:0.7;font-size:13px;"></div>
+    <div style="margin-left:auto;display:flex;gap:8px;align-items:center;">
+      <div id="sweepViewToolbar"></div>
+      <a id="sweepViewRerunBtn" class="btn small" style="padding:6px 12px;text-decoration:none;display:none;" href="#"></a>
+      <a id="sweepViewRerunNoSeedBtn" class="btn small" style="padding:6px 12px;text-decoration:none;display:none;" href="#"></a>
+      <div id="sweepViewCrossBridge"></div>
+    </div>
+  </header>
+
+  <section id="sweepViewMessages" style="margin:8px 0;font-size:13px;"></section>
+
+  <section id="sweepViewLoading" style="display:flex;flex-direction:column;align-items:center;gap:12px;padding:48px 16px;opacity:0.85;">
+    <div class="sweep-view-spinner" aria-hidden="true" style="width:40px;height:40px;border:3px solid rgba(127,127,127,0.25);border-top-color:#4fc3f7;border-radius:50%;animation:sweepViewSpin 0.9s linear infinite;"></div>
+    <div data-i18n="sweep_view.loading" style="font-size:13px;">Sweep を読み込み中…</div>
+  </section>
+  <style nonce="{{ csp_nonce }}">
+    @keyframes sweepViewSpin { to { transform: rotate(360deg); } }
+  </style>
+
+  <section id="sweepViewGrid" style="margin-top:16px;"></section>
+
+  <section id="sweepViewHistory" style="margin-top:32px;"
+           aria-label="Sweep history"></section>
+</main>

@@ -1,0 +1,20 @@
+  <div id="serverDirModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:4000;align-items:center;justify-content:center;padding:14px;">
+    <div style="width:min(860px,96vw);max-height:85vh;overflow:hidden;background:var(--card,#1f2333);border:1px solid rgba(255,255,255,0.12);border-radius:10px;display:flex;flex-direction:column;">
+      <div style="padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;gap:8px;">
+        <strong><span aria-hidden="true">🖥️</span> <span data-i18n="tools.server_dir_title">Server Folder Browser</span></strong>
+        <span id="serverDirHost" style="font-size:12px;color:var(--muted,#aab2c0);"></span>
+        <button type="button" data-action="toolsPageApi.closeServerDirBrowser" style="margin-left:auto;background:none;border:none;color:inherit;font-size:18px;cursor:pointer;"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-x"/></svg></button>
+      </div>
+      <div style="padding:10px 12px;display:flex;gap:8px;align-items:center;border-bottom:1px solid rgba(255,255,255,0.08);">
+        <button type="button" class="btn btn-secondary" data-action="toolsPageApi.browseServerParent"><span aria-hidden="true">⬆</span> <span data-i18n="tools.parent">Parent</span></button>
+        <input id="serverDirPath" type="text" aria-label="Server directory path" style="flex:1;padding:6px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.35);background:rgba(0,0,0,0.2);color:inherit;" data-action-enter="toolsPageApi.browseServerPathFromInput">
+        <button type="button" class="btn btn-secondary" data-action="toolsPageApi.browseServerPathFromInput" data-i18n="tools.go">Go</button>
+      </div>
+      <div id="serverDirRoots" style="padding:8px 12px;border-bottom:1px solid rgba(255,255,255,0.08);font-size:12px;color:#aaa;"></div>
+      <div id="serverDirList" style="padding:10px 12px;overflow:auto;min-height:260px;"></div>
+      <div style="padding:10px 12px;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:flex-end;gap:8px;">
+        <button type="button" class="btn btn-secondary" data-action="toolsPageApi.closeServerDirBrowser" data-i18n="tools.cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" data-action="toolsPageApi.selectCurrentServerDir" data-i18n="tools.use_this_path">Use This Path</button>
+      </div>
+    </div>
+  </div>

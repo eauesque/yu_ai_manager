@@ -1,0 +1,135 @@
+/*
+ * Atelier System (γ) — lan_cowork.html
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool.
+ */
+
+/* ----- Header h1 polish ----- */
+
+body.theme-atelier-light.atelier-tool .lc-header h1,
+body.theme-atelier-dark.atelier-tool .lc-header h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  margin: 4px 0 16px;
+}
+
+/* ----- Sub-navigation ----- */
+
+body.theme-atelier-light.atelier-tool .lc-subnav,
+body.theme-atelier-dark.atelier-tool .lc-subnav {
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .lc-subnav-link,
+body.theme-atelier-dark.atelier-tool .lc-subnav-link {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 2px solid transparent;
+  text-decoration: none;
+}
+
+body.theme-atelier-light.atelier-tool .lc-subnav-link:hover,
+body.theme-atelier-dark.atelier-tool .lc-subnav-link:hover {
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .lc-subnav-link.active,
+body.theme-atelier-dark.atelier-tool .lc-subnav-link.active {
+  color: var(--accent-tool);
+  border-bottom-color: var(--accent-tool);
+}
+
+/* ----- Sections / peer cards ----- */
+
+body.theme-atelier-light.atelier-tool .lc-section,
+body.theme-atelier-dark.atelier-tool .lc-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .lc-section h2,
+body.theme-atelier-dark.atelier-tool .lc-section h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 18px;
+  margin: 0 0 var(--space-3);
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .lc-peer-card,
+body.theme-atelier-dark.atelier-tool .lc-peer-card {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .lc-peer-name,
+body.theme-atelier-dark.atelier-tool .lc-peer-name {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .lc-peer-addr,
+body.theme-atelier-dark.atelier-tool .lc-peer-addr {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+/* ----- Badges ----- */
+
+body.theme-atelier-light.atelier-tool .lc-badge,
+body.theme-atelier-dark.atelier-tool .lc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .lc-badge-online,
+body.theme-atelier-dark.atelier-tool .lc-badge-online {
+  background: color-mix(in srgb, var(--accent-tool) 14%, var(--surface));
+  color: var(--accent-tool);
+  border-color: color-mix(in srgb, var(--accent-tool) 35%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .lc-badge-offline,
+body.theme-atelier-dark.atelier-tool .lc-badge-offline {
+  background: var(--surface-raised);
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light.atelier-tool .lc-empty,
+body.theme-atelier-dark.atelier-tool .lc-empty {
+  font-family: var(--font-ui);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light.atelier-tool .lc-field label,
+body.theme-atelier-dark.atelier-tool .lc-field label {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}

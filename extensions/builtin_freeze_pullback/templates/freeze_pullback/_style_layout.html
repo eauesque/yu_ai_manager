@@ -1,0 +1,142 @@
+<style>
+/* ── Freeze & Pull-back layout ───────────────────────── */
+/* CSS 変数は base-theme.css のアプリテーマを継承:
+   --bg, --card, --text, --muted, --border, --accent,
+   --btn-bg, --btn-text, --btn-hover, --shadow            */
+.fpb-layout {
+  display: flex;
+  height: calc(100vh - var(--nav-h, 50px));
+  margin-top: var(--nav-h, 50px);
+}
+
+/* ── Sidebar ─────────────────────────────────────────── */
+.fpb-sidebar {
+  width: 340px;
+  min-width: 300px;
+  max-width: 420px;
+  border-right: 1px solid var(--border, #2b3240);
+  display: flex;
+  flex-direction: column;
+  background: var(--card, #1b1f2a);
+  overflow-y: auto;
+}
+.fpb-sidebar-section {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border, #2b3240);
+}
+.fpb-sidebar-section h3 {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted, #aab2c0);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* ── Inputs ──────────────────────────────────────────── */
+.fpb-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.fpb-input-row label {
+  font-size: 13px;
+  color: var(--muted, #aab2c0);
+  min-width: 86px;
+  flex-shrink: 0;
+}
+.fpb-input {
+  flex: 1;
+  min-width: 0;
+  padding: 6px 10px;
+  border: 1px solid var(--border, #2b3240);
+  border-radius: 6px;
+  background: var(--bg, #0f1115);
+  color: var(--text, #e7eaf0);
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.fpb-input:focus {
+  outline: none;
+  border-color: var(--accent, #60a5fa);
+}
+.fpb-select {
+  flex: 1;
+  min-width: 0;
+  padding: 8px; padding-right: 28px;
+  border: 1px solid var(--border, #2b3240);
+  border-radius: 6px;
+  background: var(--bg, #0f1115);
+  color: var(--text, #e7eaf0);
+  font-size: 13px;
+  cursor: pointer;
+  min-height: 28px;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 0l6 6 6-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+}
+.fpb-checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  font-size: 13px;
+  color: var(--muted, #aab2c0);
+}
+.fpb-checkbox-row input[type="checkbox"] {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* ── Buttons ─────────────────────────────────────────── */
+.fpb-btn {
+  padding: 8px 16px;
+  border: 1px solid var(--border, #2b3240);
+  border-radius: 6px;
+  background: var(--btn-bg, #1b2030);
+  color: var(--btn-text, #e7eaf0);
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+.fpb-btn:hover {
+  background: var(--btn-hover, #222a3d);
+}
+.fpb-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.fpb-btn-primary {
+  background: var(--accent, #60a5fa);
+  color: #fff;
+  border-color: var(--accent, #60a5fa);
+  font-weight: 600;
+}
+.fpb-btn-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+.fpb-btn-danger {
+  background: #e74c3c;
+  color: #fff;
+  border-color: #e74c3c;
+}
+.fpb-btn-danger:hover:not(:disabled) {
+  opacity: 0.9;
+}
+.fpb-btn-sm {
+  padding: 4px 10px;
+  font-size: 12px;
+}
+.fpb-btn-load {
+  flex-shrink: 0;
+  min-width: 52px;
+}
+.fpb-action-row {
+  display: flex;
+  gap: 8px;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border, #2b3240);
+}
+</style>

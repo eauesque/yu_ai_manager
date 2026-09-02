@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="prompt_library.title">Prompt Library</title>
+  {% include "prompt_library_parts/_style.html" %}
+  {% include "prompt_library_parts/_style_cards.html" %}
+  {% include "prompt_library_parts/_style_modal.html" %}
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+    <div class="pl-layout">
+      {% include "prompt_library_parts/_sidebar.html" %}
+      {% include "prompt_library_parts/_main.html" %}
+    </div>
+  </main>
+  {% include "prompt_library_parts/_modal_save.html" %}
+  {% include "prompt_library_parts/_modal_folder.html" %}
+  <script nonce="{{ csp_nonce }}" src="/static/tauri_shell/cross_tab.js"></script>
+  {% include "prompt_library_parts/_script.html" %}
+  {% include "prompt_library_parts/_script_modal.html" %}
+  {% include "prompt_library_parts/_script_sidebar.html" %}
+  {% include "prompt_library_parts/_script_bridge.html" %}
+  {% include "prompt_library_parts/_script_bulk.html" %}
+</body>
+</html>

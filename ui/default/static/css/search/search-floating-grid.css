@@ -1,0 +1,134 @@
+/* Floating Grid Controller — collapsible panel */
+
+.fgc {
+  position: fixed;
+  left: 12px;
+  bottom: 12px;
+  z-index: 200;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: flex-start;
+  gap: 6px;
+  /* fit-content shrinks the container to child size, allowing click-through on the backdrop.
+     Avoids using pointer-events:none to prevent Firefox range input drag issues */
+  width: fit-content;
+  transition: bottom 0.3s ease;
+}
+
+.fgc-toggle {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid rgba(128, 128, 128, 0.45);
+  background: rgba(30, 34, 48, 0.88);
+  color: #b0bec5;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.15s;
+  line-height: 1;
+  padding: 0;
+}
+
+.fgc-toggle:hover {
+  background: rgba(50, 58, 80, 0.92);
+  border-color: rgba(102, 126, 234, 0.6);
+  color: #667eea;
+}
+
+.fgc-toggle.active {
+  background: rgba(50, 58, 80, 0.95);
+  border-color: rgba(102, 126, 234, 0.7);
+  color: #667eea;
+}
+
+.fgc-body {
+  background: rgba(30, 34, 48, 0.92);
+  border: 1px solid rgba(128, 128, 128, 0.35);
+  border-radius: 10px;
+  padding: 12px 14px;
+  /* Fixed width: prevents reflow from text updates causing Firefox range input
+     to lose pointer capture during drag */
+  width: 260px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+}
+
+/* Slider: ensure adequate touch target size */
+.fgc-body input[type="range"] {
+  height: 24px;
+  margin: 0;
+}
+
+/* Hidden while modal is active */
+body:has(.modal.active) .fgc,
+body:has(.modal.active) .scroll-nav-btn {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Scroll-to-top / Scroll-to-bottom floating buttons                 */
+/* ------------------------------------------------------------------ */
+
+.scroll-nav-btn {
+  position: fixed;
+  right: 20px;
+  z-index: 210;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(102, 126, 234, 0.85);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.2s, bottom 0.3s ease;
+}
+
+.scroll-nav-top    { bottom: 70px; }
+.scroll-nav-bottom { bottom: 20px; }
+
+/* ------------------------------------------------------------------ */
+/*  While toast is visible: shift gear icon, scroll arrows, and keyboard guide upward */
+/* ------------------------------------------------------------------ */
+
+body:has(#toast-container .toast.show) .fgc {
+  bottom: 62px;
+}
+body:has(#toast-container .toast.show) .scroll-nav-top {
+  bottom: 120px;
+}
+body:has(#toast-container .toast.show) .scroll-nav-bottom {
+  bottom: 70px;
+}
+body:has(#toast-container .toast.show) .keyboard-guide {
+  bottom: 62px;
+}
+
+/* Light mode overrides */
+body:not(.dark) .fgc-toggle {
+  background: rgba(255, 255, 255, 0.92);
+  border-color: rgba(128, 128, 128, 0.35);
+  color: #555;
+}
+
+body:not(.dark) .fgc-toggle:hover,
+body:not(.dark) .fgc-toggle.active {
+  background: rgba(240, 243, 255, 0.95);
+  border-color: rgba(102, 126, 234, 0.5);
+  color: #667eea;
+}
+
+body:not(.dark) .fgc-body {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(128, 128, 128, 0.3);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}

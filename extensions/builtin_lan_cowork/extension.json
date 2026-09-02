@@ -1,0 +1,24 @@
+{
+  "name": "builtin-lan-cowork",
+  "version": "1.0.0",
+  "description": "LAN peer discovery, prompt/wildcard sync, and distributed generation",
+  "type": "general",
+  "category": "system",
+  "entry": "lan_cowork_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "peer_core",
+  "config": {
+    "enabled": true,
+    "priority": 300
+  },
+  "config_schema": {
+    "enabled": { "type": "boolean", "default": false },
+    "peer_name": { "type": "string", "default": "auto" },
+    "discovery_port": { "type": "number", "default": 19850 },
+    "manual_peers": { "type": "array", "default": [] },
+    "sync_enabled": { "type": "boolean", "default": true },
+    "distributed_gen_enabled": { "type": "boolean", "default": true },
+    "image_sync": { "type": "string", "default": "immediate" }
+  }
+}

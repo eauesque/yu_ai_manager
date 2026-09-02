@@ -1,0 +1,1699 @@
+{
+  "a11y": {
+    "condition_added": "条件「{label}」を追加しました",
+    "condition_menu_opened": "条件追加メニューを開きました",
+    "condition_removed": "条件「{label}」を削除しました",
+    "focus_search": "検索欄にフォーカスしました",
+    "result_focus": "{index}/{total} 件目: {label}",
+    "results_list_label": "検索結果一覧"
+  },
+  "agent_journal": {
+    "scope_delete": "削除",
+    "scopes_empty_with_default": "（スコープなし — デフォルト適用）"
+  },
+  "analysis": {
+    "analyzed_at": "解析日: {date}",
+    "btn_reanalyze": "再解析",
+    "done_label": "分析済み",
+    "label": {
+      "ai_tags": "AI検出タグ:",
+      "color": "カラー:",
+      "composition": "構図:",
+      "engine": "エンジン:",
+      "mood": "ムード:",
+      "quality": "品質:",
+      "style": "スタイル:",
+      "suggestion": "プロンプト提案:"
+    },
+    "status_done": "✅ 完了",
+    "status_done_engine": "✅ 完了 ({engine})",
+    "status_error": "❌ {error}",
+    "status_running": "分析中...",
+    "status_running_engine": "{engine} で分析中...",
+    "status_saved": "✅ {engine}"
+  },
+  "analysis.engine": "AI Engine",
+  "analysis.engine_default": "Auto",
+  "analysis.mode": "Analysis Mode",
+  "analysis.mode_full": "Full Analysis",
+  "analysis.mode_simple": "Color + Composition",
+  "analysis.model": "AI Model",
+  "api_error": {
+    "bad_zip_file": "アーカイブファイルが破損しています",
+    "batch_empty": "バッチが空です",
+    "batch_too_large": "バッチサイズが上限を超えています",
+    "collection_not_found": "コレクションが見つかりません",
+    "container_not_found": "このファイルのコンテナが見つかりません",
+    "convert_failed": "フォーマット変換に失敗しました",
+    "debug_disabled": "デバッグモードが有効ではありません",
+    "empty_sql": "SQLクエリが空です",
+    "extract_register_failed": "展開ファイルの登録に失敗しました",
+    "file_missing": "ファイルがディスク上に存在しません",
+    "file_not_found": "ファイルが見つかりません",
+    "gateway_no_db": "DBが利用できません（ゲートウェイモード）",
+    "internal_error": "内部サーバーエラー",
+    "invalid_content_type": "コンテンツタイプが正しくありません",
+    "invalid_index": "不正なインデックスです",
+    "invalid_json": "JSONの形式が正しくありません",
+    "invalid_json_object": "JSONオブジェクトが必要です",
+    "invalid_mode": "不正なモードです",
+    "invalid_request": "不正なリクエストです",
+    "invalid_value": "不正な値です",
+    "job_running": "バッチジョブが既に実行中です",
+    "keyframe_error": "キーフレームの抽出に失敗しました",
+    "missing_dependency": "必要なライブラリがインストールされていません",
+    "missing_file_id": "ファイルIDが必要です",
+    "model_not_available": "モデルがまだダウンロードされていません",
+    "multi_stmt_rejected": "複数のSQL文は許可されていません",
+    "no_data": "データが指定されていません",
+    "not_found": "リソースが見つかりません",
+    "not_select": "SELECT文のみ使用できます",
+    "not_zip_member": "アーカイブメンバーではありません",
+    "path_required": "パスの指定が必要です",
+    "purge_failed": "完全削除に失敗しました",
+    "roots_summary_failed": "スキャンルートの集計に失敗しました",
+    "scan_roots_config_failed": "スキャンルートの設定に失敗しました",
+    "sql_error": "SQL実行エラー",
+    "unsupported_type": "このファイル形式はサポートされていません",
+    "write_rejected": "書き込み操作は許可されていません",
+    "zip_entry_not_found": "アーカイブ内にエントリが見つかりません",
+    "zip_not_found": "アーカイブファイルが見つかりません",
+    "zip_path_traversal": "パストラバーサルがブロックされました"
+  },
+  "boss_mode": {
+    "back": "戻る",
+    "brand": "Daily Ledger",
+    "esc_hint": "Esc で戻る",
+    "headline": "主要地域でインフレ鈍化、世界市場は安定推移",
+    "story1": "各国中銀、次四半期の引き締めペース鈍化を示唆",
+    "story2": "太平洋航路の正常化で海上輸送コストが低下",
+    "story3": "企業向け需要の伸びでテック決算は市場予想を上回る",
+    "story4": "商品高一服でエネルギー株は反落",
+    "subhead": "投資家は雇用統計・政策シグナル・エネルギー価格を見極めつつ、主要指数は全体として落ち着いた動きを見せました。",
+    "top_stories": "主要ニュース",
+    "watchlist": "ウォッチリスト"
+  },
+  "bridge": {
+    "pl": {
+      "load_tooltip": "PL 読込",
+      "save_tooltip": "PL 保存"
+    },
+    "toolbar_legend": {
+      "title": "凡例 / 記号の意味"
+    }
+  },
+  "bridge.syntax_warning.converting": "変換中…",
+  "bridge.syntax_warning.error": "変換に失敗しました",
+  "character": {
+    "negative_label": "除外:",
+    "section_title": "NovelAI V4 キャラクタープロンプト"
+  },
+  "checkpoint": {
+    "option_count": "{name} ({count}件)"
+  },
+  "collections": {
+    "created": "作成しました",
+    "deleted": "削除しました",
+    "export_csv": "パスCSV",
+    "export_recipe_csv": "レシピCSV",
+    "export_recipe_json": "レシピJSON",
+    "renamed": "名前を変更しました"
+  },
+  "common": {
+    "clear": "クリア",
+    "delete": "削除",
+    "enabled": "有効",
+    "error_prefix": "エラー:",
+    "loading": "読み込み中...",
+    "range_sep": "〜",
+    "reset": "リセット",
+    "save": "保存",
+    "saved": "保存しました",
+    "saving": "保存中..."
+  },
+  "common.saved": "保存しました",
+  "common.saving": "保存中...",
+  "conditions": {
+    "aiAnalyzed": {
+      "label": "🧠 AI分析済み"
+    },
+    "artist": {
+      "label": "🎨 Artist",
+      "placeholder": "artist名"
+    },
+    "checkpoint": {
+      "label": "🎯 チェックポイント",
+      "placeholder": "例: animagine, pony"
+    },
+    "clear_all": "すべて解除",
+    "collection": {
+      "all": "すべてのお気に入り",
+      "label": "⭐ コレクション"
+    },
+    "csvLimit": {
+      "label": "📥 CSVエクスポート件数"
+    },
+    "disabled_in_grouped": "フォルダー/ZIP表示では使用できません",
+    "favOnly": {
+      "label": "⭐ お気に入りのみ"
+    },
+    "format": {
+      "ext_filter_hint": "拡張子で絞り込み（任意）",
+      "ext_group_audio": "音声",
+      "ext_group_container": "コンテナ",
+      "ext_group_image": "画像",
+      "ext_group_video": "動画",
+      "label": "📄 形式"
+    },
+    "hasAnnotation": {
+      "desc": "アノテーション（メモ）が登録されているファイルのみ表示",
+      "label": "📝 メモあり"
+    },
+    "hasTags": {
+      "label": "🏷️ タグ付き"
+    },
+    "hint": {
+      "count_many": "{count}件の条件",
+      "count_one": "1件の条件"
+    },
+    "inCharNeg": {
+      "label": "🚫 キャラネガティブ",
+      "placeholder": "キャラ別ネガティブ検索"
+    },
+    "inCharPos": {
+      "label": "✨ キャラポジティブ",
+      "placeholder": "キャラ別ポジティブ検索"
+    },
+    "inFolder": {
+      "label": "📂 フォルダ",
+      "placeholder": "パスの一部 例: o:\\test"
+    },
+    "inNegative": {
+      "label": "🚫 ネガティブ内",
+      "placeholder": "ネガティブ内のキーワード"
+    },
+    "inPrompt": {
+      "label": "🔤 プロンプト内",
+      "placeholder": "プロンプト内のキーワード"
+    },
+    "limit": {
+      "label": "#️⃣ 読み込み量",
+      "short_label": "件数"
+    },
+    "model": {
+      "label": "🤖 モデル"
+    },
+    "orTags": {
+      "label": "🔀 OR検索",
+      "placeholder": "いずれかを含む（カンマ区切り）"
+    },
+    "period": {
+      "label": "📅 期間"
+    },
+    "remove": "条件を外す",
+    "resolution": {
+      "label": "📐 解像度"
+    },
+    "sort": {
+      "label": "↕️ 並び順"
+    },
+    "tagCase": {
+      "label": "Aa 大文字小文字区別"
+    },
+    "toggle": {
+      "close": "▲ 閉じる",
+      "more": "▼ もっと見る"
+    }
+  },
+  "container": {
+    "folder_items": "フォルダ内 {count} 枚",
+    "no_members": "コンテナにインデックスされたメンバーがありません。",
+    "preload_done": "フォルダー・ZIPカテゴリー表示の準備ができました",
+    "preloading_thumbs": "サムネイルを生成中... ({done}/{total})",
+    "zip_items": "ZIP内 {count} 枚"
+  },
+  "convert": {
+    "btn_expand_dynamic": "Dynamic Prompts",
+    "btn_restore": "元に戻す",
+    "failed": "変換に失敗しました",
+    "failed_with_error": "変換に失敗しました: {error}",
+    "label": {
+      "nai": "NAI形式 ",
+      "sd": "SD形式 "
+    }
+  },
+  "ctx.ai_analyze": "AI 分析",
+  "ctx.clear_rating": "クリア",
+  "ctx.copied": "コピーしました",
+  "ctx.copied_nai": "NAI形式でコピーしました",
+  "ctx.copied_sd": "SD形式でコピーしました",
+  "ctx.copy_nai": "NAI 形式でコピー",
+  "ctx.copy_negative": "ネガティブをコピー",
+  "ctx.copy_path": "ファイルパスをコピー",
+  "ctx.copy_prompt": "プロンプトをコピー",
+  "ctx.copy_sd": "SD 形式でコピー",
+  "ctx.favorite": "お気に入り ☆",
+  "ctx.find_similar": "類似画像を探す",
+  "ctx.path_copied": "パスをコピーしました",
+  "ctx.qr_share": "QR で共有",
+  "ctx.rating": "レーティング",
+  "ctx.save_pl": "PL に保存",
+  "ctx.send_bridge": "Bridge に送る",
+  "ctx.show_detail": "詳細を表示",
+  "detail": {
+    "ann_add_label": "メモを追加",
+    "ann_delete_confirm": "このアノテーションを削除しますか？",
+    "ann_empty": "アノテーションはありません。",
+    "ann_load_failed": "アノテーションの読み込みに失敗しました。",
+    "ann_placeholder": "このファイルへの個人メモを入力...",
+    "ann_save_failed": "保存に失敗しました",
+    "ann_source_user": "あなたのメモ",
+    "audio_unsupported": "お使いのブラウザは audio 再生に対応していません。",
+    "image_alt": "画像",
+    "load_failed": "詳細の読み込みに失敗しました",
+    "modal": {
+      "analysis_mode": "解析モード切替",
+      "audio_playback": "音声再生",
+      "autoplay": "自動再生 (P)",
+      "autoplay_interval": "間隔（秒）",
+      "bar_collapse": "バーを折りたたむ",
+      "bar_expand": "バーを展開",
+      "close": "閉じる",
+      "container_items": "{count} 件",
+      "container_view": "コンテナビュー",
+      "display": "表示:",
+      "favorite": "お気に入り切り替え",
+      "fullscreen": "全画面",
+      "info_toggle": "情報パネル表示/非表示",
+      "mode_fit": "フィット",
+      "mode_fit_custom": "指定",
+      "mode_fit_height": "高さ",
+      "mode_fit_width": "横幅",
+      "mode_original": "原寸",
+      "mute": "ミュート (M)",
+      "next": "次の画像",
+      "prev": "前の画像",
+      "repeat_off": "リピート: OFF (R)",
+      "repeat_on": "リピート: ON (R)",
+      "resume_off": "レジューム OFF",
+      "resume_on": "レジューム ON",
+      "spread_direction": "読み方向 (D)",
+      "spread_view": "見開き (B)",
+      "toast_repeat_off": "リピート: OFF",
+      "toast_repeat_on": "リピート: ON",
+      "toast_resume_off": "レジューム: OFF",
+      "toast_resume_on": "レジューム: ON",
+      "toast_speed": "速度: {rate}x",
+      "toast_spread_ltr": "左→右",
+      "toast_spread_nav_rtl": "← 次へ / 前へ →",
+      "toast_spread_off": "見開き: OFF",
+      "toast_spread_on": "見開き: ON",
+      "toast_spread_rtl": "右→左",
+      "toolbar_aria": "画像表示コントロール",
+      "toolbar_hide": "ツールバーを隠す",
+      "toolbar_overflow_menu": "その他",
+      "toolbar_show": "ツールバーを表示",
+      "unmute": "ミュート解除 (M)",
+      "video_playback": "動画再生",
+      "viewing_mode": "鑑賞モード (V)",
+      "zoom_in": "拡大",
+      "zoom_out": "縮小",
+      "zoom_reset": "等倍"
+    },
+    "save_failed": "保存に失敗しました",
+    "saved_to_library": "プロンプトライブラリに保存しました",
+    "tab_annotations": "メモ",
+    "video_unsupported": "お使いのブラウザは video タグに対応していません。"
+  },
+  "detail.ann_add_label": "メモを追加",
+  "detail.ann_delete_confirm": "このアノテーションを削除しますか？",
+  "detail.ann_empty": "アノテーションはありません。",
+  "detail.ann_load_failed": "アノテーションの読み込みに失敗しました。",
+  "detail.ann_placeholder": "このファイルへの個人メモを入力...",
+  "detail.ann_save_failed": "保存に失敗しました",
+  "detail.ann_source_user": "あなたのメモ",
+  "detail.s2t_copied": "クリップボードにコピーしました",
+  "detail.s2t_done": "文字起こし完了",
+  "detail.s2t_error": "文字起こしに失敗しました",
+  "detail.s2t_no_transcript": "まだ文字起こしはありません。「文字起こし」を押して開始してください。",
+  "detail.s2t_processing": "処理中...",
+  "detail.s2t_segments": "セグメント",
+  "detail.s2t_transcribe": "文字起こし",
+  "detail.search_by_prompt": "プロンプトで検索",
+  "detail.tab_ai": "AI Analysis",
+  "detail.tab_analysis_trace": "Trace",
+  "detail.tab_annotations": "Notes",
+  "detail.tab_info": "Info",
+  "detail.tab_ocr": "OCR",
+  "detail.tab_s2t": "S2T",
+  "detail.trace_date": "解析日",
+  "detail.trace_error": "解析履歴を読み込めませんでした",
+  "detail.trace_loading": "読み込み中...",
+  "detail.trace_meta_source": "メタデータソース",
+  "detail.trace_model": "モデル",
+  "detail.trace_none": "解析履歴なし",
+  "detail.trace_quality": "品質解析",
+  "detail.trace_quality_score": "品質",
+  "detail.trace_s2t": "音声認識",
+  "detail.trace_source": "ソース",
+  "detail.trace_tags": "タグ",
+  "ext": {
+    "builtin-a1111": {
+      "config": {
+        "parse_negative": {
+          "description": "Negative prompt: セクションを分離して抽出する",
+          "label": "Negative Promptも抽出"
+        },
+        "parse_params": {
+          "description": "Steps, Sampler, CFG Scale, Model 等のパラメータを抽出する",
+          "label": "生成パラメータも抽出"
+        }
+      }
+    },
+    "builtin-chatlog": {
+      "config": {
+        "api_key": {
+          "description": "OpenAI / Claude API の場合に必要。Ollama ローカルでは空欄",
+          "label": "API キー"
+        },
+        "base_url": {
+          "description": "AI エンジンの API エンドポイント URL",
+          "label": "API ベース URL"
+        },
+        "engine_type": {
+          "description": "会話分析に使用する AI エンジンの種類",
+          "label": "AI エンジン"
+        },
+        "model": {
+          "description": "使用するモデル名 (例: llama3.2:latest, gpt-4o-mini)",
+          "label": "モデル名"
+        }
+      }
+    },
+    "builtin-comfyui": {
+      "config": {
+        "extract_workflow": {
+          "description": "ComfyUI ワークフロー JSON を raw_meta_json に格納する",
+          "label": "ワークフロー情報も抽出"
+        }
+      }
+    },
+    "builtin-comfyui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "確認ダイアログ省略"
+        },
+        "default_sampler": {
+          "label": "デフォルトサンプラー"
+        },
+        "default_scheduler": {
+          "label": "デフォルトスケジューラー"
+        }
+      }
+    },
+    "builtin-nai-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "確認ダイアログ省略"
+        },
+        "default_model": {
+          "label": "デフォルトモデル"
+        },
+        "default_noise_schedule": {
+          "label": "デフォルトノイズスケジュール"
+        },
+        "default_sampler": {
+          "label": "デフォルトサンプラー"
+        }
+      }
+    },
+    "builtin-novelai-v4": {
+      "config": {
+        "extract_vibe_transfer": {
+          "description": "Vibe Transfer のstrength/description を抽出する",
+          "label": "Vibe Transfer情報も抽出"
+        },
+        "merge_character_prompts": {
+          "description": "base_caption + char_captions をカンマ区切りで結合する",
+          "label": "キャラクタープロンプトをベースに統合"
+        }
+      }
+    },
+    "builtin-ocr": {
+      "config": {
+        "batch_export_format": {
+          "label": "バッチエクスポート形式"
+        },
+        "batch_output_dir": {
+          "description": "バッチエクスポート時のサーバーサイド保存先。空の場合はZIPダウンロード",
+          "label": "バッチ出力先ディレクトリ (空=ダウンロード)"
+        },
+        "default_target_lang": {
+          "label": "デフォルト翻訳先言語"
+        },
+        "default_task": {
+          "label": "デフォルト OCR タスク"
+        },
+        "manga_ocr_enabled": {
+          "label": "manga-ocr 優先使用 (ocr_manga タスク時)"
+        }
+      }
+    },
+    "builtin-prompt-syntax": {
+      "config": {
+        "auto_detect": {
+          "description": "入力テキストのNAI/SD/DP構文を自動認識する",
+          "label": "構文自動認識"
+        },
+        "show_errors": {
+          "description": "括弧不一致や異常重み値を警告表示する",
+          "label": "エラー表示"
+        }
+      }
+    },
+    "builtin-sd-nai-convert": {
+      "config": {
+        "convert_emphasis": {
+          "description": "SD ((tag)) ↔ NAI {tag} の強調構文も変換する",
+          "label": "強調構文も変換"
+        },
+        "strip_embedding": {
+          "description": "SD→NAI変換時に embedding:... タグを自動除去する",
+          "label": "NAI変換時にEmbeddingタグを除去"
+        },
+        "strip_lora": {
+          "description": "SD→NAI変換時に <lora:...> タグを自動除去する",
+          "label": "NAI変換時にLoRAタグを除去"
+        }
+      }
+    },
+    "builtin-sd-webui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "確認ダイアログ省略"
+        },
+        "default_sampler": {
+          "label": "デフォルトサンプラー"
+        }
+      }
+    }
+  },
+  "fleet.button.back_to_cowork": "← LAN Cowork に戻る",
+  "fleet.button.refresh": "更新",
+  "fleet.button.restart_node": "このノードを再起動",
+  "fleet.consent.banner.approve_once": "今回だけ承認",
+  "fleet.consent.banner.approve_permanent": "永続的に承認",
+  "fleet.consent.banner.countdown": "残り {sec} 秒",
+  "fleet.consent.banner.deny": "拒否",
+  "fleet.consent.banner.title": "{peer} からリモート更新リクエストが届きました",
+  "fleet.consent.chief.cancel": "キャンセル",
+  "fleet.consent.chief.re_request": "再リクエスト",
+  "fleet.consent.chief.send_request": "同意リクエストを送る",
+  "fleet.consent.chief.send_request_for": "{peer} のリモート更新が無効です。同意リクエストを送りますか？",
+  "fleet.consent.chief.timeout": "同意タイムアウト。再リクエストしてください。",
+  "fleet.consent.chief.waiting": "同意待ち ⏱ (残り {sec} 秒)",
+  "fleet.error.branch_not_allowed": "ブランチが許可されていません",
+  "fleet.error.cannot_dispatch_self": "チーフ自身への dispatch は禁止されています",
+  "fleet.error.consent_denied": "同意が拒否されました。",
+  "fleet.error.consent_token_invalid": "同意が無効化されました。再リクエストしてください。",
+  "fleet.error.deny_cooldown": "拒否クールダウン中（残り {sec} 秒）",
+  "fleet.error.git_not_available": "git が利用できません",
+  "fleet.error.invalid_source": "source が無効です",
+  "fleet.error.local_path_not_allowed": "local パスが許可されていません",
+  "fleet.error.not_in_allowlist": "allowlist に含まれていません",
+  "fleet.error.other_chief_pending": "他のチーフが同意待ち中（残り {sec} 秒）",
+  "fleet.error.remote_update_disabled": "リモート更新が無効です",
+  "fleet.error.update_failed_token_consumed": "更新失敗 — 同意が消費されました。再リクエストしますか？",
+  "fleet.error.update_in_progress": "更新が実行中です",
+  "fleet.logs.autoscroll": "自動スクロール",
+  "fleet.logs.clear": "クリア",
+  "fleet.logs.copied": "コピーしました",
+  "fleet.logs.copy": "コピー",
+  "fleet.logs.copy_failed": "コピー失敗",
+  "fleet.logs.download": "ダウンロード",
+  "fleet.logs.pause": "一時停止",
+  "fleet.logs.peer_select": "ピア選択",
+  "fleet.logs.placeholder": "ログタブ — ピアを選択してストリーミング開始",
+  "fleet.logs.resume": "再開",
+  "fleet.node.status.degraded": "情報取得失敗",
+  "fleet.node.status.offline": "オフライン",
+  "fleet.node.status.online": "オンライン",
+  "fleet.node.status.restarting": "再起動中",
+  "fleet.settings.col.action": "操作",
+  "fleet.settings.col.log_stream": "ログ配信",
+  "fleet.settings.col.peer": "ピア",
+  "fleet.settings.col.status": "状態",
+  "fleet.settings.col.update": "アップデート",
+  "fleet.settings.local.allow_remote_update": "リモートからのアップデートを有効にする（マスタースイッチ）",
+  "fleet.settings.local.desc": "このノードが他のピアからの「ログ配信」「リモート更新」を許可するかを設定します。各ピアに対して個別にチェックを入れてください。",
+  "fleet.settings.local.save": "保存",
+  "fleet.settings.local.title": "このノードの設定",
+  "fleet.settings.remote.already_granted": "許可済み",
+  "fleet.settings.remote.desc": "ペアリング済みのトークンを使って、対象ピアの allowlist にチーフの peer_id を追加します。ピア側にログインせずに権限設定できますが、実行にはペアリングトークンが必要です。",
+  "fleet.settings.remote.done": "完了",
+  "fleet.settings.remote.failed": "失敗",
+  "fleet.settings.remote.grant": "このピアで許可",
+  "fleet.settings.remote.not_granted": "未許可",
+  "fleet.settings.remote.revoke": "このピアで取消",
+  "fleet.settings.remote.status_unreachable": "確認不可",
+  "fleet.settings.remote.title": "リモート許可付与（チーフ専用）",
+  "fleet.settings.save_failed": "保存失敗",
+  "fleet.settings.saved": "保存しました",
+  "fleet.tab.logs": "ログ",
+  "fleet.tab.overview": "概要",
+  "fleet.tab.settings": "設定",
+  "fleet.tab.update": "アップデート",
+  "fleet.title": "Fleet 管理",
+  "fleet.update.branch": "Branch:",
+  "fleet.update.button.dispatch": "選択ノードを一括更新",
+  "fleet.update.button.pull_restart": "Pull & Restart",
+  "fleet.update.button.restart_only": "再起動のみ",
+  "fleet.update.button.restart_only_dispatch": "選択ノードを再起動のみ",
+  "fleet.update.col.action": "操作",
+  "fleet.update.col.branch": "ブランチ",
+  "fleet.update.col.commit": "commit",
+  "fleet.update.col.node": "ノード",
+  "fleet.update.col.progress": "進捗",
+  "fleet.update.col.version": "バージョン",
+  "fleet.update.confirm.chief": "自機を更新すると管理画面が一時切断されます。続行しますか？",
+  "fleet.update.confirm.restart": "選択したノードを再起動します。よろしいですか？",
+  "fleet.update.confirm.update": "選択したノードを更新します。git pull してから再起動されます。よろしいですか？",
+  "fleet.update.no_selection": "ノードを選択してください",
+  "fleet.update.placeholder": "アップデートタブは Phase 4 で実装されます。",
+  "fleet.update.source": "Source:",
+  "fleet.warning.multi_chief": "複数チーフが検出されました。古いチーフノードを再起動してください。",
+  "genai.chat_delete_confirm": "この会話を削除しますか？",
+  "genai.chat_image_only": "画像だけでは送信できません",
+  "genai.chat_no_conversations": "会話がありません",
+  "genai.chat_rename_prompt": "会話名を入力してください",
+  "genai.chat_search_sources": "検索ソース",
+  "grid": {
+    "auto": "自動",
+    "col_fixed": "列（固定）",
+    "col_unit": "列",
+    "count_prefix": "表示: ",
+    "count_unit": "件 / ",
+    "image_only": " / 画像のみ",
+    "size_hint": " / サイズは自動時に反映"
+  },
+  "grouping": {
+    "btn_archive": "アーカイブ",
+    "btn_files": "ファイル",
+    "btn_folders": "フォルダー",
+    "btn_zip": "ZIP",
+    "count_folders": "{count} フォルダー見つかりました",
+    "count_zips": "{count} ZIP見つかりました",
+    "rebuild": "グループ再構築",
+    "rebuilt": "グループ再構築完了: フォルダー {folders}, ZIP {zips}",
+    "summary": "グループ化: {visible} / {total}",
+    "summary_folders": "フォルダー: {visible} ({total} ファイル)",
+    "summary_zips": "ZIP: {visible} ({total} ファイル)"
+  },
+  "input_hint": {
+    "artist": "Esc: フォーカス解除 | Alt+0/$: 行頭/行末 | Ctrl+W: 単語削除 | ?: ヘルプ",
+    "condition": "Esc: フォーカス解除 | /: 検索欄へ移動 | ?: ショートカット一覧",
+    "default": "/: 検索 | Esc: 閉じる | ?: キーボードヘルプ",
+    "inPrompt": "Esc: フォーカス解除 | Alt+W/B: 単語移動 | Ctrl+U: 全削除 | ?: ヘルプ",
+    "tagQuery": "Esc: フォーカス解除 | /: 検索に戻る | Alt+W/B: 単語移動 | Ctrl+K: 行末まで削除 | ?: ヘルプ"
+  },
+  "inspect": {
+    "conv_expand": "Dynamic Prompt 展開結果",
+    "conv_nai_sd": "NAI → SD 変換結果",
+    "conv_sd_nai": "SD → NAI 変換結果",
+    "conv_warn_already_nai": "入力は既にNAI形式のようです",
+    "conv_warn_already_sd": "入力は既にSD形式のようです",
+    "conv_warn_mixed": "NAI構文とSD構文が混在しています",
+    "copied": "コピーしました",
+    "copy": "コピー",
+    "error": "エラー",
+    "fmt_a1111": "形式: A1111 (Stable Diffusion)",
+    "fmt_json": "形式: JSON",
+    "fmt_plain": "形式: プレーンテキスト",
+    "negative": "ネガティブ",
+    "network_error": "通信エラー",
+    "open_in_sim": "Prompt Simulatorで開く",
+    "output": "出力",
+    "parse_error": "解析エラー",
+    "positive": "ポジティブ",
+    "resolution": "解像度",
+    "sim_choices": "選択肢",
+    "sim_combinations": "{count}通り",
+    "sim_depth": "深度",
+    "sim_dp_analyze": "DP確率分析",
+    "sim_link": "プロンプトシミュレーターを開く",
+    "sim_link_text": "プロンプトシミュレーターを開く",
+    "sim_pick_n": "{total}個中{n}個選択",
+    "sim_probability": "確率",
+    "sim_syntax": "構文",
+    "sim_token": "トークン",
+    "sim_weight": "倍率",
+    "sim_weight_calc": "強調倍率計算",
+    "tag_count": "タグ数",
+    "wh_not_found": "Size: WxH または width/height パターンが見つかりませんでした",
+    "wh_swap_result": "W/H 反転結果",
+    "zip_select": "ZIP内の画像"
+  },
+  "kb_help": {
+    "basic": {
+      "close_or_blur": "閉じる / フォーカス解除",
+      "focus_search": "検索欄にフォーカス（どこからでも）",
+      "run_search": "検索実行",
+      "screen_lock": "画面ロック（PIN設定時）",
+      "title": "基本操作",
+      "toggle_help": "このヘルプを表示/非表示"
+    },
+    "edit": {
+      "delete_prev_word": "前の単語を削除",
+      "kill_line": "行全体を削除",
+      "kill_to_end": "カーソルから行末まで削除",
+      "title": "テキスト編集（Emacs風）"
+    },
+    "existing": {
+      "open_condition_menu": "条件追加メニューを開く",
+      "regex_cheatsheet": "正規表現チートシート",
+      "title": "既存ショートカット",
+      "toggle_regex": "正規表現ON/OFF"
+    },
+    "results": {
+      "title": "結果グリッド",
+      "navigate": "フォーカス移動",
+      "open": "詳細を開く",
+      "copy_prompt": "プロンプトをコピー",
+      "context_menu": "コンテキストメニュー（右クリック / M キー）",
+      "context_menu_hint": "カードを右クリック: パラメータコピー・App QR・ブリッジ送信・AI分析 など"
+    },
+    "footer": {
+      "close": "キーで閉じる",
+      "hint_line": "ヒント: フィールドにフォーカスすると下部にヒントが表示されます",
+      "or": "キーまたは",
+      "regex_intro_link": "正規表現とはなに？（初心者向け入門）"
+    },
+    "move": {
+      "delete_char": "文字削除",
+      "line_end": "行末へ",
+      "line_start": "行頭へ",
+      "next_word": "次の単語へ",
+      "prev_word": "前の単語へ",
+      "title": "カーソル移動（Vim風）"
+    },
+    "regex_intro": {
+      "desc": "3つの例だけで検索が劇的に便利になります",
+      "open": "入門を見る",
+      "title": "正規表現を使ったことがない方へ"
+    },
+    "title": "キーボードショートカット"
+  },
+  "keyboard": {
+    "close": "閉じる",
+    "guide": {
+      "autoplay": "自動再生",
+      "close": "閉じる",
+      "copy": "コピー",
+      "dismiss": "操作説明を閉じる",
+      "dismiss_toast": "H キーで再表示できます",
+      "filmstrip_nav": "前後ファイル移動（メディア中も有効）",
+      "filmstrip_toggle": "フィルムストリップ",
+      "focus_move": "フォーカス移動",
+      "media_controls": "メディア操作",
+      "modal_label": "モーダル",
+      "move": "移動",
+      "open": "詳細",
+      "prev_next": "前後移動",
+      "prev_next_or_seek": "前後移動（メディア再生中は5秒シーク）",
+      "results_label": "結果",
+      "scroll": "スクロール",
+      "speed": "速度",
+      "spread_toggle": "見開き",
+      "menu": "メニュー",
+      "to_search": "検索へ",
+      "toggle_btn": "操作説明 (H)",
+      "volume": "音量"
+    },
+    "help": "ヘルプ",
+    "prev_next": "前後の画像"
+  },
+  "lan_cowork.import.done": "インポートが完了しました",
+  "lan_cowork.import.partial": "一部のファイルをインポートできませんでした",
+  "lan_cowork.import.err.no_folder": "インポートフォルダを指定してください",
+  "lan_cowork.import.err.no_peer": "インポート元のピアを選択してください",
+  "lan_cowork.import.error": "インポートに失敗しました",
+  "lan_cowork.import.folder": "インポートフォルダ",
+  "lan_cowork.import.folder.pick_failed": "フォルダ選択に失敗しました",
+  "lan_cowork.import.mode": "モード",
+  "lan_cowork.import.mode.diff": "差分",
+  "lan_cowork.import.mode.full": "全件",
+  "lan_cowork.import.opt.favorites": "favorites を含める",
+  "lan_cowork.import.opt.merge": "メタデータをマージ（ハッシュ一致時）",
+  "lan_cowork.import.peer": "インポート元ピア",
+  "lan_cowork.import.running": "インポート中...",
+  "lan_cowork.import.start": "インポート開始",
+  "lan_cowork.import.timeout": "インポートがタイムアウトしました",
+  "lan_cowork.import.title": "リモートインポート",
+  "lan_cowork.peers.discover_error": "ピアの検索に失敗しました",
+  "lan_cowork.peers.empty": "接続されているピアがありません",
+  "lan_cowork.peers.extension_disabled": "LAN Cowork 拡張機能が無効です。拡張機能管理から有効化し、サーバーを再起動してください。",
+  "lan_cowork.peers.offline": "オフライン",
+  "lan_cowork.peers.online": "オンライン",
+  "lan_cowork.peers.pair_btn": "ペアリング要求",
+  "lan_cowork.peers.pair_pin_prompt": "相手側に表示された PIN を入力してください",
+  "lan_cowork.peers.pair_request_error": "ペアリング要求失敗",
+  "lan_cowork.peers.pair_request_sent": "相手側で承認後、表示された PIN を入力してください",
+  "lan_cowork.peers.pair_requesting": "要求中...",
+  "lan_cowork.peers.pair_success": "ペアリング完了",
+  "lan_cowork.peers.pair_verify_error": "PIN 検証失敗",
+  "lan_cowork.peers.paired": "ペアリング済",
+  "lan_cowork.peers.refresh": "更新",
+  "lan_cowork.peers.remove_btn": "削除",
+  "lan_cowork.peers.remove_confirm": "このピアを削除しますか？",
+  "lan_cowork.peers.remove_error": "削除に失敗しました",
+  "lan_cowork.peers.remove_success": "削除しました",
+  "lan_cowork.peers.title": "接続ピア",
+  "lan_cowork.peers.unpaired": "未ペアリング",
+  "lan_cowork.pin_modal.error.empty": "PIN を入力してください",
+  "lan_cowork.title": "LAN Cowork",
+  "lc_peers": {
+    "pair_modal": {
+      "close": "閉じる"
+    },
+    "sse": {
+      "paired": "デバイスをペアリングしました",
+      "pairing_request": "ペアリング要求を受信しました"
+    }
+  },
+  "lc_peers.fleet.enable_notifications": "通知を有効化",
+  "lc_peers.nav.back": "← LAN Cowork",
+  "lc_peers.page_title": "Peer 管理 - LAN Cowork",
+  "lc_peers.pair_modal.cancel": "キャンセル",
+  "lc_peers.pair_modal.confirm": "確認",
+  "lc_peers.pair_modal.done": "閉じる",
+  "lc_peers.pair_modal.error.generic": "エラーが発生しました",
+  "lc_peers.pair_modal.error.unknown": "相手ノードの状態を確認できませんでした。",
+  "lc_peers.pair_modal.paired_toast": "ペアリングが完了しました",
+  "lc_peers.pair_modal.pin.error.empty": "PIN を入力してください",
+  "lc_peers.pair_modal.pin.error.invalid": "PIN が正しくありません",
+  "lc_peers.pair_modal.pin.error.retryable": "PIN が正しくありません。残り {attempts} 回試せます。",
+  "lc_peers.pair_modal.pin.error.attempts_exhausted": "PIN の試行回数が上限に達しました。",
+  "lc_peers.pair_modal.repair_steps": "再ペアリングするには、相手ノードの管理者に新しいリクエストを承認してもらってください。",
+  "lc_peers.pair_modal.pin.label": "PIN",
+  "lc_peers.pair_modal.pin.placeholder": "••••••",
+  "lc_peers.pair_modal.step1.msg": "ペアリングリクエストを送信中...",
+  "lc_peers.pair_modal.step2.msg": "相手のホストで PIN を承認してから、表示された PIN を入力してください。",
+  "lc_peers.pair_modal.step3.msg": "ペアリングが完了しました。",
+  "lc_peers.pair_modal.title": "ペアリング",
+  "lc_peers.peers.col.actions": "操作",
+  "lc_peers.peers.col.address": "アドレス",
+  "lc_peers.peers.col.name": "ピア名",
+  "lc_peers.peers.col.status": "ステータス",
+  "lc_peers.peers.col.token_expires": "トークン有効期限",
+  "lc_peers.peers.empty": "接続されているピアがありません",
+  "lc_peers.peers.load_error": "トークン一覧の取得に失敗しました",
+  "lc_peers.peers.pair_request_error": "ペアリングリクエストに失敗しました",
+  "lc_peers.peers.refresh": "更新",
+  "lc_peers.peers.revoke": "失効",
+  "lc_peers.peers.revoke_confirm": "このピアのトークンを失効させますか？",
+  "lc_peers.peers.revoke_error": "失効に失敗しました",
+  "lc_peers.peers.revoked": "トークンを失効させました",
+  "lc_peers.peers.status.auth_lost": "再ペアリング必要",
+  "lc_peers.peers.status.paired": "ペアリング済み",
+  "lc_peers.peers.title": "接続ピア一覧",
+  "lc_peers.requests.approve_error": "承認に失敗しました",
+  "lc_peers.requests.col.actions": "操作",
+  "lc_peers.requests.col.peer_name": "ピア名",
+  "lc_peers.requests.col.requester": "リクエスト元",
+  "lc_peers.requests.col.time": "受信時刻",
+  "lc_peers.requests.empty": "承認待ちのペアリングリクエストはありません",
+  "lc_peers.requests.load_error": "リクエスト一覧の取得に失敗しました",
+  "lc_peers.requests.refresh": "更新",
+  "lc_peers.requests.reject_error": "拒否に失敗しました",
+  "lc_peers.requests.rejected": "拒否しました",
+  "lc_peers.requests.title": "承認待ちペアリングリクエスト",
+  "lc_peers.title": "Peer 管理",
+  "llm_router": {
+    "aliases_section": "ルーティング別名",
+    "backends_section": "バックエンド",
+    "col": {
+      "actions": "操作",
+      "alias": "Alias",
+      "alias_name": "別名",
+      "base_url": "Base URL",
+      "last_seen": "最終確認",
+      "models": "モデル数",
+      "physical": "物理モデル",
+      "slo": "SLO",
+      "status": "状態"
+    },
+    "disable": "無効化",
+    "disabled_badge": "[無効化中]",
+    "enable": "有効化",
+    "loading": "読み込み中...",
+    "no_aliases": "ルーティング別名は設定されていません",
+    "no_backends": "登録されたバックエンドはありません",
+    "refresh": "更新",
+    "refresh_all": "全体更新",
+    "refresh_failed": "更新に失敗しました",
+    "refreshed": "更新しました",
+    "source": {
+      "mdns": "mDNS",
+      "static": "Static"
+    },
+    "status": {
+      "error": "エラー",
+      "ok": "稼働",
+      "unknown": "不明",
+      "unreachable": "到達不能"
+    },
+    "summary": {
+      "aliases": "ルーティング別名",
+      "backends": "バックエンド数",
+      "enabled": "有効数",
+      "models": "総モデル数"
+    },
+    "title": "LLM Router",
+    "toggle_failed": "無効化/有効化に失敗しました"
+  },
+  "mesh_inference": {
+    "action": {
+      "local_only": "ローカルのみモード",
+      "local_only_tooltip": "ローカルで有効な推論タイプがありません",
+      "refresh": "更新"
+    },
+    "col": {
+      "peer": "ピア"
+    },
+    "empty": "接続されているピアがありません。",
+    "subtitle": "ピアごと・推論タイプごとに分散推論の有効/無効を切り替えます。",
+    "title": "分散推論マトリクス",
+    "toast": {
+      "load_failed": "読み込みに失敗しました",
+      "refreshed": "更新しました",
+      "save_failed": "保存に失敗しました",
+      "saved": "保存しました"
+    },
+    "type": {
+      "clip": "clip",
+      "tagger": "tagger",
+      "whisper": "whisper",
+      "yolo": "yolo"
+    }
+  },
+  "meta": {
+    "checkpoint_search": "チェックポイント検索",
+    "click_open_dir": "クリックしてディレクトリを開く",
+    "click_to_copy": "クリックでコピー",
+    "copy_original": "コピー",
+    "download_json": "ダウンロード",
+    "negative_label": "ネガティブ",
+    "no_metadata": "メタデータなし",
+    "parameters_title": "パラメータ",
+    "parse_success": "解析成功",
+    "positive_label": "プロンプト",
+    "seed_copy": "Seedコピー"
+  },
+  "nav": {
+    "back_title": "元の位置に戻る",
+    "bottom_aria": "ページの末尾へ",
+    "bottom_title": "ページの末尾へ (End)",
+    "llm_router": "LLM Router",
+    "mesh_inference": "分散推論",
+    "top_aria": "ページの先頭へ",
+    "top_title": "ページの先頭へ (Home)"
+  },
+  "nav.lan_cowork": "LAN Cowork",
+  "path": {
+    "copy_label": "パス ",
+    "copy_label_filename": "ファイル名 ",
+    "copy_label_zip": "ZIPパス ",
+    "copy_title": "パスをコピー",
+    "copy_title_filename": "ファイル名をコピー",
+    "copy_title_zip": "ZIPパスをコピー",
+    "label": "パス:"
+  },
+  "period": {
+    "12h": "12時間",
+    "24h": "24時間",
+    "3h": "3時間",
+    "8h": "8時間",
+    "custom": "カスタム",
+    "days3": "3日前",
+    "days5": "5日前",
+    "half_year": "半年",
+    "last_month": "先月",
+    "month1": "1ヶ月",
+    "month2": "2ヶ月",
+    "month3": "3ヶ月",
+    "month9": "9ヶ月",
+    "week1": "1週間",
+    "week2": "2週間",
+    "year1": "1年",
+    "yesterday": "昨日まで"
+  },
+  "presets": {
+    "deleted": "プリセット削除: {name}",
+    "empty": "保存済みプリセットなし",
+    "loaded": "プリセット読込: {name}",
+    "nothing_to_save": "保存する検索条件がありません",
+    "rename_prompt": "新しいプリセット名:",
+    "renamed": "プリセット名を変更しました: {name}",
+    "save_prompt": "プリセット名:",
+    "saved": "プリセット保存: {name}"
+  },
+  "prompt": {
+    "badge": {
+      "embedding": "Textual Inversion (Embedding)",
+      "lora_weight": "LoRA weight: {weight}",
+      "novelai_weight": "NovelAI Weight: {weight}",
+      "paren_weight": "Weight: {weight} ({count} parens)",
+      "random_choice": "Random choice",
+      "weight": "Weight: {weight}"
+    }
+  },
+  "prompt_library.insert_as_is": "そのまま挿入",
+  "prompt_library.insert_cancel": "キャンセル",
+  "prompt_library.insert_convert_and_insert": "変換して挿入",
+  "prompt_library.insert_syntax_mismatch_body": "現在のブリッジと異なる構文のプロンプトが検出されました。どうしますか？",
+  "prompt_library.insert_syntax_mismatch_title": "構文が一致しません",
+  "qr": {
+    "content_label": "QR内容:",
+    "copy_text": "テキストコピー",
+    "info": {
+      "compressing": "⚠️ テキストが長いため圧縮します",
+      "meta_len": "📦 {count} 文字",
+      "negative_len": "🚫 {count} 文字",
+      "positive_len": "📝 {count} 文字",
+      "too_long": "⚠️ テキストが長すぎます（QRの上限超過）。テキストコピーをお使いください。",
+      "url": "🔗 共有URL"
+    },
+    "load_failed": "QRライブラリ読み込み失敗",
+    "mode": {
+      "meta": "全メタデータ (JSON)",
+      "negative": "Negative Prompt",
+      "positive": "Positive Prompt",
+      "url": "共有URL",
+      "url_local_disabled": "🚫 URL (localhost)"
+    },
+    "no_content": "内容がありません",
+    "save_image": "QR画像保存",
+    "text_too_long": "テキストが長すぎます",
+    "use_text_copy": "テキストコピーをお使いください"
+  },
+  "random": {
+    "empty": "ランダム表示できる検索結果がありません",
+    "opened_one": "ランダムで1件表示しました"
+  },
+  "resolution": {
+    "landscape": "横長 W≥1024 H≤768",
+    "portrait": "縦長 W≤768 H≥1024",
+    "square": "正方形",
+    "square_1024": "1024×1024",
+    "w1024": "W≥1024",
+    "w512": "W≥512",
+    "w768": "W≥768"
+  },
+  "result": {
+    "ai_analysis": "AI分析",
+    "copy_id_title": "ファイルIDをコピー",
+    "copy_prompt_title": "プロンプトをコピー",
+    "detail_label": "詳細",
+    "negative_label": "ネガティブ:",
+    "positive_label": "ポジティブ:",
+    "qr_share": "QR共有",
+    "save_to_library": "ライブラリに保存",
+    "show_detail_aria": "詳細を表示"
+  },
+  "scan": {
+    "banner": {
+      "dismiss": "破棄",
+      "interrupted": "前回のスキャンが中断されています",
+      "resume": "再開",
+      "resume_failed": "再開に失敗しました",
+      "resuming": "スキャン再開中...",
+      "scroll_top": "ページの先頭へ",
+      "stop": "停止"
+    },
+    "complete_confirm_refresh": "スキャンが完了しました。結果を再読み込みしますか？",
+    "complete_label": "✓ スキャン完了！",
+    "complete_toast": "スキャン完了: {count} ファイル処理",
+    "details": {
+      "processed": "{total} files processed",
+      "progress": "{current} / {total} files"
+    },
+    "failed_label": "✗ スキャン失敗",
+    "failed_toast": "スキャン失敗: {error}",
+    "phase": {
+      "counting": "ファイル数を確認中...",
+      "initializing": "初期化中...",
+      "scanning": "画像をスキャン中..."
+    },
+    "start_failed": "スキャンの開始に失敗しました",
+    "time": {
+      "minutes": "{m}分{s}秒",
+      "seconds": "{n}秒"
+    },
+    "unknown_error": "不明なエラー"
+  },
+  "scheduler": {
+    "action_failed": "操作に失敗しました",
+    "actions": "操作",
+    "active": "有効",
+    "add_dialog_title": "ジョブの追加",
+    "add_job": "ジョブ追加",
+    "added_msg": "ジョブを追加しました",
+    "cancel": "キャンセル",
+    "delete": "削除",
+    "delete_confirm": "ジョブ「{id}」を削除しますか？",
+    "deleted_msg": "ジョブを削除しました",
+    "duration": "所要時間",
+    "error": "エラー",
+    "failed": "失敗",
+    "field_day": "日",
+    "field_day_of_week": "曜日",
+    "field_func": "関数",
+    "field_hour": "時",
+    "field_job_id": "ジョブ ID",
+    "field_minute": "分",
+    "field_trigger_type": "トリガー種別",
+    "hint_day": "1-31, カンマ区切り, または *",
+    "hint_dow": "mon-sun, 0-6, または *",
+    "hint_hour": "0-23, カンマ区切り, または *",
+    "hint_minute": "0-59, カンマ区切り, または *",
+    "history": "実行履歴",
+    "job_desc_bsky_notification_poll": "Bluesky 通知ポーリング",
+    "job_desc_db_backup": "データベースバックアップ",
+    "job_desc_db_integrity_check": "DB 整合性チェック",
+    "job_desc_db_vacuum": "SQLite VACUUM (容量回収)",
+    "job_desc_github_issue_poll": "GitHub Issue ポーリング",
+    "job_desc_prune_unused_tags": "未使用タグの削除",
+    "job_desc_rebuild_groups_index": "グループインデックスの再構築",
+    "job_desc_refresh_monthly_stats": "月次統計キャッシュの更新",
+    "job_desc_thumbnail_cleanup": "サムネイルキャッシュ削除",
+    "job_desc_thumbnail_integrity_check": "サムネイル整合性チェック (古い/不整合を排除)",
+    "job_id": "ジョブ ID",
+    "jobs": "ジョブ一覧",
+    "loading": "読み込み中...",
+    "next_run": "次回実行",
+    "no_history": "実行履歴がありません",
+    "no_jobs": "ジョブが登録されていません",
+    "pause": "一時停止",
+    "paused": "一時停止",
+    "paused_msg": "ジョブを一時停止しました",
+    "refresh": "更新",
+    "result": "結果",
+    "resume": "再開",
+    "resumed_msg": "ジョブを再開しました",
+    "running": "稼働中",
+    "status": "スケジューラ状態",
+    "status_label": "状態",
+    "stopped": "停止中",
+    "submit": "追加",
+    "success": "成功",
+    "time": "実行日時",
+    "title": "タスクスケジューラ",
+    "trigger": "トリガー",
+    "trigger_now": "今すぐ実行",
+    "triggered": "ジョブを実行キューに投入しました"
+  },
+  "sd_bridge": {
+    "inserted": "挿入しました"
+  },
+  "sd_nai_convert": {
+    "copied": "コピーしました"
+  },
+  "search": {
+    "count": {
+      "normal": "{count} 件見つかりました",
+      "partial": "{shown} / {total} 件",
+      "prompt_match": "{count} 件（プロンプト内一致）",
+      "suffix_results": "件の結果",
+      "unit": "{count}件",
+      "zero": "0 件の結果"
+    },
+    "error": {
+      "failed": "検索に失敗しました: {message}",
+      "generic": "検索中にエラーが発生しました",
+      "network": "サーバーに接続できません。サーバーが起動しているか確認してください。",
+      "regex": "正規表現エラー: {error}"
+    },
+    "export_csv_hint": "{count}件をCSV出力（件数は「＋条件を追加」メニューから変更可能）",
+    "live": {
+      "title": "リアルタイム検索",
+      "toast_off": "リアルタイム検索: OFF",
+      "toast_on": "リアルタイム検索: ON"
+    },
+    "loading_more": "読み込み中...",
+    "partial_warning": "表示上限 {limit} 件に達しました。すべての結果を表示するには、条件を絞り込むか表示件数を増やしてください。",
+    "path_tip": {
+      "message": "タグ名とファイル/フォルダー名を一緒に検索しています。厳密な結果が欲しい場合は、検索バーにタグだけを入力し、「条件の追加」→「フォルダ」でファイル/フォルダー名を指定してください。",
+      "move_btn": "📂 フォルダー検索に移動"
+    },
+    "placeholder": {
+      "plain": "例: 1girl, blonde_hair, -nsfw",
+      "regex": "例: 1girl, blue_(hair|eyes)  正規表現タグ検索"
+    },
+    "regex_note": "（正規表現で絞り込み）",
+    "regex_warn_confirm": "⚠️ 正規表現検索は大量のデータで遅くなる可能性があります。\n検索を続行しますか？",
+    "state": {
+      "empty_db_hint1": "設定ページで画像フォルダーを登録",
+      "empty_db_hint2": "「スキャン開始」で画像メタデータを取り込み",
+      "empty_db_hint3": "スキャン後、検索結果に画像が表示されます",
+      "empty_db_message": "設定から画像フォルダーを追加して始めましょう",
+      "empty_db_settings_link": "設定を開く",
+      "empty_db_title": "データベースにまだ画像がありません",
+      "collection_empty_title": "このコレクションにはまだ何もありません",
+      "collection_empty_message": "画像の右下のスターをクリックすると、このコレクションに追加できます。",
+      "collection_empty_filtered_message": "このコレクション内に検索条件と一致する画像はありません。条件を減らしてみてください。",
+      "empty_title": "条件に一致する画像が見つかりませんでした",
+      "error_title": "エラーが発生しました",
+      "example1": "タグ検索: 1girl, blue eyes（カンマ区切りでAND）",
+      "example2": "除外: -bad quality（マイナスで除外）",
+      "example3": "「＋条件を追加」でモデルや期間のフィルタを組み合わせ",
+      "example4": "正規表現: girl.*hair（パターンマッチ）",
+      "examples_label": "検索例:",
+      "first_message": "タグや条件を入力して画像を検索できます",
+      "first_title": "検索してみましょう",
+      "hint1": "タグのスペルを確認（例: 1girl, blue_eyes）",
+      "hint2": "期間フィルタを広げてみてください",
+      "hint3": "正規表現モードでは .*keyword.* で部分一致できます",
+      "hint4": "条件を減らして検索範囲を広げてみてください",
+      "hint_label": "ヒント:",
+      "start_prompt": "検索ボタンまたは Enter で検索",
+      "unknown_error": "不明なエラー"
+    }
+  },
+  "semantic_search.elapsed": "経過",
+  "semantic_search.elapsed_suffix": "経過",
+  "server_info": {
+    "files": "ファイル",
+    "load_failed": "サーバー情報の取得に失敗しました",
+    "startup_initializing": "サーバー初期化中",
+    "startup_migration": "起動時 DB アップグレード",
+    "startup_stage_backfill": "既存レコードの検索列を更新しています。",
+    "startup_stage_backup": "アップグレード前の安全バックアップを作成しています。",
+    "startup_stage_backup_reused": "変更なしの既存バックアップを再利用しています。",
+    "startup_stage_backup_skipped": "大規模 DB のため起動時間短縮のためバックアップをスキップしています。",
+    "startup_stage_file_cache": "ファイルメタデータキャッシュを構築中です。まもなく準備完了。",
+    "startup_stage_finalizing": "アップグレード完了。起動を完了しています…",
+    "startup_stage_migrate": "データベーススキーマを更新しています。",
+    "startup_stage_prepare": "アップグレード前の確認を準備しています。",
+    "startup_stage_rebuild_fts": "新スキーマ用の検索インデックスを再構築しています。",
+    "startup_upgrade_in_progress": "データベースのアップグレード中",
+    "startup_upgrade_wait": "大規模なデータベースでは数分かかる場合があります。",
+    "tags": "タグ"
+  },
+  "settings": {
+    "apikeys_created": "作成日:",
+    "apikeys_empty": "APIキーはまだ作成されていません。",
+    "apikeys_full_access": "フルアクセス",
+    "apikeys_last_used": "最終使用:",
+    "apikeys_mcp_jump": "スニペットを確認",
+    "apikeys_mcp_updated": "↓ MCPスニペットをこのキーで自動更新しました",
+    "apikeys_revoke": "このキーを無効化",
+    "apikeys_toast_copied": "APIキーをコピーしました",
+    "apikeys_toast_create_failed": "APIキーの作成に失敗しました",
+    "apikeys_toast_created": "APIキーを作成しました",
+    "apikeys_toast_mcp_copied": "MCPスニペットをコピーしました",
+    "apikeys_toast_revoke_failed": "APIキーの無効化に失敗しました",
+    "apikeys_toast_revoked": "APIキーを無効化しました",
+    "blocker_local_only": "この操作は同一マシンからのみ許可",
+    "blocker_pin_not_active": "PIN認証が現在無効（反映には再起動が必要）",
+    "blocker_pin_session": "PIN認証セッションが必要",
+    "blocker_restart_disabled": "再起動APIが無効（--allow-restart または TAGDB_ALLOW_RESTART=1）",
+    "blocker_token_missing": "リモート再起動トークンが未設定",
+    "conditions_not_met": "現在条件不足",
+    "container_nav_continuous": "次のフォルダー/ZIPに続けて移動",
+    "container_nav_continuous_hint": "ビューアーの末端で隣接するフォルダー/ZIPに自動遷移する",
+    "container_nav_order": "グループ遷移の順序",
+    "container_nav_order_hint": "フォルダー/ZIP間の移動順序",
+    "container_nav_order_name": "名前順",
+    "container_nav_order_result": "検索結果順",
+    "database": "データベース",
+    "delete": "削除",
+    "disabled": "無効",
+    "enabled": "有効",
+    "env_var": "環境変数",
+    "error": "エラー",
+    "ext_disable": "無効化",
+    "ext_disabled": "無効",
+    "ext_disabled_msg": "Extensionを無効化しました。",
+    "ext_enable": "有効化",
+    "ext_enabled": "有効",
+    "ext_enabled_msg": "Extensionを有効化しました。",
+    "ext_restart_required": "反映するには再起動が必要です。",
+    "ext_toggle_failed": "Extension切替に失敗",
+    "failed": "失敗",
+    "files_tags": "ファイル / タグ",
+    "json_saved": "✅ JSON保存しました",
+    "lan_public": "LAN公開",
+    "load_failed": "取得失敗",
+    "local_only": "ローカル専用",
+    "lock_failed": "ロック失敗",
+    "meta_breakdown": "メタデータ内訳",
+    "modal_kb_guide": "ビューアーに操作説明を表示",
+    "modal_kb_guide_hint": "モーダルビューアーの下部にキーボードショートカットを表示します",
+    "network": "ネットワーク",
+    "no_extensions": "インストール済みExtensionはありません。",
+    "no_roots": "登録されたフォルダーはありません。",
+    "none_detected": "検出なし",
+    "not_set": "未設定",
+    "path_updated": "パス更新",
+    "pin_active": "PIN有効（現在）",
+    "pin_disabled": "PIN無効",
+    "pin_pending": "PIN設定済み（再起動待ち）",
+    "pin_source": "PINソース",
+    "profile_active_badge": "アクティブ",
+    "profile_ago": "前",
+    "profile_create": "プロファイル作成",
+    "profile_create_failed": "作成に失敗しました",
+    "profile_days": "日",
+    "profile_delete": "削除",
+    "profile_delete_confirm": "プロファイル「{label}」を削除しますか？この操作は取り消せません。",
+    "profile_delete_failed": "削除に失敗しました",
+    "profile_desc_prompt": "説明（任意）：",
+    "profile_dup_failed": "複製に失敗しました",
+    "profile_dup_label_prompt": "新しい表示ラベル：",
+    "profile_dup_name_prompt": "新しいプロファイル名：",
+    "profile_duplicate": "複製",
+    "profile_empty": "プロファイルが設定されていません。",
+    "profile_export_failed": "エクスポートに失敗しました",
+    "profile_import_exists": "プロファイル「{name}」は既に存在します。{count}個のフィールドが異なります。\nインポート方法: full（上書き）または diff（差分マージ）？",
+    "profile_import_failed": "インポートに失敗しました",
+    "profile_import_prompt": "QRプロファイルデータ（JSON）を貼り付けてください：",
+    "profile_import_success": "プロファイルをインポートしました。",
+    "profile_just_now": "たった今",
+    "profile_label_prompt": "表示ラベル：",
+    "profile_last_used": "最終使用",
+    "profile_name_prompt": "プロファイル名（英数字、ハイフン、アンダースコア）：",
+    "profile_never_used": "未使用",
+    "profile_no_desc": "説明なし",
+    "profile_no_pin": "プロファイル管理にはPIN認証が必要です。PINを設定して再起動してください。",
+    "profile_qr_hint": "下のデータをコピーするか、QRコードを読み取って別のインスタンスにインポートできます。",
+    "profile_qr_import": "QRインポート",
+    "profile_qr_title": "プロファイルエクスポート",
+    "profile_rename": "名前変更",
+    "profile_rename_failed": "名前変更に失敗しました",
+    "profile_rename_prompt": "新しい名前：",
+    "profile_switch_back": "サーバーが新しいプロファイルで復帰しました。再読み込みします...",
+    "profile_switch_btn": "切替",
+    "profile_switch_confirm": "プロファイル「{label}」に切り替えますか？サーバーが再起動します。",
+    "profile_switch_failed": "プロファイル切替失敗",
+    "profile_switch_sending": "プロファイル切替リクエスト送信中...",
+    "profile_switch_timeout": "プロファイル切替要求は送信済みですが、90秒以内に復帰を確認できませんでした。",
+    "profile_switch_waiting": "プロファイル切替を受け付けました。サーバー復帰を待っています...",
+    "profile_toggle_fav": "お気に入り切替",
+    "recursive_scan": "再帰スキャン",
+    "remote_restart_off": "リモート再起動許可: OFF",
+    "remote_restart_on": "リモート再起動許可: ON",
+    "remove_root_confirm": "このフォルダーを登録解除しますか？",
+    "restart_api": "再起動API",
+    "restart_back": "サーバーが復帰しました。再読み込みします...",
+    "restart_confirm": "サーバーを再起動しますか？（数秒間アクセス不能になります）",
+    "restart_failed": "再起動失敗",
+    "restart_sending": "再起動リクエスト送信中...",
+    "restart_server": "サーバー再起動",
+    "restart_timeout": "再起動要求は送信済みですが、90秒以内に復帰を確認できませんでした。",
+    "restart_waiting": "再起動を受け付けました。サーバー復帰を待っています...",
+    "rfs_enum_max": "列挙最大",
+    "rfs_probe_max": "プローブ最大",
+    "rfs_total_max": "合計最大",
+    "save_failed": "保存失敗",
+    "save_path": "パス保存",
+    "saved": "✅ 保存しました",
+    "saved_cli_override": "⚠ 保存しました（現在はCLI --pin が優先。反映には起動オプションの見直しが必要）",
+    "saved_restart_needed": "✅ 保存しました（反映させるには再起動が必要です）",
+    "saving": "保存中...",
+    "screen_lock": "画面ロック",
+    "security": "セキュリティ",
+    "source": "ソース",
+    "toggle_root": "有効/無効切替",
+    "token_not_set": "トークン: 未設定",
+    "token_set": "トークン: 設定済み",
+    "tsr_desc": "分散タグ推論サーバー (Hailo Remote、ONNX Local など) を管理します。ワーク・スティーリング対応の並列バッチタグ付けに対応。",
+    "tsr_mesh_redirect": "分散推論のピアごと有効/無効設定は",
+    "tsr_mesh_redirect_link": "分散推論マトリクス",
+    "tsr_mesh_redirect_suffix": "で管理します。",
+    "tsr_title": "Tagger Server Registry",
+    "unit_hours": "時間",
+    "unit_min": "分",
+    "unit_minutes": "分",
+    "unit_sec": "秒",
+    "unknown": "不明",
+    "uptime": "稼働時間",
+    "version": "バージョン"
+  },
+  "settings.bitwarden_desc": "Bitwarden CLI (bw) 経由でシークレットを動的に取得します。Bitwarden CLI のインストールとアンロックが必要です。",
+  "settings.bitwarden_title": "Bitwarden CLI",
+  "settings.bsky_auto_dismiss_follow": "フォローを自動非表示",
+  "settings.bsky_auto_dismiss_like": "いいねを自動非表示",
+  "settings.bsky_auto_dismiss_repost": "リポストを自動非表示",
+  "settings.bsky_auto_respond": "自動応答を有効化",
+  "settings.bsky_monitor_desc": "Bluesky のメンション・リプライ・その他の通知を監視します。トリアージ条件と自動応答テンプレートを設定できます。",
+  "settings.bsky_monitor_title": "Bluesky モニター",
+  "settings.bsky_notify_connect": "MCP 接続時に通知",
+  "settings.bsky_poll_interval": "ポーリング間隔 (分)",
+  "settings.bsky_poll_now": "今すぐポーリング",
+  "settings.bsky_polling": "ポーリング中...",
+  "settings.bsky_response_mention": "メンション応答",
+  "settings.bsky_response_reply": "リプライ応答",
+  "settings.bsky_response_title": "自動応答テンプレート",
+  "settings.bsky_save_failed": "モニター設定の保存に失敗しました",
+  "settings.bsky_save_monitor": "モニター設定を保存",
+  "settings.bsky_saved": "モニター設定を保存しました",
+  "settings.bsky_triage_mention": "メンション",
+  "settings.bsky_triage_quote": "引用",
+  "settings.bsky_triage_reply": "リプライ",
+  "settings.bsky_triage_title": "トリアージプロンプト",
+  "settings.sns_bluesky_title": "Bluesky",
+  "settings.theme_applied": "テーマを適用しました:",
+  "settings.theme_click_to_apply": "クリックで適用",
+  "settings.theme_hint": "テーマをクリックするとすぐに適用されます。",
+  "settings_schema.agent_safety_budget_preset": "Budget プリセット",
+  "settings_schema.agent_safety_circuit_breaker_cooldown_seconds": "Circuit Breaker クールダウン (秒)",
+  "settings_schema.agent_safety_circuit_breaker_enabled": "Circuit Breaker 有効",
+  "settings_schema.agent_safety_circuit_breaker_error_rate_threshold": "エラーレート閾値 (0.0-1.0)",
+  "settings_schema.agent_safety_circuit_breaker_max_actions_per_minute": "毎分最大アクション数",
+  "settings_schema.agent_safety_circuit_breaker_max_consecutive_errors": "連続エラー最大回数",
+  "settings_schema.agent_safety_circuit_breaker_max_identical_consecutive": "同一呼び出し連続最大回数",
+  "settings_schema.agent_safety_circuit_breaker_max_same_tool_per_minute": "同一ツール毎分最大回数",
+  "settings_schema.ai_analysis_api_key": "Anthropic (Claude) API キー",
+  "settings_schema.ai_analysis_openai_api_key": "OpenAI API キー",
+  "settings_schema.ai_analysis_openai_compat_api_key": "OpenAI Compatible API キー",
+  "settings_schema.archive_cleanup_llm_api_key": "Archive Cleanup Anthropic API キー",
+  "settings_schema.archive_cleanup_llm_openai_api_key": "Archive Cleanup OpenAI API キー",
+  "settings_schema.archive_cleanup_llm_openai_compat_api_key": "Archive Cleanup OpenAI Compat API キー",
+  "settings_schema.archive_throttle_ms": "アーカイブスロットル (ms)",
+  "settings_schema.backup_backup_dir": "バックアップ先ディレクトリ",
+  "settings_schema.backup_backup_on_scan_complete": "スキャン完了時にバックアップ",
+  "settings_schema.backup_cooldown_minutes": "クールダウン (分)",
+  "settings_schema.backup_enabled": "自動バックアップ有効",
+  "settings_schema.backup_max_generations": "最大世代数",
+  "settings_schema.backup_periodic_interval_hours": "定期バックアップ間隔 (時間)",
+  "settings_schema.brace_choice": "波括弧選択",
+  "settings_schema.compute_hash": "pHash 計算",
+  "settings_schema.direct_prompt_convert": "プロンプト直接変換",
+  "settings_schema.enable_fts": "全文検索 (FTS5) 有効",
+  "settings_schema.extensions_builtin-nai-bridge_api_token": "NovelAI API トークン",
+  "settings_schema.extract_a1111": "A1111 メタデータ抽出",
+  "settings_schema.extract_comfyui": "ComfyUI メタデータ抽出",
+  "settings_schema.lowercase_tags": "タグ小文字化",
+  "settings_schema.preserve_templates": "テンプレート保持",
+  "settings_schema.server_allow_remote_restart": "リモート再起動 API 有効",
+  "settings_schema.server_allow_restart": "再起動 API 有効",
+  "settings_schema.server_host": "バインドホスト",
+  "settings_schema.server_lan": "LAN アクセス有効",
+  "settings_schema.server_pin": "PIN 認証コード",
+  "settings_schema.server_pin_boss_login_ui": "ボスログイン UI",
+  "settings_schema.server_port": "ポート番号",
+  "settings_schema.server_quick_lock_enabled": "クイックロック有効",
+  "settings_schema.server_restart_token": "リモート再起動トークン",
+  "settings_schema.sns_bluesky_app_password": "Bluesky アプリパスワード",
+  "settings_schema.sns_bluesky_handle": "Bluesky ハンドル",
+  "settings_schema.sns_post_template": "投稿テンプレート",
+  "settings_schema.timezone": "タイムゾーン",
+  "settings_schema.ui": "UI テーマ (default/custom)",
+  "settings_schema.video_analysis_enabled": "動画解析有効",
+  "settings_schema.video_analysis_keyframe_count": "キーフレーム数",
+  "settings_schema.video_analysis_scene_threshold": "シーン閾値",
+  "settings_schema.video_analysis_strategy": "キーフレーム戦略",
+  "settings_schema.webhook_secret": "Webhook 署名シークレット",
+  "similar.error": "エラーが発生しました",
+  "similar.none_found": "類似画像が見つかりませんでした。先にハッシュ計算を実行してください。",
+  "similar.searching": "検索中...",
+  "similar.title": "類似画像",
+  "stats": {
+    "load_failed": "統計の読み込みに失敗しました",
+    "no_model_data": "モデルデータがありません",
+    "no_resolution_data": "解像度データがありません",
+    "period": {
+      "dawn": "早朝 (03-09時)",
+      "day": "日中 (09-15時)",
+      "evening": "夕方 (15-21時)",
+      "night": "深夜 (21-03時)"
+    },
+    "personality": {
+      "balanced": {
+        "advice": "柔軟な働き方ができています",
+        "description": "時間に縛られない自由なクリエイター",
+        "type": "バランス型"
+      },
+      "daytime": {
+        "advice": "健康的なリズムを保っています",
+        "description": "規則正しい生活のクリエイター",
+        "type": "日中型"
+      },
+      "early_bird": {
+        "advice": "素晴らしい生活習慣です",
+        "description": "朝の集中力を活かすクリエイター",
+        "type": "早起き型"
+      },
+      "evening": {
+        "advice": "ゴールデンタイムを活用していますね",
+        "description": "夕方から本領発揮のクリエイター",
+        "type": "夕方集中型"
+      },
+      "night_owl": {
+        "advice": "健康に気をつけて！",
+        "description": "深夜の静けさを愛するクリエイター",
+        "type": "完全夜型"
+      },
+      "unknown": {
+        "advice": "",
+        "description": "データが不足しています",
+        "type": "不明"
+      }
+    }
+  },
+  "story": {
+    "event": {
+      "first_month": {
+        "desc": "{count}枚の画像でスタート",
+        "title": "創作活動スタート"
+      },
+      "milestone_100": {
+        "desc": "累計: {total}",
+        "title": "100枚達成！"
+      },
+      "milestone_100k": {
+        "desc": "累計: {total}",
+        "title": "100,000枚達成！"
+      },
+      "milestone_10k": {
+        "desc": "累計: {total}",
+        "title": "10,000枚達成！"
+      },
+      "milestone_1k": {
+        "desc": "累計: {total}",
+        "title": "1,000枚達成！"
+      },
+      "milestone_2k": {
+        "desc": "累計: {total}",
+        "title": "2,000枚達成！"
+      },
+      "milestone_500": {
+        "desc": "累計: {total}",
+        "title": "500枚達成！"
+      },
+      "milestone_50k": {
+        "desc": "累計: {total}",
+        "title": "50,000枚達成！"
+      },
+      "milestone_5k": {
+        "desc": "累計: {total}",
+        "title": "5,000枚達成！"
+      },
+      "new_source": {
+        "desc": "{source} の使用を開始",
+        "title": "新しいツール: {source}"
+      },
+      "peak_month": {
+        "desc": "{count}枚の画像を作成",
+        "title": "最も生産的な月"
+      },
+      "productivity_down": {
+        "desc": "前月比 -{percent}%",
+        "title": "落ち着いた時期"
+      },
+      "productivity_up": {
+        "desc": "前月比 +{percent}%",
+        "title": "生産性急上昇"
+      },
+      "quiet_month": {
+        "desc": "今月は{count}枚のみ",
+        "title": "静かな月"
+      },
+      "tag_diversity": {
+        "desc": "今月のユニークタグ数: {count}",
+        "title": "創作の多様性が最高記録"
+      }
+    },
+    "load_failed": "ストーリーの読み込みに失敗しました",
+    "no_data": "ストーリーを作成するにはデータが不足しています",
+    "on_this_day": "1年前の今日 ({date}): {count}枚の画像を作成"
+  },
+  "sweep.card_loading": "読み込み中…",
+  "sweep.card_no_axis": "軸情報なし",
+  "sweep.card_open_view_btn": "🔎 Sweep ビューを開く",
+  "sweep.card_others_btn": "🖼️ 同じ Sweep の他画像を表示",
+  "sweep.card_others_empty": "このフォルダ内に同じ Sweep の他画像は見つかりません。",
+  "sweep.card_others_error": "失敗: ",
+  "sweep.card_rerun_btn": "🔁 同じ Sweep をやり直す",
+  "sweep.card_rerun_no_seed_btn": "🎲 新しいシードでやり直す",
+  "sweep.card_rerun_other_bridge_btn": "別ブリッジで再実行",
+  "sweep.card_rerun_with_seed_btn": "🔁 同じシードでやり直す",
+  "sweep.card_title": "Sweep",
+  "sweep.resume_not_found": "そのファイルに Sweep のメタデータが見つかりませんでした。",
+  "sweep.resume_populated": "Sweep を復元しました。Generate を押すとやり直します。",
+  "sweep.resume_unknown_param": "Sweep: この Bridge では対応していないパラメータです: ",
+  "sweep.resume_wrong_bridge": "別の Bridge で実行された Sweep です: ",
+  "tags.add_tag": "タグを追加",
+  "toast": {
+    "checkpoint_search": "チェックポイント検索: {model}",
+    "conditions_cleared": "すべての検索条件をクリアしました",
+    "copy_done": "コピーしました",
+    "copy_done_strong": "コピーしました！",
+    "copy_failed": "コピーに失敗しました",
+    "copy_failed_short": "コピー失敗",
+    "copy_with_label": "{label}コピーしました",
+    "dir_open_failed": "ディレクトリを開けませんでした",
+    "dir_opened": "ディレクトリを開きました",
+    "error_occurred": "エラーが発生しました"
+  },
+  "tools": {
+    "ai_analyzing": "AI分析中...",
+    "analyzing": "分析中...",
+    "analyzing_trends": "プロンプトトレンドを分析中...",
+    "api_key_set": "APIキー設定済み",
+    "bulk_register_failed": "一括登録に失敗しました",
+    "cache_clear_failed": "キャッシュクリアに失敗しました",
+    "cache_cleared": "件のキャッシュを削除しました",
+    "cancel": "キャンセル",
+    "checking_roots": "登録済みフォルダーを確認中...",
+    "clear_cache_confirm": "サムネイルキャッシュをすべて削除しますか？\n次回表示時に再生成されます。",
+    "click_copy_path": "クリックでパスをコピー",
+    "click_preview": "クリックでプレビュー",
+    "compute_hash_confirm": "{type}ハッシュを計算します。\nファイル数が多い場合は時間がかかることがあります。",
+    "computing_hashes": "ハッシュを計算中...",
+    "confirm_db_delete": "{count}件のファイルをデータベースから削除します。\n（実ファイルはディスクに残ります）",
+    "confirm_hard_delete": "警告: {count}件のファイルを完全に削除します。\nこの操作は取り消せません！\n\n本当によろしいですか？",
+    "counting_files": "ファイル数を確認中...",
+    "db_path": "データベースパス:",
+    "db_size": "データベースサイズ:",
+    "delete": "削除",
+    "delete_failed": "削除に失敗しました",
+    "deleted": "削除済み",
+    "deleting": "削除中...",
+    "disable": "無効化",
+    "drag_to_move": "ドラッグで移動",
+    "dup_groups_found": "重複グループが見つかりました",
+    "duplicate": "重複",
+    "enable": "有効化",
+    "enter_folder_path": "フォルダパスを入力してください",
+    "enter_search_query": "検索キーワードを入力してください",
+    "error": "エラー",
+    "exact_match": "完全一致",
+    "ext_enabled": "有効",
+    "fetch_failed": "取得に失敗しました",
+    "file": "ファイル",
+    "file_and_perceptual": "ファイル + 知覚",
+    "file_count": "ファイル数:",
+    "file_hash_computed": "ファイルハッシュ計算完了",
+    "files": "ファイル",
+    "files_deleted": "{count}件のファイルを削除しました",
+    "folder_dialog_failed": "フォルダ選択ダイアログを開けませんでした。\nパスを手入力してください。",
+    "force_rescan": "強制再スキャン（全ファイルを再解析）",
+    "frequent_tags": "頻出タグ:",
+    "group": "グループ",
+    "hash_not_computed": "ハッシュが未計算です。先に「ハッシュを計算」を実行してください。",
+    "hash_stats_total": "総ファイル数",
+    "include_subfolders": "サブフォルダーを含む",
+    "items": "件",
+    "keep": "保持",
+    "load_failed": "読み込み失敗",
+    "loading": "読み込み中...",
+    "no_analysis_yet": "まだ分析済みのファイルがありません",
+    "no_duplicates": "重複は見つかりませんでした",
+    "no_extensions": "Extensionなし",
+    "no_files_in_db": "データベースにファイルがありません",
+    "no_normalize_needed": "正規化が必要なタグはありません",
+    "no_registered_roots": "登録済みフォルダーはありません",
+    "no_results": "結果なし",
+    "no_subdirs": "サブディレクトリなし",
+    "normalize_confirm": "タグを正規化しますか？この操作は取り消せません。",
+    "normalize_items": "正規化対象",
+    "normalizing": "正規化中...",
+    "normalizing_tags": "タグを正規化中...",
+    "open_detail_tab": "詳細を新しいタブで開く",
+    "perceptual": "知覚",
+    "phash_computed": "知覚ハッシュ計算完了",
+    "phash_not_computed": "知覚ハッシュが未計算です。先に「ハッシュを計算」を実行してください。",
+    "preparing": "準備中...",
+    "processed_files": "処理済みファイル:",
+    "prompt_trends": "プロンプトトレンド分析",
+    "recommendations": "おすすめ:",
+    "register_all": "全てconfig.jsonに登録",
+    "register_failed": "登録に失敗しました",
+    "register_to_config": "config.jsonに登録",
+    "remove_root_confirm": "このフォルダーを登録解除しますか？（実ファイルは削除されません）",
+    "rescan": "再スキャン",
+    "rescan_all": "全て再スキャン",
+    "rescanning_all": "全フォルダーを再スキャン中...",
+    "roots_drag_hint": "ドラッグで並び替え | Shift+↑↓ で移動 | 順序はフォルダソートに反映",
+    "same_size": "同一サイズ",
+    "save_failed": "保存に失敗しました",
+    "saved": "保存しました",
+    "scan_all_complete": "全フォルダーのスキャンが完了しました",
+    "scan_complete": "スキャン完了",
+    "scanning": "スキャン中...",
+    "schema_version": "スキーマバージョン:",
+    "search_zips": "ZIPファイル内を検索",
+    "searching": "検索中...",
+    "select": "選択",
+    "select_all_dupes": "すべての重複を選択",
+    "select_files_to_delete": "削除するファイルを選択してください",
+    "showing_first": "件中（先頭",
+    "similar_images": "類似画像",
+    "start_scan": "スキャン開始",
+    "starting": "開始中...",
+    "strengths": "強み:",
+    "style": "スタイル",
+    "style_tendency": "スタイル傾向:",
+    "tag_count": "タグ数:",
+    "th_deleted": "削除済み",
+    "th_format": "形式",
+    "th_path": "パス",
+    "th_prompt": "プロンプト",
+    "th_size": "サイズ",
+    "th_source": "ソース",
+    "toggle_failed": "切替に失敗しました",
+    "unexplored_themes": "未探索のテーマ:",
+    "unit_hours": "時間",
+    "unit_minutes": "分",
+    "uptime": "稼働時間:",
+    "weaknesses": "改善点:",
+    "wt_batch_failed": "一括処理の開始に失敗しました",
+    "wt_close": "閉じる",
+    "wt_complete": "完了",
+    "wt_config_failed": "設定の保存に失敗しました",
+    "wt_config_saved": "WD-Tagger 設定を保存しました",
+    "wt_download_failed": "ダウンロードに失敗しました",
+    "wt_downloading": "モデルをダウンロード中...",
+    "wt_model_check_failed": "モデル状態の確認に失敗しました",
+    "wt_model_not_downloaded": "モデル未ダウンロード",
+    "wt_model_ready": "モデル準備完了",
+    "wt_no_tags": "タグなし",
+    "wt_processing": "処理中...",
+    "wt_sec_elapsed": "秒",
+    "wt_tagged_files": "タグ付き画像",
+    "wt_total_tags": "タグ総数",
+    "wt_unique": "ユニーク",
+    "wt_untagged": "未タグ (unknown)",
+    "wt_xmp_dc_subject": "dc:subject タグ:",
+    "wt_xmp_load_failed": "XMP データの読み込みに失敗しました",
+    "wt_xmp_not_found": "XMP データが見つかりません",
+    "wt_xmp_raw_xml": "Raw XML",
+    "wt_xmp_title": "XMP メタデータ",
+    "wt_xmp_wdtag_info": "wdtag 情報:"
+  },
+  "yolo_stream.detect_error": "検出に失敗しました",
+  "yolo_stream.register": "登録",
+  "sd_bridge.api_key_set": "(設定済み)",
+  "comfyui_bridge.api_key_set": "(設定済み)"
+}

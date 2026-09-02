@@ -1,0 +1,224 @@
+/*
+ * Atelier System (γ) — Inspect page (atelier-tool variant) retrofit
+ *
+ * Inspect is a metadata workbench. Tone the existing #667eea purple drop-zone
+ * down to atelier neutrals, raise the raw-meta / OCR text panes to JetBrains
+ * Mono, and let format chips & tag chips read as data badges rather than
+ * decoration.
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool so classic /
+ * dark themes keep pages/inspect.css untouched.
+ */
+
+/* ----- Page title ----- */
+
+body.theme-atelier-light.atelier-tool main#main-content > header h1,
+body.theme-atelier-dark.atelier-tool main#main-content > header h1 {
+  margin: 4px 0 16px;
+}
+
+body.theme-atelier-light.atelier-tool main#main-content > header h1 [aria-hidden="true"],
+body.theme-atelier-dark.atelier-tool main#main-content > header h1 [aria-hidden="true"] {
+  font-size: 0.7em;
+  vertical-align: middle;
+  margin-right: 0.25em;
+  opacity: 0.7;
+}
+
+/* ----- Drop zone ----- */
+
+body.theme-atelier-light.atelier-tool .drop-zone,
+body.theme-atelier-dark.atelier-tool .drop-zone {
+  background: var(--surface);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  color: var(--text);
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+
+body.theme-atelier-light.atelier-tool .drop-zone:hover,
+body.theme-atelier-dark.atelier-tool .drop-zone:hover {
+  background: var(--surface-raised);
+  border-color: color-mix(in srgb, var(--accent-tool) 50%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .drop-zone.dragover,
+body.theme-atelier-dark.atelier-tool .drop-zone.dragover {
+  border-color: var(--accent-tool);
+  background: color-mix(in srgb, var(--accent-tool) 10%, var(--surface));
+}
+
+body.theme-atelier-light.atelier-tool .drop-zone .icon,
+body.theme-atelier-dark.atelier-tool .drop-zone .icon {
+  opacity: 0.55;
+}
+
+body.theme-atelier-light.atelier-tool .drop-zone .hint,
+body.theme-atelier-dark.atelier-tool .drop-zone .hint {
+  font-family: var(--font-ui);
+  font-size: var(--fs-h3);
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light.atelier-tool .drop-zone .hint small,
+body.theme-atelier-dark.atelier-tool .drop-zone .hint small {
+  font-size: var(--fs-small);
+}
+
+/* Format chips — read as data badges */
+body.theme-atelier-light.atelier-tool .format-tag,
+body.theme-atelier-dark.atelier-tool .format-tag {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+}
+
+/* ----- Preview area ----- */
+
+body.theme-atelier-light.atelier-tool .preview-img,
+body.theme-atelier-dark.atelier-tool .preview-img {
+  background: var(--canvas);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+body.theme-atelier-light.atelier-tool .meta-panel,
+body.theme-atelier-dark.atelier-tool .meta-panel {
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light.atelier-tool .meta-row,
+body.theme-atelier-dark.atelier-tool .meta-row {
+  border-bottom: 1px solid var(--border);
+  font-size: var(--fs-body);
+  padding: 6px 0;
+}
+
+body.theme-atelier-light.atelier-tool .meta-key,
+body.theme-atelier-dark.atelier-tool .meta-key {
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+body.theme-atelier-light.atelier-tool .meta-val,
+body.theme-atelier-dark.atelier-tool .meta-val {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+/* ----- Tag chips ----- */
+
+body.theme-atelier-light.atelier-tool .tag-chip,
+body.theme-atelier-dark.atelier-tool .tag-chip {
+  background: color-mix(in srgb, var(--accent-tool) 14%, var(--surface));
+  color: var(--accent-tool);
+  border: 1px solid color-mix(in srgb, var(--accent-tool) 35%, var(--border));
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+}
+
+/* ----- Raw metadata / OCR text panels ----- */
+
+body.theme-atelier-light.atelier-tool .raw-meta,
+body.theme-atelier-dark.atelier-tool .raw-meta {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.5;
+  border-radius: var(--radius-md);
+  padding: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool h2[data-i18n="inspect.raw_meta"],
+body.theme-atelier-dark.atelier-tool h2[data-i18n="inspect.raw_meta"],
+body.theme-atelier-light.atelier-tool h2[data-i18n="inspect.ocr_title"],
+body.theme-atelier-dark.atelier-tool h2[data-i18n="inspect.ocr_title"] {
+  font-family: var(--font-ui) !important;
+  font-size: var(--fs-small) !important;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* ----- Buttons (copy / OCR run) ----- */
+
+body.theme-atelier-light.atelier-tool .copy-btn,
+body.theme-atelier-dark.atelier-tool .copy-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+}
+
+body.theme-atelier-light.atelier-tool .copy-btn:hover,
+body.theme-atelier-dark.atelier-tool .copy-btn:hover {
+  background: var(--surface-raised);
+  border-color: color-mix(in srgb, var(--accent-tool) 40%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .wb-btn,
+body.theme-atelier-dark.atelier-tool .wb-btn {
+  background: var(--accent-tool);
+  border: 1px solid var(--accent-tool);
+  color: #fff;
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  font-weight: 500;
+  border-radius: var(--radius-md);
+  padding: 6px 14px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+body.theme-atelier-light.atelier-tool .wb-btn:hover,
+body.theme-atelier-dark.atelier-tool .wb-btn:hover {
+  background: color-mix(in srgb, var(--accent-tool) 88%, #000);
+  border-color: color-mix(in srgb, var(--accent-tool) 88%, #000);
+}
+
+body.theme-atelier-light.atelier-tool .copy-btn:focus-visible,
+body.theme-atelier-dark.atelier-tool .copy-btn:focus-visible,
+body.theme-atelier-light.atelier-tool .wb-btn:focus-visible,
+body.theme-atelier-dark.atelier-tool .wb-btn:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+}
+
+/* ----- Spinner ----- */
+
+body.theme-atelier-light.atelier-tool .inspect-spinner,
+body.theme-atelier-dark.atelier-tool .inspect-spinner {
+  border-color: var(--border);
+  border-top-color: var(--accent-tool);
+}
+
+/* ----- Sim search link ----- */
+
+body.theme-atelier-light.atelier-tool .inspect-sim-link,
+body.theme-atelier-dark.atelier-tool .inspect-sim-link {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  color: var(--accent-tool);
+  text-decoration: none;
+}
+
+body.theme-atelier-light.atelier-tool .inspect-sim-link:hover,
+body.theme-atelier-dark.atelier-tool .inspect-sim-link:hover {
+  text-decoration: underline;
+}

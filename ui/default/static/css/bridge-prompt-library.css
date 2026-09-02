@@ -1,0 +1,498 @@
+/* ================================================================
+   Bridge Prompt Library — shared CSS for PL modals + gen thumbnails
+   ================================================================ */
+
+/* --- Overlay (shared by picker + save) --- */
+
+.bpl-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* --- Modal base --- */
+
+.bpl-modal {
+  background: var(--bg, #0f0f1a);
+  border: 1px solid rgba(128,128,128,0.25);
+  border-radius: 12px;
+  max-width: 600px; width: 92vw;
+  max-height: 80vh;
+  display: flex; flex-direction: column;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.bpl-modal-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 18px 10px;
+  border-bottom: 1px solid rgba(128,128,128,0.15);
+}
+.bpl-modal-header h3 { margin: 0; font-size: 15px; color: var(--text, #e0e0e0); }
+
+.bpl-close {
+  background: none; border: none; color: var(--text-secondary, #aaa);
+  font-size: 22px; cursor: pointer; padding: 0 4px; line-height: 1;
+}
+.bpl-close:hover { color: var(--text, #e0e0e0); }
+
+/* --- Picker search --- */
+
+.bpl-search-wrap { padding: 10px 18px 6px; }
+
+.bpl-search {
+  width: 100%; box-sizing: border-box;
+  padding: 8px 12px; border: 1px solid rgba(128,128,128,0.2);
+  border-radius: 6px; background: rgba(30,30,50,0.8);
+  color: var(--text, #e0e0e0); font-size: 13px;
+}
+.bpl-search:focus { outline: none; border-color: var(--accent, #667eea); }
+
+/* --- Picker list --- */
+
+.bpl-list {
+  flex: 1; overflow-y: auto; padding: 0 18px;
+  min-height: 120px;
+}
+
+.bpl-loading, .bpl-empty {
+  padding: 24px 0; text-align: center;
+  color: var(--text-secondary, #aaa); font-size: 13px;
+}
+
+.bpl-card {
+  cursor: pointer; padding: 10px 0;
+  border-bottom: 1px solid rgba(128,128,128,0.1);
+}
+.bpl-card:last-child { border-bottom: none; }
+.bpl-card:hover { background: rgba(102,126,234,0.06); margin: 0 -18px; padding: 10px 18px; }
+
+.bpl-card-title {
+  font-size: 13px; font-weight: 600;
+  color: var(--text, #e0e0e0);
+  margin-bottom: 3px;
+}
+.bpl-card-preview {
+  font-size: 12px; color: var(--text-secondary, #aaa);
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden; line-height: 1.4;
+}
+.bpl-card-params {
+  font-size: 11px; color: var(--accent, #667eea);
+  margin-top: 3px;
+}
+
+/* --- Pager --- */
+
+.bpl-pager {
+  display: flex; justify-content: center; gap: 8px;
+  padding: 10px 18px 14px;
+  border-top: 1px solid rgba(128,128,128,0.15);
+}
+.bpl-pager-btn {
+  padding: 5px 14px; border: 1px solid rgba(102,126,234,0.3);
+  border-radius: 6px; background: rgba(102,126,234,0.08);
+  color: var(--text, #e0e0e0); cursor: pointer; font-size: 12px;
+}
+.bpl-pager-btn:hover { background: rgba(102,126,234,0.2); }
+
+/* --- Save modal --- */
+
+.bpl-save-modal { max-width: 500px; }
+
+.bpl-save-form {
+  padding: 14px 18px 18px;
+  overflow-y: auto;
+}
+.bpl-save-form label {
+  display: block; font-size: 11px; margin: 8px 0 3px;
+  color: var(--text-secondary, #aaa);
+}
+.bpl-save-form label:first-child { margin-top: 0; }
+.bpl-required { color: #f44336; }
+
+.bpl-input, .bpl-textarea {
+  width: 100%; box-sizing: border-box;
+  padding: 7px 10px; border: 1px solid rgba(128,128,128,0.2);
+  border-radius: 6px; background: rgba(30,30,50,0.8);
+  color: var(--text, #e0e0e0); font-size: 13px;
+  font-family: inherit;
+}
+.bpl-textarea { resize: vertical; font-family: 'Consolas','Monaco',monospace; font-size: 12px; }
+.bpl-input:focus, .bpl-textarea:focus { outline: none; border-color: var(--accent, #667eea); }
+
+.bpl-save-params {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 6px; margin-top: 4px;
+}
+.bpl-save-param label { margin: 0 0 2px; }
+
+.bpl-save-btn {
+  margin-top: 14px; width: 100%;
+  padding: 9px 0; border: none; border-radius: 6px;
+  background: var(--accent, #667eea); color: #fff;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+}
+.bpl-save-btn:hover { opacity: 0.9; }
+
+/* --- Toast --- */
+
+.bpl-toast {
+  position: fixed; bottom: 20px; left: 50%;
+  transform: translateX(-50%);
+  background: #4caf50; color: #fff;
+  padding: 10px 24px; border-radius: 8px;
+  font-size: 13px; z-index: 10001;
+  animation: bplFadeIn 0.2s;
+}
+.bpl-toast-error { background: #f44336; }
+
+@keyframes bplFadeIn { from { opacity: 0; transform: translateX(-50%) translateY(10px); } }
+
+/* --- Characters summary in save modal --- */
+
+.bpl-chars-summary {
+  margin-top: 10px; padding: 8px 10px;
+  border-radius: 6px;
+  background: rgba(102,126,234,0.06);
+  border: 1px solid rgba(128,128,128,0.15);
+}
+.bpl-chars-summary label {
+  display: block; font-size: 11px; font-weight: 600;
+  margin: 0 0 4px; color: var(--accent, #667eea);
+}
+.bpl-char-entry {
+  font-size: 12px; color: var(--text-secondary, #aaa);
+  padding: 2px 0; line-height: 1.4;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+
+/* ================================================================
+   Bridge Result Panel — 2-column layout (brp-*)
+   ================================================================ */
+
+.brp-layout {
+  display: flex; gap: 20px;
+}
+.brp-left {
+  flex: 1; min-width: 0;
+}
+.brp-right {
+  flex: 0 0 45%; max-width: 560px;
+  position: sticky; top: calc(var(--nav-h, 50px) + 10px);
+  align-self: flex-start;
+}
+
+/* Latest image */
+.brp-latest {
+  border-radius: 8px; overflow: hidden;
+  border: 1px solid rgba(128,128,128,0.15);
+  background: rgba(30,30,50,0.3);
+  min-height: 200px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+.brp-latest-empty {
+  color: var(--text, #e0e0e0); font-size: 13px;
+  padding: 40px 20px; text-align: center;
+}
+.brp-latest-img {
+  max-width: 100%; max-height: 50vh; width: auto; display: block;
+  border-radius: 8px; cursor: pointer; object-fit: contain;
+  view-transition-name: brp-latest-img;
+}
+
+/* Action buttons below latest image */
+.brp-actions {
+  display: flex; gap: 6px; flex-wrap: wrap;
+  padding: 8px 10px; width: 100%;
+  justify-content: center;
+}
+.brp-action-btn {
+  padding: 5px 12px; border-radius: 6px;
+  border: 1px solid rgba(102,126,234,0.3);
+  background: rgba(102,126,234,0.08);
+  color: var(--text, #f0f0f0); cursor: pointer;
+  font-size: 11px; white-space: nowrap;
+  transition: all 0.2s;
+}
+.brp-action-btn:hover {
+  background: rgba(102,126,234,0.25);
+  border-color: var(--accent, #667eea);
+}
+body:not(.dark) .brp-action-btn {
+  color: var(--text, #333);
+  border-color: rgba(102,126,234,0.35);
+}
+body:not(.dark) .brp-action-btn:hover {
+  background: rgba(102,126,234,0.15);
+}
+
+/* Fullsize overlay */
+.brp-fullsize-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 10000;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+}
+.brp-fullsize-overlay img {
+  max-width: 95vw; max-height: 95vh;
+  object-fit: contain;
+  border-radius: 4px;
+  cursor: default;
+}
+
+/* Meta info below latest */
+.brp-meta {
+  font-size: 12px; color: var(--text-secondary, #aaa);
+  margin-top: 6px; min-height: 1.5em;
+}
+.brp-saved {
+  color: #4caf50; margin-top: 2px;
+}
+.brp-expanded {
+  margin-top: 4px;
+}
+.brp-expanded summary {
+  font-size: 12px; color: #4fc3f7; cursor: pointer;
+  user-select: none;
+}
+.brp-expanded-text {
+  white-space: pre-wrap; font-size: 11px; line-height: 1.4;
+  color: var(--text-secondary, #bbb); margin-top: 2px;
+  max-height: 120px; overflow-y: auto;
+}
+
+/* History header */
+.brp-history-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 16px; margin-bottom: 6px;
+}
+.brp-history-header span {
+  font-size: 11px; color: var(--text, #e0e0e0); font-weight: 600;
+}
+.brp-clear-btn {
+  background: none; border: none; color: var(--text-secondary, #aaa);
+  font-size: 16px; cursor: pointer; padding: 4px 6px; line-height: 1;
+  min-width: 28px; min-height: 28px; display: inline-flex; align-items: center; justify-content: center;
+}
+.brp-clear-btn:hover { color: var(--text, #e0e0e0); }
+
+/* History grid */
+.brp-history {
+  display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+}
+.brp-thumb {
+  border-radius: 6px; overflow: hidden; cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+.brp-thumb:hover { border-color: var(--accent, #667eea); }
+.brp-thumb.active {
+  border-color: var(--accent, #667eea);
+  box-shadow: 0 0 6px rgba(102,126,234,0.3);
+}
+.brp-thumb img {
+  width: 100%; aspect-ratio: 1; object-fit: cover;
+  display: block;
+}
+
+@media (max-width: 768px) {
+  .brp-layout { flex-direction: column-reverse; }
+  .brp-right {
+    flex: none; max-width: none; width: 100%;
+    position: static;
+  }
+  .brp-history { grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); }
+}
+
+/* ----------------------------------------------------------------
+   Filmstrip mode (wide viewports >= 1600px) — JS toggles
+   `.brp-filmstrip-wrap.active` and `.brp-right.history-hidden`.
+   ---------------------------------------------------------------- */
+
+/* Filmstrip wrap is hidden by default; activated by JS at the breakpoint */
+.brp-filmstrip-wrap {
+  display: none;
+  margin-top: 14px;
+  border-top: 1px solid rgba(128,128,128,0.18);
+  padding-top: 10px;
+}
+.brp-filmstrip-wrap.active { display: block; }
+
+/* When the filmstrip is active, hide the sidebar history so the same data
+   isn't shown in two places. The latest preview + meta still show. */
+.brp-right.history-hidden .brp-history-sidebar-header,
+.brp-right.history-hidden .brp-history-sidebar {
+  display: none;
+}
+
+/* Horizontal-scrolling thumb row. Newest sits at the left (insertBefore). */
+.brp-filmstrip {
+  display: flex;
+  flex-direction: row;
+  gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+  scroll-behavior: smooth;
+  /* Keep grid styling from .brp-history at bay. */
+  grid-template-columns: none;
+}
+.brp-filmstrip .brp-thumb {
+  flex: 0 0 auto;
+  width: 120px;
+  height: 120px;
+}
+.brp-filmstrip .brp-thumb img {
+  width: 100%; height: 100%;
+  aspect-ratio: auto;
+}
+.brp-filmstrip-header {
+  margin-top: 0;
+}
+
+/* ================================================================
+   Bridge Multi-Server Result Panel
+   ================================================================ */
+
+.result-view-toggle {
+  margin: 0 0 10px;
+}
+
+.multi-server-results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.swimlane-group-header {
+  padding: 8px 10px;
+  border: 1px solid rgba(128,128,128,0.18);
+  border-radius: 6px;
+  background: rgba(102,126,234,0.08);
+  color: var(--text, #f0f0f0);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.swimlane {
+  border: 1px solid rgba(128,128,128,0.18);
+  border-radius: 8px;
+  background: rgba(30,30,50,0.22);
+  padding: 10px;
+}
+
+.swimlane-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: var(--text, #f0f0f0);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: 0 0 auto;
+}
+
+.progress-bar {
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(128,128,128,0.18);
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.progress-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: var(--accent, #667eea);
+  transition: width 120ms ease;
+}
+
+.swimlane-error {
+  margin-bottom: 8px;
+  color: #ff8a80;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.swimlane-images,
+.unified-filmstrip {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 4px;
+}
+
+.swimlane-images img,
+.filmstrip-thumb img {
+  width: 96px;
+  height: 96px;
+  border-radius: 6px;
+  object-fit: cover;
+  display: block;
+}
+
+.filmstrip-thumb {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.backend-color-badge {
+  position: absolute;
+  right: 5px;
+  bottom: 5px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,0,0,0.35);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.25);
+}
+
+/* ================================================================
+   Bridge Aspect Lock — shared W↔H aspect-ratio cell styling
+   ================================================================ */
+
+.bridge-aspect-cell {
+  display: flex;
+  gap: 4px;
+  align-items: stretch;
+}
+
+.bridge-aspect-cell .bridge-aspect-lock-btn {
+  min-width: 32px;
+  opacity: 0.55;
+  transition: opacity 120ms ease, filter 120ms ease;
+}
+
+.bridge-aspect-cell .bridge-aspect-lock-btn.locked {
+  opacity: 1;
+  filter: drop-shadow(0 0 2px rgba(99, 179, 237, 0.6));
+}
+
+.bridge-aspect-cell .bridge-aspect-ratio-input {
+  flex: 1;
+  min-width: 0;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+
+.bridge-aspect-cell .bridge-aspect-ratio-input.readonly {
+  color: var(--text, #e0e0e0);
+  background: var(--bg-muted, rgba(255, 255, 255, 0.03));
+}
+
+body:not(.dark):not([data-theme=dark]) .brp-latest-empty,
+body:not(.dark):not([data-theme=dark]) .brp-history-header span,
+body:not(.dark):not([data-theme=dark]) .bridge-aspect-cell .bridge-aspect-ratio-input.readonly {
+  color: var(--text, #222);
+}

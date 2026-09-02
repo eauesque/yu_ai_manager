@@ -1,0 +1,41 @@
+        <!-- Condition chip area: active conditions displayed as chips -->
+        <div id="activeConditions" style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;"></div>
+        
+        <!-- + button -> available conditions menu -->
+        <div style="margin:6px 0;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+          <button type="button" id="addConditionBtn" data-action="conditionBuilderApi.toggleConditionMenu" aria-haspopup="menu" aria-controls="conditionMenu" aria-expanded="false" data-i18n-title="search.add_condition_title" title="条件を追加（Ctrl+Shift+A）" style="background:rgba(102,126,234,0.15);border:1px dashed rgba(163,179,255,0.5);color:var(--muted-accessible,#a3b3ff);padding:4px 12px;border-radius:16px;cursor:pointer;font-size:13px;" data-i18n="search.add_condition">＋ 条件を追加</button>
+          <span id="conditionMenuHint" style="font-size:11px;color:var(--muted-accessible,#aab);"></span>
+          
+          <!-- Utility buttons -->
+          <span class="search-util-bar">
+            <button type="button" data-action="detailModalApi.runtimeControls.openRandomResult" class="search-util-btn" data-i18n-title="search.random_title" title="検索結果からランダムに1件開く">🎲 <span data-i18n="search.random">ランダム</span></button>
+            <button type="button" data-action="runtimeInitApi.clearAllInputs" class="search-util-btn" data-i18n-title="search.clear_all_title" title="すべてクリア"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-trash"/></svg></button>
+            <span class="search-util-preset-wrap">
+              <button type="button" data-action="runtimeInitApi.togglePresetMenu" class="search-util-btn" data-i18n-title="search.preset_title" title="検索プリセット">📋</button>
+              <div id="presetDropdown" class="search-util-dropdown">
+                <div style="display:flex;gap:4px;margin-bottom:6px;">
+                  <button type="button" data-action="runtimeInitApi.savePreset" class="search-util-dropdown-save"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-save"/></svg> <span data-i18n="search.preset_save">保存</span></button>
+                </div>
+                <div id="presetMenu" style="max-height:200px;overflow-y:auto;"></div>
+              </div>
+            </span>
+            <!-- ⋯ overflow menu for less-used items -->
+            <span class="search-util-overflow-wrap">
+              <button type="button" class="search-util-btn" id="searchUtilOverflowBtn" title="More" aria-haspopup="menu" aria-expanded="false">&#x22EF;</button>
+              <div id="searchUtilOverflow" class="search-util-overflow-menu" style="display:none;" role="menu">
+                <a href="/inspect" class="search-util-overflow-item" data-i18n-title="search.inspect_title" title="メタデータ検査 (PNG Info)">🔬 <span data-i18n="search.inspect_link">検査</span></a>
+                <button type="button" data-action="runtimeToolsApi.openRegexIntro" class="search-util-overflow-item" data-i18n-title="search.regex_intro_title" title="正規表現とは？（初心者向け入門）"><span data-i18n="search.regex_intro">.*? 正規表現とは</span></button>
+              </div>
+            </span>
+          </span>
+        </div>
+        
+        <!-- Add condition menu (hidden, shown on + click) -->
+        <div id="conditionMenu" role="menu" aria-hidden="true" style="display:none;padding:10px;background:rgba(0,0,0,0.15);border-radius:8px;margin:6px 0;">
+          <div style="display:flex;flex-wrap:wrap;gap:6px;" id="conditionMenuItems"></div>
+        </div>
+        <div id="a11yStatus" aria-live="polite" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"></div>
+        <div id="resultA11yStatus" aria-live="polite" style="position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden;"></div>
+        
+        <!-- Input fields for each condition (hidden, shown when chip is added) -->
+        <div id="conditionFields" style="margin:6px 0;"></div>

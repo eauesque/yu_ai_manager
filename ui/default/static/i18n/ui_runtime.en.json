@@ -1,0 +1,1699 @@
+{
+  "a11y": {
+    "condition_added": "Condition \"{label}\" added",
+    "condition_menu_opened": "Condition menu opened",
+    "condition_removed": "Condition \"{label}\" removed",
+    "focus_search": "Focused search input",
+    "result_focus": "Item {index} of {total}: {label}",
+    "results_list_label": "Search results"
+  },
+  "agent_journal": {
+    "scope_delete": "Delete",
+    "scopes_empty_with_default": "(no scopes — default applies)"
+  },
+  "analysis": {
+    "analyzed_at": "Analyzed: {date}",
+    "btn_reanalyze": "Re-analyze",
+    "done_label": "Analyzed",
+    "label": {
+      "ai_tags": "AI Tags:",
+      "color": "Color:",
+      "composition": "Composition:",
+      "engine": "Engine:",
+      "mood": "Mood:",
+      "quality": "Quality:",
+      "style": "Style:",
+      "suggestion": "Prompt suggestion:"
+    },
+    "status_done": "✅ Done",
+    "status_done_engine": "✅ Done ({engine})",
+    "status_error": "❌ {error}",
+    "status_running": "Analyzing...",
+    "status_running_engine": "Analyzing with {engine}...",
+    "status_saved": "✅ {engine}"
+  },
+  "analysis.engine": "AI Engine",
+  "analysis.engine_default": "Auto",
+  "analysis.mode": "Analysis Mode",
+  "analysis.mode_full": "Full Analysis",
+  "analysis.mode_simple": "Color + Composition",
+  "analysis.model": "AI Model",
+  "api_error": {
+    "bad_zip_file": "Corrupted archive file",
+    "batch_empty": "Batch is empty",
+    "batch_too_large": "Batch size exceeds the limit",
+    "collection_not_found": "Collection not found",
+    "container_not_found": "Container not found for this file",
+    "convert_failed": "Format conversion failed",
+    "debug_disabled": "Debug mode is not enabled",
+    "empty_sql": "SQL query is empty",
+    "extract_register_failed": "Failed to register extracted file",
+    "file_missing": "File not found on disk",
+    "file_not_found": "File not found",
+    "gateway_no_db": "Database not available (gateway mode)",
+    "internal_error": "Internal server error",
+    "invalid_content_type": "Wrong content type",
+    "invalid_index": "Invalid index",
+    "invalid_json": "Malformed JSON",
+    "invalid_json_object": "Expected a JSON object",
+    "invalid_mode": "Invalid mode",
+    "invalid_request": "Invalid request",
+    "invalid_value": "Invalid value",
+    "job_running": "A batch job is already running",
+    "keyframe_error": "Failed to extract keyframes",
+    "missing_dependency": "Required library is missing",
+    "missing_file_id": "File ID is required",
+    "model_not_available": "Model is not downloaded yet",
+    "multi_stmt_rejected": "Multiple SQL statements are not allowed",
+    "no_data": "No data provided",
+    "not_found": "Resource not found",
+    "not_select": "Only SELECT statements are allowed",
+    "not_zip_member": "Not an archive member",
+    "path_required": "Path is required",
+    "purge_failed": "Purge operation failed",
+    "roots_summary_failed": "Failed to summarize scan roots",
+    "scan_roots_config_failed": "Scan roots configuration failed",
+    "sql_error": "SQL execution error",
+    "unsupported_type": "This file type is not supported",
+    "write_rejected": "Write operations are not allowed",
+    "zip_entry_not_found": "Entry not found in archive",
+    "zip_not_found": "Archive file not found",
+    "zip_path_traversal": "Path traversal blocked"
+  },
+  "boss_mode": {
+    "back": "Back",
+    "brand": "Daily Ledger",
+    "esc_hint": "Press Esc to return",
+    "headline": "Global Markets Steady as Inflation Cools in Key Regions",
+    "story1": "Central banks hint at slower policy tightening into next quarter",
+    "story2": "Shipping costs ease as trans-Pacific routes normalize",
+    "story3": "Tech earnings beat expectations on enterprise demand",
+    "story4": "Energy sector retreats after two-week commodity rally",
+    "subhead": "Analysts noted broad stability across major indices on Tuesday, with investors balancing labor data, policy signals, and energy prices.",
+    "top_stories": "Top Stories",
+    "watchlist": "Watchlist"
+  },
+  "bridge": {
+    "pl": {
+      "load_tooltip": "Load PL",
+      "save_tooltip": "Save PL"
+    },
+    "toolbar_legend": {
+      "title": "Legend / Symbols"
+    }
+  },
+  "bridge.syntax_warning.converting": "Converting...",
+  "bridge.syntax_warning.error": "Conversion failed",
+  "character": {
+    "negative_label": "Exclude:",
+    "section_title": "NovelAI V4 Character Prompts"
+  },
+  "checkpoint": {
+    "option_count": "{name} ({count})"
+  },
+  "collections": {
+    "created": "Collection created",
+    "deleted": "Collection deleted",
+    "export_csv": "Path CSV",
+    "export_recipe_csv": "Recipe CSV",
+    "export_recipe_json": "Recipe JSON",
+    "renamed": "Collection renamed"
+  },
+  "common": {
+    "clear": "Clear",
+    "delete": "Delete",
+    "enabled": "Enabled",
+    "error_prefix": "Error:",
+    "loading": "Loading...",
+    "range_sep": "–",
+    "reset": "Reset",
+    "save": "Save",
+    "saved": "Saved",
+    "saving": "Saving..."
+  },
+  "common.saved": "Saved",
+  "common.saving": "Saving...",
+  "conditions": {
+    "aiAnalyzed": {
+      "label": "🧠 AI Analyzed"
+    },
+    "artist": {
+      "label": "🎨 Artist",
+      "placeholder": "artist name"
+    },
+    "checkpoint": {
+      "label": "🎯 Checkpoint",
+      "placeholder": "e.g. animagine, pony"
+    },
+    "clear_all": "Clear all",
+    "collection": {
+      "all": "All Favorites",
+      "label": "⭐ Collection"
+    },
+    "csvLimit": {
+      "label": "📥 CSV Export Limit"
+    },
+    "disabled_in_grouped": "Not available in folder/ZIP view",
+    "favOnly": {
+      "label": "⭐ Favorites only"
+    },
+    "format": {
+      "ext_filter_hint": "Filter by extension (optional)",
+      "ext_group_audio": "Audio",
+      "ext_group_container": "Container",
+      "ext_group_image": "Image",
+      "ext_group_video": "Video",
+      "label": "📄 Format"
+    },
+    "hasAnnotation": {
+      "desc": "Show only files with annotations (notes)",
+      "label": "📝 Has Note"
+    },
+    "hasTags": {
+      "label": "🏷️ Tagged"
+    },
+    "hint": {
+      "count_many": "{count} conditions",
+      "count_one": "1 condition"
+    },
+    "inCharNeg": {
+      "label": "🚫 In Char Negative",
+      "placeholder": "character negative search"
+    },
+    "inCharPos": {
+      "label": "✨ In Char Positive",
+      "placeholder": "character positive search"
+    },
+    "inFolder": {
+      "label": "📂 Folder",
+      "placeholder": "path part e.g. o:\\test"
+    },
+    "inNegative": {
+      "label": "🚫 In Negative",
+      "placeholder": "keyword in negative"
+    },
+    "inPrompt": {
+      "label": "🔤 In Prompt",
+      "placeholder": "keyword in prompt"
+    },
+    "limit": {
+      "label": "#️⃣ Amount",
+      "short_label": "Count"
+    },
+    "model": {
+      "label": "🤖 Model"
+    },
+    "orTags": {
+      "label": "🔀 OR tags",
+      "placeholder": "contains any (comma-separated)"
+    },
+    "period": {
+      "label": "📅 Period"
+    },
+    "remove": "Remove condition",
+    "resolution": {
+      "label": "📐 Resolution"
+    },
+    "sort": {
+      "label": "↕️ Sort"
+    },
+    "tagCase": {
+      "label": "Aa Case sensitive"
+    },
+    "toggle": {
+      "close": "▲ Close",
+      "more": "▼ More"
+    }
+  },
+  "container": {
+    "folder_items": "{count} images in folder",
+    "no_members": "Container has no indexed members.",
+    "preload_done": "Folder / ZIP category view is now ready",
+    "preloading_thumbs": "Generating thumbnails... ({done}/{total})",
+    "zip_items": "{count} images in ZIP"
+  },
+  "convert": {
+    "btn_expand_dynamic": "Dynamic Prompts",
+    "btn_restore": "Restore",
+    "failed": "Conversion failed",
+    "failed_with_error": "Conversion failed: {error}",
+    "label": {
+      "nai": "NAI format ",
+      "sd": "SD format "
+    }
+  },
+  "ctx.ai_analyze": "AI Analysis",
+  "ctx.clear_rating": "Clear",
+  "ctx.copied": "Copied",
+  "ctx.copied_nai": "Copied as NAI",
+  "ctx.copied_sd": "Copied as SD",
+  "ctx.copy_nai": "Copy as NAI",
+  "ctx.copy_negative": "Copy negative",
+  "ctx.copy_path": "Copy file path",
+  "ctx.copy_prompt": "Copy prompt",
+  "ctx.copy_sd": "Copy as SD",
+  "ctx.favorite": "Favorite ☆",
+  "ctx.find_similar": "Find similar",
+  "ctx.path_copied": "Path copied",
+  "ctx.qr_share": "Share via QR",
+  "ctx.rating": "Rating",
+  "ctx.save_pl": "Save to PL",
+  "ctx.send_bridge": "Send to Bridge",
+  "ctx.show_detail": "Show detail",
+  "detail": {
+    "ann_add_label": "Add note",
+    "ann_delete_confirm": "Delete this annotation?",
+    "ann_empty": "No annotations yet.",
+    "ann_load_failed": "Failed to load annotations.",
+    "ann_placeholder": "Add a personal note for this file...",
+    "ann_save_failed": "Save failed",
+    "ann_source_user": "Your notes",
+    "audio_unsupported": "Your browser does not support audio playback.",
+    "image_alt": "Image",
+    "load_failed": "Failed to load detail",
+    "modal": {
+      "analysis_mode": "Toggle analysis mode",
+      "audio_playback": "Audio Playback",
+      "autoplay": "Auto-play (P)",
+      "autoplay_interval": "Interval (seconds)",
+      "bar_collapse": "Collapse bar",
+      "bar_expand": "Expand bar",
+      "close": "Close",
+      "container_items": "{count} items",
+      "container_view": "Container view",
+      "display": "Display:",
+      "favorite": "Toggle favorite",
+      "fullscreen": "Fullscreen",
+      "info_toggle": "Toggle info panel",
+      "mode_fit": "Fit",
+      "mode_fit_custom": "Custom",
+      "mode_fit_height": "H-Fit",
+      "mode_fit_width": "W-Fit",
+      "mode_original": "Original",
+      "mute": "Mute (M)",
+      "next": "Next image",
+      "prev": "Previous image",
+      "repeat_off": "Repeat: OFF (R)",
+      "repeat_on": "Repeat: ON (R)",
+      "resume_off": "Resume Off",
+      "resume_on": "Resume On",
+      "spread_direction": "Read direction (D)",
+      "spread_view": "Spread view (B)",
+      "toast_repeat_off": "Repeat: OFF",
+      "toast_repeat_on": "Repeat: ON",
+      "toast_resume_off": "Resume: OFF",
+      "toast_resume_on": "Resume: ON",
+      "toast_speed": "Speed: {rate}x",
+      "toast_spread_ltr": "Read: L→R",
+      "toast_spread_nav_rtl": "← Next / Prev →",
+      "toast_spread_off": "Spread: OFF",
+      "toast_spread_on": "Spread: ON",
+      "toast_spread_rtl": "Read: R→L",
+      "toolbar_aria": "Image display controls",
+      "toolbar_hide": "Hide toolbar",
+      "toolbar_overflow_menu": "More",
+      "toolbar_show": "Show toolbar",
+      "unmute": "Unmute (M)",
+      "video_playback": "Video Playback",
+      "viewing_mode": "Viewing mode (V)",
+      "zoom_in": "Zoom in",
+      "zoom_out": "Zoom out",
+      "zoom_reset": "Reset zoom"
+    },
+    "save_failed": "Save failed",
+    "saved_to_library": "Saved to Prompt Library",
+    "tab_annotations": "Notes",
+    "video_unsupported": "Your browser does not support the video tag."
+  },
+  "detail.ann_add_label": "Add note",
+  "detail.ann_delete_confirm": "Delete this annotation?",
+  "detail.ann_empty": "No annotations yet.",
+  "detail.ann_load_failed": "Failed to load annotations.",
+  "detail.ann_placeholder": "Add a personal note for this file...",
+  "detail.ann_save_failed": "Save failed",
+  "detail.ann_source_user": "Your notes",
+  "detail.s2t_copied": "Copied to clipboard",
+  "detail.s2t_done": "Transcription complete",
+  "detail.s2t_error": "Transcription failed",
+  "detail.s2t_no_transcript": "No transcript yet. Click \"Transcribe\" to start.",
+  "detail.s2t_processing": "Processing...",
+  "detail.s2t_segments": "Segments",
+  "detail.s2t_transcribe": "Transcribe",
+  "detail.search_by_prompt": "Search by Prompt",
+  "detail.tab_ai": "AI Analysis",
+  "detail.tab_analysis_trace": "Trace",
+  "detail.tab_annotations": "Notes",
+  "detail.tab_info": "Info",
+  "detail.tab_ocr": "OCR",
+  "detail.tab_s2t": "S2T",
+  "detail.trace_date": "Analyzed",
+  "detail.trace_error": "Failed to load analysis trace",
+  "detail.trace_loading": "Loading...",
+  "detail.trace_meta_source": "Metadata Source",
+  "detail.trace_model": "Model",
+  "detail.trace_none": "No analysis trace",
+  "detail.trace_quality": "Quality Analysis",
+  "detail.trace_quality_score": "Quality",
+  "detail.trace_s2t": "Speech Recognition",
+  "detail.trace_source": "Source",
+  "detail.trace_tags": "tags",
+  "ext": {
+    "builtin-a1111": {
+      "config": {
+        "parse_negative": {
+          "description": "Separate and extract the Negative prompt: section",
+          "label": "Also extract Negative Prompt"
+        },
+        "parse_params": {
+          "description": "Extract parameters such as Steps, Sampler, CFG Scale, Model, etc.",
+          "label": "Also extract generation parameters"
+        }
+      }
+    },
+    "builtin-chatlog": {
+      "config": {
+        "api_key": {
+          "description": "Required for OpenAI / Claude API. Leave empty for local Ollama",
+          "label": "API key"
+        },
+        "base_url": {
+          "description": "API endpoint URL for the AI engine",
+          "label": "API base URL"
+        },
+        "engine_type": {
+          "description": "Type of AI engine used for conversation analysis",
+          "label": "AI engine"
+        },
+        "model": {
+          "description": "Model name to use (e.g., llama3.2:latest, gpt-4o-mini)",
+          "label": "Model name"
+        }
+      }
+    },
+    "builtin-comfyui": {
+      "config": {
+        "extract_workflow": {
+          "description": "Store ComfyUI workflow JSON in raw_meta_json",
+          "label": "Also extract workflow info"
+        }
+      }
+    },
+    "builtin-comfyui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Skip confirmation dialog"
+        },
+        "default_sampler": {
+          "label": "Default sampler"
+        },
+        "default_scheduler": {
+          "label": "Default scheduler"
+        }
+      }
+    },
+    "builtin-nai-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Skip confirmation dialog"
+        },
+        "default_model": {
+          "label": "Default model"
+        },
+        "default_noise_schedule": {
+          "label": "Default noise schedule"
+        },
+        "default_sampler": {
+          "label": "Default sampler"
+        }
+      }
+    },
+    "builtin-novelai-v4": {
+      "config": {
+        "extract_vibe_transfer": {
+          "description": "Extract Vibe Transfer strength/description",
+          "label": "Also extract Vibe Transfer info"
+        },
+        "merge_character_prompts": {
+          "description": "Concatenate base_caption + char_captions with commas",
+          "label": "Merge character prompts into base"
+        }
+      }
+    },
+    "builtin-ocr": {
+      "config": {
+        "batch_export_format": {
+          "label": "Batch export format"
+        },
+        "batch_output_dir": {
+          "description": "Server-side save destination for batch export. If empty, downloads as ZIP",
+          "label": "Batch output directory (empty = download)"
+        },
+        "default_target_lang": {
+          "label": "Default translation target language"
+        },
+        "default_task": {
+          "label": "Default OCR task"
+        },
+        "manga_ocr_enabled": {
+          "label": "Prefer manga-ocr (for ocr_manga task)"
+        }
+      }
+    },
+    "builtin-prompt-syntax": {
+      "config": {
+        "auto_detect": {
+          "description": "Automatically detect NAI/SD/DP syntax in input text",
+          "label": "Auto-detect syntax"
+        },
+        "show_errors": {
+          "description": "Show warnings for bracket mismatches and abnormal weight values",
+          "label": "Show errors"
+        }
+      }
+    },
+    "builtin-sd-nai-convert": {
+      "config": {
+        "convert_emphasis": {
+          "description": "Also convert emphasis syntax between SD ((tag)) and NAI {tag}",
+          "label": "Also convert emphasis syntax"
+        },
+        "strip_embedding": {
+          "description": "Automatically remove embedding:... tags when converting SD to NAI",
+          "label": "Remove Embedding tags on NAI conversion"
+        },
+        "strip_lora": {
+          "description": "Automatically remove <lora:...> tags when converting SD to NAI",
+          "label": "Remove LoRA tags on NAI conversion"
+        }
+      }
+    },
+    "builtin-sd-webui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Skip confirmation dialog"
+        },
+        "default_sampler": {
+          "label": "Default sampler"
+        }
+      }
+    }
+  },
+  "fleet.button.back_to_cowork": "← Back to LAN Cowork",
+  "fleet.button.refresh": "Refresh",
+  "fleet.button.restart_node": "Restart this node",
+  "fleet.consent.banner.approve_once": "Approve once",
+  "fleet.consent.banner.approve_permanent": "Approve permanently",
+  "fleet.consent.banner.countdown": "{sec} seconds remaining",
+  "fleet.consent.banner.deny": "Deny",
+  "fleet.consent.banner.title": "Remote update request from {peer}",
+  "fleet.consent.chief.cancel": "Cancel",
+  "fleet.consent.chief.re_request": "Re-request",
+  "fleet.consent.chief.send_request": "Send consent request",
+  "fleet.consent.chief.send_request_for": "Remote update disabled for {peer}. Send consent request?",
+  "fleet.consent.chief.timeout": "Consent timed out. Re-request?",
+  "fleet.consent.chief.waiting": "Waiting for consent ⏱ ({sec}s remaining)",
+  "fleet.error.branch_not_allowed": "Branch not allowed",
+  "fleet.error.cannot_dispatch_self": "Cannot dispatch to chief itself",
+  "fleet.error.consent_denied": "Consent was denied.",
+  "fleet.error.consent_token_invalid": "Consent invalidated. Please re-request.",
+  "fleet.error.deny_cooldown": "Deny cooldown active ({sec}s remaining)",
+  "fleet.error.git_not_available": "git is not available",
+  "fleet.error.invalid_source": "Invalid source",
+  "fleet.error.local_path_not_allowed": "Local path not allowed",
+  "fleet.error.not_in_allowlist": "Not in allowlist",
+  "fleet.error.other_chief_pending": "Another chief is awaiting consent ({sec}s remaining)",
+  "fleet.error.remote_update_disabled": "Remote update is disabled",
+  "fleet.error.update_failed_token_consumed": "Update failed — consent consumed. Re-request?",
+  "fleet.error.update_in_progress": "Update already in progress",
+  "fleet.logs.autoscroll": "Auto-scroll",
+  "fleet.logs.clear": "Clear",
+  "fleet.logs.copied": "Copied!",
+  "fleet.logs.copy": "Copy",
+  "fleet.logs.copy_failed": "Copy failed",
+  "fleet.logs.download": "Download",
+  "fleet.logs.pause": "Pause",
+  "fleet.logs.peer_select": "Select Peer",
+  "fleet.logs.placeholder": "Logs — select a peer to start streaming",
+  "fleet.logs.resume": "Resume",
+  "fleet.node.status.degraded": "Info Unavailable",
+  "fleet.node.status.offline": "Offline",
+  "fleet.node.status.online": "Online",
+  "fleet.node.status.restarting": "Restarting",
+  "fleet.settings.col.action": "Action",
+  "fleet.settings.col.log_stream": "Log stream",
+  "fleet.settings.col.peer": "Peer",
+  "fleet.settings.col.status": "Status",
+  "fleet.settings.col.update": "Update",
+  "fleet.settings.local.allow_remote_update": "Enable remote updates (master switch)",
+  "fleet.settings.local.desc": "Configure whether this node allows other peers to stream logs or perform remote updates. Toggle checkboxes per peer.",
+  "fleet.settings.local.save": "Save",
+  "fleet.settings.local.title": "This node's settings",
+  "fleet.settings.remote.already_granted": "Already granted",
+  "fleet.settings.remote.desc": "Use the pairing token to add the chief's peer_id to the target peer's allowlist. You don't need to log in on the peer, but a pairing token is required.",
+  "fleet.settings.remote.done": "Done",
+  "fleet.settings.remote.failed": "Failed",
+  "fleet.settings.remote.grant": "Grant on this peer",
+  "fleet.settings.remote.not_granted": "Not granted",
+  "fleet.settings.remote.revoke": "Revoke on this peer",
+  "fleet.settings.remote.status_unreachable": "Cannot check",
+  "fleet.settings.remote.title": "Remote grant (chief only)",
+  "fleet.settings.save_failed": "Save failed",
+  "fleet.settings.saved": "Saved",
+  "fleet.tab.logs": "Logs",
+  "fleet.tab.overview": "Overview",
+  "fleet.tab.settings": "Settings",
+  "fleet.tab.update": "Update",
+  "fleet.title": "Fleet Admin",
+  "fleet.update.branch": "Branch:",
+  "fleet.update.button.dispatch": "Update Selected Nodes",
+  "fleet.update.button.pull_restart": "Pull & Restart",
+  "fleet.update.button.restart_only": "Restart only",
+  "fleet.update.button.restart_only_dispatch": "Restart selected nodes",
+  "fleet.update.col.action": "Action",
+  "fleet.update.col.branch": "Branch",
+  "fleet.update.col.commit": "Commit",
+  "fleet.update.col.node": "Node",
+  "fleet.update.col.progress": "Progress",
+  "fleet.update.col.version": "Version",
+  "fleet.update.confirm.chief": "Updating this node will temporarily disconnect the admin UI. Continue?",
+  "fleet.update.confirm.restart": "Restart the selected nodes?",
+  "fleet.update.confirm.update": "Update the selected nodes? They will git pull and restart. Continue?",
+  "fleet.update.no_selection": "Please select at least one node",
+  "fleet.update.placeholder": "Update tab will be implemented in Phase 4.",
+  "fleet.update.source": "Source:",
+  "fleet.warning.multi_chief": "Multiple chiefs detected. Please restart the conflicting chief node.",
+  "genai.chat_delete_confirm": "Delete this conversation?",
+  "genai.chat_image_only": "Image-only messages are not supported",
+  "genai.chat_no_conversations": "No conversations",
+  "genai.chat_rename_prompt": "Enter a conversation name",
+  "genai.chat_search_sources": "Search sources",
+  "grid": {
+    "auto": "Auto",
+    "col_fixed": "cols (fixed)",
+    "col_unit": "cols",
+    "count_prefix": "Showing: ",
+    "count_unit": " items / ",
+    "image_only": " / images only",
+    "size_hint": " / size applies in auto mode"
+  },
+  "grouping": {
+    "btn_archive": "Archive",
+    "btn_files": "Files",
+    "btn_folders": "Folders",
+    "btn_zip": "ZIP",
+    "count_folders": "{count} folders found",
+    "count_zips": "{count} ZIP archives found",
+    "rebuild": "Rebuild groups",
+    "rebuilt": "Groups rebuilt: {folders} folders, {zips} ZIP",
+    "summary": "Grouped: {visible} / {total}",
+    "summary_folders": "Folders: {visible} ({total} files)",
+    "summary_zips": "ZIP: {visible} ({total} files)"
+  },
+  "input_hint": {
+    "artist": "Esc: Blur | Alt+0/$: Line start/end | Ctrl+W: Delete word | ?: Help",
+    "condition": "Esc: Blur | /: Jump to search | ?: Shortcut list",
+    "default": "/: Search | Esc: Close | ?: Keyboard help",
+    "inPrompt": "Esc: Blur | Alt+W/B: Move word | Ctrl+U: Clear all | ?: Help",
+    "tagQuery": "Esc: Blur | /: Back to search | Alt+W/B: Move word | Ctrl+K: Delete to end | ?: Help"
+  },
+  "inspect": {
+    "conv_expand": "Dynamic Prompt Expand Result",
+    "conv_nai_sd": "NAI → SD Result",
+    "conv_sd_nai": "SD → NAI Result",
+    "conv_warn_already_nai": "Input already appears to be in NAI format",
+    "conv_warn_already_sd": "Input already appears to be in SD format",
+    "conv_warn_mixed": "NAI and SD syntax are mixed in the input",
+    "copied": "Copied",
+    "copy": "Copy",
+    "error": "Error",
+    "fmt_a1111": "Format: A1111 (Stable Diffusion)",
+    "fmt_json": "Format: JSON",
+    "fmt_plain": "Format: Plain Text",
+    "negative": "Negative",
+    "network_error": "Network error",
+    "open_in_sim": "Open in Prompt Simulator",
+    "output": "Output",
+    "parse_error": "Parse error",
+    "positive": "Positive",
+    "resolution": "Resolution",
+    "sim_choices": "choices",
+    "sim_combinations": "{count} combinations",
+    "sim_depth": "Depth",
+    "sim_dp_analyze": "DP Probability Analysis",
+    "sim_link": "Open Prompt Simulator",
+    "sim_link_text": "Open Prompt Simulator",
+    "sim_pick_n": "Pick {n} from {total}",
+    "sim_probability": "Probability",
+    "sim_syntax": "Syntax",
+    "sim_token": "Token",
+    "sim_weight": "Weight",
+    "sim_weight_calc": "Emphasis Weight Calculator",
+    "tag_count": "Tag count",
+    "wh_not_found": "Size: WxH or width/height pattern not found",
+    "wh_swap_result": "W/H Swap Result",
+    "zip_select": "Image in ZIP"
+  },
+  "kb_help": {
+    "basic": {
+      "close_or_blur": "Close / blur focus",
+      "focus_search": "Focus search input (from anywhere)",
+      "run_search": "Run search",
+      "screen_lock": "Screen lock (when PIN is set)",
+      "title": "Basic",
+      "toggle_help": "Show/hide this help"
+    },
+    "edit": {
+      "delete_prev_word": "Delete previous word",
+      "kill_line": "Delete entire line",
+      "kill_to_end": "Delete from cursor to end of line",
+      "title": "Text Editing (Emacs style)"
+    },
+    "existing": {
+      "open_condition_menu": "Open add-condition menu",
+      "regex_cheatsheet": "Open regex cheat sheet",
+      "title": "Existing Shortcuts",
+      "toggle_regex": "Toggle regex ON/OFF"
+    },
+    "results": {
+      "title": "Result Grid",
+      "navigate": "Move focus",
+      "open": "Open detail",
+      "copy_prompt": "Copy prompt",
+      "context_menu": "Context menu (right-click / M key)",
+      "context_menu_hint": "Right-click a card for: copy params, App QR, bridge, analysis, ..."
+    },
+    "footer": {
+      "close": "to close",
+      "hint_line": "Hint: focusing a field shows help at the bottom",
+      "or": "or",
+      "regex_intro_link": "What is regex? (Beginner intro)"
+    },
+    "move": {
+      "delete_char": "Delete character",
+      "line_end": "Move to line end",
+      "line_start": "Move to line start",
+      "next_word": "Move to next word",
+      "prev_word": "Move to previous word",
+      "title": "Cursor Move (Vim style)"
+    },
+    "regex_intro": {
+      "desc": "Just three examples can make search much easier",
+      "open": "Open intro",
+      "title": "New to regex?"
+    },
+    "title": "Keyboard Shortcuts"
+  },
+  "keyboard": {
+    "close": "Close",
+    "guide": {
+      "autoplay": "auto-play",
+      "close": "close",
+      "copy": "copy",
+      "dismiss": "Hide keyboard guide",
+      "dismiss_toast": "Press H to show again",
+      "filmstrip_nav": "prev/next file (works in media)",
+      "filmstrip_toggle": "filmstrip",
+      "focus_move": "focus move",
+      "media_controls": "Media",
+      "modal_label": "Modal",
+      "move": "move",
+      "open": "open",
+      "prev_next": "prev/next",
+      "prev_next_or_seek": "prev/next (or seek 5s in media)",
+      "results_label": "Results",
+      "scroll": "Scroll",
+      "speed": "Speed",
+      "spread_toggle": "spread view",
+      "menu": "menu",
+      "to_search": "to search",
+      "toggle_btn": "Keyboard guide (H)",
+      "volume": "Vol"
+    },
+    "help": "Help",
+    "prev_next": "Prev/next image"
+  },
+  "lan_cowork.import.done": "Import completed",
+  "lan_cowork.import.partial": "Import completed with some files missing",
+  "lan_cowork.import.err.no_folder": "Please specify an import folder",
+  "lan_cowork.import.err.no_peer": "Please select a peer to import from",
+  "lan_cowork.import.error": "Import failed",
+  "lan_cowork.import.folder": "Import folder",
+  "lan_cowork.import.folder.pick_failed": "Failed to choose folder",
+  "lan_cowork.import.mode": "Mode",
+  "lan_cowork.import.mode.diff": "Diff",
+  "lan_cowork.import.mode.full": "Full",
+  "lan_cowork.import.opt.favorites": "Include favorites",
+  "lan_cowork.import.opt.merge": "Merge metadata (on hash match)",
+  "lan_cowork.import.peer": "Source peer",
+  "lan_cowork.import.running": "Importing...",
+  "lan_cowork.import.start": "Start import",
+  "lan_cowork.import.timeout": "Import timed out",
+  "lan_cowork.import.title": "Remote Import",
+  "lan_cowork.peers.discover_error": "Failed to discover peers",
+  "lan_cowork.peers.empty": "No peers connected",
+  "lan_cowork.peers.extension_disabled": "LAN Cowork extension is disabled. Enable it from Extensions admin and restart the server.",
+  "lan_cowork.peers.offline": "Offline",
+  "lan_cowork.peers.online": "Online",
+  "lan_cowork.peers.pair_btn": "Pair request",
+  "lan_cowork.peers.pair_pin_prompt": "Enter the PIN shown on the other side.",
+  "lan_cowork.peers.pair_request_error": "Failed to request pairing",
+  "lan_cowork.peers.pair_request_sent": "Approve on the other side, then enter the displayed PIN.",
+  "lan_cowork.peers.pair_requesting": "Requesting...",
+  "lan_cowork.peers.pair_success": "Pairing completed",
+  "lan_cowork.peers.pair_verify_error": "PIN verification failed",
+  "lan_cowork.peers.paired": "Paired",
+  "lan_cowork.peers.refresh": "Refresh",
+  "lan_cowork.peers.remove_btn": "Remove",
+  "lan_cowork.peers.remove_confirm": "Remove this peer?",
+  "lan_cowork.peers.remove_error": "Failed to remove peer",
+  "lan_cowork.peers.remove_success": "Removed",
+  "lan_cowork.peers.title": "Connected peers",
+  "lan_cowork.peers.unpaired": "Unpaired",
+  "lan_cowork.pin_modal.error.empty": "Please enter PIN",
+  "lan_cowork.title": "LAN Cowork",
+  "lc_peers": {
+    "pair_modal": {
+      "close": "Close"
+    },
+    "sse": {
+      "paired": "Devices paired",
+      "pairing_request": "Pairing request received"
+    }
+  },
+  "lc_peers.fleet.enable_notifications": "Enable notifications",
+  "lc_peers.nav.back": "← LAN Cowork",
+  "lc_peers.page_title": "Peer Management - LAN Cowork",
+  "lc_peers.pair_modal.cancel": "Cancel",
+  "lc_peers.pair_modal.confirm": "Confirm",
+  "lc_peers.pair_modal.done": "Close",
+  "lc_peers.pair_modal.error.generic": "An error occurred",
+  "lc_peers.pair_modal.error.unknown": "The remote node status could not be confirmed.",
+  "lc_peers.pair_modal.paired_toast": "Pairing complete",
+  "lc_peers.pair_modal.pin.error.empty": "Please enter PIN",
+  "lc_peers.pair_modal.pin.error.invalid": "PIN is incorrect",
+  "lc_peers.pair_modal.pin.error.retryable": "PIN is incorrect. {attempts} attempts remaining.",
+  "lc_peers.pair_modal.pin.error.attempts_exhausted": "The maximum number of PIN attempts has been reached.",
+  "lc_peers.pair_modal.repair_steps": "Start pairing again and have the administrator of the other node approve the new request.",
+  "lc_peers.pair_modal.pin.label": "PIN",
+  "lc_peers.pair_modal.pin.placeholder": "••••••",
+  "lc_peers.pair_modal.step1.msg": "Sending pairing request...",
+  "lc_peers.pair_modal.step2.msg": "Approve the PIN on the remote host, then enter the displayed PIN.",
+  "lc_peers.pair_modal.step3.msg": "Pairing completed.",
+  "lc_peers.pair_modal.title": "Pairing",
+  "lc_peers.peers.col.actions": "Actions",
+  "lc_peers.peers.col.address": "Address",
+  "lc_peers.peers.col.name": "Peer Name",
+  "lc_peers.peers.col.status": "Status",
+  "lc_peers.peers.col.token_expires": "Token Expires",
+  "lc_peers.peers.empty": "No peers connected",
+  "lc_peers.peers.load_error": "Failed to load token list",
+  "lc_peers.peers.pair_request_error": "Pairing request failed",
+  "lc_peers.peers.refresh": "Refresh",
+  "lc_peers.peers.revoke": "Revoke",
+  "lc_peers.peers.revoke_confirm": "Revoke this peer's token?",
+  "lc_peers.peers.revoke_error": "Failed to revoke",
+  "lc_peers.peers.revoked": "Token revoked",
+  "lc_peers.peers.status.auth_lost": "Re-pairing required",
+  "lc_peers.peers.status.paired": "Paired",
+  "lc_peers.peers.title": "Connected Peers",
+  "lc_peers.requests.approve_error": "Failed to approve",
+  "lc_peers.requests.col.actions": "Actions",
+  "lc_peers.requests.col.peer_name": "Peer Name",
+  "lc_peers.requests.col.requester": "Requester",
+  "lc_peers.requests.col.time": "Received At",
+  "lc_peers.requests.empty": "No pending pairing requests",
+  "lc_peers.requests.load_error": "Failed to load request list",
+  "lc_peers.requests.refresh": "Refresh",
+  "lc_peers.requests.reject_error": "Failed to reject",
+  "lc_peers.requests.rejected": "Rejected",
+  "lc_peers.requests.title": "Pending Pairing Requests",
+  "lc_peers.title": "Peer Management",
+  "llm_router": {
+    "aliases_section": "Routing Aliases",
+    "backends_section": "Backends",
+    "col": {
+      "actions": "Actions",
+      "alias": "Alias",
+      "alias_name": "Alias",
+      "base_url": "Base URL",
+      "last_seen": "Last Seen",
+      "models": "Models",
+      "physical": "Physical Model",
+      "slo": "SLO",
+      "status": "Status"
+    },
+    "disable": "Disable",
+    "disabled_badge": "[DISABLED]",
+    "enable": "Enable",
+    "loading": "Loading...",
+    "no_aliases": "No routing aliases configured",
+    "no_backends": "No backends registered",
+    "refresh": "Refresh",
+    "refresh_all": "Refresh All",
+    "refresh_failed": "Refresh failed",
+    "refreshed": "Refreshed",
+    "source": {
+      "mdns": "mDNS",
+      "static": "Static"
+    },
+    "status": {
+      "error": "error",
+      "ok": "ok",
+      "unknown": "unknown",
+      "unreachable": "unreachable"
+    },
+    "summary": {
+      "aliases": "Routing aliases",
+      "backends": "Backends",
+      "enabled": "Enabled",
+      "models": "Models"
+    },
+    "title": "LLM Router",
+    "toggle_failed": "Failed to toggle backend"
+  },
+  "mesh_inference": {
+    "action": {
+      "local_only": "Local-only mode",
+      "local_only_tooltip": "Local peer has no effective inference types",
+      "refresh": "Refresh"
+    },
+    "col": {
+      "peer": "Peer"
+    },
+    "empty": "No peers connected.",
+    "subtitle": "Toggle distributed inference per peer and per inference type.",
+    "title": "Mesh Inference Matrix",
+    "toast": {
+      "load_failed": "Load failed",
+      "refreshed": "Refreshed",
+      "save_failed": "Save failed",
+      "saved": "Saved"
+    },
+    "type": {
+      "clip": "clip",
+      "tagger": "tagger",
+      "whisper": "whisper",
+      "yolo": "yolo"
+    }
+  },
+  "meta": {
+    "checkpoint_search": "Checkpoint search",
+    "click_open_dir": "Click to open directory",
+    "click_to_copy": "Click to copy",
+    "copy_original": "Copy",
+    "download_json": "Download",
+    "negative_label": "Negative",
+    "no_metadata": "No metadata",
+    "parameters_title": "Parameters",
+    "parse_success": "Parse succeeded",
+    "positive_label": "Positive",
+    "seed_copy": "Copy Seed"
+  },
+  "nav": {
+    "back_title": "Back to previous position",
+    "bottom_aria": "Go to bottom",
+    "bottom_title": "Go to bottom (End)",
+    "llm_router": "LLM Router",
+    "mesh_inference": "Mesh Inference",
+    "top_aria": "Go to top",
+    "top_title": "Go to top (Home)"
+  },
+  "nav.lan_cowork": "LAN Cowork",
+  "path": {
+    "copy_label": "Path ",
+    "copy_label_filename": "Filename ",
+    "copy_label_zip": "ZIP path ",
+    "copy_title": "Copy path",
+    "copy_title_filename": "Copy filename",
+    "copy_title_zip": "Copy ZIP path",
+    "label": "Path:"
+  },
+  "period": {
+    "12h": "12h",
+    "24h": "24h",
+    "3h": "3h",
+    "8h": "8h",
+    "custom": "Custom",
+    "days3": "3 days",
+    "days5": "5 days",
+    "half_year": "6 months",
+    "last_month": "Last month",
+    "month1": "1 month",
+    "month2": "2 months",
+    "month3": "3 months",
+    "month9": "9 months",
+    "week1": "1 week",
+    "week2": "2 weeks",
+    "year1": "1 year",
+    "yesterday": "Until yesterday"
+  },
+  "presets": {
+    "deleted": "Preset deleted: {name}",
+    "empty": "No saved presets",
+    "loaded": "Preset loaded: {name}",
+    "nothing_to_save": "No search state to save",
+    "rename_prompt": "New preset name:",
+    "renamed": "Preset renamed: {name}",
+    "save_prompt": "Preset name:",
+    "saved": "Preset saved: {name}"
+  },
+  "prompt": {
+    "badge": {
+      "embedding": "Textual Inversion (Embedding)",
+      "lora_weight": "LoRA weight: {weight}",
+      "novelai_weight": "NovelAI Weight: {weight}",
+      "paren_weight": "Weight: {weight} ({count} parens)",
+      "random_choice": "Random choice",
+      "weight": "Weight: {weight}"
+    }
+  },
+  "prompt_library.insert_as_is": "Insert as-is",
+  "prompt_library.insert_cancel": "Cancel",
+  "prompt_library.insert_convert_and_insert": "Convert and insert",
+  "prompt_library.insert_syntax_mismatch_body": "The selected prompt appears to use a different syntax from the current bridge. What do you want to do?",
+  "prompt_library.insert_syntax_mismatch_title": "Syntax mismatch detected",
+  "qr": {
+    "content_label": "QR content:",
+    "copy_text": "Copy text",
+    "info": {
+      "compressing": "⚠️ Too long, compressing text",
+      "meta_len": "📦 {count} chars",
+      "negative_len": "🚫 {count} chars",
+      "positive_len": "📝 {count} chars",
+      "too_long": "⚠️ Text is too long for QR. Please use text copy.",
+      "url": "🔗 Share URL"
+    },
+    "load_failed": "Failed to load QR library",
+    "mode": {
+      "meta": "All metadata (JSON)",
+      "negative": "Negative Prompt",
+      "positive": "Positive Prompt",
+      "url": "Share URL",
+      "url_local_disabled": "🚫 URL (localhost)"
+    },
+    "no_content": "No content",
+    "save_image": "Save QR image",
+    "text_too_long": "Text is too long",
+    "use_text_copy": "Please use text copy"
+  },
+  "random": {
+    "empty": "No search results available for random display",
+    "opened_one": "Opened one random result"
+  },
+  "resolution": {
+    "landscape": "Landscape W>=1024 H<=768",
+    "portrait": "Portrait W<=768 H>=1024",
+    "square": "Square",
+    "square_1024": "1024x1024",
+    "w1024": "W>=1024",
+    "w512": "W>=512",
+    "w768": "W>=768"
+  },
+  "result": {
+    "ai_analysis": "AI Analysis",
+    "copy_id_title": "Copy file ID",
+    "copy_prompt_title": "Copy prompt",
+    "detail_label": "Detail",
+    "negative_label": "Negative:",
+    "positive_label": "Positive:",
+    "qr_share": "QR Share",
+    "save_to_library": "Save to Library",
+    "show_detail_aria": "Show detail"
+  },
+  "scan": {
+    "banner": {
+      "dismiss": "Dismiss",
+      "interrupted": "Previous scan was interrupted",
+      "resume": "Resume",
+      "resume_failed": "Failed to resume",
+      "resuming": "Resuming scan...",
+      "scroll_top": "Go to top",
+      "stop": "Stop"
+    },
+    "complete_confirm_refresh": "Scan complete. Refresh results now?",
+    "complete_label": "✓ Scan complete!",
+    "complete_toast": "Scan complete: {count} files processed",
+    "details": {
+      "processed": "{total} files processed",
+      "progress": "{current} / {total} files"
+    },
+    "failed_label": "✗ Scan failed",
+    "failed_toast": "Scan failed: {error}",
+    "phase": {
+      "counting": "Counting files...",
+      "initializing": "Initializing...",
+      "scanning": "Scanning images..."
+    },
+    "start_failed": "Failed to start scan",
+    "time": {
+      "minutes": "{m}m{s}s",
+      "seconds": "{n}s"
+    },
+    "unknown_error": "Unknown error"
+  },
+  "scheduler": {
+    "action_failed": "Action failed",
+    "actions": "Actions",
+    "active": "Active",
+    "add_dialog_title": "Add Scheduled Job",
+    "add_job": "Add Job",
+    "added_msg": "Job added",
+    "cancel": "Cancel",
+    "delete": "Delete",
+    "delete_confirm": "Delete job \"{id}\"?",
+    "deleted_msg": "Job deleted",
+    "duration": "Duration",
+    "error": "Error",
+    "failed": "Failed",
+    "field_day": "Day",
+    "field_day_of_week": "Day of Week",
+    "field_func": "Function",
+    "field_hour": "Hour",
+    "field_job_id": "Job ID",
+    "field_minute": "Minute",
+    "field_trigger_type": "Trigger Type",
+    "hint_day": "1-31, comma, or *",
+    "hint_dow": "mon-sun, 0-6, or *",
+    "hint_hour": "0-23, comma, or *",
+    "hint_minute": "0-59, comma, or *",
+    "history": "Execution History",
+    "job_desc_bsky_notification_poll": "Bluesky notification polling",
+    "job_desc_db_backup": "Database backup",
+    "job_desc_db_integrity_check": "DB integrity check",
+    "job_desc_db_vacuum": "SQLite VACUUM (reclaim space)",
+    "job_desc_github_issue_poll": "GitHub issue polling",
+    "job_desc_prune_unused_tags": "Prune unused tags",
+    "job_desc_rebuild_groups_index": "Rebuild groups index",
+    "job_desc_refresh_monthly_stats": "Refresh monthly stats cache",
+    "job_desc_thumbnail_cleanup": "Thumbnail cache cleanup",
+    "job_desc_thumbnail_integrity_check": "Thumbnail integrity check (remove stale/inconsistent)",
+    "job_id": "Job ID",
+    "jobs": "Jobs",
+    "loading": "Loading...",
+    "next_run": "Next Run",
+    "no_history": "No execution history",
+    "no_jobs": "No jobs registered",
+    "pause": "Pause",
+    "paused": "Paused",
+    "paused_msg": "Job paused",
+    "refresh": "Refresh",
+    "result": "Result",
+    "resume": "Resume",
+    "resumed_msg": "Job resumed",
+    "running": "Running",
+    "status": "Scheduler Status",
+    "status_label": "Status",
+    "stopped": "Stopped",
+    "submit": "Add",
+    "success": "Success",
+    "time": "Time",
+    "title": "Task Scheduler",
+    "trigger": "Trigger",
+    "trigger_now": "Run Now",
+    "triggered": "Job queued for immediate execution"
+  },
+  "sd_bridge": {
+    "inserted": "Inserted"
+  },
+  "sd_nai_convert": {
+    "copied": "Copied"
+  },
+  "search": {
+    "count": {
+      "normal": "{count} results found",
+      "partial": "{shown} / {total} items",
+      "prompt_match": "{count} results (prompt match)",
+      "suffix_results": "results",
+      "unit": "{count}",
+      "zero": "0 results"
+    },
+    "error": {
+      "failed": "Search failed: {message}",
+      "generic": "An error occurred during search",
+      "network": "Cannot connect to server. Please check that the server is running.",
+      "regex": "Regex error: {error}"
+    },
+    "export_csv_hint": "Export {count} results as CSV (change limit from \"+Add condition\" menu)",
+    "live": {
+      "title": "Live search (auto)",
+      "toast_off": "Live search: OFF",
+      "toast_on": "Live search: ON"
+    },
+    "loading_more": "Loading...",
+    "partial_warning": "Reached display limit ({limit}). Narrow conditions or increase display count to show all results.",
+    "path_tip": {
+      "message": "Searching both tag names and file/folder names. For precise results, enter tags in the search bar and specify file/folder names via \"Add condition\" → \"Folder\".",
+      "move_btn": "📂 Move to folder search"
+    },
+    "placeholder": {
+      "plain": "Example: 1girl, blonde_hair, -nsfw",
+      "regex": "Example: 1girl, blue_(hair|eyes)  regex tag search"
+    },
+    "regex_note": " (regex filtered)",
+    "regex_warn_confirm": "⚠️ Regex search may be slow on large datasets.\nContinue searching?",
+    "state": {
+      "empty_db_hint1": "Go to Settings page and register image folders",
+      "empty_db_hint2": "Click \"Start Scan\" to import image metadata",
+      "empty_db_hint3": "After scanning, images will appear in search results",
+      "empty_db_message": "Add image folders in Settings to get started",
+      "empty_db_settings_link": "Open Settings",
+      "empty_db_title": "No images in database yet",
+      "collection_empty_title": "Nothing in this collection yet",
+      "collection_empty_message": "Click the star on an image's lower-right to add it to this collection.",
+      "collection_empty_filtered_message": "No images in this collection match your search conditions. Try removing some filters.",
+      "empty_title": "No images matched your conditions",
+      "error_title": "An error occurred",
+      "example1": "Tag search: 1girl, blue eyes (AND with commas)",
+      "example2": "Exclude: -bad quality (minus prefix)",
+      "example3": "Use +Add condition for model/date filters",
+      "example4": "Regex: girl.*hair (pattern match)",
+      "examples_label": "Examples:",
+      "first_message": "Enter tags or conditions to search images",
+      "first_title": "Try searching",
+      "hint1": "Check tag spelling (example: 1girl, blue_eyes)",
+      "hint2": "Try widening the date range",
+      "hint3": "In regex mode, use .*keyword.* for partial matches",
+      "hint4": "Reduce conditions to broaden the search",
+      "hint_label": "Hints:",
+      "start_prompt": "Press Search button or Enter",
+      "unknown_error": "Unknown error"
+    }
+  },
+  "semantic_search.elapsed": "elapsed",
+  "semantic_search.elapsed_suffix": "elapsed",
+  "server_info": {
+    "files": "files",
+    "load_failed": "Failed to load server info",
+    "startup_initializing": "Server initializing",
+    "startup_migration": "Startup DB upgrade",
+    "startup_stage_backfill": "Updating search columns for existing records.",
+    "startup_stage_backup": "Preparing a safety backup before the upgrade.",
+    "startup_stage_backup_reused": "Reusing an unchanged pre-upgrade backup.",
+    "startup_stage_backup_skipped": "Skipping pre-upgrade backup for a large database to reduce startup time.",
+    "startup_stage_file_cache": "Building file metadata cache. Ready shortly.",
+    "startup_stage_finalizing": "Upgrade complete. Finalizing startup...",
+    "startup_stage_migrate": "Applying database schema updates.",
+    "startup_stage_prepare": "Preparing database upgrade checks.",
+    "startup_stage_rebuild_fts": "Rebuilding search indexes for the new schema.",
+    "startup_upgrade_in_progress": "Database upgrade in progress",
+    "startup_upgrade_wait": "This may take a few minutes on large databases.",
+    "tags": "tags"
+  },
+  "settings": {
+    "apikeys_created": "Created:",
+    "apikeys_empty": "No API keys created yet.",
+    "apikeys_full_access": "full access",
+    "apikeys_last_used": "Last used:",
+    "apikeys_mcp_jump": "View snippet",
+    "apikeys_mcp_updated": "↓ MCP snippet updated with this key",
+    "apikeys_revoke": "Revoke this key",
+    "apikeys_toast_copied": "API key copied",
+    "apikeys_toast_create_failed": "Failed to create API key",
+    "apikeys_toast_created": "API key created",
+    "apikeys_toast_mcp_copied": "MCP snippet copied",
+    "apikeys_toast_revoke_failed": "Failed to revoke API key",
+    "apikeys_toast_revoked": "API key revoked",
+    "blocker_local_only": "This operation is only allowed from the local machine",
+    "blocker_pin_not_active": "PIN auth not active (restart required)",
+    "blocker_pin_session": "PIN auth session required",
+    "blocker_restart_disabled": "Restart API disabled (--allow-restart or TAGDB_ALLOW_RESTART=1)",
+    "blocker_token_missing": "Remote restart token not set",
+    "conditions_not_met": "conditions not met",
+    "container_nav_continuous": "Continue to next folder/ZIP",
+    "container_nav_continuous_hint": "Navigate to adjacent folder/ZIP when reaching the end in viewer",
+    "container_nav_order": "Group navigation order",
+    "container_nav_order_hint": "Order for navigating between folders/ZIPs",
+    "container_nav_order_name": "Name order",
+    "container_nav_order_result": "Search result order",
+    "database": "Database",
+    "delete": "Delete",
+    "disabled": "Disabled",
+    "enabled": "Enabled",
+    "env_var": "Env var",
+    "error": "Error",
+    "ext_disable": "Disable",
+    "ext_disabled": "Disabled",
+    "ext_disabled_msg": "Extension disabled.",
+    "ext_enable": "Enable",
+    "ext_enabled": "Enabled",
+    "ext_enabled_msg": "Extension enabled.",
+    "ext_restart_required": "Restart required to apply.",
+    "ext_toggle_failed": "Extension toggle failed",
+    "failed": "Failed",
+    "files_tags": "Files / Tags",
+    "json_saved": "✅ JSON saved",
+    "lan_public": "LAN Public",
+    "load_failed": "Load failed",
+    "local_only": "Local Only",
+    "lock_failed": "Lock failed",
+    "meta_breakdown": "Metadata breakdown",
+    "modal_kb_guide": "Show keyboard guide in viewer",
+    "modal_kb_guide_hint": "Display keyboard shortcut hints at the bottom of the modal viewer",
+    "network": "Network",
+    "no_extensions": "No extensions installed.",
+    "no_roots": "No registered folders.",
+    "none_detected": "None detected",
+    "not_set": "Not set",
+    "path_updated": "Path updated",
+    "pin_active": "PIN active",
+    "pin_disabled": "PIN disabled",
+    "pin_pending": "PIN set (restart required)",
+    "pin_source": "PIN source",
+    "profile_active_badge": "Active",
+    "profile_ago": "ago",
+    "profile_create": "Create Profile",
+    "profile_create_failed": "Create failed",
+    "profile_days": "d",
+    "profile_delete": "Delete",
+    "profile_delete_confirm": "Delete profile \"{label}\"? This cannot be undone.",
+    "profile_delete_failed": "Delete failed",
+    "profile_desc_prompt": "Description (optional):",
+    "profile_dup_failed": "Duplicate failed",
+    "profile_dup_label_prompt": "New display label:",
+    "profile_dup_name_prompt": "New profile name:",
+    "profile_duplicate": "Duplicate",
+    "profile_empty": "No profiles configured.",
+    "profile_export_failed": "Export failed",
+    "profile_import_exists": "Profile \"{name}\" already exists. {count} field(s) differ.\nImport mode: full (overwrite) or diff (merge changes)?",
+    "profile_import_failed": "Import failed",
+    "profile_import_prompt": "Paste QR profile data (JSON):",
+    "profile_import_success": "Profile imported successfully.",
+    "profile_just_now": "just now",
+    "profile_label_prompt": "Display label:",
+    "profile_last_used": "Last used",
+    "profile_name_prompt": "Profile name (alphanumeric, hyphens, underscores):",
+    "profile_never_used": "Never used",
+    "profile_no_desc": "No description",
+    "profile_no_pin": "Profile management requires PIN auth. Set a PIN and restart.",
+    "profile_qr_hint": "Copy the data below or scan the QR code to import on another instance.",
+    "profile_qr_import": "QR Import",
+    "profile_qr_title": "Profile Export",
+    "profile_rename": "Rename",
+    "profile_rename_failed": "Rename failed",
+    "profile_rename_prompt": "New name:",
+    "profile_switch_back": "Server is back with new profile. Reloading...",
+    "profile_switch_btn": "Switch",
+    "profile_switch_confirm": "Switch to profile \"{label}\"? The server will restart.",
+    "profile_switch_failed": "Profile switch failed",
+    "profile_switch_sending": "Sending profile switch request...",
+    "profile_switch_timeout": "Profile switch request sent but server did not respond within 90 seconds.",
+    "profile_switch_waiting": "Profile switch accepted. Waiting for server to come back...",
+    "profile_toggle_fav": "Toggle favorite",
+    "recursive_scan": "Recursive scan",
+    "remote_restart_off": "Remote restart: OFF",
+    "remote_restart_on": "Remote restart: ON",
+    "remove_root_confirm": "Unregister this folder?",
+    "restart_api": "Restart API",
+    "restart_back": "Server is back. Reloading...",
+    "restart_confirm": "Restart the server? (inaccessible for a few seconds)",
+    "restart_failed": "Restart failed",
+    "restart_sending": "Sending restart request...",
+    "restart_server": "Restart server",
+    "restart_timeout": "Restart request sent but server did not respond within 90 seconds.",
+    "restart_waiting": "Restart accepted. Waiting for server to come back...",
+    "rfs_enum_max": "Enumerate max",
+    "rfs_probe_max": "Probe max",
+    "rfs_total_max": "Total max",
+    "save_failed": "Save failed",
+    "save_path": "Save path",
+    "saved": "✅ Saved",
+    "saved_cli_override": "⚠ Saved (CLI --pin takes precedence. Review startup options to apply)",
+    "saved_restart_needed": "✅ Saved (restart required to apply)",
+    "saving": "Saving...",
+    "screen_lock": "Screen Lock",
+    "security": "Security",
+    "source": "source",
+    "toggle_root": "Enable/Disable",
+    "token_not_set": "Token: not set",
+    "token_set": "Token: set",
+    "tsr_desc": "Manage distributed tag inference servers (Hailo Remote, ONNX Local, etc.). Supports parallel batch tagging with work-stealing.",
+    "tsr_mesh_redirect": "Per-peer mesh inference toggles are managed in the",
+    "tsr_mesh_redirect_link": "Mesh Inference Matrix",
+    "tsr_mesh_redirect_suffix": "page.",
+    "tsr_title": "Tagger Server Registry",
+    "unit_hours": "h",
+    "unit_min": "min",
+    "unit_minutes": "m",
+    "unit_sec": "s",
+    "unknown": "Unknown",
+    "uptime": "Uptime",
+    "version": "Version"
+  },
+  "settings.bitwarden_desc": "Link secrets to Bitwarden for dynamic retrieval via bw CLI. Requires Bitwarden CLI installed and unlocked.",
+  "settings.bitwarden_title": "Bitwarden CLI",
+  "settings.bsky_auto_dismiss_follow": "Auto-dismiss follows",
+  "settings.bsky_auto_dismiss_like": "Auto-dismiss likes",
+  "settings.bsky_auto_dismiss_repost": "Auto-dismiss reposts",
+  "settings.bsky_auto_respond": "Enable auto-response",
+  "settings.bsky_monitor_desc": "Monitor Bluesky mentions, replies, and other notifications. Configure triage criteria and auto-response templates.",
+  "settings.bsky_monitor_title": "Bluesky Monitor",
+  "settings.bsky_notify_connect": "Notify on MCP connect",
+  "settings.bsky_poll_interval": "Poll Interval (minutes)",
+  "settings.bsky_poll_now": "Poll Now",
+  "settings.bsky_polling": "Polling...",
+  "settings.bsky_response_mention": "Mention Response",
+  "settings.bsky_response_reply": "Reply Response",
+  "settings.bsky_response_title": "Auto-Response Templates",
+  "settings.bsky_save_failed": "Failed to save monitor settings",
+  "settings.bsky_save_monitor": "Save Monitor Settings",
+  "settings.bsky_saved": "Monitor settings saved",
+  "settings.bsky_triage_mention": "Mentions",
+  "settings.bsky_triage_quote": "Quotes",
+  "settings.bsky_triage_reply": "Replies",
+  "settings.bsky_triage_title": "Triage Prompts",
+  "settings.sns_bluesky_title": "Bluesky",
+  "settings.theme_applied": "Theme applied:",
+  "settings.theme_click_to_apply": "Click to apply",
+  "settings.theme_hint": "Click a theme to apply it instantly.",
+  "settings_schema.agent_safety_budget_preset": "Budget preset",
+  "settings_schema.agent_safety_circuit_breaker_cooldown_seconds": "Circuit Breaker cooldown (seconds)",
+  "settings_schema.agent_safety_circuit_breaker_enabled": "Circuit Breaker enabled",
+  "settings_schema.agent_safety_circuit_breaker_error_rate_threshold": "Error rate threshold (0.0-1.0)",
+  "settings_schema.agent_safety_circuit_breaker_max_actions_per_minute": "Max actions per minute",
+  "settings_schema.agent_safety_circuit_breaker_max_consecutive_errors": "Max consecutive errors",
+  "settings_schema.agent_safety_circuit_breaker_max_identical_consecutive": "Max identical consecutive calls",
+  "settings_schema.agent_safety_circuit_breaker_max_same_tool_per_minute": "Max same tool per minute",
+  "settings_schema.ai_analysis_api_key": "Anthropic (Claude) API key",
+  "settings_schema.ai_analysis_openai_api_key": "OpenAI API key",
+  "settings_schema.ai_analysis_openai_compat_api_key": "OpenAI Compatible API key",
+  "settings_schema.archive_cleanup_llm_api_key": "Archive Cleanup Anthropic API key",
+  "settings_schema.archive_cleanup_llm_openai_api_key": "Archive Cleanup OpenAI API key",
+  "settings_schema.archive_cleanup_llm_openai_compat_api_key": "Archive Cleanup OpenAI Compat API key",
+  "settings_schema.archive_throttle_ms": "Archive throttle (ms)",
+  "settings_schema.backup_backup_dir": "Backup directory",
+  "settings_schema.backup_backup_on_scan_complete": "Backup on scan complete",
+  "settings_schema.backup_cooldown_minutes": "Cooldown (minutes)",
+  "settings_schema.backup_enabled": "Auto backup enabled",
+  "settings_schema.backup_max_generations": "Max backup generations",
+  "settings_schema.backup_periodic_interval_hours": "Periodic backup interval (hours)",
+  "settings_schema.brace_choice": "Brace choice",
+  "settings_schema.compute_hash": "pHash computation",
+  "settings_schema.direct_prompt_convert": "Direct prompt conversion",
+  "settings_schema.enable_fts": "Full-text search (FTS5) enabled",
+  "settings_schema.extensions_builtin-nai-bridge_api_token": "NovelAI API token",
+  "settings_schema.extract_a1111": "A1111 metadata extraction",
+  "settings_schema.extract_comfyui": "ComfyUI metadata extraction",
+  "settings_schema.lowercase_tags": "Lowercase tags",
+  "settings_schema.preserve_templates": "Preserve templates",
+  "settings_schema.server_allow_remote_restart": "Remote restart API enabled",
+  "settings_schema.server_allow_restart": "Restart API enabled",
+  "settings_schema.server_host": "Bind host",
+  "settings_schema.server_lan": "LAN access enabled",
+  "settings_schema.server_pin": "PIN authentication code",
+  "settings_schema.server_pin_boss_login_ui": "Boss login UI",
+  "settings_schema.server_port": "Port number",
+  "settings_schema.server_quick_lock_enabled": "Quick lock enabled",
+  "settings_schema.server_restart_token": "Remote restart token",
+  "settings_schema.sns_bluesky_app_password": "Bluesky app password",
+  "settings_schema.sns_bluesky_handle": "Bluesky handle",
+  "settings_schema.sns_post_template": "Post template",
+  "settings_schema.timezone": "Timezone",
+  "settings_schema.ui": "UI theme (default/custom)",
+  "settings_schema.video_analysis_enabled": "Video analysis enabled",
+  "settings_schema.video_analysis_keyframe_count": "Keyframe count",
+  "settings_schema.video_analysis_scene_threshold": "Scene threshold",
+  "settings_schema.video_analysis_strategy": "Keyframe strategy",
+  "settings_schema.webhook_secret": "Webhook signing secret",
+  "similar.error": "An error occurred",
+  "similar.none_found": "No similar images were found. Run hash calculation first.",
+  "similar.searching": "Searching...",
+  "similar.title": "Similar Images",
+  "stats": {
+    "load_failed": "Failed to load statistics",
+    "no_model_data": "No model data available",
+    "no_resolution_data": "No resolution data available",
+    "period": {
+      "dawn": "Dawn (03-09)",
+      "day": "Daytime (09-15)",
+      "evening": "Evening (15-21)",
+      "night": "Night (21-03)"
+    },
+    "personality": {
+      "balanced": {
+        "advice": "You have a flexible work style!",
+        "description": "A free creator unconstrained by time",
+        "type": "Balanced"
+      },
+      "daytime": {
+        "advice": "You're keeping a healthy rhythm!",
+        "description": "A creator with a regular routine",
+        "type": "Daytime Type"
+      },
+      "early_bird": {
+        "advice": "Great lifestyle habits!",
+        "description": "A creator who harnesses morning focus",
+        "type": "Early Bird"
+      },
+      "evening": {
+        "advice": "Making the most of golden hours!",
+        "description": "A creator who peaks in the evening",
+        "type": "Evening Focused"
+      },
+      "night_owl": {
+        "advice": "Take care of your health!",
+        "description": "A creator who loves the quiet of the night",
+        "type": "Night Owl"
+      },
+      "unknown": {
+        "advice": "",
+        "description": "Not enough data",
+        "type": "Unknown"
+      }
+    }
+  },
+  "story": {
+    "event": {
+      "first_month": {
+        "desc": "Started with {count} images",
+        "title": "Creative journey begins"
+      },
+      "milestone_100": {
+        "desc": "Cumulative total: {total}",
+        "title": "100 images!"
+      },
+      "milestone_100k": {
+        "desc": "Cumulative total: {total}",
+        "title": "100,000 images!"
+      },
+      "milestone_10k": {
+        "desc": "Cumulative total: {total}",
+        "title": "10,000 images!"
+      },
+      "milestone_1k": {
+        "desc": "Cumulative total: {total}",
+        "title": "1,000 images!"
+      },
+      "milestone_2k": {
+        "desc": "Cumulative total: {total}",
+        "title": "2,000 images!"
+      },
+      "milestone_500": {
+        "desc": "Cumulative total: {total}",
+        "title": "500 images!"
+      },
+      "milestone_50k": {
+        "desc": "Cumulative total: {total}",
+        "title": "50,000 images!"
+      },
+      "milestone_5k": {
+        "desc": "Cumulative total: {total}",
+        "title": "5,000 images!"
+      },
+      "new_source": {
+        "desc": "Started using {source}",
+        "title": "New tool: {source}"
+      },
+      "peak_month": {
+        "desc": "{count} images created",
+        "title": "Most productive month"
+      },
+      "productivity_down": {
+        "desc": "-{percent}% from last month",
+        "title": "Quiet period"
+      },
+      "productivity_up": {
+        "desc": "+{percent}% from last month",
+        "title": "Productivity surge"
+      },
+      "quiet_month": {
+        "desc": "Only {count} images this month",
+        "title": "Calm month"
+      },
+      "tag_diversity": {
+        "desc": "{count} unique tags this month",
+        "title": "Creative diversity record"
+      }
+    },
+    "load_failed": "Failed to load story",
+    "no_data": "Not enough data to create your story yet",
+    "on_this_day": "1 year ago today ({date}): {count} images created"
+  },
+  "sweep.card_loading": "Loading…",
+  "sweep.card_no_axis": "no axis info",
+  "sweep.card_open_view_btn": "🔎 Open Sweep view",
+  "sweep.card_others_btn": "🖼️ Show other images in this sweep",
+  "sweep.card_others_empty": "No matching images found in this folder.",
+  "sweep.card_others_error": "Failed: ",
+  "sweep.card_rerun_btn": "🔁 Re-run this sweep",
+  "sweep.card_rerun_no_seed_btn": "🎲 Re-run (new seed)",
+  "sweep.card_rerun_other_bridge_btn": "Re-run on other bridge",
+  "sweep.card_rerun_with_seed_btn": "🔁 Re-run (same seed)",
+  "sweep.card_title": "Sweep",
+  "sweep.resume_not_found": "No sweep metadata found on that file.",
+  "sweep.resume_populated": "Sweep restored. Click Generate to re-run.",
+  "sweep.resume_unknown_param": "Sweep: parameter not supported on this bridge: ",
+  "sweep.resume_wrong_bridge": "Sweep was made on a different bridge: ",
+  "tags.add_tag": "Add tag",
+  "toast": {
+    "checkpoint_search": "Checkpoint search: {model}",
+    "conditions_cleared": "All search conditions have been cleared",
+    "copy_done": "Copied",
+    "copy_done_strong": "Copied!",
+    "copy_failed": "Copy failed",
+    "copy_failed_short": "Copy failed",
+    "copy_with_label": "{label} copied",
+    "dir_open_failed": "Failed to open directory",
+    "dir_opened": "Opened directory",
+    "error_occurred": "An error occurred"
+  },
+  "tools": {
+    "ai_analyzing": "AI analyzing...",
+    "analyzing": "Analyzing...",
+    "analyzing_trends": "Analyzing prompt trends...",
+    "api_key_set": "API key set",
+    "bulk_register_failed": "Bulk register failed",
+    "cache_clear_failed": "Cache clear failed",
+    "cache_cleared": "file caches cleared",
+    "cancel": "Cancel",
+    "checking_roots": "Checking registered folders...",
+    "clear_cache_confirm": "Clear all thumbnail caches?\nThey will be regenerated on next display.",
+    "click_copy_path": "Click to copy path",
+    "click_preview": "Click to preview",
+    "compute_hash_confirm": "Compute {type} hashes.\nThis may take a while if there are many files.",
+    "computing_hashes": "Computing hashes...",
+    "confirm_db_delete": "Delete {count} files from database.\n(Actual files will remain on disk)",
+    "confirm_hard_delete": "Warning: Permanently delete {count} files.\nThis cannot be undone!\n\nAre you sure?",
+    "counting_files": "Counting files...",
+    "db_path": "Database Path:",
+    "db_size": "Database Size:",
+    "delete": "Delete",
+    "delete_failed": "Delete failed",
+    "deleted": "Deleted",
+    "deleting": "Deleting...",
+    "disable": "Disable",
+    "drag_to_move": "Drag to move",
+    "dup_groups_found": "Duplicate groups found",
+    "duplicate": "Duplicate",
+    "enable": "Enable",
+    "enter_folder_path": "Please enter a folder path",
+    "enter_search_query": "Enter search query",
+    "error": "Error",
+    "exact_match": "Exact match",
+    "ext_enabled": "enabled",
+    "fetch_failed": "Fetch failed",
+    "file": "File",
+    "file_and_perceptual": "File + Perceptual",
+    "file_count": "File Count:",
+    "file_hash_computed": "File hashes computed",
+    "files": "files",
+    "files_deleted": "{count} files deleted",
+    "folder_dialog_failed": "Could not open folder picker dialog.\nPlease enter the path manually.",
+    "force_rescan": "Force rescan (reanalyze all files)",
+    "frequent_tags": "Frequent tags:",
+    "group": "Group",
+    "hash_not_computed": "Hashes not computed. Run \"Compute Hashes\" first.",
+    "hash_stats_total": "Total files",
+    "include_subfolders": "Include subfolders",
+    "items": "items",
+    "keep": "Keep",
+    "load_failed": "Load failed",
+    "loading": "Loading...",
+    "no_analysis_yet": "No files analyzed yet",
+    "no_duplicates": "No duplicates found",
+    "no_extensions": "No extensions",
+    "no_files_in_db": "No files in database",
+    "no_normalize_needed": "No tags need normalization",
+    "no_registered_roots": "No registered folders",
+    "no_results": "No results",
+    "no_subdirs": "No subdirectories",
+    "normalize_confirm": "Normalize tags? This cannot be undone.",
+    "normalize_items": "Items to normalize",
+    "normalizing": "Normalizing...",
+    "normalizing_tags": "Normalizing tags...",
+    "open_detail_tab": "Open detail in new tab",
+    "perceptual": "Perceptual",
+    "phash_computed": "Perceptual hashes computed",
+    "phash_not_computed": "Perceptual hashes not computed. Run \"Compute Hashes\" first.",
+    "preparing": "Preparing...",
+    "processed_files": "Processed files:",
+    "prompt_trends": "Prompt Trend Analysis",
+    "recommendations": "Recommendations:",
+    "register_all": "Register all to config.json",
+    "register_failed": "Register failed",
+    "register_to_config": "Register to config.json",
+    "remove_root_confirm": "Unregister this folder? (actual files will not be deleted)",
+    "rescan": "Rescan",
+    "rescan_all": "Rescan All",
+    "rescanning_all": "Rescanning all folders...",
+    "roots_drag_hint": "Drag to reorder | Shift+↑↓ to move | Order affects folder sort",
+    "same_size": "Same size",
+    "save_failed": "Save failed",
+    "saved": "Saved",
+    "scan_all_complete": "All folder scans complete",
+    "scan_complete": "Scan complete",
+    "scanning": "Scanning...",
+    "schema_version": "Schema Version:",
+    "search_zips": "Search inside ZIP files",
+    "searching": "Searching...",
+    "select": "Select",
+    "select_all_dupes": "Select all duplicates",
+    "select_files_to_delete": "Please select files to delete",
+    "showing_first": "showing first",
+    "similar_images": "Similar images",
+    "start_scan": "Start Scan",
+    "starting": "Starting...",
+    "strengths": "Strengths:",
+    "style": "Style",
+    "style_tendency": "Style tendency:",
+    "tag_count": "Tag Count:",
+    "th_deleted": "Deleted",
+    "th_format": "Format",
+    "th_path": "Path",
+    "th_prompt": "Prompt",
+    "th_size": "Size",
+    "th_source": "Source",
+    "toggle_failed": "Toggle failed",
+    "unexplored_themes": "Unexplored themes:",
+    "unit_hours": "h",
+    "unit_minutes": "m",
+    "uptime": "Uptime:",
+    "weaknesses": "Areas for improvement:",
+    "wt_batch_failed": "Batch start failed",
+    "wt_close": "Close",
+    "wt_complete": "Complete",
+    "wt_config_failed": "Failed to save config",
+    "wt_config_saved": "WD-Tagger config saved",
+    "wt_download_failed": "Download failed",
+    "wt_downloading": "Downloading model...",
+    "wt_model_check_failed": "Model status check failed",
+    "wt_model_not_downloaded": "Model not downloaded",
+    "wt_model_ready": "Model ready",
+    "wt_no_tags": "No tags",
+    "wt_processing": "Processing...",
+    "wt_sec_elapsed": "s elapsed",
+    "wt_tagged_files": "Tagged files",
+    "wt_total_tags": "Total tags",
+    "wt_unique": "Unique",
+    "wt_untagged": "Untagged unknown",
+    "wt_xmp_dc_subject": "dc:subject tags:",
+    "wt_xmp_load_failed": "Failed to load XMP data",
+    "wt_xmp_not_found": "No XMP data found",
+    "wt_xmp_raw_xml": "Raw XML",
+    "wt_xmp_title": "XMP Metadata",
+    "wt_xmp_wdtag_info": "wdtag info:"
+  },
+  "yolo_stream.detect_error": "Detection failed",
+  "yolo_stream.register": "Register",
+  "sd_bridge.api_key_set": "(Key set)",
+  "comfyui_bridge.api_key_set": "(Key set)"
+}

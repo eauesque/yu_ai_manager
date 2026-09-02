@@ -1,0 +1,166 @@
+/* ContainerView panel — full-screen overlay for browsing container members */
+
+.cv-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 900; /* below modal (1000) */
+  display: flex;
+  flex-direction: column;
+  background: var(--bg, #fff);
+  opacity: 0;
+  transform: translateY(12px);
+  pointer-events: none;
+  transition: opacity .2s ease, transform .2s ease;
+}
+
+.cv-panel.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* When the cv-panel covers the page we hide body scroll, but the
+   removal of the OS scrollbar would change the layout width by ~17px
+   and fire a ResizeObserver in the underlying VirtualGrid (which
+   then re-lays-out 200K+ cards and stalls the cursor for hundreds of
+   ms on every open/close). `scrollbar-gutter: stable` reserves the
+   gutter at all times so the width stays constant, killing the
+   ResizeObserver cascade. */
+html { scrollbar-gutter: stable; }
+
+body.cv-panel-open {
+  overflow: hidden;
+}
+
+/* ---- Header ---- */
+
+.cv-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border, #ddd);
+  flex-shrink: 0;
+  min-height: 48px;
+}
+
+.cv-back-btn,
+.cv-close-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: var(--text, #333);
+}
+
+.cv-back-btn:hover,
+.cv-close-btn:hover {
+  background: var(--hover-bg, rgba(0,0,0,.06));
+}
+
+.cv-header-label {
+  flex: 1;
+  font-weight: 600;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.cv-member-count {
+  font-size: 13px;
+  color: var(--text-muted, #888);
+  white-space: nowrap;
+}
+
+/* ---- Body / Grid ---- */
+
+.cv-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cv-grid {
+  /* Smaller default min-size for denser container grid.
+     --grid-min-size / --grid-columns from floating-grid controls
+     override this via inline style, keeping the slider functional. */
+  --grid-min-size: 140px;
+  gap: 8px;
+}
+
+.cv-member-card {
+  cursor: pointer;
+  border-radius: 6px;
+  overflow: hidden;
+  aspect-ratio: 1 / 1;
+  position: relative;
+  /* Reduce GPU load: override inherited result-card styles */
+  animation: none !important;
+  box-shadow: none;
+  transition: outline-color .15s ease;
+  transform: none !important;
+  /* Repaint isolation + skip off-screen rendering */
+  contain: layout style paint;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 1px;
+  outline: 2px solid transparent;
+  outline-offset: -2px;
+}
+
+.cv-member-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.cv-member-card:hover {
+  outline-color: var(--accent, #5b8def);
+}
+
+.cv-member-card:focus-visible {
+  outline-color: var(--accent, #5b8def);
+  outline-width: 3px;
+}
+
+/* Active (last-viewed) highlight — outline only (avoids box-shadow blur) */
+.cv-member-card.cv-active {
+  outline-color: var(--accent, #5b8def);
+  outline-width: 3px;
+}
+
+/* ---- prefers-reduced-motion ---- */
+
+@media (prefers-reduced-motion: reduce) {
+  .cv-panel {
+    transition: none;
+  }
+  .cv-member-card {
+    transition: none;
+  }
+}
+
+/* ---- Dark mode ---- */
+
+body.dark .cv-panel {
+  background: var(--bg, #1a1a1a);
+}
+
+body.dark .cv-header {
+  border-bottom-color: var(--border, #333);
+}
+
+body.dark .cv-back-btn,
+body.dark .cv-close-btn {
+  color: var(--text, #ddd);
+}
+
+body.dark .cv-back-btn:hover,
+body.dark .cv-close-btn:hover {
+  background: var(--hover-bg, rgba(255,255,255,.08));
+}

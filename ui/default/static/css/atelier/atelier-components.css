@@ -1,0 +1,268 @@
+/*
+ * Atelier System (γ) — Generic components
+ *
+ * Typography (Fraunces opsz axis), glass buttons, chips, eyebrow,
+ * and prompt-syntax inline-mono helpers. Scoped to body.theme-atelier-*.
+ */
+
+/* ----- Typography scale ----- */
+
+/*
+ * Default heading sizes are tuned for the average page (modal filename,
+ * tools heading, form sections). Pages that want editorial-grade display
+ * typography opt in via `.atelier-display-xl` / `.atelier-display-lg`
+ * (see below) — this avoids 96px hairline serifs leaking into modals and
+ * data dashboards where they truncate or dominate the layout.
+ */
+body.theme-atelier-light h1,
+body.theme-atelier-dark h1 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 3.2vw, 48px);
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-h2), "wght" 500;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0 0 0.4em;
+}
+
+body.theme-atelier-light h2,
+body.theme-atelier-dark h2 {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 2.2vw, 32px);
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 500;
+  line-height: 1.15;
+  color: var(--text);
+  margin: 0 0 0.5em;
+}
+
+body.theme-atelier-light h3,
+body.theme-atelier-dark h3 {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 500;
+  line-height: 1.25;
+  color: var(--text);
+  margin: 0 0 0.6em;
+}
+
+/* Opt-in display grades — apply to specific h1 / h2 elements that benefit
+ * from editorial scale (landing-style page hero etc.). */
+body.theme-atelier-light .atelier-display-xl,
+body.theme-atelier-dark .atelier-display-xl {
+  font-family: var(--font-display);
+  font-size: clamp(56px, 8vw, 96px);
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-h1), "wght" 400;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+body.theme-atelier-light .atelier-display-lg,
+body.theme-atelier-dark .atelier-display-lg {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-h1), "wght" 400;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+body.theme-atelier-light p,
+body.theme-atelier-dark p {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 400;
+  font-variation-settings: "opsz" var(--opsz-body), "wght" 400;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/*
+ * small / sub / sup do NOT inherit the parent opsz —
+ * Fraunces' optical sizing should match actual rendered size.
+ * Otherwise inline `small` inside an h1 (opsz=96) would render with
+ * display-grade hairline strokes at body sizes.
+ */
+body.theme-atelier-light small,
+body.theme-atelier-dark small {
+  font-size: 12px;
+  font-variation-settings: "opsz" 12, "wght" 400;
+}
+body.theme-atelier-light sub,
+body.theme-atelier-light sup,
+body.theme-atelier-dark sub,
+body.theme-atelier-dark sup {
+  font-size: 0.7em;
+  font-variation-settings: "opsz" 9, "wght" 500;
+}
+
+/* ----- Eyebrow (small uppercase label) ----- */
+
+body.theme-atelier-light .eyebrow,
+body.theme-atelier-dark .eyebrow {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  font-variation-settings: "opsz" var(--opsz-eyebrow);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  display: inline-block;
+}
+
+/* ----- Glass button ----- */
+
+body.theme-atelier-light .atelier-btn,
+body.theme-atelier-dark .atelier-btn {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  background: var(--glass-bg);
+  backdrop-filter: blur(10px) saturate(1.1);
+  -webkit-backdrop-filter: blur(10px) saturate(1.1);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+body.theme-atelier-light .atelier-btn:hover,
+body.theme-atelier-dark .atelier-btn:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent-tool);
+}
+
+body.theme-atelier-light .atelier-btn:focus-visible,
+body.theme-atelier-dark .atelier-btn:focus-visible {
+  /* WCAG 2.5.5 + 1.4.11: 3:1 against any neighbouring surface.
+   * --accent-tool is verified ≥ 3:1 against both --bg and --canvas. */
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+}
+
+/* Tonal variants */
+body.theme-atelier-light .atelier-btn.is-primary,
+body.theme-atelier-dark .atelier-btn.is-primary {
+  background: var(--accent-tool);
+  color: #ffffff;
+  border-color: var(--accent-tool);
+}
+
+body.theme-atelier-light .atelier-btn.is-warm,
+body.theme-atelier-dark .atelier-btn.is-warm {
+  background: var(--accent-warm);
+  color: #2a2620;
+  border-color: var(--accent-warm);
+}
+
+/* ----- Chip ----- */
+
+body.theme-atelier-light .atelier-chip,
+body.theme-atelier-dark .atelier-chip {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 3px 10px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* ----- Prompt syntax (inline mono) -----
+ *
+ * For prompt body rendered in Fraunces roman: weight syntax `(...:1.2)`,
+ * `<lora:foo:0.8>`, and `<embed>` tokens flip to JetBrains Mono inline so
+ * the syntax reads as code while the natural-language portion stays
+ * editorial.
+ */
+
+body.theme-atelier-light .prompt-syntax,
+body.theme-atelier-dark .prompt-syntax {
+  font-family: var(--font-mono);
+  font-size: 0.92em;
+  font-weight: 500;
+  font-variation-settings: "wght" 500;
+  background: var(--surface-raised);
+  color: var(--accent-tool);
+  padding: 0.05em 0.35em;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+body.theme-atelier-light .prompt-syntax.is-lora,
+body.theme-atelier-dark .prompt-syntax.is-lora {
+  color: var(--accent-warm);
+}
+
+body.theme-atelier-light .prompt-syntax.is-embed,
+body.theme-atelier-dark .prompt-syntax.is-embed {
+  color: var(--text-muted);
+}
+
+/* ----- Generic surface helpers ----- */
+
+body.theme-atelier-light .atelier-card,
+body.theme-atelier-dark .atelier-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  padding: 16px;
+}
+
+/* ----- Native <select> atelier polish -----
+ *
+ * Default browser <select> chrome (e.g. the "新しい順" sort dropdown on index)
+ * looks cold against the warm atelier surfaces. Strip native chrome and draw
+ * a custom chevron so the control sits in the warm-chrome family while still
+ * reading as a native form control. Multi-select stays native (vertical list).
+ */
+body.theme-atelier-light select:not([multiple]):not([size]),
+body.theme-atelier-dark select:not([multiple]):not([size]) {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-color: var(--surface);
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='none' stroke='%23808080' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M1 1l4 4 4-4'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--font-ui);
+  padding: 4px 28px 4px 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+body.theme-atelier-light select:not([multiple]):not([size]):hover,
+body.theme-atelier-dark select:not([multiple]):not([size]):hover {
+  border-color: var(--accent-tool);
+}
+
+body.theme-atelier-light select:not([multiple]):not([size]):focus-visible,
+body.theme-atelier-dark select:not([multiple]):not([size]):focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+  border-color: var(--accent-tool);
+}
+
+/* IE/Edge legacy: hide the default arrow when appearance isn't enough. */
+body.theme-atelier-light select:not([multiple]):not([size])::-ms-expand,
+body.theme-atelier-dark select:not([multiple]):not([size])::-ms-expand {
+  display: none;
+}

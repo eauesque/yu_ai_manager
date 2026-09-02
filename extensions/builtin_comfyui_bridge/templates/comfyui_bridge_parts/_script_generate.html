@@ -1,0 +1,500 @@
+  // Batch loop state
+  var _cfbBatchCancel = false;
+  var _cfbAbort = null;
+  var _cfbCurrentTaskId = null;
+  // Current batch position label (e.g. "2/3"). Empty string when not in a multi-batch run.
+  // Read by the progress poller to prefix the percentage text.
+  var _cfbBatchLabel = "";
+
+  // Update the "Total: N" label when batch_count or batch_size changes.
+  function _cfbUpdateBatchTotal() {
+    var c = parseInt(($("cfbBatchCount") || {}).value, 10) || 1;
+    var s = parseInt(($("cfbBatchSize") || {}).value, 10) || 1;
+    var el = $("cfbBatchTotal");
+    if (!el) return;
+    var tmpl = window.tr ? window.tr('bridge.total_images', 'Total: {n}') : 'Total: {n}';
+    el.textContent = tmpl.replace('{n}', c * s);
+  }
+  // Expose for lastparams restore
+  window._cfbUpdateBatchTotal = _cfbUpdateBatchTotal;
+
+  // Show/hide graceful stop buttons (both simple and JSON tabs).
+  function _cfbShowStopAfter(show) {
+    ["cfbStopAfterCurrentBtn", "cfbJsonStopAfterCurrentBtn"].forEach(function(id) {
+      var btn = $(id);
+      if (!btn) return;
+      btn.style.display = show ? "" : "none";
+      btn.disabled = false;
+      btn.textContent = window.tr ? window.tr('bridge.action.stop_after_current', 'Stop after current')
+                                  : 'Stop after current';
+    });
+  }
+
+  window.cfbStopAfterCurrent = function() {
+    _cfbBatchCancel = true;
+    ["cfbStopAfterCurrentBtn", "cfbJsonStopAfterCurrentBtn"].forEach(function(id) {
+      var btn = $(id);
+      if (!btn) return;
+      btn.disabled = true;
+      btn.textContent = window.tr ? window.tr('bridge.status.stopping_graceful', 'Stopping…')
+                                  : 'Stopping…';
+    });
+  };
+
+  async function doGenerate(body) {
+    body.bridge = "comfyui";
+    // task_id is generated fresh for each batch iteration (see loop below).
+    // Assigning one ID here and reusing it would cause task_registry to return
+    // 409 on the 2nd+ iteration, making d.ok=false and breaking the loop.
+    _cfbCurrentTaskId = null;
+    var batchCount = Math.max(1, parseInt(($("cfbBatchCount") || {}).value, 10) || 1);
+    var batchSize  = Math.max(1, parseInt(($("cfbBatchSize") || {}).value, 10) || 1);
+    var baseSeed   = (typeof body.seed === "number" && body.seed >= 0) ? body.seed : -1;
+
+    _cfbBatchCancel = false;
+    setGenerating(true);
+    $("cfbResult").textContent = ""; // clears child nodes (equivalent to innerHTML="")
+    if (batchCount > 1) _cfbShowStopAfter(true);
+
+    var fanOutStates = null;
+    var useFanOut = false;
+    if (window.BridgeFanOut && typeof window.BridgeFanOut.initFanOut === "function") {
+      fanOutStates = await window.BridgeFanOut.initFanOut("comfyui");
+      if (!fanOutStates.length) {
+        $("cfbResult")["innerHTML"] = '<div class="cfb-result-info" style="color:#f44336;">'
+          + window.tr('comfyui_bridge.generation_failed', 'Generation failed') + '</div>';
+        setGenerating(false);
+        return;
+      }
+      useFanOut = !window.BridgeFanOut.isDefaultFanOut(fanOutStates);
+    }
+
+    var progressText = $("cfbProgressText");
+    var loopFatal = false;
+    var lastElapsed = 0;
+
+    try {
+      for (var i = 0; i < batchCount; i++) {
+        if (_cfbBatchCancel) break;
+        // Generate a fresh task_id for every iteration.
+        // task_registry.create_task() rejects duplicate IDs with 409,
+        // which would set d.ok=false and break the loop on the 2nd call.
+        _cfbCurrentTaskId = "cfb-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10);
+        var callBody = JSON.parse(JSON.stringify(body));
+        callBody.task_id = _cfbCurrentTaskId;
+        callBody.batch_size = batchSize;
+        callBody.seed = (baseSeed >= 0) ? (baseSeed + i) : -1;
+
+        _cfbAbort = (typeof AbortController !== "undefined") ? new AbortController() : null;
+        if (batchCount > 1) {
+          // Keep batch position visible throughout this iteration (poller reads _cfbBatchLabel).
+          _cfbBatchLabel = (i + 1) + "/" + batchCount;
+          if (progressText) progressText.textContent = _cfbBatchLabel + " — 0%";
+        }
+
+        try {
+          var d;
+          if (useFanOut) {
+            var fanOutResults = await window.BridgeFanOut.runFanOut(
+              fanOutStates,
+              callBody,
+              BASE + "/api/generate"
+            );
+            d = mergeFanOutResults(fanOutResults);
+          } else {
+            var resp = await window.bridgeFetch("comfyui", "generate", callBody, {
+              signal: _cfbAbort ? _cfbAbort.signal : undefined,
+            });
+            d = await resp.json();
+          }
+          if (!d.ok) {
+            $("cfbResult")["innerHTML"] = '<div class="cfb-result-info" style="color:#f44336;">'
+              + window.tr('comfyui_bridge.error_prefix', 'Error') + ': '
+              + escHtml(d.error || window.tr('comfyui_bridge.generation_failed', 'Generation failed'))
+              + ' (' + (i + 1) + '/' + batchCount + ')</div>';
+            loopFatal = true;
+            break;
+          }
+          renderResult(d, i > 0);
+          lastElapsed = d.elapsed_ms || 0;
+          // Auto-save params after successful generation (simple mode only)
+          if (body.mode === "simple") cfbSaveLastParams();
+          if (typeof window._cfbApplySeedAutoReset === "function") window._cfbApplySeedAutoReset();
+        } catch (e) {
+          if (e && (e.name === "AbortError" || /aborted/i.test(e.message || ""))) {
+            break; // user-initiated abort: don't show as error
+          }
+          $("cfbResult")["innerHTML"] = '<div class="cfb-result-info" style="color:#f44336;">'
+            + window.tr('comfyui_bridge.request_failed', 'Request failed') + ': '
+            + escHtml(e.message) + '</div>';
+          loopFatal = true;
+          break;
+        }
+      }
+    } finally {
+      _cfbAbort = null;
+      _cfbBatchLabel = "";
+      _cfbShowStopAfter(false);
+    }
+
+    if (loopFatal) looping = false;
+
+    // Re-check checkbox before continuing loop (user may have unchecked it)
+    var foreverCb = $("cfbForever");
+    if (looping && (!foreverCb || !foreverCb.checked)) {
+      looping = false;
+    }
+    // Cloud safety cap: if the configured api_url is non-local, stop the
+    // forever loop after 50 iterations (matches sweep cap). Local stays
+    // uncapped because there is no per-request cost.
+    if (looping) {
+      var _urlEl = $("cfbCfgUrl");
+      var _isLocal = (_urlEl && typeof isLocalUrl === "function" && isLocalUrl(_urlEl.value));
+      if (!_isLocal && (loopCount + 1) >= 50) {
+        looping = false;
+        if (foreverCb) foreverCb.checked = false;
+        window.showToast(window.tr('comfyui_bridge.forever_cloud_cap_reached', 'Forever ループの上限 (クラウド: 50 回) に達しました'));
+      }
+    }
+    if (looping) {
+      loopCount++;
+      var elapsed = lastElapsed ? " — " + (lastElapsed / 1000).toFixed(1) + "s" : "";
+      $("cfbLoopCount").textContent = "#" + loopCount + elapsed;
+      setGenerating(false);
+      setTimeout(function() {
+        if (activeTab === "json") cfbGenerateJson();
+        else cfbGenerate();
+      }, 500);
+    } else {
+      setGenerating(false);
+    }
+  }
+
+  function mergeFanOutResults(results) {
+    var merged = { ok: false, images: [], saved: [] };
+    (results || []).forEach(function(item) {
+      var d = item && item.data;
+      if (!d || d.ok === false) return;
+      merged.ok = true;
+      if (!merged.image_format && d.image_format) merged.image_format = d.image_format;
+      if (!merged.expanded_prompt && d.expanded_prompt) merged.expanded_prompt = d.expanded_prompt;
+      if (!merged.original_prompt && d.original_prompt) merged.original_prompt = d.original_prompt;
+      if (typeof merged.final_negative !== "string" && typeof d.final_negative === "string") {
+        merged.final_negative = d.final_negative;
+      }
+      if (d.elapsed_ms) merged.elapsed_ms = Math.max(merged.elapsed_ms || 0, d.elapsed_ms);
+      if (Array.isArray(d.images)) merged.images = merged.images.concat(d.images);
+      if (Array.isArray(d.saved)) merged.saved = merged.saved.concat(d.saved);
+    });
+    if (!merged.ok) merged.error = "All selected servers failed";
+    return merged;
+  }
+
+  function setGenerating(active) {
+    generating = active;
+
+    // Disable both generate buttons
+    $("cfbGenBtn").disabled = active;
+    $("cfbJsonGenBtn").disabled = active;
+
+    // Show/hide cancel buttons based on active tab (keep visible while looping)
+    $("cfbCancelBtn").style.display = ((active || looping) && activeTab === "simple") ? "" : "none";
+    $("cfbJsonCancelBtn").style.display = ((active || looping) && activeTab === "json") ? "" : "none";
+
+    var prog = $("cfbProgress");
+    if (active) {
+      prog.classList.add("active");
+      $("cfbProgressFill").style.width = "0%";
+      $("cfbProgressText").textContent = "0%";
+      startPolling();
+    } else {
+      prog.classList.remove("active");
+      stopPolling();
+      if (!looping) {
+        $("cfbLoopCount").style.display = "none";
+        loopCount = 0;
+        _cfbCurrentTaskId = null;
+      }
+    }
+  }
+
+  // append=true: batch-count loop の 2 回目以降は cfbResult に追記する（上書きしない）。
+  function renderResult(d, append) {
+    var html = "";
+    var images = d.images || [];
+    var mimeMap = { png: "image/png", webp: "image/webp", jpg: "image/jpeg" };
+    var mime = mimeMap[d.image_format] || "image/png";
+    images.forEach(function(img, i) {
+      html += '<div style="margin-bottom:12px;">';
+      html += '<img src="data:' + mime + ';base64,' + img.base64 + '" alt="Generated image ' + (i + 1) + '">';
+      if (img.filename) {
+        html += '<div class="cfb-result-info">' + escHtml(img.filename) + '</div>';
+      }
+      html += '</div>';
+    });
+    var cfbPromptOpenEl = $("cfbCfgPromptOpen");
+    var cfbPromptOpen = cfbPromptOpenEl ? cfbPromptOpenEl.checked : (localStorage.getItem("cfb_prompt_open") !== "false");
+    var cfbOpenAttr = cfbPromptOpen ? " open" : "";
+    if (d.expanded_prompt) {
+      var cfbPromptLabel = d.original_prompt
+        ? window.tr('comfyui_bridge.expanded', 'Expanded')
+        : window.tr('comfyui_bridge.result_prompt', 'Prompt');
+      html += '<details' + cfbOpenAttr + '><summary style="font-size:12px;color:#4fc3f7;">' + cfbPromptLabel + '</summary>';
+      html += '<div class="cfb-result-info" style="white-space:pre-wrap;font-size:11px;">' +
+        escHtml(d.expanded_prompt) + '</div></details>';
+    }
+    if (typeof d.final_negative === 'string') {
+      html += '<details' + cfbOpenAttr + '><summary style="font-size:12px;color:#ef9a9a;">' + window.tr('comfyui_bridge.result_negative', 'Negative') + '</summary>';
+      html += '<div class="cfb-result-info" style="white-space:pre-wrap;font-size:11px;">' +
+        (d.final_negative ? escHtml(d.final_negative) : '<span style="opacity:0.5;">' + window.tr('common.none', '(なし)') + '</span>') + '</div></details>';
+    }
+    if (d.elapsed_ms) {
+      html += '<div class="cfb-result-info">' + window.tr('comfyui_bridge.generated_in', 'Generated in') + ' ' + (d.elapsed_ms / 1000).toFixed(1) + 's</div>';
+    }
+    if (d.prompt_id) {
+      html += '<div class="cfb-result-info">' + window.tr('comfyui_bridge.prompt_id_label', 'Prompt ID') + ': ' + escHtml(d.prompt_id) + '</div>';
+    }
+    if (Array.isArray(d.saved) && d.saved.length) {
+      html += '<div class="cfb-result-info" style="color:#4caf50;">' + window.tr('comfyui_bridge.saved_prefix', 'Saved') + ': ' +
+        d.saved.map(function(p) { return escHtml(p); }).join(", ") + '</div>';
+    }
+    if (!images.length) {
+      html += '<div class="cfb-result-info">' + window.tr('comfyui_bridge.no_images_returned', 'No images returned.') + '</div>';
+    }
+    if (append) {
+      // batch-count ループの 2 回目以降: バッチ区切りラインを挿入してから追記。
+      var sep = '<hr style="border:none;border-top:1px solid rgba(255,255,255,0.15);margin:12px 0;">';
+      $("cfbResult").insertAdjacentHTML("beforeend", sep + html);
+    } else {
+      $("cfbResult")["innerHTML"] = html;
+    }
+    // Update result panel
+    if (window._cfbThumbStrip) window._cfbThumbStrip.update(images, mime, {
+      elapsed_ms: d.elapsed_ms,
+      expanded_prompt: d.expanded_prompt,
+      original_prompt: d.original_prompt,
+      final_negative: d.final_negative,
+      saved: d.saved,
+    });
+  }
+
+  // -- Progress polling -------------------------------------------
+
+  function startPolling() {
+    stopPolling();
+    pollTimer = setInterval(function() {
+      if (!generating) return;
+      var params = {};
+      if (_cfbCurrentTaskId) params.task_id = _cfbCurrentTaskId;
+      window.bridgeFetch("comfyui", "progress", params).then(function(r) { return r.json(); }).then(function(d) {
+        if (!generating) return;
+        var pct = Math.round(d.progress || 0);
+        $("cfbProgressFill").style.width = pct + "%";
+        var text = pct + "%";
+        if (d.step && d.total_steps) {
+          text += " (step " + d.step + "/" + d.total_steps + ")";
+        }
+        if (d.status && d.status !== "idle") {
+          text += " [" + d.status + "]";
+        }
+        // Prepend batch position so it stays visible while progress updates.
+        if (_cfbBatchLabel) text = _cfbBatchLabel + " — " + text;
+        $("cfbProgressText").textContent = text;
+      }).catch(function() {});
+    }, 1000);
+  }
+
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  // -- Cancel -----------------------------------------------------
+
+  window.cfbCancel = function() {
+    _cfbBatchCancel = true;
+    if (_cfbAbort) { try { _cfbAbort.abort(); } catch (_) {} }
+    looping = false;
+    var params = {};
+    if (_cfbCurrentTaskId) params.task_id = _cfbCurrentTaskId;
+    window.bridgeFetch("comfyui", "cancel", params).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) {
+        setGenerating(false);
+        $("cfbResult")["innerHTML"] = '<div class="cfb-result-info">' + window.tr('comfyui_bridge.cancelled', 'Cancelled.') + '</div>';
+      }
+    }).catch(function() {});
+  };
+
+{% include "comfyui_bridge_parts/_script_config.html" %}
+
+{% include "comfyui_bridge_parts/_script_recv.html" %}
+
+{% include "comfyui_bridge_parts/_script_lastparams.html" %}
+
+  // -- Send to other Bridge -----------------------------------------
+
+  window.cfbSendToBridge = function(target, evt) {
+    var pos = (typeof _cfbGetPrompt === "function" ? _cfbGetPrompt() : $("cfbPrompt").value).trim();
+    var neg = (typeof _cfbGetNegative === "function" ? _cfbGetNegative() : $("cfbNegative").value).trim();
+    if (!pos) { window.showToast(window.tr('comfyui_bridge.prompt_empty', 'Prompt is empty'), true); return; }
+
+    if (target === "nai") {
+      // ComfyUI (SD syntax) -> NAI auto-convert
+      fetch("/ext/convert/sd-to-nai", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({prompt: pos, negative: neg})
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        localStorage.setItem("bridge_send_prompt", JSON.stringify({
+          prompt: d.prompt || pos, negative: d.negative || neg, source: "comfyui-bridge"
+        }));
+        window.tauriCrossTab.sendToBridge("nai", {}, evt);
+      }).catch(function() {
+        localStorage.setItem("bridge_send_prompt", JSON.stringify({prompt: pos, negative: neg, source: "comfyui-bridge"}));
+        window.tauriCrossTab.sendToBridge("nai", {}, evt);
+      });
+    } else {
+      localStorage.setItem("bridge_send_prompt", JSON.stringify({prompt: pos, negative: neg, source: "comfyui-bridge"}));
+      window.tauriCrossTab.sendToBridge("a1111", {}, evt);
+    }
+  };
+
+  // Add auxclick (middle-click) listeners for send-to-bridge buttons
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('[data-action="cfbSendToBridge"][data-action-arg]').forEach(function(btn) {
+      btn.addEventListener("auxclick", function(e) {
+        if (e.button !== 1) return;
+        e.preventDefault();
+        window.cfbSendToBridge(btn.getAttribute("data-action-arg"), e);
+      });
+    });
+
+    // Batch count/size total label updater
+    ["cfbBatchCount", "cfbBatchSize"].forEach(function(id) {
+      var el = $(id);
+      if (el) el.addEventListener("input", _cfbUpdateBatchTotal);
+    });
+    _cfbUpdateBatchTotal();
+  });
+
+  // -- Keyboard shortcuts ------------------------------------------
+
+  document.addEventListener("keydown", function(e) {
+    // Ctrl+Enter -> Generate (tab-dependent)
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+      e.preventDefault();
+      if (activeTab === "json") cfbGenerateJson();
+      else cfbGenerate();
+    }
+    // Esc -> Cancel
+    if (e.key === "Escape" && generating) {
+      e.preventDefault();
+      cfbCancel();
+    }
+  });
+
+  // -- Init -------------------------------------------------------
+
+  ["cfbDiffusionModel", "cfbTextEncoder1", "cfbTextEncoder2"].forEach(function(id) {
+    var el = $(id);
+    if (el) el.addEventListener("change", cfbUpdateSeparateLoadUI);
+  });
+
+  // Auto-apply SD 1.5 / SDXL preset when the user picks a Checkpoint.
+  // Skips when the user is already in separate-load mode (Diffusion Model takes over).
+  // Fields the user manually edited are preserved (see _cfbApplyCheckpointPreset).
+  if (typeof _cfbInitDirtyTracking === "function") _cfbInitDirtyTracking();
+  (function() {
+    var modelEl = $("cfbModel");
+    if (!modelEl) return;
+
+    function applyAndToast(family, sourceLabel) {
+      var result = _cfbApplyCheckpointPreset(family);
+      var msgKey = (family === "sdxl")
+        ? "comfyui_bridge.preset_applied_sdxl"
+        : "comfyui_bridge.preset_applied_sd15";
+      var fallback = (family === "sdxl") ? "SDXL preset applied" : "SD 1.5 preset applied";
+      var msg = window.tr ? window.tr(msgKey, fallback) : fallback;
+      if (sourceLabel) msg += " " + sourceLabel;
+      if (result && result.skipped && result.skipped.length) {
+        var keptKey = "comfyui_bridge.preset_kept_user_edits";
+        var keptFallback = " (kept your edits)";
+        msg += window.tr ? window.tr(keptKey, keptFallback) : keptFallback;
+      }
+      if (window.showToast) window.showToast(msg);
+    }
+
+    modelEl.addEventListener("change", function(e) {
+      if (!e.isTrusted) return;
+      var diff = ($("cfbDiffusionModel") || {}).value || "";
+      if (diff) return;
+      var name = modelEl.value || "";
+      if (!name) return;
+      var guess = _cfbDetectCheckpointFamily(name);
+
+      // Try header-based detection first; fall back to filename guess on
+      // remote ComfyUI / unconfigured models_root, with an explicit warning.
+      getJSON("/api/checkpoint-info?name=" + encodeURIComponent(name))
+        .then(function(d) {
+          if (d && d.ok && d.source === "header") {
+            if (d.family === "sdxl" || d.family === "sd15") {
+              applyAndToast(d.family, "");
+            }
+            return;
+          }
+          if (!guess) return;
+          var warnKey = "comfyui_bridge.preset_unverified_warning";
+          var warnFallback = "(filename-only - please verify resolution before generating)";
+          var warn = window.tr ? window.tr(warnKey, warnFallback) : warnFallback;
+          applyAndToast(guess, warn);
+        })
+        .catch(function() {
+          if (!guess) return;
+          applyAndToast(guess, "");
+        });
+    });
+  })();
+  // A1111 mode requires ComfyUI custom node BNK_CLIPTextEncodeAdvanced.
+  // Verify availability the moment the user opts in, and offer a graceful
+  // fallback (uncheck + warn) instead of letting submit fail later.
+  (function() {
+    var box = $("cfbA1111Mode");
+    if (!box) return;
+    box.addEventListener("change", function(e) {
+      if (!e.isTrusted || !box.checked) return;
+      getJSON("/api/has-node?type=BNK_CLIPTextEncodeAdvanced").then(function(d) {
+        if (d && d.ok && d.available) return;
+        box.checked = false;
+        var msg = window.tr
+          ? window.tr(
+              "comfyui_bridge.a1111_mode_node_missing",
+              "ComfyUI_ADV_CLIP_emb (BNK_CLIPTextEncodeAdvanced) が見つかりません。互換モードを無効化しました。",
+            )
+          : "BNK_CLIPTextEncodeAdvanced not installed; A1111 mode disabled.";
+        if (window.showToast) window.showToast(msg, true);
+      }).catch(function() { /* ignore - submit-side guard catches it */ });
+    });
+  })();
+
+  _initControlnetUpload();
+  _initDragDrop();
+
+  // receivePrompt/Image are async; chain so _cfbReceivedPrompt is settled
+  // before BridgeLastParams.restore() decides whether to overwrite.
+  Promise.all([receivePrompt(), receiveImage()])
+    .then(function() { return loadConfig(); })
+    .then(function() {
+      // Skip last-params restore when the page is resuming a sweep
+      // (`?resume_sweep=N`). Sweep resume populates the prompt textarea
+      // from the XMP `prompt_template` shortly after, and a brief flash of
+      // the unrelated last-prompt before that override is visually
+      // distracting (esp. on cross-bridge re-run).
+      var resumingSweep = false;
+      try { resumingSweep = !!new URL(location.href).searchParams.get("resume_sweep"); } catch (_) {}
+      if (!_cfbReceivedPrompt && !resumingSweep && window.BridgeLastParams) {
+        window.BridgeLastParams.restore(_cfbLastParamsConfig);
+      }
+    });
+  // Use the retry wrapper so a not-yet-ready ComfyUI doesn't leave the
+  // bridge stuck without populated dropdowns until the user clicks Test.
+  if (window.cfbAutoTestConnectionWithRetry) cfbAutoTestConnectionWithRetry();
+  else cfbTestConnection();

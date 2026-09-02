@@ -1,0 +1,54 @@
+<div class="fm-container">
+  <!-- Sidebar: Collections -->
+  <aside class="fm-sidebar" aria-label="コレクション" data-i18n-aria-label="favorites.collections_aria">
+    <div class="fm-sidebar-header">
+      <span data-i18n="favorites.collections">コレクション</span>
+    </div>
+    <div class="fm-coll-list" id="fmCollList">
+      <!-- Populated by JS -->
+    </div>
+    <div class="fm-sidebar-footer">
+      <input type="text" id="fmNewCollName" placeholder="新しいコレクション名..." data-i18n-placeholder="favorites.new_collection_placeholder" aria-label="新しいコレクション名" data-i18n-aria-label="favorites.new_collection_aria" />
+      <button type="button" id="fmAddCollBtn" data-i18n="favorites.add_collection">+ 追加</button>
+    </div>
+  </aside>
+
+  <!-- Main content -->
+  <div class="fm-main">
+    <h1 class="fm-page-title" data-i18n="favorites.page_title"><span aria-hidden="true">⭐</span> お気に入り管理</h1>
+    <div class="fm-toolbar">
+      <span class="fm-toolbar-title" id="fmToolbarTitle" data-i18n="favorites.all_favorites">すべてのお気に入り</span>
+      <span id="fmImageCount" style="font-size:12px;color:var(--muted,#888);"></span>
+      <button type="button" class="fm-toolbar-btn" id="fmLanShareBtn" title="LAN でコレクションを共有" data-i18n-title="favorites.lan_share_title" data-i18n="favorites.lan_share">📡 LAN 共有</button>
+      <button type="button" class="fm-toolbar-btn" id="fmExportZipBtn" title="ZIP でダウンロード" data-i18n-title="favorites.zip_download_title" data-i18n="favorites.zip">📦 ZIP</button>
+      <button type="button" class="fm-toolbar-btn" id="fmExportFolderBtn" title="シンボリックリンクフォルダを作成" data-i18n-title="favorites.symlink_folder_title" data-i18n="favorites.folder_export">🔗 フォルダ</button>
+      <button type="button" class="fm-toolbar-btn" id="fmSelectModeBtn" data-action="fmSelectToggle" title="選択モード" data-i18n-title="favorites.select_mode_title" data-i18n="favorites.select_mode">☑ 選択</button>
+    </div>
+    <div class="fm-select-bar" id="fmSelectBar" style="display:none;">
+      <span id="fmSelectCount" data-i18n="favorites.selected_count">0 件選択中</span>
+      <button type="button" class="fm-toolbar-btn" data-action="fmSelectAll" data-i18n="favorites.select_all">すべて選択</button>
+      <button type="button" class="fm-toolbar-btn" data-action="fmDeselectAll" data-i18n="favorites.deselect_all">選択解除</button>
+      <div style="position:relative;display:inline-block;">
+        <button type="button" class="fm-toolbar-btn primary" data-action="fmShowMoveDropdown" data-action-this="1" data-i18n="favorites.move_to">移動先...</button>
+        <div class="fm-coll-dropdown" id="fmMoveDropdown" style="display:none;"></div>
+      </div>
+      <button type="button" class="fm-toolbar-btn danger" data-action="fmBatchRemove" data-i18n="favorites.delete">削除</button>
+    </div>
+    <div class="fm-grid" id="fmGrid">
+      <div class="fm-empty" data-i18n="favorites.empty_message">コレクションを選択するか、すべてのお気に入りを表示します</div>
+    </div>
+  </div>
+</div>
+
+<!-- Folder export modal -->
+<div class="fm-modal-overlay" id="fmFolderModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="fmFolderModalTitle">
+  <div class="fm-modal">
+    <h2 id="fmFolderModalTitle" style="font-size:16px;" data-i18n="favorites.symlink_export_title"><span aria-hidden="true">🔗</span> シンボリックリンク エクスポート</h2>
+    <label for="fmFolderPath" data-i18n="favorites.output_directory">出力先ディレクトリ:</label>
+    <input type="text" id="fmFolderPath" placeholder="/path/to/export/folder" data-i18n-placeholder="favorites.output_path_placeholder" />
+    <div class="fm-modal-actions">
+      <button type="button" class="fm-toolbar-btn" id="fmFolderModalCancel" data-action="fmCloseFolderModal" data-i18n="favorites.cancel">キャンセル</button>
+      <button type="button" class="fm-toolbar-btn primary" data-action="fmDoFolderExport" data-i18n="favorites.export">エクスポート</button>
+    </div>
+  </div>
+</div>

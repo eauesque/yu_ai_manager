@@ -1,0 +1,22 @@
+<nav class="nav" id="mainNav" aria-label="Main navigation">
+  <a href="/" class="nav-brand" aria-label="Home">GALLERY</a>
+  <button class="nav-hamburger" id="hamburger" type="button" aria-label="Menu">&#9776;</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/" class="nav-link{% if active == 'search' %} active{% endif %}">Browse</a>
+    <a href="/stats" class="nav-link{% if active == 'stats' %} active{% endif %}">Stats</a>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" id="themeToggle" type="button" title="Toggle theme" aria-label="Toggle dark/light mode">&#9789;</button>
+    <div class="nav-overflow">
+      <button class="nav-btn" id="overflowBtn" type="button" title="More pages" aria-label="More pages">&#x22EF;</button>
+      <div class="nav-overflow-menu" id="overflowMenu">
+        <a href="/tools" class="nav-overflow-item">Tools</a>
+        <a href="/settings" class="nav-overflow-item">Settings</a>
+        <a href="/inspect" class="nav-overflow-item">Inspect</a>
+        <a href="/story" class="nav-overflow-item">Story</a>
+        <a href="/report" class="nav-overflow-item">Report</a>
+        <a href="/extensions" class="nav-overflow-item">Extensions</a>
+      </div>
+    </div>
+  </div>
+</nav>

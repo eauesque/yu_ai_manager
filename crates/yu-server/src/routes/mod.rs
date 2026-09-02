@@ -1,0 +1,140 @@
+pub mod admin;
+pub mod agent;
+pub mod agent_audit;
+pub mod agent_journal;
+pub mod agent_scope;
+pub mod agent_scope_store;
+pub mod analysis;
+pub mod analysis_net;
+pub mod analysis_results;
+pub mod analysis_servers;
+pub mod annotations;
+pub mod auto_stubs;
+pub mod bridge_save;
+pub mod caption_runner;
+pub mod chatlog;
+pub mod clip_index;
+pub mod clip_indexer;
+pub mod clip_model;
+pub mod clip_search;
+pub mod collections;
+pub mod comfyui_bridge;
+pub mod cross_search;
+pub mod debug;
+pub mod diagnostics;
+pub mod download;
+pub mod ext_favorites;
+pub mod extensions_admin;
+pub mod favorites;
+pub mod file_detail;
+pub mod file_trace;
+pub mod files;
+pub mod freeze_pullback;
+pub mod gateway_proxy;
+pub mod gateway_status;
+pub mod github;
+pub mod groups;
+pub mod hailo_genai_chat;
+pub(crate) mod hailo_model_download;
+pub(crate) mod hailo_model_registry;
+pub mod hailo_tagger;
+pub(crate) mod hailo_web_search;
+pub(crate) mod hailo_yolo_detect;
+pub(crate) mod hailo_yolo_labels;
+pub(crate) mod hailo_yolo_postprocess;
+pub(crate) mod hailo_yolo_preprocess;
+pub(crate) mod hailo_yolo_stream;
+pub mod hailort;
+pub mod hash_backfill;
+pub mod headroom;
+pub mod help;
+pub mod inference_proxy;
+pub mod jobs;
+mod lan_cowork_host_impl;
+pub mod llm_agent_prompt;
+pub mod llm_client;
+pub mod llm_endpoints;
+pub mod llm_router_admin;
+pub mod lora_dataset;
+pub mod maintenance;
+pub mod market_quotes;
+pub mod mcp_client;
+pub mod mcp_native;
+pub mod md_viewer;
+pub mod mdns;
+pub mod mesh_inference;
+pub mod migration_stats;
+pub mod misc_admin;
+pub mod monthly_report;
+pub mod nai_bridge;
+pub mod ocr;
+pub mod ocr_jobs;
+pub mod pages;
+pub mod prompt_library;
+pub mod prompt_sim;
+pub mod prompt_syntax;
+pub mod ratings;
+pub mod recipe;
+pub mod s2t;
+pub mod s2t_runner;
+pub mod scan_admin;
+pub mod scan_errors;
+pub mod scan_history;
+pub mod scan_roots;
+pub mod scheduler;
+pub mod sd_nai_convert;
+pub mod sd_webui_bridge;
+pub mod search;
+pub mod server_info;
+pub mod settings;
+pub mod share;
+pub mod source_api;
+pub mod source_browser;
+pub mod stats;
+pub mod suggest;
+pub mod svg_info;
+pub mod sweep_common;
+pub mod sweeps;
+pub mod tag_dictionary;
+pub mod tag_normalize;
+pub mod tag_reads;
+pub mod tagger_servers;
+pub mod tags;
+pub mod tools_debug_log;
+pub mod tools_fs;
+pub mod tools_ops;
+pub mod trophies;
+pub mod ui;
+pub mod update_status;
+pub mod vector_store;
+pub mod video_analysis;
+pub mod watcher;
+pub mod wd_infer;
+pub mod wd_tagger;
+pub(crate) mod wd_tagger_batch;
+pub(crate) mod wd_tagger_infer;
+pub(crate) mod wd_tagger_normalize;
+pub(crate) mod wd_tagger_video;
+pub(crate) mod wd_tagger_write;
+pub(crate) mod wd_tagger_xmp;
+pub mod webhook;
+pub(crate) mod xmp_data;
+pub mod zip_files;
+
+#[cfg(test)]
+mod genesis_lan_cowork_convergence_tests;
+#[cfg(test)]
+mod lan_cowork_split_integration_tests;
+
+pub(crate) use ::lan_cowork::routes::lan_cowork_bypass::BYPASS_ROUTES;
+pub(crate) use ::lan_cowork::routes::peer_identity;
+pub use ::lan_cowork::routes::{
+    lan_cowork, lan_cowork_client, lan_cowork_descriptor, lan_cowork_discovery,
+    lan_cowork_fleet_allowlists, lan_cowork_fleet_config, lan_cowork_fleet_consent,
+    lan_cowork_fleet_dispatch, lan_cowork_fleet_machine, lan_cowork_fleet_manager,
+    lan_cowork_fleet_ops, lan_cowork_fleet_peers, lan_cowork_fleet_security, lan_cowork_fleet_ui,
+    lan_cowork_host, lan_cowork_import_executor, lan_cowork_import_meta, lan_cowork_import_persist,
+    lan_cowork_import_state, lan_cowork_import_transfer, lan_cowork_inbound_read,
+    lan_cowork_local_import, lan_cowork_pairing, lan_cowork_peer_api, lan_cowork_registry,
+    lan_cowork_settings, lan_cowork_sync, lan_cowork_transport,
+};

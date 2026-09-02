@@ -1,0 +1,30 @@
+# Rust Python proxy-keep registry
+# Lines starting with '#' are comments. Blank lines are ignored.
+# Each entry is matched as a prefix or exact path against the normalized axum route path.
+# Add only routes backed by an explicit written proxy-keep decision.
+
+# Profile testing requires real inference; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ16「proxy-keep（10件）」.
+/api/wd-tagger/profiles/{id}/test
+# Model download uses huggingface_hub and Python job progress; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ16「proxy-keep（10件）」.
+/api/wd-tagger/model/download
+# Single-file tagging requires inference; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ16「proxy-keep（10件）」.
+/api/wd-tagger/tag/
+# Retag routes use Python inference job management; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ16「proxy-keep（10件）」.
+/api/wd-tagger/retag/
+
+# Inference info reads Python onnxruntime state; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ17「proxy-keep（10件）」.
+/api/system/inference-info
+# Bug-report generation depends on Python log collection; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ17「proxy-keep（10件）」.
+/api/diagnostics/bug-report
+# Doctor jobs inspect the Python environment and keep process-local state; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ17「proxy-keep（10件）」.
+/api/diagnostics/doctor
+# Zip-repair parity was explicitly deferred to Phase 4; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ17「proxy-keep（10件）」.
+/api/diagnostics/zip-repair
+# Signed update verification and apply remain a Python-owned security boundary; RUST_MIGRATION_REMAINING_BATCHES_DESIGN.md §バッチ17「proxy-keep（10件）」.
+/api/system/update/
+
+# Captioning is outside the approved initial semantic-search port; RUST_MIGRATION_STANDALONE_EXCLUSION_SCOPE_DESIGN.md §4「移植する場合の設計骨子」4.
+/ext/hailo-semantic/api/caption/
+
+# Chat web search depends on Python's ddgs/duckduckgo_search packages and intentionally remains Python-backed.
+/ext/hailo-genai/api/chat/search

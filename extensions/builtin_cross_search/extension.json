@@ -1,0 +1,26 @@
+{
+  "name": "builtin-cross-search",
+  "version": "1.0.0",
+  "description": "Cross-text search across MD, chat logs, prompts and plain text files",
+  "type": "ui_widget",
+  "category": "library",
+  "entry": "cross_search_ext.py",
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/cross-search",
+  "nav": {
+    "label": "Cross Search",
+    "icon": "\ud83d\udd0d"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 275
+  },
+  "config_schema": {
+    "txt_scan_roots": {
+      "type": "array",
+      "title": "TXT Scan Roots",
+      "description": "Directories to scan for .txt files (falls back to global scan_roots if empty)",
+      "default": []
+    }
+  }
+}

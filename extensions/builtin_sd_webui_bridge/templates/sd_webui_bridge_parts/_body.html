@@ -1,0 +1,641 @@
+<div class="sdwb-container brp-container" data-1p-ignore data-lpignore="true">
+  <h1><span class="icon" aria-hidden="true">🎨</span> <span data-i18n="sd_bridge.heading">SD WebUI Bridge</span></h1>
+
+  <!-- Connection status -->
+  <div class="sdwb-conn" id="sdwbConn">
+    <span class="sdwb-conn-dot" id="sdwbConnDot"></span>
+    <span class="sdwb-conn-text" id="sdwbConnText" data-i18n="sd_bridge.not_connected">Not connected</span>
+    <button class="sdwb-btn small" data-action="sdwbTestConnection" data-i18n="sd_bridge.test_connection">Test Connection</button>
+    <select id="sdwbModelSelect" style="display:none; margin-left:8px; max-width:260px; font-size:12px;" title="Switch model" aria-label="Model">
+      <option value="" data-i18n="sd_bridge.select_model">Select model...</option>
+    </select>
+  </div>
+
+  <!-- Editor toolbar -->
+  <div class="bridge-editor-toolbar">
+    <button class="sdwb-btn small" data-action="_sdwbToggleSed" data-i18n-title="sd_bridge.sed_title" title="sed (stream editor)" aria-label="sed stream editor">Sed</button>
+    <button class="sdwb-btn small" data-action="_sdwbToggleDedup" title="重複タグを削除" data-i18n-title="sd_bridge.dedup_tooltip" aria-label="Dedup tags">Dedup</button>
+    <button class="sdwb-btn small on" id="sdwbAcToggle" data-action="_sdwbToggleAc" data-i18n-title="sd_bridge.tags_title" title="Danbooru tag autocomplete">Tags</button>
+    <button class="sdwb-btn small" id="sdwbWcToggle" data-action="_sdwbToggleWc" data-i18n-title="sd_bridge.wc_title" title="Wildcard / Dynamic Prompt 展開 (server-side)" aria-label="Wildcard browser">Wildcard</button>
+    <span class="bridge-toolbar-hint" data-i18n="sd_bridge.toolbar_hint">Ctrl+Enter: Generate / Esc: Cancel / Alt+W: Vim word</span>
+  </div>
+
+  <!-- Sed bar (hidden by default) -->
+  <div class="bridge-sed-bar" id="sdwbSedBar" style="display:none;">
+    <label for="sdwbSedInput">sed:</label>
+    <input id="sdwbSedInput" type="text" data-i18n-placeholder="sd_bridge.sed_placeholder" placeholder="s/old/new/g" spellcheck="false">
+    <span class="bridge-sed-toast" id="sdwbSedToast" style="display:none;"></span>
+  </div>
+
+  <!-- Dedup bar (hidden by default) -->
+  <div class="bridge-sed-bar" id="sdwbDedupBar" style="display:none;">
+    <button class="sdwb-btn small" id="sdwbBtnDedupFirst" data-i18n="sd_bridge.dedup_first">重複削除(先優先)</button>
+    <button class="sdwb-btn small" id="sdwbBtnDedupLast" data-i18n="sd_bridge.dedup_last">重複削除(後優先)</button>
+    <span class="bridge-sed-toast" id="sdwbDedupToast" style="display:none;"></span>
+  </div>
+
+  <!-- Positive prompt -->
+  <div class="sdwb-field">
+    <label class="sdwb-section-label" for="sdwbPrompt" data-i18n="sd_bridge.positive_prompt">Positive Prompt</label>
+    <div class="sdwb-prompt-with-wc">
+      <div id="sdwbPromptWrap" class="sdwb-editor-wrap" style="flex:1;min-width:0;">
+        <textarea id="sdwbPrompt" rows="4" data-i18n-placeholder="sd_bridge.positive_prompt_placeholder" placeholder="1girl, masterpiece, best quality" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other"></textarea>
+      </div>
+      <div id="sdwbSyntaxBanner" class="syntax-warning-banner" role="status" aria-live="polite" hidden>
+        <span class="syntax-warning-msg" data-i18n="bridge.syntax_warning.nai_to_sd"></span>
+        <button class="syntax-warning-convert" data-i18n="bridge.syntax_warning.convert_btn" data-action="sdwb-syntax-convert"></button>
+        <button class="syntax-warning-dismiss" data-i18n="bridge.syntax_warning.dismiss_btn" data-action="sdwb-syntax-dismiss" aria-label="閉じる"></button>
+      </div>
+      <div id="sdwbWcBrowser" class="bwc-panel" style="display:none;"></div>
+    </div>
+  </div>
+
+  <!-- Negative prompt -->
+  <div class="sdwb-field">
+    <label class="sdwb-section-label" for="sdwbNegative" data-i18n="sd_bridge.negative_prompt">Negative Prompt</label>
+    <div id="sdwbNegativeWrap" class="sdwb-editor-wrap">
+      <textarea id="sdwbNegative" rows="2" data-i18n-placeholder="sd_bridge.negative_prompt_placeholder" placeholder="lowres, bad anatomy, worst quality" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other"></textarea>
+    </div>
+    <div id="sdwbNegSyntaxBanner" class="syntax-warning-banner" role="status" aria-live="polite" hidden>
+      <span class="syntax-warning-msg" data-i18n="bridge.syntax_warning.nai_to_sd"></span>
+      <button class="syntax-warning-convert" data-i18n="bridge.syntax_warning.convert_btn" data-action="sdwb-neg-syntax-convert"></button>
+      <button class="syntax-warning-dismiss" data-i18n="bridge.syntax_warning.dismiss_btn" data-action="sdwb-neg-syntax-dismiss" aria-label="閉じる"></button>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="sdwb-actions">
+    <button class="sdwb-btn primary" id="sdwbGenBtn" data-action="sdwbGenerate" data-i18n="sd_bridge.send_to_sd">SD WebUI に送信</button>
+    <button class="sdwb-btn small" id="sdwbRestoreBtn" data-action="sdwbRestoreLast" data-i18n="sd_bridge.restore_last" data-i18n-title="sd_bridge.restore_last_title" title="前回のパラメータを復元（ブラウザ保存のため、キャッシュクリアで消去されます）">🔄 前回</button>
+    <button class="sdwb-btn small" data-action="sdwbClearPrompts" data-i18n="sd_bridge.clear_prompts" data-i18n-title="sd_bridge.clear_prompts_title" title="プロンプトをクリア（Ctrl+Z で元に戻せます）" aria-label="Clear prompts">🗑️</button>
+    <button class="sdwb-btn small" data-action="sdwbSendToBridge" data-action-arg="nai" data-i18n="sd_bridge.send_to_nai" data-i18n-title="sd_bridge.send_to_nai_title" title="NAI Bridge に送る (自動変換)">→NAI</button>
+    <button class="sdwb-btn small" data-action="sdwbSendToBridge" data-action-arg="comfyui" data-i18n="sd_bridge.send_to_comfyui" data-i18n-title="sd_bridge.send_to_comfyui_title" title="ComfyUI に送る">→ComfyUI</button>
+    <button class="sdwb-btn small" id="sdwbCancelBtn" type="button"
+            style="display:none;"
+            data-action="sdwbCancel"
+            data-i18n="bridge.action.stop_immediate">Stop</button>
+    <button class="sdwb-btn small" id="sdwbStopAfterCurrentBtn" type="button"
+            style="display:none;margin-left:8px;"
+            data-action="sdwbStopAfterCurrent"
+            data-i18n="bridge.action.stop_after_current">Stop after current</button>
+    <label class="bridge-forever-label" id="sdwbForeverLabel"
+           data-i18n-title="sd_bridge.forever_title" title="ローカル: 無制限 / クラウド: 50 回まで">
+      <input type="checkbox" id="sdwbForever" aria-label="Loop generation"> <span>Loop</span>
+    </label>
+    <span class="bridge-loop-count" id="sdwbLoopCount" style="display:none;"></span>
+  </div>
+
+  <!-- Progress bar -->
+  <div class="sdwb-progress" id="sdwbProgress">
+    <div class="sdwb-progress-bar">
+      <div class="sdwb-progress-fill" id="sdwbProgressFill"></div>
+    </div>
+    <div class="sdwb-progress-text" id="sdwbProgressText">0%</div>
+  </div>
+
+  <!-- img2img -->
+  <details class="sdwb-img2img-section" id="sdwbImg2ImgSection">
+    <summary><span data-i18n="sd_bridge.img2img">img2img</span> <span id="sdwbImg2ImgStatus"></span></summary>
+    <div class="sdwb-img2img-drop" id="sdwbImg2ImgDrop" data-action="sdwbClickImg2ImgFile">
+      <input type="file" id="sdwbImg2ImgFile" accept="image/*" hidden data-action="sdwbSetImg2ImgFile" data-action-event="change" data-action-this="1" data-i18n-aria-label="sd_bridge.img2img_source_label" aria-label="img2img source image">
+      <div id="sdwbImg2ImgPlaceholder" data-i18n="sd_bridge.img2img_placeholder">画像をドロップまたはクリック</div>
+      <div id="sdwbImg2ImgPreview" style="display:none;">
+        <img id="sdwbImg2ImgImg" alt="img2img source">
+        <button class="sdwb-btn small" data-action="sdwbClearImg2Img" data-i18n="sd_bridge.img2img_remove">削除</button>
+      </div>
+    </div>
+    <div class="sdwb-img2img-params">
+      <div class="sdwb-param">
+        <label for="sdwbDenoising" data-i18n="sd_bridge.denoising_strength">Denoising Strength</label>
+        <input id="sdwbDenoising" type="range" min="0" max="1" step="0.05" value="0.75"
+               data-mirror-target="sdwbDenoisingVal">
+        <span id="sdwbDenoisingVal">0.75</span>
+      </div>
+    </div>
+  </details>
+
+  <!-- LoRA / Embeddings / Extensions browser -->
+  <details class="sdwb-discovery-section" id="sdwbDiscoveryPanel">
+    <summary><span data-i18n="sd_bridge.resources">LoRA / Embeddings</span> <span class="sdwb-discovery-badge" id="sdwbDiscoveryBadge"></span></summary>
+    <div class="sdwb-discovery-tabs">
+      <button class="sdwb-disc-tab active" data-action="sdwbSwitchDiscTab" data-action-arg="lora" data-i18n="sd_bridge.loras">LoRA</button>
+      <button class="sdwb-disc-tab" data-action="sdwbSwitchDiscTab" data-action-arg="emb" data-i18n="sd_bridge.embeddings">Embeddings</button>
+      <button class="sdwb-disc-tab" data-action="sdwbSwitchDiscTab" data-action-arg="ext" data-i18n="sd_bridge.extensions">Extensions</button>
+    </div>
+    <div class="sdwb-discovery-search">
+      <input id="sdwbDiscSearch" type="text" data-i18n-placeholder="sd_bridge.search_placeholder" placeholder="Search..." aria-label="Search LoRA / Embeddings" data-action="sdwbFilterDiscovery" data-action-event="input" spellcheck="false">
+    </div>
+    <div id="sdwbDiscContent" class="sdwb-disc-content">
+      <div class="sdwb-disc-empty" data-i18n="sd_bridge.disc_connect_first">Connect to load resources</div>
+    </div>
+  </details>
+
+  <!-- Scripts (ADetailer etc.) -->
+  <details class="sdwb-scripts-section" id="sdwbScriptsPanel">
+    <summary><span data-i18n="sd_bridge.scripts">Scripts (ADetailer etc.)</span> <span class="sdwb-scripts-badge" id="sdwbScriptsBadge"></span></summary>
+    <div id="sdwbScriptsList" class="sdwb-scripts-list"></div>
+    <div id="sdwbScriptsParams" class="sdwb-scripts-params"></div>
+  </details>
+
+  <!-- Hires Fix -->
+  <div class="sdwb-hires-section" id="sdwbHiresSection" style="position:relative;">
+    <div class="sdwb-detail-toggle" style="position:absolute;top:0;left:0;z-index:1;padding:8px;">
+      <input type="checkbox" id="sdwbHiresEnable" data-action="sdwbUpdateHiresState" data-action-event="change" data-i18n-aria-label="sd_bridge.enable_hires_fix" aria-label="Enable Hires Fix">
+    </div>
+    <details>
+    <summary style="padding-left:32px;">
+      <span data-i18n="sd_bridge.hires_fix">Hires Fix</span> <span id="sdwbHiresStatus" class="sdwb-detail-status"></span>
+    </summary>
+    <div class="sdwb-hires-params">
+      <div class="sdwb-param">
+        <label for="sdwbHiresUpscaler" data-i18n="sd_bridge.upscaler">Upscaler</label>
+        <select id="sdwbHiresUpscaler">
+          <option>Latent</option>
+          <option>Latent (antialiased)</option>
+          <option>Latent (nearest)</option>
+          <option>Latent (nearest-exact)</option>
+          <option>None</option>
+          <option>Lanczos</option>
+          <option>Nearest</option>
+          <option>ESRGAN_4x</option>
+          <option>R-ESRGAN 4x+</option>
+          <option>R-ESRGAN 4x+ Anime6B</option>
+          <option>SwinIR_4x</option>
+        </select>
+      </div>
+      <div class="sdwb-param">
+        <label for="sdwbHiresScale" data-i18n="sd_bridge.hires_scale">Scale</label>
+        <input id="sdwbHiresScale" type="number" value="2.0" min="1.0" max="4.0" step="0.05">
+      </div>
+      <div class="sdwb-param">
+        <label for="sdwbHiresSteps" data-i18n="sd_bridge.hires_steps">Hires Steps (0 = same)</label>
+        <input id="sdwbHiresSteps" type="number" value="0" min="0" max="150">
+      </div>
+      <div class="sdwb-param">
+        <label for="sdwbHiresDenoising" data-i18n="sd_bridge.hires_denoising_strength">Denoising Strength</label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="sdwbHiresDenoising" type="range" min="0" max="1" step="0.05" value="0.7"
+                 data-mirror-target="sdwbHiresDenoisingVal" style="flex:1;">
+          <span id="sdwbHiresDenoisingVal" style="font-size:12px;min-width:32px;text-align:right;font-variant-numeric:tabular-nums;">0.7</span>
+        </div>
+      </div>
+      <div class="sdwb-param">
+        <label for="sdwbHiresResizeX" data-i18n="sd_bridge.hires_resize_width">Resize Width (0 = auto)</label>
+        <input id="sdwbHiresResizeX" type="number" value="0" min="0" max="4096" step="64">
+      </div>
+      <div class="sdwb-param">
+        <label for="sdwbHiresResizeY" data-i18n="sd_bridge.hires_resize_height">Resize Height (0 = auto)</label>
+        <input id="sdwbHiresResizeY" type="number" value="0" min="0" max="4096" step="64">
+      </div>
+    </div>
+  </details>
+  </div>
+
+  <!-- Refiner (SDXL) -->
+  <div class="sdwb-refiner-section" id="sdwbRefinerSection" style="position:relative;">
+    <div class="sdwb-detail-toggle" style="position:absolute;top:0;left:0;z-index:1;padding:8px;">
+      <input type="checkbox" id="sdwbRefinerEnable" data-action="sdwbUpdateRefinerState" data-action-event="change" data-i18n-aria-label="sd_bridge.enable_refiner" aria-label="Enable Refiner">
+    </div>
+    <details>
+    <summary style="padding-left:32px;">
+      <span data-i18n="sd_bridge.refiner_sdxl">Refiner (SDXL)</span> <span id="sdwbRefinerStatus" class="sdwb-detail-status"></span>
+    </summary>
+    <div class="sdwb-refiner-params">
+      <div class="sdwb-param">
+        <label for="sdwbRefinerCheckpoint" data-i18n="sd_bridge.refiner_checkpoint">Refiner Checkpoint</label>
+        <select id="sdwbRefinerCheckpoint">
+          <option value="" data-i18n="sd_bridge.select_placeholder">-- Select --</option>
+        </select>
+      </div>
+      <div class="sdwb-param">
+        <label for="sdwbRefinerSwitchAt" data-i18n="sd_bridge.refiner_switch_at">Switch At</label>
+        <div style="display:flex;gap:6px;align-items:center;">
+          <input id="sdwbRefinerSwitchAt" type="range" min="0" max="1" step="0.05" value="0.8"
+                 data-mirror-target="sdwbRefinerSwitchAtVal" style="flex:1;">
+          <span id="sdwbRefinerSwitchAtVal" style="font-size:12px;min-width:32px;text-align:right;font-variant-numeric:tabular-nums;">0.8</span>
+        </div>
+      </div>
+    </div>
+  </details>
+  </div>
+
+  <!-- Parameters -->
+  <div class="sdwb-params">
+    <div class="sdwb-param">
+      <label for="sdwbSteps" data-i18n="sd_bridge.steps">Steps</label>
+      <input id="sdwbSteps" type="number" value="28" min="1" max="150">
+    </div>
+    <div class="sdwb-param">
+      <label for="sdwbSampler" data-i18n="sd_bridge.sampler">Sampler</label>
+      <select id="sdwbSampler">
+        <option>Euler a</option>
+        <option>Euler</option>
+        <option>DPM++ 2M</option>
+        <option>DPM++ 2M Karras</option>
+        <option>DPM++ 2M SDE</option>
+        <option>DPM++ 2M SDE Karras</option>
+        <option>DPM++ 2M SDE Heun</option>
+        <option>DPM++ 2M SDE Heun Karras</option>
+        <option>DPM++ SDE</option>
+        <option>DPM++ SDE Karras</option>
+        <option>DPM++ 2S a</option>
+        <option>DPM++ 2S a Karras</option>
+        <option>DPM++ 3M SDE</option>
+        <option>DPM++ 3M SDE Karras</option>
+        <option>DPM2</option>
+        <option>DPM2 Karras</option>
+        <option>DPM2 a</option>
+        <option>DPM2 a Karras</option>
+        <option>DPM fast</option>
+        <option>DPM adaptive</option>
+        <option>Heun</option>
+        <option>LMS</option>
+        <option>LMS Karras</option>
+        <option>Restart</option>
+        <option>DDIM</option>
+        <option>DDIM CFG++</option>
+        <option>PLMS</option>
+        <option>UniPC</option>
+        <option>LCM</option>
+      </select>
+    </div>
+    <div class="sdwb-param">
+      <label for="sdwbCfg" data-i18n="sd_bridge.cfg_scale">CFG Scale</label>
+      <input id="sdwbCfg" type="number" value="7" min="1" max="30" step="0.5">
+    </div>
+    <div class="sdwb-param" style="grid-column: 1 / -1;">
+      <label for="sdwbResolutionPreset" data-i18n="sd_bridge.resolution_preset">Resolution Preset</label>
+      <div style="display:flex; gap:6px; align-items:stretch;">
+        <select id="sdwbResolutionPreset" style="flex:1; min-width:0;"></select>
+        <button id="sdwbSwapWH" type="button" class="sdwb-btn small"
+                style="min-width:36px;" data-i18n-title="sd_bridge.swap_dimensions"
+                data-i18n-aria-label="sd_bridge.swap_dimensions" title="Swap W/H"
+                aria-label="Swap W/H">⇄</button>
+      </div>
+    </div>
+    <div class="sdwb-param">
+      <label for="sdwbWidth" data-i18n="sd_bridge.width">Width</label>
+      <input id="sdwbWidth" type="number" value="512" min="64" max="2048" step="8">
+    </div>
+    <div class="sdwb-param">
+      <label for="sdwbAspectRatio" data-i18n="bridge.aspect_lock_label">Aspect</label>
+      <div class="bridge-aspect-cell">
+        <button id="sdwbAspectLock" type="button" class="sdwb-btn small bridge-aspect-lock-btn"
+                aria-pressed="false" title="Lock aspect ratio" aria-label="Lock aspect ratio">🔗</button>
+        <input id="sdwbAspectRatio" type="text" class="bridge-aspect-ratio-input"
+               placeholder="W:H" aria-label="Aspect ratio">
+      </div>
+    </div>
+    <div class="sdwb-param">
+      <label for="sdwbHeight" data-i18n="sd_bridge.height">Height</label>
+      <input id="sdwbHeight" type="number" value="768" min="64" max="2048" step="8">
+    </div>
+    <div class="sdwb-param">
+      <label for="sdwbSeed" data-i18n="sd_bridge.seed">Seed (-1 = random)</label>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <input id="sdwbSeed" type="number" value="-1" style="flex:1;">
+        <button class="sdwb-btn small" data-action="sdwbResetSeed" data-i18n-title="sd_bridge.seed_random_title" title="Seed をランダムに戻す" aria-label="Random seed">🎲</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:4px;font-size:11px;margin-top:2px;cursor:pointer;" title="生成後に Seed を -1 (ランダム) に戻します" data-i18n-title="sd_bridge.seed_auto_reset_tooltip">
+        <input id="sdwbSeedAutoReset" type="checkbox">
+        <span data-i18n="sd_bridge.seed_auto_reset_label">生成後にランダム (-1) に戻す</span>
+      </label>
+    </div>
+    <!-- Batch controls -->
+    <div class="sdwb-param sdwb-batch-row" style="grid-column: 1 / -1;display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+      <label for="sdwbBatchCount" data-i18n="bridge.batch_count">Batch count</label>
+      <input id="sdwbBatchCount" name="sdwbBatchCount" type="number" value="1" min="1" max="100" style="width:60px;">
+      <span style="opacity:0.5;">×</span>
+      <label for="sdwbBatchSize" data-i18n="bridge.batch_size">Batch size</label>
+      <input id="sdwbBatchSize" name="sdwbBatchSize" type="number" value="1" min="1" max="8" style="width:60px;">
+      <span class="sdwb-batch-total" id="sdwbBatchTotal" style="margin-left:8px;font-size:11px;opacity:0.7;">Total: 1</span>
+    </div>
+    <div class="sdwb-param">
+      <label for="sdwbImageFormat" data-i18n="sd_bridge.image_format">Image Format</label>
+      <select id="sdwbImageFormat">
+        <option value="png">PNG</option>
+        <option value="webp">WebP</option>
+        <option value="jpg">JPEG</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Sweep (1-axis or 2-axis parameter sweep) -->
+  <details class="sdwb-sweep-section" id="sdwbSweepSection">
+    <summary>
+      <span data-i18n="sd_bridge.sweep_summary">Sweep（1軸 / 2軸パラメータ振り）</span>
+      <span id="sdwbSweepStatus" style="font-size:12px;opacity:0.7;"></span>
+    </summary>
+    <div class="sdwb-sweep-grid" style="display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin-top:8px;">
+      <label for="sdwbSweepEnabled" data-i18n="sd_bridge.sweep_enable_label">有効化</label>
+      <input id="sdwbSweepEnabled" type="checkbox" aria-label="Enable sweep">
+
+      <!-- X axis -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:4px;" data-i18n="sd_bridge.sweep_x_axis_heading">X 軸</div>
+
+      <label for="sdwbSweepParam" data-i18n="sd_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="sdwbSweepParam" aria-label="Sweep X-axis parameter">
+        <option value="cfg_scale" data-i18n="sd_bridge.sweep_param_cfg_scale">CFG Scale</option>
+        <option value="steps" data-i18n="sd_bridge.sweep_param_steps">Steps</option>
+        <option value="denoising_strength" data-i18n="sd_bridge.sweep_param_denoising_strength">Denoising Strength</option>
+        <option value="hr_scale" data-i18n="sd_bridge.sweep_param_hr_scale">Hires Scale</option>
+        <option value="_macros" data-i18n="sd_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <div id="sdwbSweepMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <strong style="font-size:12px;" data-i18n="sd_bridge.sweep_macros_title">マクロ slot</strong>
+          <span style="font-size:11px;opacity:0.7;" data-i18n="sd_bridge.sweep_macros_help">プロンプトに <code>$x1</code>, <code>$x2</code>, ... を書くと置換される (Y/Z 軸は <code>$y1</code>/<code>$z1</code>)。<code>$1</code> は <code>$x1</code> のエイリアス。テキスト slot に <code>__name__</code> を書くと軸ファイルの全行に展開。</span>
+          <span style="flex:1;"></span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="font-size:11px;text-decoration:none;opacity:0.85;" data-i18n="sd_bridge.sweep_axes_manager_link">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="sdwbSweepMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="sdwbSweepMacrosSharedCount" style="font-size:12px;" data-i18n="sd_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="sdwbSweepMacrosSharedCount" type="number" value="6" min="2" max="500" style="width:80px;">
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <input id="sdwbSweepMacrosPadShort" type="checkbox">
+            <span data-i18n="sd_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="sdwbSweepMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="sdwbSweepMacroAddBtn" class="sdwb-btn small" style="margin-top:6px;" data-i18n="sd_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="sdwbSweepMin" data-i18n="sd_bridge.sweep_min_label">下限</label>
+      <input id="sdwbSweepMin" type="number" value="3" step="0.1" aria-label="Sweep X min">
+
+      <label for="sdwbSweepMax" data-i18n="sd_bridge.sweep_max_label">上限</label>
+      <input id="sdwbSweepMax" type="number" value="8" step="0.1" aria-label="Sweep X max">
+
+      <label for="sdwbSweepMode" data-i18n="sd_bridge.sweep_mode_label">分割方法</label>
+      <select id="sdwbSweepMode" aria-label="Sweep X mode">
+        <option value="count" data-i18n="sd_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="sd_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="sdwbSweepCount" data-i18n="sd_bridge.sweep_count_label">枚数</label>
+      <input id="sdwbSweepCount" type="number" value="6" min="2" max="500" aria-label="Sweep X count" title="ローカル接続時のみ 50 を超える値が有効。リモート時は 50 で頭打ちになる。">
+
+      <label for="sdwbSweepStep" data-i18n="sd_bridge.sweep_step_label">間隔</label>
+      <input id="sdwbSweepStep" type="number" value="0.5" step="0.1" min="0.0001" aria-label="Sweep X step">
+
+      <!-- Y axis (opt-in 2nd axis) -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:8px;display:flex;align-items:center;gap:8px;">
+        <input id="sdwbSweepYEnabled" type="checkbox" aria-label="Enable Y axis">
+        <label for="sdwbSweepYEnabled" data-i18n="sd_bridge.sweep_y_axis_heading" style="cursor:pointer;">Y 軸を追加（2軸 sweep）</label>
+      </div>
+
+      <label for="sdwbSweepYParam" data-i18n="sd_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="sdwbSweepYParam" aria-label="Sweep Y-axis parameter" disabled>
+        <option value="cfg_scale" data-i18n="sd_bridge.sweep_param_cfg_scale">CFG Scale</option>
+        <option value="steps" data-i18n="sd_bridge.sweep_param_steps">Steps</option>
+        <option value="denoising_strength" data-i18n="sd_bridge.sweep_param_denoising_strength">Denoising Strength</option>
+        <option value="hr_scale" data-i18n="sd_bridge.sweep_param_hr_scale">Hires Scale</option>
+        <option value="_macros" data-i18n="sd_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <div id="sdwbSweepYMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="font-size:11px;opacity:0.8;margin-bottom:6px;">
+          <span data-i18n="sd_bridge.sweep_macros_y_hint">Y 軸: 置換子は <code>$y1</code>, <code>$y2</code>, ...</span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="margin-left:8px;text-decoration:none;font-size:11px;opacity:0.85;"
+             data-i18n="sd_bridge.sweep_axes_manager_link">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="sdwbSweepYMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="sdwbSweepYMacrosSharedCount" style="font-size:12px;" data-i18n="sd_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="sdwbSweepYMacrosSharedCount" type="number" value="3" min="2" max="500" style="width:80px;">
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;opacity:0.8;cursor:pointer;">
+            <input id="sdwbSweepYMacrosPadShort" type="checkbox">
+            <span data-i18n="sd_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="sdwbSweepYMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="sdwbSweepYMacroAddBtn" class="sdwb-btn small" style="margin-top:6px;" data-i18n="sd_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="sdwbSweepYMin" data-i18n="sd_bridge.sweep_min_label">下限</label>
+      <input id="sdwbSweepYMin" type="number" value="0.4" step="0.1" aria-label="Sweep Y min" disabled>
+
+      <label for="sdwbSweepYMax" data-i18n="sd_bridge.sweep_max_label">上限</label>
+      <input id="sdwbSweepYMax" type="number" value="1" step="0.1" aria-label="Sweep Y max" disabled>
+
+      <label for="sdwbSweepYMode" data-i18n="sd_bridge.sweep_mode_label">分割方法</label>
+      <select id="sdwbSweepYMode" aria-label="Sweep Y mode" disabled>
+        <option value="count" data-i18n="sd_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="sd_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="sdwbSweepYCount" data-i18n="sd_bridge.sweep_count_label">枚数</label>
+      <input id="sdwbSweepYCount" type="number" value="3" min="2" max="500" aria-label="Sweep Y count" disabled title="ローカル接続時のみ 50 を超える値が有効。">
+
+      <label for="sdwbSweepYStep" data-i18n="sd_bridge.sweep_step_label">間隔</label>
+      <input id="sdwbSweepYStep" type="number" value="0.1" step="0.1" min="0.0001" aria-label="Sweep Y step" disabled>
+
+      <!-- Z axis (opt-in 3rd axis, requires Y). Renders one X*Y grid per Z value, switched by a tab strip. -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:8px;display:flex;align-items:center;gap:8px;">
+        <input id="sdwbSweepZEnabled" type="checkbox" aria-label="Enable Z axis">
+        <label for="sdwbSweepZEnabled" data-i18n="sd_bridge.sweep_z_axis_heading" style="cursor:pointer;">Z 軸を追加（3軸 sweep、Z はタブ切替）</label>
+      </div>
+
+      <label for="sdwbSweepZParam" data-i18n="sd_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="sdwbSweepZParam" aria-label="Sweep Z-axis parameter" disabled>
+        <option value="cfg_scale" data-i18n="sd_bridge.sweep_param_cfg_scale">CFG Scale</option>
+        <option value="steps" data-i18n="sd_bridge.sweep_param_steps">Steps</option>
+        <option value="denoising_strength" data-i18n="sd_bridge.sweep_param_denoising_strength">Denoising Strength</option>
+        <option value="hr_scale" data-i18n="sd_bridge.sweep_param_hr_scale">Hires Scale</option>
+        <option value="_macros" data-i18n="sd_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <div id="sdwbSweepZMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="font-size:11px;opacity:0.8;margin-bottom:6px;">
+          <span data-i18n="sd_bridge.sweep_macros_z_hint">Z 軸: 置換子は <code>$z1</code>, <code>$z2</code>, ...</span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="margin-left:8px;text-decoration:none;font-size:11px;opacity:0.85;"
+             data-i18n="sd_bridge.sweep_axes_manager_link">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="sdwbSweepZMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="sdwbSweepZMacrosSharedCount" style="font-size:12px;" data-i18n="sd_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="sdwbSweepZMacrosSharedCount" type="number" value="3" min="2" max="500" style="width:80px;">
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;opacity:0.8;cursor:pointer;">
+            <input id="sdwbSweepZMacrosPadShort" type="checkbox">
+            <span data-i18n="sd_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="sdwbSweepZMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="sdwbSweepZMacroAddBtn" class="sdwb-btn small" style="margin-top:6px;" data-i18n="sd_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="sdwbSweepZMin" data-i18n="sd_bridge.sweep_min_label">下限</label>
+      <input id="sdwbSweepZMin" type="number" value="0.4" step="0.1" aria-label="Sweep Z min" disabled>
+
+      <label for="sdwbSweepZMax" data-i18n="sd_bridge.sweep_max_label">上限</label>
+      <input id="sdwbSweepZMax" type="number" value="1" step="0.1" aria-label="Sweep Z max" disabled>
+
+      <label for="sdwbSweepZMode" data-i18n="sd_bridge.sweep_mode_label">分割方法</label>
+      <select id="sdwbSweepZMode" aria-label="Sweep Z mode" disabled>
+        <option value="count" data-i18n="sd_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="sd_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="sdwbSweepZCount" data-i18n="sd_bridge.sweep_count_label">枚数</label>
+      <input id="sdwbSweepZCount" type="number" value="3" min="2" max="500" aria-label="Sweep Z count" disabled title="ローカル接続時のみ 50 を超える値が有効。">
+
+      <label for="sdwbSweepZStep" data-i18n="sd_bridge.sweep_step_label">間隔</label>
+      <input id="sdwbSweepZStep" type="number" value="0.1" step="0.1" min="0.0001" aria-label="Sweep Z step" disabled>
+
+      <div id="sdwbSweepEstimateRow" style="grid-column:1 / span 2;margin-top:6px;font-size:12px;">
+        <span data-i18n="sd_bridge.sweep_total_estimate_label">合計</span>:
+        <span id="sdwbSweepTotalEstimate" style="font-weight:600;">—</span>
+      </div>
+
+      <label for="sdwbSweepDeferSave" data-i18n="sd_bridge.sweep_defer_save_label">一括保存</label>
+      <span style="display:flex;align-items:center;gap:6px;">
+        <input id="sdwbSweepDeferSave" type="checkbox" checked aria-label="Defer save until sweep ends">
+        <span style="font-size:11px;opacity:0.7;" data-i18n="sd_bridge.sweep_defer_save_hint">完了/停止時にまとめて保存（DB 連鎖負荷を回避）</span>
+      </span>
+    </div>
+    <div id="sdwbSweepCancelRow" style="display:none;margin-top:10px;gap:8px;">
+      <button class="sdwb-btn small" data-action="sdwbStopSweepGraceful"
+              data-i18n="sd_bridge.sweep_stop_graceful_btn"
+              data-i18n-title="sd_bridge.sweep_stop_graceful_title"
+              title="現在の生成が終わったら停止（途中の画像は捨てない）">現在の画像で停止</button>
+      <button class="sdwb-btn small" data-action="sdwbStopSweepImmediate"
+              style="background:#c33;color:#fff;"
+              data-i18n="sd_bridge.sweep_stop_immediate_btn"
+              data-i18n-title="sd_bridge.sweep_stop_immediate_title"
+              title="進行中のリクエストを即座に中断（途中画像は破棄、SD WebUI 側もキャンセル）">即時停止</button>
+      <button type="button" id="sdwb-sweep-open" class="sdwb-btn small" disabled
+              title="Sweep ページで結果を開く（最初の画像が保存されると有効化）" aria-label="Open sweep page">📊 Sweep ページを開く</button>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+      <button type="button" id="sdwb-sweep-history" class="sdwb-btn small"
+              title="最近の Sweep 履歴" aria-label="Sweep 履歴">🕘 Sweep 履歴</button>
+    </div>
+    <div id="sdwbSweepGrid" class="sdwb-sweep-grid" style="display:none;margin-top:10px;overflow-x:auto;"></div>
+    <p style="font-size:11px;opacity:0.7;margin:8px 0 0;" data-i18n="sd_bridge.sweep_hint">
+      seed は固定（-1 の場合は1つ生成して全枚数で再利用）。1枚ずつ順次生成し履歴に追記します。安全装置として最大 50 枚に制限されます。
+    </p>
+  </details>
+
+  <!-- Result area -->
+  <div class="sdwb-result" id="sdwbResult"></div>
+
+  <!-- Settings -->
+  <details class="sdwb-config">
+    <summary data-i18n="sd_bridge.settings">Settings</summary>
+    <div style="margin-top: 10px;">
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgUrl" data-i18n="sd_bridge.api_url">API URL</label>
+        <input id="sdwbCfgUrl" type="text" value="http://127.0.0.1:7860">
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgGatewayUrl" data-i18n="sd_bridge.gateway_url">Gateway URL</label>
+        <input id="sdwbCfgGatewayUrl" type="text" data-i18n-placeholder="sd_bridge.gateway_url_placeholder" placeholder="http://host:5000/sd  (省略時は API URL を直接使用)">
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgApiKey" data-i18n="sd_bridge.api_key">API Key</label>
+        <input id="sdwbCfgApiKey" type="password" autocomplete="new-password" data-i18n-placeholder="sd_bridge.api_key_placeholder" placeholder="">
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgSampler" data-i18n="sd_bridge.default_sampler">Default Sampler</label>
+        <select id="sdwbCfgSampler">
+          <option>Euler a</option>
+          <option>Euler</option>
+          <option>DPM++ 2M</option>
+          <option>DPM++ 2M Karras</option>
+          <option>DPM++ 2M SDE</option>
+          <option>DPM++ 2M SDE Karras</option>
+          <option>DPM++ 2M SDE Heun</option>
+          <option>DPM++ 2M SDE Heun Karras</option>
+          <option>DPM++ SDE</option>
+          <option>DPM++ SDE Karras</option>
+          <option>DPM++ 2S a</option>
+          <option>DPM++ 2S a Karras</option>
+          <option>DPM++ 3M SDE</option>
+          <option>DPM++ 3M SDE Karras</option>
+          <option>DPM2</option>
+          <option>DPM2 Karras</option>
+          <option>DPM2 a</option>
+          <option>DPM2 a Karras</option>
+          <option>DPM fast</option>
+          <option>DPM adaptive</option>
+          <option>Heun</option>
+          <option>LMS</option>
+          <option>LMS Karras</option>
+          <option>Restart</option>
+          <option>DDIM</option>
+          <option>DDIM CFG++</option>
+          <option>PLMS</option>
+          <option>UniPC</option>
+          <option>LCM</option>
+        </select>
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgAutoSend" data-i18n="sd_bridge.auto_send">Auto-send</label>
+        <input id="sdwbCfgAutoSend" type="checkbox">
+        <span style="font-size:12px;" data-i18n="sd_bridge.auto_send_desc">確認ダイアログ省略</span>
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgSaveFolder" data-i18n="sd_bridge.save_folder">Save Folder</label>
+        <div style="flex:1; display:flex; gap:4px; align-items:center;">
+          <input id="sdwbCfgSaveFolder" type="text" data-i18n-placeholder="sd_bridge.save_folder_placeholder" placeholder="/path/to/save" style="flex:1;">
+          <button class="sdwb-btn small" data-action="sdwbBrowseSaveFolder" data-i18n="sd_bridge.browse">Browse</button>
+        </div>
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgAutoSave" data-i18n="sd_bridge.auto_save">Auto-save</label>
+        <input id="sdwbCfgAutoSave" type="checkbox">
+        <span style="font-size:12px;" data-i18n="sd_bridge.auto_save_desc">生成後に自動保存</span>
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgBridgeManagedSave" data-i18n="sd_bridge.bridge_managed_save">Bridge-managed save</label>
+        <input id="sdwbCfgBridgeManagedSave" type="checkbox">
+        <span style="font-size:12px;" data-i18n="sd_bridge.bridge_managed_save_desc">SD WebUI 側の保存を止めて Bridge から保存（Sweep XMP 付）。save_folder 必須</span>
+      </div>
+      <div class="sdwb-config-row">
+        <button type="button" class="sdwb-btn small"
+                id="sdwbDiagSaveStateBtn"
+                data-action="sdwbDiagSaveState"
+                data-i18n="sd_bridge.diag_save_state_btn">保存状態を診断</button>
+        <span style="font-size:12px;" data-i18n="sd_bridge.diag_save_state_desc">SD WebUI 側の samples_save / grid_save と /sdapi/v1/options の到達性を確認</span>
+      </div>
+      <pre id="sdwbDiagSaveStateResult"
+           style="display:none;max-height:320px;overflow:auto;font-size:11px;background:rgba(0,0,0,0.04);padding:8px;border-radius:4px;white-space:pre-wrap;word-break:break-word;"></pre>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgAutoImport" data-i18n="sd_bridge.auto_import">Auto-import</label>
+        <input id="sdwbCfgAutoImport" type="checkbox" checked>
+        <span style="font-size:12px;" data-i18n="sd_bridge.auto_import_desc">保存時にDBに自動登録</span>
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgImageFormat" data-i18n="sd_bridge.default_image_format">Default Image Format</label>
+        <select id="sdwbCfgImageFormat">
+          <option value="png">PNG</option>
+          <option value="webp">WebP</option>
+          <option value="jpg">JPEG</option>
+        </select>
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgSaveNaming" data-i18n="sd_bridge.save_naming">Save Naming</label>
+        <select id="sdwbCfgSaveNaming">
+          <option value="daily_folder" data-i18n="sd_bridge.naming_daily_folder">Daily Folder (2026-02-25/seed_0.png)</option>
+          <option value="date_prefix" data-i18n="sd_bridge.naming_date_prefix">Date Prefix (2026-02-25_143022_seed_0.png)</option>
+          <option value="timestamp" data-i18n="sd_bridge.naming_timestamp">Timestamp (seed_unix_0.png)</option>
+        </select>
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgPromptOpen" data-i18n="sd_bridge.prompt_open_label">プロンプトを展開して表示</label>
+        <input id="sdwbCfgPromptOpen" type="checkbox" checked aria-label="Show prompt expanded">
+      </div>
+      <div class="sdwb-config-row">
+        <label for="sdwbCfgMaxBatchSize" data-i18n="bridge.max_batch_size_label">Max Batch Size</label>
+        <input id="sdwbCfgMaxBatchSize" type="number" min="1" max="64" value="8" style="width:80px;">
+        <span style="font-size:11px;opacity:0.7;" data-i18n="bridge.max_batch_size_help">Upper limit for the Batch size input. Increase if you have ample VRAM (default 8).</span>
+      </div>
+      <div class="sdwb-config-row">
+        <button class="sdwb-btn small" data-action="sdwbSaveConfig" data-i18n="sd_bridge.save_settings">Save Settings</button>
+        <button class="sdwb-btn small" data-action="sdwbLoadSamplers" data-i18n="sd_bridge.refresh_samplers">Refresh Samplers</button>
+        <button class="sdwb-btn small" data-action="sdwbLoadModels" data-i18n="sd_bridge.refresh_models">Refresh Models</button>
+        <button class="sdwb-btn small" data-action="sdwbRefreshAssets" data-i18n="sd_bridge.refresh_assets" title="Tell SD WebUI to rescan checkpoints / VAE / LoRAs on disk">Refresh Assets (SD)</button>
+      </div>
+    </div>
+  </details>
+</div>
+<div id="bridge-server-management" class="bridge-server-mgmt-root"></div>

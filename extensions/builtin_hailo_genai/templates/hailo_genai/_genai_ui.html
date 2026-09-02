@@ -1,0 +1,203 @@
+<!-- Hailo-10H GenAI (LLM / VLM / Speech2Text) — Tools Page Section -->
+<div class="tool-section" id="hgGenaiSection">
+  <h2>
+    <span aria-hidden="true">&#x1f916;</span>
+    <span data-i18n="genai.heading">GenAI (Hailo-10H LLM / VLM / S2T)</span>
+  </h2>
+  <p data-i18n="genai.description">Hailo-10H NPU で LLM・VLM・音声認識モデルをローカル実行します。</p>
+
+  <!-- Unified health (source of truth: /api/extensions health field) -->
+  <div id="hgHealth" class="hg-health" style="margin-bottom:8px;"></div>
+  <script nonce="{{ csp_nonce }}">
+    (function(){
+      var run = function(){
+        if (window.extensionHealthApi && typeof window.extensionHealthApi.renderInto === 'function') {
+          window.extensionHealthApi.renderInto('hgHealth', 'builtin-hailo-genai', 'details');
+        }
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run, { once: true });
+      } else { run(); }
+    })();
+  </script>
+
+  <!-- Context Usage Bar -->
+  <div id="hgContextBar" style="display:none;" class="hg-context-bar">
+    <div class="hg-context-header">
+      <span data-i18n="genai.context_usage">コンテキスト使用量</span>
+      <span id="hgContextPct">0%</span>
+    </div>
+    <div class="hg-progress-track">
+      <div id="hgContextFill" class="hg-progress-fill" style="width:0%;"></div>
+    </div>
+  </div>
+
+  <!-- Chat page link -->
+  <div style="margin:12px 0;">
+    <a href="/ext/hailo-genai/chat" class="btn btn-primary" style="font-size:13px;text-decoration:none;display:inline-flex;align-items:center;gap:6px;">
+      <span aria-hidden="true">&#x1f4ac;</span>
+      <span data-i18n="genai.open_chat">Chat を開く</span>
+    </a>
+  </div>
+
+  <!-- Mode Tabs -->
+  <div class="hg-tabs">
+    <button class="btn btn-secondary hg-mode-btn hg-mode-active" data-hg-mode="llm" data-i18n="genai.tab_llm_chat">LLM Chat</button>
+    <button class="btn btn-secondary hg-mode-btn" data-hg-mode="vlm" data-i18n="genai.tab_vlm">VLM</button>
+    <button class="btn btn-secondary hg-mode-btn" data-hg-mode="s2t" data-i18n="genai.tab_speech_recognition">音声認識</button>
+    <button class="btn btn-secondary hg-mode-btn" data-hg-mode="models" data-i18n="genai.tab_model_management">モデル管理</button>
+  </div>
+
+  <!-- ── LLM Panel ─────────────────────────────────────────── -->
+  <div class="hg-panel" id="hgPanelLlm">
+    <div class="hg-field">
+      <label class="hg-label" for="hgLlmModel" data-i18n="genai.model">モデル:</label>
+      <select id="hgLlmModel" class="hg-select"></select>
+    </div>
+    <div class="hg-field">
+      <label class="hg-label" for="hgLlmTemp">Temperature:</label>
+      <div class="hg-slider-row">
+        <input type="range" id="hgLlmTemp" min="0" max="2" step="0.1" value="0.7" class="hg-slider">
+        <span id="hgLlmTempVal" class="hg-slider-val">0.7</span>
+      </div>
+    </div>
+    <div class="hg-field">
+      <label class="hg-label" for="hgLlmMaxTok" data-i18n="genai.max_tokens">最大トークン数:</label>
+      <div class="hg-slider-row">
+        <input type="range" id="hgLlmMaxTok" min="64" max="2048" step="64" value="512" class="hg-slider">
+        <span id="hgLlmMaxTokVal" class="hg-slider-val">512</span>
+      </div>
+    </div>
+    <!-- Download prompt (shown when model not available) -->
+    <div id="hgLlmDlPrompt" class="hg-dl-prompt" style="display:none;">
+      <span data-i18n="genai.model_not_downloaded">モデルがダウンロードされていません。</span>
+      <button class="btn btn-primary hg-dl-btn" data-action="hgDownloadLlm" data-i18n="genai.download">ダウンロード</button>
+    </div>
+    <!-- Chat messages (bubble UI) -->
+    <div id="hgLlmChat" class="hg-chat-container"></div>
+    <!-- Prompt input -->
+    <div class="hg-prompt-row">
+      <input type="text" id="hgLlmPrompt" placeholder="メッセージを入力..." data-i18n-placeholder="genai.message_placeholder" class="hg-prompt-input" aria-label="LLM メッセージ入力" data-i18n-aria-label="genai.llm_message_input_aria">
+      <button class="btn btn-primary" id="hgLlmSendBtn" data-action="hgLlmSend" data-i18n="genai.send">送信</button>
+      <button class="btn btn-secondary hg-clear-btn" data-action="hgLlmClear" title="コンテキストをクリア" data-i18n-title="genai.clear_context_title" aria-label="コンテキストをクリア" data-i18n-aria-label="genai.clear_context_aria">&#x1f5d1;</button>
+    </div>
+  </div>
+
+  <!-- ── VLM Panel ─────────────────────────────────────────── -->
+  <div class="hg-panel" id="hgPanelVlm" style="display:none;">
+    <div class="hg-field">
+      <label class="hg-label" for="hgVlmImage" data-i18n="genai.image">画像:</label>
+      <input type="file" id="hgVlmImage" accept="image/*" class="hg-file-input">
+    </div>
+    <div id="hgVlmPreview" style="display:none;" class="hg-field">
+      <img id="hgVlmPreviewImg" class="hg-preview-img" alt="VLM preview">
+    </div>
+    <div class="hg-field">
+      <label class="hg-label" for="hgVlmPrompt" data-i18n="genai.question">質問:</label>
+      <input type="text" id="hgVlmPrompt" placeholder="この画像に何が写っていますか？" data-i18n-placeholder="genai.vlm_prompt_placeholder" class="hg-prompt-input hg-prompt-input-full">
+    </div>
+    <!-- Download prompt -->
+    <div id="hgVlmDlPrompt" class="hg-dl-prompt" style="display:none;">
+      <span data-i18n="genai.vlm_model_not_downloaded">VLM モデルがダウンロードされていません。</span>
+      <button class="btn btn-primary hg-dl-btn" data-action="hgDownloadVlm" data-i18n="genai.download_vlm">ダウンロード</button>
+    </div>
+    <div id="hgVlmOutput" class="hg-output-box hg-output-placeholder" data-i18n="genai.output_placeholder">出力がここに表示されます</div>
+    <button class="btn btn-primary" id="hgVlmSendBtn" data-action="hgVlmSend" data-i18n="genai.analyze">解析</button>
+  </div>
+
+  <!-- ── S2T Panel ─────────────────────────────────────────── -->
+  <div class="hg-panel" id="hgPanelS2t" style="display:none;">
+    <div class="hg-field">
+      <label class="hg-label" for="hgS2tAudio" data-i18n="genai.audio_file">音声ファイル (.wav):</label>
+      <input type="file" id="hgS2tAudio" accept="audio/wav,audio/wave,.wav" class="hg-file-input">
+    </div>
+    <div class="hg-field">
+      <label class="hg-label" for="hgS2tModel" data-i18n="genai.s2t_model">モデル:</label>
+      <select id="hgS2tModel" class="hg-select"></select>
+    </div>
+    <div class="hg-field">
+      <label class="hg-label" for="hgS2tLang" data-i18n="genai.language">言語:</label>
+      <input type="text" id="hgS2tLang" value="en" maxlength="5" class="hg-lang-input">
+    </div>
+    <!-- Download prompt -->
+    <div id="hgS2tDlPrompt" class="hg-dl-prompt" style="display:none;">
+      <span data-i18n="genai.s2t_model_not_downloaded">モデルがダウンロードされていません。</span>
+      <button class="btn btn-primary hg-dl-btn" data-action="hgDownloadS2t" data-i18n="genai.download_s2t">ダウンロード</button>
+    </div>
+    <div id="hgS2tOutput" class="hg-output-box hg-output-placeholder" data-i18n="genai.s2t_output_placeholder">出力がここに表示されます</div>
+    <button class="btn btn-primary" id="hgS2tBtn" data-action="hgS2tTranscribe" data-i18n="genai.transcribe">文字起こし</button>
+
+    <!-- Video Transcription Sub-section -->
+    <div class="hg-video-section">
+      <h2 class="hg-video-title" style="font-size:1.1em;">
+        <span aria-hidden="true">&#x1f3ac;</span>
+        <span data-i18n="genai.video_transcription_title">動画の文字起こし</span>
+      </h3>
+      <p class="hg-video-desc" data-i18n="genai.video_transcription_desc">動画から音声を抽出し、Whisper S2T で文字起こしします。</p>
+      <div class="hg-field">
+        <label class="hg-label" for="hgVideoFileId" data-i18n="genai.file_id">ファイル ID:</label>
+        <input type="number" id="hgVideoFileId" placeholder="ファイル ID を入力" data-i18n-placeholder="genai.file_id_placeholder"
+          class="hg-num-input">
+      </div>
+      <div class="hg-field">
+        <label class="hg-label" for="hgVideoLang" data-i18n="genai.video_language">言語:</label>
+        <select id="hgVideoLang" class="hg-select hg-select-sm">
+          <option value="ja" data-i18n="genai.lang_japanese">日本語</option>
+          <option value="en" data-i18n="genai.lang_english">English</option>
+          <option value="zh" data-i18n="genai.lang_chinese">中文</option>
+          <option value="ko" data-i18n="genai.lang_korean">한국어</option>
+          <option value="fr" data-i18n="genai.lang_french">Français</option>
+          <option value="es" data-i18n="genai.lang_spanish">Español</option>
+          <option value="pt" data-i18n="genai.lang_portuguese">Português</option>
+          <option value="it" data-i18n="genai.lang_italian">Italiano</option>
+          <option value="de" data-i18n="genai.lang_german">Deutsch</option>
+          <option value="ru" data-i18n="genai.lang_russian">Русский</option>
+          <option value="custom" data-i18n="s2t.lang_custom">Other (custom code)</option>
+        </select>
+        <input type="text" id="hgVideoCustomLang" name="hg_video_custom_lang"
+               class="s2t-custom-lang" style="display:none;"
+               placeholder="e.g. ca, el, th, vi..." data-i18n-placeholder="s2t.lang_custom_placeholder" maxlength="10">
+      </div>
+      <!-- Video S2T Progress -->
+      <div id="hgVideoS2tProgress" style="display:none;" class="hg-progress-wrap">
+        <div class="hg-progress-header-sm">
+          <span id="hgVideoS2tLabel" data-i18n="genai.transcribing">文字起こし中...</span>
+          <span id="hgVideoS2tPct">0%</span>
+        </div>
+        <div class="hg-progress-track">
+          <div id="hgVideoS2tBar" class="hg-progress-fill hg-progress-fill-green" style="width:0%;"></div>
+        </div>
+        <div id="hgVideoS2tDetail" class="hg-progress-detail"></div>
+      </div>
+      <div id="hgVideoS2tOutput" class="hg-output-box" style="display:none;"></div>
+      <div class="tool-actions hg-video-actions">
+        <button class="btn btn-primary" data-action="hgVideoTranscribe">
+          <span aria-hidden="true">&#x25b6;</span>
+          <span data-i18n="genai.transcribe_video">動画を文字起こし</span>
+        </button>
+        <button class="btn btn-secondary" data-action="hgVideoGetTranscript">
+          <span aria-hidden="true">&#x1f4c4;</span>
+          <span data-i18n="genai.get_saved_transcript">保存済みを取得</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Models Panel ──────────────────────────────────────── -->
+  <div class="hg-panel" id="hgPanelModels" style="display:none;">
+    <p class="hg-muted" style="font-size:13px;" data-i18n="genai.model_management_desc">GenAI HEF モデルのダウンロード・アンロードを管理します。</p>
+    <div id="hgModelList" class="hg-model-list"></div>
+    <div class="tool-actions" style="margin-top:10px;">
+      <button class="btn btn-secondary" data-action="hgUnloadModel" data-i18n="genai.unload_current_model">現在のモデルをアンロード</button>
+    </div>
+  </div>
+
+  <!-- Result box -->
+  <div id="hgResult" class="result-box" style="display:none;"></div>
+</div>
+
+
+{% include "hailo_genai/_genai_style.html" %}
+
+{% include "hailo_genai/_genai_script.html" %}
+{% include "hailo_genai/_genai_script_media.html" %}

@@ -1,0 +1,80 @@
+{
+  "name": "builtin-nai-bridge",
+  "version": "0.1.0",
+  "description": "NovelAI API integration bridge",
+  "type": "ui_widget",
+  "category": "bridge",
+  "entry": "nai_bridge.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/nai-bridge",
+  "nav": {
+    "label": "NAI Bridge",
+    "icon": "\u2728"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 420
+  },
+  "config_schema": {
+    "api_token": {
+      "type": "str",
+      "default": "",
+      "label": "NAI API Token (pst-***)"
+    },
+    "default_model": {
+      "type": "enum",
+      "default": "nai-diffusion-4-5-full",
+      "options": [
+        "nai-diffusion-5-full",
+        "nai-diffusion-5-curated",
+        "nai-diffusion-4-5-full",
+        "nai-diffusion-4-5-curated",
+        "nai-diffusion-4-full",
+        "nai-diffusion-4-curated-preview"
+      ],
+      "label": "Default Model"
+    },
+    "default_sampler": {
+      "type": "enum",
+      "default": "k_euler_ancestral",
+      "options": [
+        "k_euler_ancestral",
+        "k_euler",
+        "k_dpmpp_2m",
+        "k_dpmpp_sde",
+        "k_dpmpp_2s_ancestral",
+        "ddim"
+      ],
+      "label": "Default Sampler"
+    },
+    "default_noise_schedule": {
+      "type": "enum",
+      "default": "karras",
+      "options": [
+        "karras",
+        "exponential",
+        "polyexponential",
+        "native"
+      ],
+      "label": "Default Noise Schedule"
+    },
+    "auto_send": {
+      "type": "bool",
+      "default": false,
+      "label": "Skip confirmation dialog"
+    },
+    "default_image_format": {
+      "type": "enum",
+      "default": "png",
+      "options": ["png", "webp", "jpg"],
+      "label": "Default Image Format"
+    },
+    "cache_max_size_mb": {
+      "type": "number",
+      "default": 500,
+      "label": "Vibe encode cache (MB)",
+      "label_ja": "Vibe\u30a8\u30f3\u30b3\u30fc\u30c9\u30ad\u30e3\u30c3\u30b7\u30e5 (MB)"
+    }
+  }
+}

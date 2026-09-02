@@ -1,0 +1,11 @@
+{
+  "port": 8080,
+  "host": "127.0.0.1",
+  "backend": "auto",
+  "model": "wd-swinv2-tagger-v3",
+  "model_dir": "./models/wd-swinv2-tagger-v3",
+  "ort_provider": "",
+  "general_threshold": 0.35,
+  "character_threshold": 0.85,
+  "bearer_token": "REPLACE_WITH_A_RANDOM_SECRET"
+}

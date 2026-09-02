@@ -1,0 +1,53 @@
+/* textarea-drag.css — Ghost, caret indicator, and mirror styles for
+   textarea drag-and-drop text movement. */
+
+/* Ghost: follows cursor during drag */
+.ta-drag-ghost {
+  position: fixed;
+  z-index: 10000;
+  max-width: 300px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 13px;
+  line-height: 1.4;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+  background: var(--card, #1e1e3a);
+  color: var(--text, #e0e0e0);
+  border: 1px solid var(--accent, #2563eb);
+  opacity: 0.88;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+}
+
+/* Caret indicator: shows drop position */
+.ta-drag-caret {
+  position: fixed;
+  z-index: 10000;
+  width: 2px;
+  display: none;
+  pointer-events: none;
+  background: var(--accent, #2563eb);
+  border-radius: 1px;
+  animation: ta-drag-blink 0.8s step-end infinite;
+}
+
+@keyframes ta-drag-blink {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0; }
+}
+
+/* Mirror div: invisible layout clone of textarea */
+.ta-drag-mirror {
+  position: fixed;
+  opacity: 0;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* Cursor override while dragging */
+body.ta-dragging,
+body.ta-dragging textarea {
+  cursor: grabbing !important;
+}

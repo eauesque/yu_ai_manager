@@ -1,0 +1,50 @@
+/* Keyboard Help Overlay: interactive/dark styles */
+.help-close-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+  color: #000;
+}
+
+body.dark .keyboard-help-content {
+  background: #1f1f1f;
+  color: #e0e0e0;
+}
+
+body.dark .keyboard-help-header {
+  border-bottom-color: #3a3a3a;
+}
+
+body.dark .help-close-btn {
+  color: #999;
+}
+
+body.dark .help-close-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+body.dark .help-section h3 {
+  color: #60a5fa;
+}
+
+body.dark .help-item {
+  border-bottom-color: #2a2a2a;
+}
+
+body.dark .help-item kbd {
+  background: linear-gradient(180deg, #3a3a3a, #2a2a2a);
+  border-color: #4a4a4a;
+  color: #e0e0e0;
+}
+
+body.dark .help-item span {
+  color: #d1d5db;
+}
+
+body.dark .keyboard-help-footer {
+  background: #1a1a1a;
+  border-top-color: #3a3a3a;
+}
+
+body.dark .keyboard-help-footer p {
+  color: #9ca3af;
+}

@@ -1,0 +1,120 @@
+/* ui/default/static/css/pages/mesh_inference.css
+ * Matrix layout for /mesh-inference.
+ * Light + dark via base-theme.css variables (--bg, --fg, --card, --border, etc.).
+ */
+
+.mi-page {
+  max-width: 1100px;
+  margin: 0 auto 24px;
+  padding: 50px 20px 0;
+}
+
+.mi-header h1 {
+  font-size: 1.4rem;
+  margin: 0 0 4px 0;
+  color: var(--fg, #222);
+}
+
+.mi-subtitle {
+  font-size: 0.9rem;
+  color: var(--muted, #666);
+  margin: 0 0 18px 0;
+}
+
+.mi-toolbar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.mi-matrix-wrap {
+  overflow-x: auto;
+  background: var(--card, #fafafa);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+}
+
+.mi-matrix {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mi-matrix th,
+.mi-matrix td {
+  padding: 10px 14px;
+  text-align: center;
+  border-bottom: 1px solid var(--border, #eee);
+  color: var(--fg, #222);
+}
+
+.mi-matrix th:first-child,
+.mi-matrix td.mi-peer {
+  text-align: left;
+}
+
+.mi-matrix th {
+  background: var(--bg-hover, #f0f0f0);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.mi-row-local {
+  background: var(--accent-bg, rgba(80, 160, 255, 0.05));
+}
+
+.mi-row-offline .mi-peer {
+  opacity: 0.6;
+}
+
+.mi-badge {
+  font-size: 0.65rem;
+  vertical-align: middle;
+  margin-left: 4px;
+}
+
+.mi-badge-online {
+  color: var(--success, #2ea06c);
+}
+
+.mi-badge-offline {
+  color: var(--error, #c44);
+}
+
+.mi-device {
+  color: var(--muted, #888);
+  font-size: 0.8rem;
+  margin-left: 4px;
+}
+
+.mi-cell {
+  cursor: pointer;
+}
+
+.mi-cell-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  width: 100%;
+  height: 100%;
+}
+
+.mi-toggle {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.mi-cell-na {
+  color: var(--muted, #aaa);
+  font-weight: 300;
+  cursor: not-allowed;
+}
+
+.mi-empty {
+  margin: 40px 0;
+  text-align: center;
+  color: var(--muted, #888);
+}

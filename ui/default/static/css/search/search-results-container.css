@@ -1,0 +1,158 @@
+/* Container cards (ZIP / Folder grouping) */
+
+.container-card .container-thumb-stack {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  display: grid;
+  background: var(--card, #fff);
+}
+
+.container-card .stack-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.container-card .container-overlay {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.7));
+  padding: 8px 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #fff;
+  pointer-events: none;
+}
+
+.container-card .container-icon {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.container-card .container-count {
+  font-size: 14px;
+  font-weight: bold;
+}
+
+/* Thumb stack grid layouts by data-count */
+.container-thumb-stack[data-count="1"] {
+  grid-template: 1fr / 1fr;
+}
+
+.container-thumb-stack[data-count="2"] {
+  grid-template: 1fr / 1fr 1fr;
+}
+
+.container-thumb-stack[data-count="4"] {
+  grid-template: 1fr 1fr / 1fr 1fr;
+}
+
+/* 8-thumb layout: feature image top-left spanning 2 rows, small grid right + bottom */
+.container-thumb-stack[data-count="8"] {
+  grid-template-columns: 1fr 1fr 1fr 1fr;
+  grid-template-rows: 1fr 1fr 1fr 1fr;
+}
+
+.container-thumb-stack[data-count="8"] .stack-thumb:nth-child(1) {
+  grid-column: 1 / 3;
+  grid-row: 1 / 3;
+}
+
+.container-thumb-stack[data-count="8"] .stack-thumb:nth-child(2) {
+  grid-column: 3 / 4;
+  grid-row: 1 / 2;
+}
+
+.container-thumb-stack[data-count="8"] .stack-thumb:nth-child(3) {
+  grid-column: 4 / 5;
+  grid-row: 1 / 2;
+}
+
+.container-thumb-stack[data-count="8"] .stack-thumb:nth-child(4) {
+  grid-column: 3 / 4;
+  grid-row: 2 / 3;
+}
+
+.container-thumb-stack[data-count="8"] .stack-thumb:nth-child(5) {
+  grid-column: 4 / 5;
+  grid-row: 2 / 3;
+}
+
+.container-thumb-stack[data-count="8"] .stack-thumb:nth-child(6) {
+  grid-column: 1 / 2;
+  grid-row: 3 / 5;
+}
+
+.container-thumb-stack[data-count="8"] .stack-thumb:nth-child(7) {
+  grid-column: 2 / 3;
+  grid-row: 3 / 5;
+}
+
+.container-thumb-stack[data-count="8"] .stack-thumb:nth-child(8) {
+  grid-column: 3 / 5;
+  grid-row: 3 / 5;
+}
+
+/* Container card click cursor */
+.container-card {
+  cursor: pointer;
+  /* Reduce GPU load: disable entry animation, hover zoom, and shadow for container cards */
+  animation: none !important;
+  box-shadow: none;
+  transition: outline-color .15s ease;
+  contain: layout style paint;
+}
+.container-card:hover {
+  transform: none;
+  box-shadow: none;
+  outline: 2px solid var(--accent, #5b8def);
+  outline-offset: -2px;
+}
+
+/* Dark mode background for stack */
+body.dark .container-card .container-thumb-stack {
+  background: #111;
+}
+
+/* Loading state: pulsing shimmer while thumbnails are being generated */
+.container-card.container-loading {
+  pointer-events: none;
+  opacity: 0.6;
+}
+
+.container-card.container-loading .container-thumb-stack {
+  animation: container-shimmer 1.5s ease-in-out infinite;
+}
+
+@keyframes container-shimmer {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* Thumbnail progress bar: stack above scan progress bar */
+.thumb-progress-bar {
+  border-top-color: #8b5cf6;
+}
+.thumb-progress-bar .scan-progress-fill {
+  background: linear-gradient(90deg, #8b5cf6, #a78bfa);
+}
+.thumb-progress-bar.complete .scan-progress-fill {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+.scan-progress-bar.active + .thumb-progress-bar.active {
+  bottom: 60px;
+}
+
+/* Push keyboard guide above progress bars */
+body:has(.thumb-progress-bar.active) .keyboard-guide,
+body:has(.scan-progress-bar.active) .keyboard-guide {
+  bottom: 74px;
+}
+body:has(.scan-progress-bar.active + .thumb-progress-bar.active) .keyboard-guide {
+  bottom: 134px;
+}

@@ -1,0 +1,132 @@
+/* LAN Share — Guest page styles */
+
+.ls-body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg, #f5f6f8);
+  color: var(--text, #222);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+}
+
+/* Header */
+.ls-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border, #e6e6e6);
+  flex-wrap: wrap;
+}
+
+.ls-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.ls-meta {
+  font-size: 13px;
+  color: var(--muted, #666);
+}
+
+.ls-timer {
+  margin-left: auto;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted, #666);
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: var(--card, #ffffff);
+}
+
+.ls-timer.ls-urgent {
+  color: #f87171;
+  background: rgba(248, 113, 113, 0.12);
+}
+
+/* Actions */
+.ls-actions {
+  padding: 12px 20px;
+  display: flex;
+  gap: 10px;
+}
+
+.ls-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent, #667eea);
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.ls-download-btn:hover {
+  background: #5a6fd6;
+}
+
+/* Grid */
+.ls-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 6px;
+  padding: 12px 20px 40px;
+}
+
+.ls-card {
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: 6px;
+  background: var(--card, #ffffff);
+}
+
+.ls-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Expired state */
+.ls-expired {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 80vh;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.ls-expired-icon {
+  font-size: 64px;
+  margin-bottom: 16px;
+  opacity: 0.6;
+}
+
+.ls-expired h1 {
+  font-size: 24px;
+  margin: 0 0 12px;
+  color: var(--text, #222);
+}
+
+.ls-expired p {
+  color: var(--muted, #666);
+  font-size: 15px;
+  max-width: 400px;
+}
+
+/* Responsive: larger thumbnails on tablet */
+@media (min-width: 600px) {
+  .ls-grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+  }
+}

@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="agent_journal.title">Agent Journal - YU AI Manager</title>
+  <link rel="stylesheet" href="static/css/main.css?v=20260306">
+  <link rel="stylesheet" href="static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260306">
+  <link rel="stylesheet" href="static/css/dark-mode/tags/dark-mode-tags-enhanced.css?v=20260306">
+  <!-- Atelier System (γ): tokens → components → editorial -->
+  <link rel="stylesheet" href="static/css/atelier/atelier-tokens.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-components.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-index.css?v=20260507">
+  <style>
+    .aj-container { max-width: 1200px; margin: 60px auto 20px; padding: 0 16px; }
+    .aj-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px; }
+    .aj-header h1 { font-size: 1.4em; margin: 0; }
+    .aj-kill-banner { background: rgba(220,38,38,0.15); border: 1px solid #ef4444; border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: none; color: #ef4444; font-weight: bold; }
+    .aj-kill-banner.active { display: block; }
+    .aj-filters { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .aj-filters select, .aj-filters input { padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border, #444); background: var(--card, #1e1e3a); color: var(--text, #e0e0e0); font-size: 13px; }
+    .aj-stats { display: flex; gap: 16px; margin-bottom: 16px; flex-wrap: wrap; }
+    .aj-stat-card { background: var(--card, #1e1e3a); border: 1px solid var(--border, #444); border-radius: 8px; padding: 12px 16px; min-width: 120px; }
+    .aj-stat-card .aj-stat-value { font-size: 1.6em; font-weight: bold; color: var(--accent, #2563eb); }
+    .aj-stat-card .aj-stat-label { font-size: 0.85em; color: var(--muted, #888); }
+    .aj-table-wrap { overflow-x: auto; }
+    .aj-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .aj-table th, .aj-table td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--border, #333); }
+    .aj-table th { background: var(--card, #1e1e3a); position: sticky; top: 0; font-weight: 600; font-size: 12px; color: var(--muted, #888); text-transform: uppercase; }
+    .aj-table tr:hover { background: rgba(255,255,255,0.03); }
+    .aj-status { padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600; }
+    .aj-status-success { background: rgba(34,197,94,0.15); color: #22c55e; }
+    .aj-status-error { background: rgba(239,68,68,0.15); color: #ef4444; }
+    .aj-status-killed { background: rgba(220,38,38,0.25); color: #ef4444; }
+    .aj-pagination { display: flex; justify-content: center; gap: 8px; margin-top: 16px; }
+    .aj-pagination button { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border, #444); background: var(--card, #1e1e3a); color: var(--text, #e0e0e0); cursor: pointer; }
+    .aj-pagination button:disabled { opacity: 0.4; cursor: not-allowed; }
+    .aj-empty { text-align: center; color: var(--muted, #888); padding: 40px 0; }
+    .aj-tool-name { font-family: monospace; font-size: 12px; }
+    .aj-time { font-size: 12px; color: var(--muted, #888); white-space: nowrap; }
+    .aj-session { font-family: monospace; font-size: 11px; color: var(--muted, #888); }
+    .aj-cb-banner { border-radius: 8px; padding: 12px 16px; margin-bottom: 16px; display: none; font-weight: bold; }
+    .aj-cb-banner.open { display: block; background: rgba(245,158,11,0.15); border: 1px solid #f59e0b; color: #f59e0b; }
+    .aj-cb-banner.half-open { display: block; background: rgba(59,130,246,0.15); border: 1px solid #3b82f6; color: #3b82f6; }
+    .aj-budget-bar { height: 8px; border-radius: 4px; background: var(--border, #333); overflow: hidden; margin-top: 4px; }
+    .aj-budget-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    .aj-budget-fill.ok { background: #22c55e; }
+    .aj-budget-fill.warn { background: #f59e0b; }
+    .aj-budget-fill.danger { background: #ef4444; }
+    .aj-section-title { font-size: 1.1em; font-weight: 600; margin: 16px 0 8px; }
+    .aj-budget-row { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 2px; }
+    .aj-cb-reset-btn, .aj-budget-reset-btn { padding: 4px 12px; border-radius: 6px; border: 1px solid var(--border, #444); background: var(--card, #1e1e3a); color: var(--text, #e0e0e0); cursor: pointer; font-size: 12px; margin-left: 8px; }
+    .aj-cb-reset-btn:hover, .aj-budget-reset-btn:hover { background: rgba(255,255,255,0.08); }
+    .aj-header-actions { display: flex; gap: 8px; }
+    .aj-action-btn { padding: 6px 14px; border-radius: 6px; border: 1px solid var(--border, #444); background: var(--card, #1e1e3a); color: var(--text, #e0e0e0); cursor: pointer; font-size: 13px; font-weight: 600; transition: background 0.15s; }
+    .aj-action-btn:hover { background: rgba(255,255,255,0.08); }
+    .aj-kill-btn.active { background: rgba(220,38,38,0.25); border-color: #ef4444; color: #ef4444; }
+    .aj-resume-btn { margin-left: 12px; padding: 4px 12px; border-radius: 6px; border: 1px solid #ef4444; background: transparent; color: #ef4444; cursor: pointer; font-size: 12px; font-weight: 600; }
+    .aj-resume-btn:hover { background: rgba(239,68,68,0.2); }
+    /* Approval Queue */
+    .aj-approval-banner { background: rgba(245,158,11,0.15); border: 1px solid #f59e0b; border-radius: 8px; padding: 10px 14px; margin-bottom: 16px; }
+    .aj-approval-title { font-weight: 700; color: #f59e0b; font-size: 14px; margin-bottom: 8px; }
+    .aj-approval-item { background: var(--card, #1e1e3a); border: 1px solid rgba(245,158,11,0.35); border-radius: 8px; padding: 10px 14px; margin-bottom: 8px; font-size: 13px; }
+    .aj-approval-item:last-child { margin-bottom: 0; }
+    .aj-approval-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 6px; margin-bottom: 6px; }
+    .aj-approval-tool { font-family: monospace; font-size: 13px; font-weight: 600; color: #f59e0b; }
+    .aj-approval-session { font-family: monospace; font-size: 11px; color: var(--muted, #888); }
+    .aj-approval-timer { font-size: 11px; color: var(--muted, #888); }
+    .aj-approval-params { font-size: 12px; color: var(--muted, #aaa); background: var(--bg, #111); border-radius: 4px; padding: 6px 8px; margin-bottom: 8px; white-space: pre-wrap; word-break: break-all; max-height: 100px; overflow-y: auto; }
+    .aj-approval-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .aj-btn-allow { padding: 5px 14px; border-radius: 6px; border: 1px solid #22c55e; background: rgba(34,197,94,0.15); color: #22c55e; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .aj-btn-allow:hover { background: rgba(34,197,94,0.3); }
+    .aj-btn-always { padding: 5px 14px; border-radius: 6px; border: 1px solid #3b82f6; background: rgba(59,130,246,0.12); color: #3b82f6; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .aj-btn-always:hover { background: rgba(59,130,246,0.25); }
+    .aj-btn-deny { padding: 5px 14px; border-radius: 6px; border: 1px solid #ef4444; background: rgba(239,68,68,0.12); color: #ef4444; cursor: pointer; font-size: 12px; font-weight: 700; }
+    .aj-btn-deny:hover { background: rgba(239,68,68,0.25); }
+/* PR-2: Governance sections */
+.aj-section { margin-bottom: 20px; }
+.aj-section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.aj-btn { padding: 4px 12px; border-radius: 4px; border: 1px solid rgba(0,0,0,0.15); cursor: pointer; font-size: 0.85rem; }
+.aj-btn-warn { background: #f59e0b; color: #fff; border-color: #d97706; }
+.aj-btn-secondary { background: var(--surface, #ede4d3); color: var(--text, #2a2620); }
+.aj-btn-undo { background: #3b82f6; color: #fff; border-color: #2563eb; }
+.aj-btn-ack { background: #10b981; color: #fff; border-color: #059669; }
+.aj-audit-actions { display: flex; gap: 8px; }
+.aj-audit-verify-result { padding: 8px 12px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9rem; }
+.aj-audit-verify-result.ok { background: #d1fae5; color: #065f46; }
+.aj-audit-verify-result.broken { background: #fee2e2; color: #991b1b; }
+.aj-anomaly-item, .aj-audit-item, .aj-undo-item { padding: 8px 12px; border-radius: 4px; background: var(--surface, #ede4d3); margin-bottom: 6px; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.aj-tool-levels-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+.aj-tool-levels-table th, .aj-tool-levels-table td { padding: 6px 10px; text-align: left; border-bottom: 1px solid rgba(0,0,0,0.08); }
+.aj-level-auto { color: #6b7280; }
+.aj-level-notify { color: #d97706; font-weight: 500; }
+.aj-level-approve { color: #dc2626; font-weight: 600; }
+  </style>
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_nav.html" %}
+  <main id="main-content" class="aj-container">
+    <div class="aj-header">
+      <h1 data-i18n="agent_journal.heading">🛡️ Agent Journal</h1>
+      <div class="aj-header-actions">
+        <button id="ajKillToggleBtn" class="aj-action-btn aj-kill-btn" type="button" title="Kill Switch" data-i18n="agent_journal.kill_btn" data-i18n-title="agent_journal.kill_switch_title">🛑 Kill</button>
+        <button id="ajCbResetBtn" class="aj-action-btn aj-cb-reset-btn" type="button" title="Circuit Breaker Reset" style="display:none" data-i18n="agent_journal.cb_reset_btn" data-i18n-title="agent_journal.cb_reset_title">⚡ CB Reset</button>
+      </div>
+    </div>
+
+    <div id="ajKillBanner" class="aj-kill-banner">
+      <span data-i18n="agent_journal.kill_active_msg">Agent Kill Switch is active. All agent operations are blocked.</span>
+      <button id="ajResumeBtn" class="aj-resume-btn" type="button" data-i18n="agent_journal.resume_btn">解除する</button>
+    </div>
+
+    <div id="ajCbBanner" class="aj-cb-banner"></div>
+
+    <!-- Approval Queue -->
+    <div id="ajApprovalSection" style="display:none;" aria-live="polite" aria-label="Approval Queue">
+      <div class="aj-approval-banner">
+        <div class="aj-approval-title">⏳ <span data-i18n="agent_journal.approval_title">承認待ちキュー</span> (<span id="ajApprovalCount">0</span>)</div>
+        <div id="ajApprovalList"></div>
+      </div>
+    </div>
+
+    <div id="ajStats" class="aj-stats"></div>
+
+    <div id="ajBudgetSection" style="margin-bottom:16px">
+      <div class="aj-section-title"><span data-i18n="agent_journal.budget">Budget</span> <button id="ajBudgetResetBtn" class="aj-budget-reset-btn" type="button" data-i18n="agent_journal.reset">Reset</button></div>
+      <div id="ajBudgetContent"></div>
+    </div>
+
+    <div id="ajScopeSection" style="margin-bottom:16px;display:none;">
+      <div class="aj-section-title"><span data-i18n="agent_journal.scopes">Active Scopes</span></div>
+      <div id="ajScopeContent" style="font-size:13px;"></div>
+    </div>
+
+      <!-- Anomaly Detection Section (PR-2) -->
+      <div id="ajAnomalySection" class="aj-section" style="display:none">
+        <div class="aj-section-header">
+          <h3 class="aj-section-title" data-i18n="agent_journal.anomaly">Anomaly Detection</h3>
+          <button id="ajAnomalyResetBtn" class="aj-btn aj-btn-warn" data-i18n="agent_journal.anomaly_reset_btn">Reset</button>
+        </div>
+        <div id="ajAnomalyContent" class="aj-anomaly-list">
+          <div class="aj-empty" data-i18n="agent_journal.anomaly_no_alerts">No anomalies detected</div>
+        </div>
+      </div>
+
+      <!-- Audit Log Section (PR-2) -->
+      <div id="ajAuditSection" class="aj-section" style="display:none">
+        <div class="aj-section-header">
+          <h3 class="aj-section-title" data-i18n="agent_journal.audit_log">Audit Log</h3>
+          <div class="aj-audit-actions">
+            <button id="ajAuditVerifyBtn" class="aj-btn aj-btn-secondary" data-i18n="agent_journal.audit_verify">Verify Chain</button>
+            <button id="ajAuditReportBtn" class="aj-btn aj-btn-secondary" data-i18n="agent_journal.audit_report">Export Report</button>
+          </div>
+        </div>
+        <div id="ajAuditVerifyResult" class="aj-audit-verify-result" style="display:none"></div>
+        <div id="ajAuditContent" class="aj-audit-list">
+          <div class="aj-empty" data-i18n="agent_journal.audit_empty">No audit log entries</div>
+        </div>
+      </div>
+
+      <!-- Tool Safety Levels Section (PR-2) -->
+      <div id="ajToolLevelsSection" class="aj-section" style="display:none">
+        <h3 class="aj-section-title" data-i18n="agent_journal.tool_levels">Tool Safety Levels</h3>
+        <div id="ajToolLevelsContent">
+          <div class="aj-empty" data-i18n="agent_journal.tool_levels_empty">No tool levels configured</div>
+        </div>
+      </div>
+
+      <!-- Undoable Actions Section (PR-2) -->
+      <div id="ajUndoSection" class="aj-section" style="display:none">
+        <h3 class="aj-section-title" data-i18n="agent_journal.undo">Undoable Actions</h3>
+        <div id="ajUndoContent">
+          <div class="aj-empty" data-i18n="agent_journal.undo_empty">No undoable actions</div>
+        </div>
+      </div>
+
+    <div class="aj-filters">
+      <select id="ajFilterStatus" aria-label="Status filter" data-i18n-aria-label="agent_journal.filter_status_label">
+        <option value="" data-i18n="agent_journal.filter_all_status">All Status</option>
+        <option value="success" data-i18n="agent_journal.filter_success">Success</option>
+        <option value="error" data-i18n="agent_journal.filter_error">Error</option>
+        <option value="killed" data-i18n="agent_journal.filter_killed">Killed</option>
+      </select>
+      <input id="ajFilterTool" type="text" placeholder="Tool name..." aria-label="Tool name filter" data-i18n-placeholder="agent_journal.filter_tool_placeholder" data-i18n-aria-label="agent_journal.filter_tool_label">
+      <input id="ajFilterSession" type="text" placeholder="Session ID..." aria-label="Session ID filter" data-i18n-placeholder="agent_journal.filter_session_placeholder" data-i18n-aria-label="agent_journal.filter_session_label">
+      <button id="ajFilterBtn" type="button" data-i18n="agent_journal.filter_btn">Filter</button>
+    </div>
+
+    <div class="aj-table-wrap">
+      <table class="aj-table">
+        <thead>
+          <tr>
+            <th data-i18n="agent_journal.th_time">Time</th>
+            <th data-i18n="agent_journal.th_tool">Tool</th>
+            <th data-i18n="agent_journal.th_status">Status</th>
+            <th data-i18n="agent_journal.th_duration">Duration</th>
+            <th data-i18n="agent_journal.th_session">Session</th>
+            <th data-i18n="agent_journal.th_summary">Summary</th>
+          </tr>
+        </thead>
+        <tbody id="ajTableBody">
+          <tr><td colspan="6" class="aj-empty" data-i18n="agent_journal.loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="aj-pagination">
+      <button id="ajPrevBtn" type="button" disabled data-i18n="agent_journal.prev">Prev</button>
+      <span id="ajPageInfo"></span>
+      <button id="ajNextBtn" type="button" disabled data-i18n="agent_journal.next">Next</button>
+    </div>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/agent-journal-app.js?v={{ dist_v }}"></script>
+</body>
+</html>

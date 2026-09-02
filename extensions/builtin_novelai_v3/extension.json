@@ -1,0 +1,19 @@
+{
+  "name": "builtin-novelai-v3",
+  "version": "1.1.0",
+  "description": "NovelAI V3-and-earlier metadata extraction (builtin) - supports the legacy prompt/uc format in PNG/WebP and produces structured inspect output",
+  "type": "importer",
+  "category": "metadata",
+  "entry": "novelai_v3.py",
+  "hooks": [
+    "on_scan_file",
+    "on_build_sections"
+  ],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/novelai-v3",
+  "config": {
+    "enabled": true,
+    "priority": 60
+  },
+  "config_schema": {}
+}

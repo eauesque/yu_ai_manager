@@ -1,0 +1,34 @@
+<nav class="nav">
+  <a href="/" class="nav-brand" aria-label="YU AI Manager Home">
+    <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true">
+      <defs><linearGradient id="navG" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" stop-color="#e76f51"/><stop offset="100%" stop-color="#f4a261"/></linearGradient></defs>
+      <circle cx="16" cy="16" r="15" fill="url(#navG)"/>
+      <path d="M16 6 C12 6 9 9 9 13 C9 17.5 16 26 16 26 C16 26 23 17.5 23 13 C23 9 20 6 16 6Z" fill="white" opacity="0.95"/>
+      <circle cx="16" cy="13" r="3" fill="url(#navG)"/>
+    </svg>
+  </a>
+  <div class="nav-search-wrap">
+    <svg class="nav-search-icon" width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+      <circle cx="7" cy="7" r="5.5" stroke="currentColor" stroke-width="1.5"/>
+      <line x1="11" y1="11" x2="14.5" y2="14.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    <input type="text" class="nav-search" id="navSearchInput" placeholder="Search images, tags, prompts..." aria-label="Search">
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" id="themeToggle" type="button" title="Toggle theme" aria-label="Toggle dark mode">&#9789;</button>
+    <div class="nav-overflow">
+      <button class="nav-btn" id="overflowBtn" type="button" title="More pages" aria-label="More pages">&#x22EF;</button>
+      <div class="nav-overflow-menu" id="overflowMenu" role="menu">
+        <a href="/" class="nav-overflow-item{% if active == 'search' %} active{% endif %}" role="menuitem">Gallery</a>
+        <a href="/stats" class="nav-overflow-item{% if active == 'stats' %} active{% endif %}" role="menuitem">Stats</a>
+        <div class="nav-overflow-divider" role="separator"></div>
+        <a href="/tools" class="nav-overflow-item" role="menuitem">Tools</a>
+        <a href="/settings" class="nav-overflow-item" role="menuitem">Settings</a>
+        <a href="/inspect" class="nav-overflow-item" role="menuitem">Inspect</a>
+        <a href="/story" class="nav-overflow-item" role="menuitem">Story</a>
+        <a href="/report" class="nav-overflow-item" role="menuitem">Report</a>
+        <a href="/extensions" class="nav-overflow-item" role="menuitem">Extensions</a>
+      </div>
+    </div>
+  </div>
+</nav>

@@ -1,0 +1,96 @@
+/* base-buttons.css — Unified button classes (GC Controller Tier A/B/C)
+ *
+ * Tier A (Frequent):  .btn.btn-primary  — 40-48px height, strong accent
+ * Tier B (Support):   .btn.btn-secondary — 32-40px height, standard
+ * Tier C (Rare):      .btn.btn-danger   — 32px height, low saturation
+ *
+ * Base .btn provides shared reset; combine with a tier modifier.
+ */
+
+/* ── Base reset ── */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border, rgba(128,128,128,0.2));
+  background: var(--btn-bg, rgba(128,128,128,0.08));
+  color: var(--btn-text, var(--text, #eee));
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+.btn:hover {
+  background: var(--btn-hover, rgba(128,128,128,0.15));
+}
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+/* Safari/WebKit focus fallback */
+.btn:focus {
+  outline: 2px solid var(--accent, #667eea);
+  outline-offset: 2px;
+}
+.btn:focus:not(:focus-visible) {
+  outline: none;
+}
+.btn:focus-visible {
+  outline: 2px solid var(--accent, #667eea);
+  outline-offset: 2px;
+}
+
+/* ── Tier A: Primary (frequent operations) ── */
+.btn.btn-primary {
+  padding: 10px 20px;
+  background: var(--accent, #667eea);
+  color: #fff;
+  border-color: transparent;
+  font-weight: 600;
+  font-size: 14px;
+}
+.btn.btn-primary:hover {
+  opacity: 0.88;
+  background: var(--accent, #667eea);
+}
+
+/* ── Tier B: Secondary (support operations) ── */
+.btn.btn-secondary {
+  padding: 8px 16px;
+  background: var(--btn-bg, rgba(128,128,128,0.08));
+  color: var(--text, #eee);
+  border-color: rgba(128,128,128,0.25);
+}
+.btn.btn-secondary:hover {
+  background: rgba(128,128,128,0.18);
+  border-color: rgba(128,128,128,0.4);
+}
+
+/* ── Tier C: Danger (rare / destructive) ── */
+.btn.btn-danger {
+  padding: 8px 16px;
+  background: #fef2f2;
+  color: #d32f2f;
+  border-color: rgba(220,38,38,0.5);
+  font-size: 12px;
+}
+body.dark .btn.btn-danger {
+  background: rgba(220,38,38,0.12);
+  color: #ff7070;
+}
+.btn.btn-danger:hover {
+  background: rgba(220,38,38,0.20);
+  border-color: rgba(220,38,38,0.7);
+}
+
+/* Extra-destructive variant (e.g. permanent file deletion) */
+.btn.btn-danger-hard {
+  background: rgba(185,28,28,0.85);
+  color: #fff;
+  border-color: transparent;
+}
+.btn.btn-danger-hard:hover {
+  background: rgba(185,28,28,1);
+}

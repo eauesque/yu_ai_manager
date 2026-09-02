@@ -1,0 +1,58 @@
+# === Python ===
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+.pytest_cache/
+
+# === Node.js (TS ビルドは Docker 内で実行) ===
+node_modules/
+static/dist/
+*.tsbuildinfo
+
+# === Git / IDE / OS ===
+.git/
+.gitignore
+.gitmodules
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.sublime-*
+
+# === データ・テスト・レポート ===
+data/
+tags.db
+*.db
+*.db-wal
+*.db-shm
+uploads/
+tests/
+reports/
+screenshots/
+test_images/
+test_data/
+sample_images/
+
+# === Tauri (デスクトップビルド) ===
+src-tauri/
+
+# === その他 ===
+archive/
+docs/
+dev/
+scratch/
+experiments/
+.claude/
+config.json
+config_test.json
+docker-compose.override.yml
+Dockerfile.debug
+Dockerfile.playwright
+docker-compose.debug.yml
+
+# === docker/hailo_wheel/ は除外しない (Hailo ビルドで必要) ===

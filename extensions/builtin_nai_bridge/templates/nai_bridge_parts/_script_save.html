@@ -1,0 +1,22 @@
+<script nonce="{{ csp_nonce }}">
+  // -- Save folder helpers ------------------------------------------
+
+  // Sibling <script> tags don't share scope with _script.html's IIFE,
+  // so re-declare the $ shorthand here.
+  function $(id) { return document.getElementById(id); }
+
+  window.nabBrowseSaveFolder = function() {
+    fetch("/api/tools/select-folder")
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.path) {
+          $("nabCfgSaveFolder").value = d.path;
+        } else if (d.error) {
+          window.showToast(window.tr('nai_bridge.folder_selection_failed', 'Folder selection failed') + ": " + (d.error || "unknown"), true);
+        }
+      })
+      .catch(function(e) {
+        window.showToast(window.tr('nai_bridge.folder_selection_failed', 'Folder selection failed') + ": " + e.message, true);
+      });
+  };
+</script>

@@ -1,0 +1,33 @@
+{
+  "name": "builtin-auto-scan-watcher",
+  "version": "1.0.0",
+  "description": "Auto Scan Watcher - automatically detects file changes and applies incremental DB updates",
+  "type": "general",
+  "category": "system",
+  "entry": "auto_scan_watcher.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/watcher",
+  "nav": {
+    "label": "Watcher",
+    "icon": "\ud83d\udc41"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 300
+  },
+  "config_schema": {
+    "debounce_seconds": {
+      "type": "number",
+      "default": 3.0
+    },
+    "auto_start": {
+      "type": "boolean",
+      "default": true
+    },
+    "scan_archives": {
+      "type": "boolean",
+      "default": true
+    }
+  }
+}

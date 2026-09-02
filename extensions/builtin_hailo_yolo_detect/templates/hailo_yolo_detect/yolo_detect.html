@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="yolo_detect.page_title">YOLO Object Detection</title>
+  <link rel="stylesheet" href="/static/css/main.css?v=20260305">
+  <link rel="stylesheet" href="/static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260305">
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content" style="max-width:900px;margin:0 auto;padding:24px 16px;padding-top:calc(var(--nav-h,50px) + 24px);">
+    <h1 class="sr-only" data-i18n="yolo_detect.page_title">YOLO Object Detection</h1>
+    <div class="yd-tabs">
+      <button class="yd-tab active" data-action="yd-tab" data-tab="batch" data-i18n="yolo_detect.tab_batch">バッチ検出</button>
+      <button class="yd-tab" data-action="yd-tab" data-tab="stream" data-i18n="yolo_detect.tab_stream">ライブストリーム</button>
+    </div>
+    <div id="yd-tab-batch" class="yd-tab-content">
+      {% include 'hailo_yolo_detect/_yolo_detect_ui.html' %}
+    </div>
+    <div id="yd-tab-stream" class="yd-tab-content" style="display:none">
+      {% include 'hailo_yolo_detect/_yolo_stream_ui.html' %}
+    </div>
+    <style>
+      .yd-tabs{display:flex;gap:2px;margin-bottom:16px;border-bottom:2px solid var(--border-color,#ddd)}
+      .yd-tab{padding:8px 20px;border:none;background:transparent;cursor:pointer;font-size:.95rem;color:var(--text-secondary,#666);border-bottom:2px solid transparent;margin-bottom:-2px;transition:color .2s,border-color .2s}
+      .yd-tab:hover{color:var(--text-primary,#333)}
+      .yd-tab.active{color:var(--accent-color,#0066cc);border-bottom-color:var(--accent-color,#0066cc);font-weight:600}
+    </style>
+    <script nonce="{{ csp_nonce }}">
+    document.querySelector('.yd-tabs')?.addEventListener('click', function(e) {
+      var btn = e.target.closest('[data-action="yd-tab"]');
+      if (!btn) return;
+      document.querySelectorAll('.yd-tab').forEach(function(b) { b.classList.remove('active'); });
+      document.querySelectorAll('.yd-tab-content').forEach(function(c) { c.style.display = 'none'; });
+      btn.classList.add('active');
+      var t = document.getElementById('yd-tab-' + btn.dataset.tab);
+      if (t) t.style.display = '';
+    });
+    </script>
+  </main>
+</body>
+</html>

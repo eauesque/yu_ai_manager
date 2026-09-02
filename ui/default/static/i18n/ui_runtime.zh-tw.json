@@ -1,0 +1,1673 @@
+{
+  "a11y": {
+    "condition_added": "已新增條件「{label}」",
+    "condition_menu_opened": "條件選單已開啟",
+    "condition_removed": "已移除條件「{label}」",
+    "focus_search": "已聚焦搜尋輸入",
+    "result_focus": "第 {index} 項，共 {total} 項：{label}",
+    "results_list_label": "搜尋結果"
+  },
+  "agent_journal": {
+    "scope_delete": "刪除",
+    "scopes_empty_with_default": "（無範圍 — 套用預設值）"
+  },
+  "analysis": {
+    "analyzed_at": "分析時間：{date}",
+    "btn_reanalyze": "重新分析",
+    "done_label": "已分析",
+    "label": {
+      "ai_tags": "AI 標籤：",
+      "color": "色彩：",
+      "composition": "構圖：",
+      "engine": "引擎：",
+      "mood": "氛圍：",
+      "quality": "品質：",
+      "style": "風格：",
+      "suggestion": "提示詞建議："
+    },
+    "status_done": "✅ 完成",
+    "status_done_engine": "✅ 完成（{engine}）",
+    "status_error": "❌ {error}",
+    "status_running": "分析中...",
+    "status_running_engine": "使用 {engine} 分析中...",
+    "status_saved": "✅ {engine}"
+  },
+  "analysis.engine": "AI Engine",
+  "analysis.engine_default": "Auto",
+  "analysis.mode": "Analysis Mode",
+  "analysis.mode_full": "Full Analysis",
+  "analysis.mode_simple": "Color + Composition",
+  "analysis.model": "AI Model",
+  "api_error": {
+    "bad_zip_file": "壓縮檔已損壞",
+    "batch_empty": "批次為空",
+    "batch_too_large": "批次大小超出限制",
+    "collection_not_found": "找不到收藏集",
+    "container_not_found": "找不到此檔案的容器",
+    "convert_failed": "格式轉換失敗",
+    "debug_disabled": "偵錯模式未啟用",
+    "empty_sql": "SQL 查詢為空",
+    "extract_register_failed": "擷取檔案註冊失敗",
+    "file_missing": "磁碟上不存在該檔案",
+    "file_not_found": "找不到檔案",
+    "gateway_no_db": "資料庫不可用（閘道模式）",
+    "internal_error": "內部伺服器錯誤",
+    "invalid_content_type": "內容類型不正確",
+    "invalid_index": "無效的索引",
+    "invalid_json": "JSON 格式不正確",
+    "invalid_json_object": "需要 JSON 物件",
+    "invalid_mode": "無效的模式",
+    "invalid_request": "無效的請求",
+    "invalid_value": "無效的值",
+    "job_running": "批次作業正在執行中",
+    "keyframe_error": "關鍵影格擷取失敗",
+    "missing_dependency": "缺少必要的程式庫",
+    "missing_file_id": "需要檔案 ID",
+    "model_not_available": "模型尚未下載",
+    "multi_stmt_rejected": "不允許多條 SQL 陳述式",
+    "no_data": "未提供資料",
+    "not_found": "找不到資源",
+    "not_select": "只能使用 SELECT 陳述式",
+    "not_zip_member": "不是壓縮檔成員",
+    "path_required": "需要指定路徑",
+    "purge_failed": "徹底刪除失敗",
+    "roots_summary_failed": "掃描根目錄彙總失敗",
+    "scan_roots_config_failed": "掃描根目錄設定失敗",
+    "sql_error": "SQL 執行錯誤",
+    "unsupported_type": "不支援此檔案類型",
+    "write_rejected": "不允許寫入操作",
+    "zip_entry_not_found": "壓縮檔中找不到該項目",
+    "zip_not_found": "找不到壓縮檔",
+    "zip_path_traversal": "路徑穿越已被阻止"
+  },
+  "boss_mode": {
+    "back": "返回",
+    "brand": "每日帳簿",
+    "esc_hint": "按 Esc 返回",
+    "headline": "通膨降溫 全球市場穩定",
+    "story1": "央行暗示下季將放緩政策緊縮",
+    "story2": "跨太平洋航線正常化，運輸成本下降",
+    "story3": "企業需求推動科技業績超越預期",
+    "story4": "兩週大宗商品漲勢後能源板塊回落",
+    "subhead": "分析師指出，週二各主要指數普遍穩定，投資者在就業數據、政策訊號和能源價格之間取得平衡。",
+    "top_stories": "頭條新聞",
+    "watchlist": "關注清單"
+  },
+  "bridge": {
+    "toolbar_legend": {
+      "title": "圖例 / 符號"
+    }
+  },
+  "bridge.syntax_warning.converting": "Converting...",
+  "bridge.syntax_warning.error": "Conversion failed",
+  "character": {
+    "negative_label": "排除：",
+    "section_title": "NovelAI V4 角色提示詞"
+  },
+  "checkpoint": {
+    "option_count": "{name}（{count}）"
+  },
+  "collections": {
+    "created": "收藏集已建立",
+    "deleted": "收藏集已刪除",
+    "renamed": "收藏集已重新命名"
+  },
+  "common": {
+    "clear": "清除",
+    "enabled": "已啟用",
+    "error_prefix": "錯誤：",
+    "loading": "載入中...",
+    "range_sep": "–",
+    "reset": "重設"
+  },
+  "common.saved": "Saved",
+  "common.saving": "Saving...",
+  "conditions": {
+    "aiAnalyzed": {
+      "label": "🧠 AI 已分析"
+    },
+    "artist": {
+      "label": "🎨 繪師",
+      "placeholder": "繪師名稱"
+    },
+    "checkpoint": {
+      "label": "🎯 Checkpoint",
+      "placeholder": "例如 animagine, pony"
+    },
+    "clear_all": "清除全部",
+    "collection": {
+      "all": "所有收藏",
+      "label": "⭐ 收藏集"
+    },
+    "csvLimit": {
+      "label": "📥 CSV 匯出限制"
+    },
+    "disabled_in_grouped": "在資料夾/ZIP 檢視中不可用",
+    "favOnly": {
+      "label": "⭐ 僅收藏"
+    },
+    "format": {
+      "ext_filter_hint": "依副檔名篩選（選填）",
+      "ext_group_audio": "音訊",
+      "ext_group_container": "容器",
+      "ext_group_image": "圖片",
+      "ext_group_video": "影片",
+      "label": "📄 格式"
+    },
+    "hasTags": {
+      "label": "🏷️ 已標籤"
+    },
+    "hint": {
+      "count_many": "{count} 個條件",
+      "count_one": "1 個條件"
+    },
+    "inCharNeg": {
+      "label": "🚫 角色反向內",
+      "placeholder": "角色反向搜尋"
+    },
+    "inCharPos": {
+      "label": "✨ 角色正向內",
+      "placeholder": "角色正向搜尋"
+    },
+    "inFolder": {
+      "label": "📂 資料夾",
+      "placeholder": "路徑片段 例如 o:\\test"
+    },
+    "inNegative": {
+      "label": "🚫 反向詞內",
+      "placeholder": "反向提示詞中的關鍵字"
+    },
+    "inPrompt": {
+      "label": "🔤 提示詞內",
+      "placeholder": "提示詞中的關鍵字"
+    },
+    "limit": {
+      "label": "#️⃣ 數量",
+      "short_label": "數量"
+    },
+    "model": {
+      "label": "🤖 模型"
+    },
+    "orTags": {
+      "label": "🔀 OR 標籤",
+      "placeholder": "包含任一（逗號分隔）"
+    },
+    "period": {
+      "label": "📅 期間"
+    },
+    "remove": "移除條件",
+    "resolution": {
+      "label": "📐 解析度"
+    },
+    "sort": {
+      "label": "↕️ 排序"
+    },
+    "tagCase": {
+      "label": "Aa 區分大小寫"
+    },
+    "toggle": {
+      "close": "▲ 收合",
+      "more": "▼ 更多"
+    }
+  },
+  "container": {
+    "folder_items": "資料夾中 {count} 張圖片",
+    "no_members": "容器中沒有已索引的成員。",
+    "preload_done": "資料夾 / ZIP 分類檢視已就緒",
+    "preloading_thumbs": "生成縮圖中...（{done}/{total}）",
+    "zip_items": "ZIP 中 {count} 張圖片"
+  },
+  "convert": {
+    "btn_expand_dynamic": "動態提示詞",
+    "btn_restore": "還原",
+    "failed": "轉換失敗",
+    "failed_with_error": "轉換失敗：{error}",
+    "label": {
+      "nai": "NAI 格式 ",
+      "sd": "SD 格式 "
+    }
+  },
+  "ctx.ai_analyze": "AI Analysis",
+  "ctx.clear_rating": "Clear",
+  "ctx.copied": "Copied",
+  "ctx.copied_nai": "Copied as NAI",
+  "ctx.copied_sd": "Copied as SD",
+  "ctx.copy_nai": "Copy as NAI",
+  "ctx.copy_negative": "Copy negative",
+  "ctx.copy_path": "Copy file path",
+  "ctx.copy_prompt": "Copy prompt",
+  "ctx.copy_sd": "Copy as SD",
+  "ctx.favorite": "Favorite ☆",
+  "ctx.find_similar": "Find similar",
+  "ctx.path_copied": "Path copied",
+  "ctx.qr_share": "Share via QR",
+  "ctx.rating": "Rating",
+  "ctx.save_pl": "Save to PL",
+  "ctx.send_bridge": "Send to Bridge",
+  "ctx.show_detail": "Show detail",
+  "detail": {
+    "audio_unsupported": "您的瀏覽器不支援音訊播放。",
+    "image_alt": "圖片",
+    "load_failed": "無法載入詳細資訊",
+    "modal": {
+      "analysis_mode": "切換分析模式",
+      "audio_playback": "音訊播放",
+      "autoplay": "自動播放 (P)",
+      "autoplay_interval": "間隔（秒）",
+      "bar_collapse": "收合列",
+      "bar_expand": "展開列",
+      "close": "關閉",
+      "container_items": "{count} 個項目",
+      "container_view": "容器檢視",
+      "display": "顯示：",
+      "favorite": "切換收藏",
+      "fullscreen": "全螢幕",
+      "info_toggle": "切換資訊面板",
+      "mode_fit": "適應",
+      "mode_fit_custom": "自訂",
+      "mode_fit_height": "高適應",
+      "mode_fit_width": "寬適應",
+      "mode_original": "原始",
+      "mute": "靜音 (M)",
+      "next": "下一張圖片",
+      "prev": "上一張圖片",
+      "repeat_off": "重複：關閉 (R)",
+      "repeat_on": "重複：開啟 (R)",
+      "resume_off": "恢復：關閉",
+      "resume_on": "恢復：開啟",
+      "spread_direction": "閱讀方向 (D)",
+      "spread_view": "跨頁檢視 (B)",
+      "toast_repeat_off": "重複：關閉",
+      "toast_repeat_on": "重複：開啟",
+      "toast_resume_off": "恢復：關閉",
+      "toast_resume_on": "恢復：開啟",
+      "toast_speed": "速度：{rate}x",
+      "toast_spread_ltr": "閱讀：左→右",
+      "toast_spread_nav_rtl": "← 下一頁 / 上一頁 →",
+      "toast_spread_off": "跨頁：關閉",
+      "toast_spread_on": "跨頁：開啟",
+      "toast_spread_rtl": "閱讀：右→左",
+      "toolbar_aria": "圖片顯示控制",
+      "toolbar_hide": "隱藏工具列",
+      "toolbar_overflow_menu": "更多",
+      "toolbar_show": "顯示工具列",
+      "unmute": "取消靜音 (M)",
+      "video_playback": "影片播放",
+      "viewing_mode": "鑑賞模式 (V)",
+      "zoom_in": "放大",
+      "zoom_out": "縮小",
+      "zoom_reset": "重設縮放"
+    },
+    "save_failed": "儲存失敗",
+    "saved_to_library": "已儲存到提示詞庫",
+    "video_unsupported": "您的瀏覽器不支援影片標籤。"
+  },
+  "detail.ann_add_label": "Add note",
+  "detail.ann_delete_confirm": "Delete this annotation?",
+  "detail.ann_empty": "No annotations yet.",
+  "detail.ann_load_failed": "Failed to load annotations.",
+  "detail.ann_placeholder": "Add a personal note for this file...",
+  "detail.ann_save_failed": "Save failed",
+  "detail.ann_source_user": "Your notes",
+  "detail.s2t_copied": "Copied to clipboard",
+  "detail.s2t_done": "Transcription complete",
+  "detail.s2t_error": "Transcription failed",
+  "detail.s2t_no_transcript": "No transcript yet. Click \"Transcribe\" to start.",
+  "detail.s2t_processing": "Processing...",
+  "detail.s2t_segments": "Segments",
+  "detail.s2t_transcribe": "Transcribe",
+  "detail.search_by_prompt": "Search by Prompt",
+  "detail.tab_ai": "AI Analysis",
+  "detail.tab_analysis_trace": "Trace",
+  "detail.tab_annotations": "Notes",
+  "detail.tab_info": "Info",
+  "detail.tab_ocr": "OCR",
+  "detail.tab_s2t": "S2T",
+  "detail.trace_date": "Analyzed",
+  "detail.trace_error": "Failed to load analysis trace",
+  "detail.trace_loading": "Loading...",
+  "detail.trace_meta_source": "Metadata Source",
+  "detail.trace_model": "Model",
+  "detail.trace_none": "No analysis trace",
+  "detail.trace_quality": "Quality Analysis",
+  "detail.trace_quality_score": "Quality",
+  "detail.trace_s2t": "Speech Recognition",
+  "detail.trace_source": "Source",
+  "detail.trace_tags": "tags",
+  "ext": {
+    "builtin-a1111": {
+      "config": {
+        "parse_negative": {
+          "description": "分離並擷取 Negative prompt: 區段",
+          "label": "同時擷取 Negative Prompt"
+        },
+        "parse_params": {
+          "description": "擷取 Steps、Sampler、CFG Scale、Model 等參數",
+          "label": "同時擷取生成參數"
+        }
+      }
+    },
+    "builtin-chatlog": {
+      "config": {
+        "api_key": {
+          "description": "使用 OpenAI / Claude API 時需要。本機 Ollama 留空",
+          "label": "API 金鑰"
+        },
+        "base_url": {
+          "description": "AI 引擎的 API 端點 URL",
+          "label": "API 基礎 URL"
+        },
+        "engine_type": {
+          "description": "用於對話分析的 AI 引擎類型",
+          "label": "AI 引擎"
+        },
+        "model": {
+          "description": "要使用的模型名稱（例如：llama3.2:latest、gpt-4o-mini）",
+          "label": "模型名稱"
+        }
+      }
+    },
+    "builtin-comfyui": {
+      "config": {
+        "extract_workflow": {
+          "description": "將 ComfyUI 工作流程 JSON 儲存到 raw_meta_json",
+          "label": "同時擷取工作流程資訊"
+        }
+      }
+    },
+    "builtin-comfyui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "略過確認對話框"
+        },
+        "default_sampler": {
+          "label": "預設取樣器"
+        },
+        "default_scheduler": {
+          "label": "預設排程器"
+        }
+      }
+    },
+    "builtin-nai-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "略過確認對話框"
+        },
+        "default_model": {
+          "label": "預設模型"
+        },
+        "default_noise_schedule": {
+          "label": "預設噪聲排程"
+        },
+        "default_sampler": {
+          "label": "預設取樣器"
+        }
+      }
+    },
+    "builtin-novelai-v4": {
+      "config": {
+        "extract_vibe_transfer": {
+          "description": "擷取 Vibe Transfer 的 strength/description",
+          "label": "同時擷取 Vibe Transfer 資訊"
+        },
+        "merge_character_prompts": {
+          "description": "將 base_caption + char_captions 以逗號分隔合併",
+          "label": "將角色提示詞合併到基礎提示詞"
+        }
+      }
+    },
+    "builtin-ocr": {
+      "config": {
+        "batch_export_format": {
+          "label": "批次匯出格式"
+        },
+        "batch_output_dir": {
+          "description": "批次匯出時的伺服器端儲存路徑。為空時以 ZIP 下載",
+          "label": "批次輸出目錄（空=下載）"
+        },
+        "default_target_lang": {
+          "label": "預設翻譯目標語言"
+        },
+        "default_task": {
+          "label": "預設 OCR 任務"
+        },
+        "manga_ocr_enabled": {
+          "label": "優先使用 manga-ocr（ocr_manga 任務時）"
+        }
+      }
+    },
+    "builtin-prompt-syntax": {
+      "config": {
+        "auto_detect": {
+          "description": "自動辨識輸入文字的 NAI/SD/DP 語法",
+          "label": "自動辨識語法"
+        },
+        "show_errors": {
+          "description": "對括號不匹配和異常權重值顯示警告",
+          "label": "顯示錯誤"
+        }
+      }
+    },
+    "builtin-sd-nai-convert": {
+      "config": {
+        "convert_emphasis": {
+          "description": "同時轉換 SD ((tag)) 與 NAI {tag} 之間的強調語法",
+          "label": "同時轉換強調語法"
+        },
+        "strip_embedding": {
+          "description": "SD→NAI 轉換時自動移除 embedding:... 標籤",
+          "label": "NAI 轉換時移除 Embedding 標籤"
+        },
+        "strip_lora": {
+          "description": "SD→NAI 轉換時自動移除 <lora:...> 標籤",
+          "label": "NAI 轉換時移除 LoRA 標籤"
+        }
+      }
+    },
+    "builtin-sd-webui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "略過確認對話框"
+        },
+        "default_sampler": {
+          "label": "預設取樣器"
+        }
+      }
+    }
+  },
+  "fleet.button.back_to_cowork": "← 返回 LAN Cowork",
+  "fleet.button.refresh": "重新整理",
+  "fleet.button.restart_node": "重新啟動此節點",
+  "fleet.consent.banner.approve_once": "僅本次批准",
+  "fleet.consent.banner.approve_permanent": "永久批准",
+  "fleet.consent.banner.countdown": "剩餘 {sec} 秒",
+  "fleet.consent.banner.deny": "拒絕",
+  "fleet.consent.banner.title": "來自 {peer} 的遠端更新請求",
+  "fleet.consent.chief.cancel": "取消",
+  "fleet.consent.chief.re_request": "重新請求",
+  "fleet.consent.chief.send_request": "傳送同意請求",
+  "fleet.consent.chief.send_request_for": "{peer} 的遠端更新已停用。傳送同意請求？",
+  "fleet.consent.chief.timeout": "同意逾時。請重新請求。",
+  "fleet.consent.chief.waiting": "等待同意 ⏱ (剩餘 {sec} 秒)",
+  "fleet.error.branch_not_allowed": "分支不允許",
+  "fleet.error.cannot_dispatch_self": "不能對主節點本身派送任務",
+  "fleet.error.consent_denied": "同意遭拒絕。",
+  "fleet.error.consent_token_invalid": "同意已失效。請重新請求。",
+  "fleet.error.deny_cooldown": "拒絕冷卻中（剩餘 {sec} 秒）",
+  "fleet.error.git_not_available": "git 不可用",
+  "fleet.error.invalid_source": "來源無效",
+  "fleet.error.local_path_not_allowed": "本地路徑不允許",
+  "fleet.error.not_in_allowlist": "不在允許清單中",
+  "fleet.error.other_chief_pending": "另一個主節點正在等待同意（剩餘 {sec} 秒）",
+  "fleet.error.remote_update_disabled": "遠端更新已停用",
+  "fleet.error.update_failed_token_consumed": "更新失敗 — 同意已消費。重新請求？",
+  "fleet.error.update_in_progress": "更新已在進行中",
+  "fleet.logs.autoscroll": "自動捲動",
+  "fleet.logs.clear": "清除",
+  "fleet.logs.copied": "已複製",
+  "fleet.logs.copy": "複製",
+  "fleet.logs.copy_failed": "複製失敗",
+  "fleet.logs.download": "下載",
+  "fleet.logs.pause": "暫停",
+  "fleet.logs.peer_select": "選擇節點",
+  "fleet.logs.placeholder": "日誌 — 請選擇節點以開始串流",
+  "fleet.logs.resume": "繼續",
+  "fleet.node.status.degraded": "資訊取得失敗",
+  "fleet.node.status.offline": "離線",
+  "fleet.node.status.online": "線上",
+  "fleet.node.status.restarting": "重新啟動中",
+  "fleet.settings.col.action": "Action",
+  "fleet.settings.col.log_stream": "Log stream",
+  "fleet.settings.col.peer": "Peer",
+  "fleet.settings.col.status": "Status",
+  "fleet.settings.col.update": "Update",
+  "fleet.settings.local.allow_remote_update": "Enable remote updates (master switch)",
+  "fleet.settings.local.desc": "Configure whether this node allows other peers to stream logs or perform remote updates. Toggle checkboxes per peer.",
+  "fleet.settings.local.save": "Save",
+  "fleet.settings.local.title": "This node's settings",
+  "fleet.settings.remote.already_granted": "Already granted",
+  "fleet.settings.remote.desc": "Use the pairing token to add the chief's peer_id to the target peer's allowlist. You don't need to log in on the peer, but a pairing token is required.",
+  "fleet.settings.remote.done": "Done",
+  "fleet.settings.remote.failed": "Failed",
+  "fleet.settings.remote.grant": "Grant on this peer",
+  "fleet.settings.remote.not_granted": "Not granted",
+  "fleet.settings.remote.revoke": "Revoke on this peer",
+  "fleet.settings.remote.status_unreachable": "Cannot check",
+  "fleet.settings.remote.title": "Remote grant (chief only)",
+  "fleet.settings.save_failed": "Save failed",
+  "fleet.settings.saved": "Saved",
+  "fleet.tab.logs": "日誌",
+  "fleet.tab.overview": "總覽",
+  "fleet.tab.settings": "Settings",
+  "fleet.tab.update": "更新",
+  "fleet.title": "Fleet 管理",
+  "fleet.update.branch": "分支：",
+  "fleet.update.button.dispatch": "批次更新所選節點",
+  "fleet.update.button.pull_restart": "Pull & Restart",
+  "fleet.update.button.restart_only": "僅重啟",
+  "fleet.update.button.restart_only_dispatch": "重啟所選節點",
+  "fleet.update.col.action": "操作",
+  "fleet.update.col.branch": "分支",
+  "fleet.update.col.commit": "提交",
+  "fleet.update.col.node": "節點",
+  "fleet.update.col.progress": "進度",
+  "fleet.update.col.version": "版本",
+  "fleet.update.confirm.chief": "更新本機將暫時中斷管理介面。確定繼續？",
+  "fleet.update.confirm.restart": "將重啟所選節點。是否繼續？",
+  "fleet.update.confirm.update": "將更新所選節點。執行 git pull 後重啟。是否繼續？",
+  "fleet.update.no_selection": "請至少選擇一個節點",
+  "fleet.update.placeholder": "更新標籤將於 Phase 4 實作。",
+  "fleet.update.source": "來源：",
+  "fleet.warning.multi_chief": "偵測到多個主節點，請重新啟動衝突的主節點。",
+  "genai.chat_delete_confirm": "Delete this conversation?",
+  "genai.chat_image_only": "Image-only messages are not supported",
+  "genai.chat_no_conversations": "No conversations",
+  "genai.chat_rename_prompt": "Enter a conversation name",
+  "genai.chat_search_sources": "Search sources",
+  "grid": {
+    "auto": "自動",
+    "col_fixed": "欄（固定）",
+    "col_unit": "欄",
+    "count_prefix": "顯示：",
+    "count_unit": " 個項目 / ",
+    "image_only": " / 僅圖片",
+    "size_hint": " / 大小在自動模式下生效"
+  },
+  "grouping": {
+    "btn_archive": "封存",
+    "btn_files": "檔案",
+    "btn_folders": "資料夾",
+    "btn_zip": "ZIP",
+    "count_folders": "找到 {count} 個資料夾",
+    "count_zips": "找到 {count} 個 ZIP 壓縮檔",
+    "rebuild": "重建群組",
+    "rebuilt": "群組已重建：{folders} 個資料夾，{zips} 個 ZIP",
+    "summary": "群組：{visible} / {total}",
+    "summary_folders": "資料夾：{visible}（{total} 個檔案）",
+    "summary_zips": "ZIP：{visible}（{total} 個檔案）"
+  },
+  "input_hint": {
+    "artist": "Esc：取消焦點 | Alt+0/$：行首/行尾 | Ctrl+W：刪除單詞 | ?：說明",
+    "condition": "Esc：取消焦點 | /：跳至搜尋 | ?：快捷鍵列表",
+    "default": "/：搜尋 | Esc：關閉 | ?：鍵盤說明",
+    "inPrompt": "Esc：取消焦點 | Alt+W/B：單詞移動 | Ctrl+U：全部清除 | ?：說明",
+    "tagQuery": "Esc：取消焦點 | /：返回搜尋 | Alt+W/B：單詞移動 | Ctrl+K：刪除到行尾 | ?：說明"
+  },
+  "inspect": {
+    "conv_expand": "動態提示詞展開結果",
+    "conv_nai_sd": "NAI → SD 結果",
+    "conv_sd_nai": "SD → NAI 結果",
+    "conv_warn_already_nai": "輸入似乎已經是 NAI 格式",
+    "conv_warn_already_sd": "輸入似乎已經是 SD 格式",
+    "conv_warn_mixed": "輸入中混合了 NAI 和 SD 語法",
+    "copied": "已複製",
+    "copy": "複製",
+    "error": "錯誤",
+    "fmt_a1111": "格式：A1111（Stable Diffusion）",
+    "fmt_json": "格式：JSON",
+    "fmt_plain": "格式：純文字",
+    "negative": "反向",
+    "network_error": "網路錯誤",
+    "open_in_sim": "在提示詞模擬器中開啟",
+    "output": "輸出",
+    "parse_error": "解析錯誤",
+    "positive": "正向",
+    "resolution": "解析度",
+    "sim_choices": "選項",
+    "sim_combinations": "{count} 種組合",
+    "sim_depth": "深度",
+    "sim_dp_analyze": "DP 機率分析",
+    "sim_link": "開啟提示詞模擬器",
+    "sim_link_text": "開啟提示詞模擬器",
+    "sim_pick_n": "從 {total} 中選取 {n}",
+    "sim_probability": "機率",
+    "sim_syntax": "語法",
+    "sim_token": "Token",
+    "sim_weight": "權重",
+    "sim_weight_calc": "強調權重計算器",
+    "tag_count": "標籤數量",
+    "wh_not_found": "大小：未找到 WxH 或 width/height 模式",
+    "wh_swap_result": "寬/高互換結果",
+    "zip_select": "ZIP 中的圖片"
+  },
+  "kb_help": {
+    "basic": {
+      "close_or_blur": "關閉 / 取消焦點",
+      "focus_search": "聚焦搜尋輸入（從任何位置）",
+      "run_search": "執行搜尋",
+      "screen_lock": "螢幕鎖定（已設定 PIN 時）",
+      "title": "基本",
+      "toggle_help": "顯示/隱藏此說明"
+    },
+    "edit": {
+      "delete_prev_word": "刪除前一個單詞",
+      "kill_line": "刪除整行",
+      "kill_to_end": "從游標刪除到行尾",
+      "title": "文字編輯（Emacs 風格）"
+    },
+    "existing": {
+      "open_condition_menu": "開啟新增條件選單",
+      "regex_cheatsheet": "開啟正規表達式速查表",
+      "title": "現有快捷鍵",
+      "toggle_regex": "切換正規表達式開/關"
+    },
+    "footer": {
+      "close": "關閉",
+      "hint_line": "提示：聚焦欄位時底部會顯示說明",
+      "or": "或",
+      "regex_intro_link": "什麼是正規表達式？（入門介紹）"
+    },
+    "move": {
+      "delete_char": "刪除字元",
+      "line_end": "移至行尾",
+      "line_start": "移至行首",
+      "next_word": "移至下一個單詞",
+      "prev_word": "移至上一個單詞",
+      "title": "游標移動（Vim 風格）"
+    },
+    "regex_intro": {
+      "desc": "只要三個範例就能讓搜尋更輕鬆",
+      "open": "開啟介紹",
+      "title": "正規表達式新手？"
+    },
+    "title": "鍵盤快捷鍵"
+  },
+  "keyboard": {
+    "close": "關閉",
+    "guide": {
+      "autoplay": "自動播放",
+      "close": "關閉",
+      "copy": "複製",
+      "dismiss": "隱藏鍵盤指南",
+      "dismiss_toast": "按 H 再次顯示",
+      "filmstrip_nav": "上一個/下一個檔案（在媒體中有效）",
+      "filmstrip_toggle": "影片條",
+      "focus_move": "焦點移動",
+      "media_controls": "媒體",
+      "modal_label": "模態",
+      "move": "移動",
+      "open": "開啟",
+      "prev_next": "上一個/下一個",
+      "prev_next_or_seek": "上一個/下一個（或媒體快轉 5 秒）",
+      "results_label": "結果",
+      "scroll": "捲動",
+      "speed": "速度",
+      "spread_toggle": "跨頁檢視",
+      "to_search": "至搜尋",
+      "toggle_btn": "鍵盤指南 (H)",
+      "volume": "音量"
+    },
+    "help": "說明",
+    "prev_next": "上一張/下一張圖片"
+  },
+  "lan_cowork.import.done": "匯入完成",
+  "lan_cowork.import.partial": "部分檔案匯入失敗",
+  "lan_cowork.import.err.no_folder": "請指定匯入資料夾",
+  "lan_cowork.import.err.no_peer": "請選擇要匯入的節點",
+  "lan_cowork.import.error": "匯入失敗",
+  "lan_cowork.import.folder": "匯入資料夾",
+  "lan_cowork.import.folder.pick_failed": "Failed to choose folder",
+  "lan_cowork.import.mode": "模式",
+  "lan_cowork.import.mode.diff": "差異",
+  "lan_cowork.import.mode.full": "全部",
+  "lan_cowork.import.opt.favorites": "包含收藏",
+  "lan_cowork.import.opt.merge": "合並中繼資料（雜湊相符時）",
+  "lan_cowork.import.peer": "來源節點",
+  "lan_cowork.import.running": "匯入中...",
+  "lan_cowork.import.start": "開始匯入",
+  "lan_cowork.import.timeout": "匯入逾時",
+  "lan_cowork.import.title": "遠端匯入",
+  "lan_cowork.peers.discover_error": "搜尋節點失敗",
+  "lan_cowork.peers.empty": "沒有已連線的節點",
+  "lan_cowork.peers.extension_disabled": "LAN Cowork 擴充功能已停用。請從擴充功能管理中啟用後重新啟動伺服器。",
+  "lan_cowork.peers.offline": "離線",
+  "lan_cowork.peers.online": "線上",
+  "lan_cowork.peers.pair_btn": "Pair request",
+  "lan_cowork.peers.pair_pin_prompt": "Enter the PIN shown on the other side.",
+  "lan_cowork.peers.pair_request_error": "Failed to request pairing",
+  "lan_cowork.peers.pair_request_sent": "Approve on the other side, then enter the displayed PIN.",
+  "lan_cowork.peers.pair_requesting": "Requesting...",
+  "lan_cowork.peers.pair_success": "Pairing completed",
+  "lan_cowork.peers.pair_verify_error": "PIN verification failed",
+  "lan_cowork.peers.paired": "Paired",
+  "lan_cowork.peers.refresh": "重新整理",
+  "lan_cowork.peers.remove_btn": "Remove",
+  "lan_cowork.peers.remove_confirm": "Remove this peer?",
+  "lan_cowork.peers.remove_error": "Failed to remove peer",
+  "lan_cowork.peers.remove_success": "Removed",
+  "lan_cowork.peers.title": "已連線節點",
+  "lan_cowork.peers.unpaired": "Unpaired",
+  "lan_cowork.pin_modal.error.empty": "Please enter PIN",
+  "lan_cowork.title": "LAN Cowork",
+  "lc_peers": {
+    "pair_modal": {
+      "close": "關閉"
+    },
+    "sse": {
+      "paired": "裝置已配對",
+      "pairing_request": "已收到配對請求"
+    }
+  },
+  "lc_peers.fleet.enable_notifications": "啟用通知",
+  "lc_peers.nav.back": "← LAN Cowork",
+  "lc_peers.page_title": "Peer 管理 - LAN Cowork",
+  "lc_peers.pair_modal.cancel": "取消",
+  "lc_peers.pair_modal.confirm": "確認",
+  "lc_peers.pair_modal.done": "關閉",
+  "lc_peers.pair_modal.error.generic": "發生錯誤",
+  "lc_peers.pair_modal.error.unknown": "無法確認遠端節點的狀態。",
+  "lc_peers.pair_modal.paired_toast": "配對完成",
+  "lc_peers.pair_modal.pin.error.empty": "請輸入 PIN",
+  "lc_peers.pair_modal.pin.error.invalid": "PIN 不正確",
+  "lc_peers.pair_modal.pin.error.retryable": "PIN 不正確。還可嘗試 {attempts} 次。",
+  "lc_peers.pair_modal.pin.error.attempts_exhausted": "PIN 嘗試次數已達上限。",
+  "lc_peers.pair_modal.repair_steps": "請重新開始配對，並讓另一節點的管理員核准新的請求。",
+  "lc_peers.pair_modal.pin.label": "PIN",
+  "lc_peers.pair_modal.pin.placeholder": "••••••",
+  "lc_peers.pair_modal.step1.msg": "正在發送配對請求...",
+  "lc_peers.pair_modal.step2.msg": "請在對方主機上核准 PIN，然後輸入顯示的 PIN。",
+  "lc_peers.pair_modal.step3.msg": "配對完成。",
+  "lc_peers.pair_modal.title": "配對",
+  "lc_peers.peers.col.actions": "操作",
+  "lc_peers.peers.col.address": "位址",
+  "lc_peers.peers.col.name": "Peer 名稱",
+  "lc_peers.peers.col.status": "狀態",
+  "lc_peers.peers.col.token_expires": "Token 有效期限",
+  "lc_peers.peers.empty": "沒有已連線的 Peer",
+  "lc_peers.peers.load_error": "取得 Token 清單失敗",
+  "lc_peers.peers.pair_request_error": "配對請求失敗",
+  "lc_peers.peers.refresh": "重新整理",
+  "lc_peers.peers.revoke": "撤銷",
+  "lc_peers.peers.revoke_confirm": "要撤銷此 Peer 的 Token 嗎？",
+  "lc_peers.peers.revoke_error": "撤銷失敗",
+  "lc_peers.peers.revoked": "已撤銷 Token",
+  "lc_peers.peers.status.auth_lost": "需要重新配對",
+  "lc_peers.peers.status.paired": "已配對",
+  "lc_peers.peers.title": "已連線 Peer 清單",
+  "lc_peers.requests.approve_error": "核准失敗",
+  "lc_peers.requests.col.actions": "操作",
+  "lc_peers.requests.col.peer_name": "Peer 名稱",
+  "lc_peers.requests.col.requester": "請求方",
+  "lc_peers.requests.col.time": "接收時間",
+  "lc_peers.requests.empty": "沒有待核准的配對請求",
+  "lc_peers.requests.load_error": "取得請求清單失敗",
+  "lc_peers.requests.refresh": "重新整理",
+  "lc_peers.requests.reject_error": "拒絕失敗",
+  "lc_peers.requests.rejected": "已拒絕",
+  "lc_peers.requests.title": "待核准配對請求",
+  "lc_peers.title": "Peer 管理",
+  "llm_router": {
+    "aliases_section": "路由別名",
+    "backends_section": "後端",
+    "col": {
+      "actions": "操作",
+      "alias": "別名",
+      "alias_name": "別名",
+      "base_url": "Base URL",
+      "last_seen": "最後確認",
+      "models": "模型數",
+      "physical": "實體模型",
+      "slo": "SLO",
+      "status": "狀態"
+    },
+    "disable": "停用",
+    "disabled_badge": "[已停用]",
+    "enable": "啟用",
+    "loading": "載入中...",
+    "no_aliases": "尚未設定路由別名",
+    "no_backends": "尚未註冊後端",
+    "refresh": "重新整理",
+    "refresh_all": "全部重新整理",
+    "refresh_failed": "重新整理失敗",
+    "refreshed": "已重新整理",
+    "source": {
+      "mdns": "mDNS",
+      "static": "靜態"
+    },
+    "status": {
+      "error": "錯誤",
+      "ok": "運作中",
+      "unknown": "未知",
+      "unreachable": "無法連線"
+    },
+    "summary": {
+      "aliases": "路由別名",
+      "backends": "後端數量",
+      "enabled": "已啟用",
+      "models": "模型總數"
+    },
+    "title": "LLM Router",
+    "toggle_failed": "啟用/停用切換失敗"
+  },
+  "mesh_inference": {
+    "action": {
+      "local_only": "僅限本機模式",
+      "local_only_tooltip": "本機沒有可用的推論類型",
+      "refresh": "重新整理"
+    },
+    "col": {
+      "peer": "節點"
+    },
+    "empty": "沒有已連線的節點。",
+    "subtitle": "依據每個節點及推論類型切換分散推論的啟用/停用。",
+    "title": "分散推論矩陣",
+    "toast": {
+      "load_failed": "載入失敗",
+      "refreshed": "已重新整理",
+      "save_failed": "儲存失敗",
+      "saved": "已儲存"
+    },
+    "type": {
+      "clip": "clip",
+      "tagger": "tagger",
+      "whisper": "whisper",
+      "yolo": "yolo"
+    }
+  },
+  "meta": {
+    "checkpoint_search": "Checkpoint 搜尋",
+    "click_open_dir": "點擊開啟目錄",
+    "click_to_copy": "點擊複製",
+    "copy_original": "複製",
+    "download_json": "下載",
+    "negative_label": "反向",
+    "no_metadata": "無中繼資料",
+    "parameters_title": "參數",
+    "parse_success": "解析成功",
+    "positive_label": "正向",
+    "seed_copy": "複製 Seed"
+  },
+  "nav": {
+    "back_title": "返回先前位置",
+    "bottom_aria": "前往底部",
+    "bottom_title": "前往底部 (End)",
+    "llm_router": "LLM Router",
+    "mesh_inference": "分散推論",
+    "top_aria": "前往頂部",
+    "top_title": "前往頂部 (Home)"
+  },
+  "nav.lan_cowork": "LAN Cowork",
+  "path": {
+    "copy_label": "路徑 ",
+    "copy_label_filename": "檔名 ",
+    "copy_label_zip": "ZIP 路徑 ",
+    "copy_title": "複製路徑",
+    "copy_title_filename": "複製檔名",
+    "copy_title_zip": "複製 ZIP 路徑",
+    "label": "路徑："
+  },
+  "period": {
+    "12h": "12小時",
+    "24h": "24小時",
+    "3h": "3小時",
+    "8h": "8小時",
+    "custom": "自訂",
+    "days3": "3 天",
+    "days5": "5 天",
+    "half_year": "6 個月",
+    "last_month": "上個月",
+    "month1": "1 個月",
+    "month2": "2 個月",
+    "month3": "3 個月",
+    "month9": "9 個月",
+    "week1": "1 週",
+    "week2": "2 週",
+    "year1": "1 年",
+    "yesterday": "到昨天"
+  },
+  "presets": {
+    "deleted": "預設已刪除：{name}",
+    "empty": "沒有已儲存的預設",
+    "loaded": "預設已載入：{name}",
+    "nothing_to_save": "沒有可儲存的搜尋狀態",
+    "rename_prompt": "新的預設名稱：",
+    "renamed": "預設已重新命名：{name}",
+    "save_prompt": "預設名稱：",
+    "saved": "預設已儲存：{name}"
+  },
+  "prompt": {
+    "badge": {
+      "embedding": "Textual Inversion（Embedding）",
+      "lora_weight": "LoRA 權重：{weight}",
+      "novelai_weight": "NovelAI 權重：{weight}",
+      "paren_weight": "權重：{weight}（{count} 個括號）",
+      "random_choice": "隨機選擇",
+      "weight": "權重：{weight}"
+    }
+  },
+  "prompt_library.insert_as_is": "Insert as-is",
+  "prompt_library.insert_cancel": "Cancel",
+  "prompt_library.insert_convert_and_insert": "Convert and insert",
+  "prompt_library.insert_syntax_mismatch_body": "The selected prompt appears to use a different syntax from the current bridge. What do you want to do?",
+  "prompt_library.insert_syntax_mismatch_title": "Syntax mismatch detected",
+  "qr": {
+    "content_label": "QR 內容：",
+    "copy_text": "複製文字",
+    "info": {
+      "compressing": "⚠️ 文字過長，正在壓縮",
+      "meta_len": "📦 {count} 字元",
+      "negative_len": "🚫 {count} 字元",
+      "positive_len": "📝 {count} 字元",
+      "too_long": "⚠️ 文字對 QR 來說太長。請使用文字複製。",
+      "url": "🔗 分享 URL"
+    },
+    "load_failed": "無法載入 QR 函式庫",
+    "mode": {
+      "meta": "所有中繼資料（JSON）",
+      "negative": "反向提示詞",
+      "positive": "正向提示詞",
+      "url": "分享 URL",
+      "url_local_disabled": "🚫 URL（localhost）"
+    },
+    "no_content": "無內容",
+    "save_image": "儲存 QR 圖片",
+    "text_too_long": "文字過長",
+    "use_text_copy": "請使用文字複製"
+  },
+  "random": {
+    "empty": "沒有可用的搜尋結果供隨機顯示",
+    "opened_one": "已開啟一個隨機結果"
+  },
+  "resolution": {
+    "landscape": "橫向 W>=1024 H<=768",
+    "portrait": "直向 W<=768 H>=1024",
+    "square": "正方形",
+    "square_1024": "1024x1024",
+    "w1024": "W>=1024",
+    "w512": "W>=512",
+    "w768": "W>=768"
+  },
+  "result": {
+    "ai_analysis": "AI 分析",
+    "copy_id_title": "複製檔案 ID",
+    "copy_prompt_title": "複製提示詞",
+    "detail_label": "詳細",
+    "negative_label": "反向：",
+    "positive_label": "正向：",
+    "qr_share": "QR 分享",
+    "save_to_library": "儲存到提示詞庫",
+    "show_detail_aria": "顯示詳細"
+  },
+  "scan": {
+    "banner": {
+      "dismiss": "關閉",
+      "interrupted": "上次掃描被中斷",
+      "resume": "恢復",
+      "resume_failed": "恢復失敗",
+      "resuming": "恢復掃描中...",
+      "scroll_top": "前往頂部",
+      "stop": "停止"
+    },
+    "complete_confirm_refresh": "掃描完成。立即重新整理結果？",
+    "complete_label": "✓ 掃描完成！",
+    "complete_toast": "掃描完成：已處理 {count} 個檔案",
+    "details": {
+      "processed": "已處理 {total} 個檔案",
+      "progress": "{current} / {total} 個檔案"
+    },
+    "failed_label": "✗ 掃描失敗",
+    "failed_toast": "掃描失敗：{error}",
+    "phase": {
+      "counting": "計算檔案中...",
+      "initializing": "初始化中...",
+      "scanning": "掃描圖片中..."
+    },
+    "start_failed": "無法開始掃描",
+    "time": {
+      "minutes": "{m}分{s}秒",
+      "seconds": "{n}秒"
+    },
+    "unknown_error": "未知錯誤"
+  },
+  "scheduler": {
+    "action_failed": "操作失敗",
+    "actions": "操作",
+    "active": "啟用",
+    "add_dialog_title": "新增任務",
+    "add_job": "新增任務",
+    "added_msg": "任務已新增",
+    "cancel": "取消",
+    "delete": "刪除",
+    "delete_confirm": "確定刪除任務「{id}」？",
+    "deleted_msg": "任務已刪除",
+    "duration": "耗時",
+    "error": "錯誤",
+    "failed": "失敗",
+    "field_day": "日",
+    "field_day_of_week": "星期",
+    "field_func": "函式",
+    "field_hour": "時",
+    "field_job_id": "任務 ID",
+    "field_minute": "分",
+    "field_trigger_type": "觸發器類型",
+    "hint_day": "1-31，逗號分隔，或 *",
+    "hint_dow": "mon-sun、0-6，或 *",
+    "hint_hour": "0-23，逗號分隔，或 *",
+    "hint_minute": "0-59，逗號分隔，或 *",
+    "history": "執行歷史",
+    "job_desc_bsky_notification_poll": "Bluesky 通知輪詢",
+    "job_desc_db_backup": "資料庫備份",
+    "job_desc_db_integrity_check": "資料庫完整性檢查",
+    "job_desc_db_vacuum": "SQLite VACUUM（回收空間）",
+    "job_desc_github_issue_poll": "GitHub Issue 輪詢",
+    "job_desc_prune_unused_tags": "清除未使用標籤",
+    "job_desc_rebuild_groups_index": "重建群組索引",
+    "job_desc_refresh_monthly_stats": "更新月度統計快取",
+    "job_desc_thumbnail_cleanup": "縮圖快取清理",
+    "job_id": "任務 ID",
+    "jobs": "任務列表",
+    "loading": "載入中...",
+    "next_run": "下次執行",
+    "no_history": "無執行歷史",
+    "no_jobs": "尚未註冊任何任務",
+    "pause": "暫停",
+    "paused": "已暫停",
+    "paused_msg": "任務已暫停",
+    "refresh": "重新整理",
+    "result": "結果",
+    "resume": "恢復",
+    "resumed_msg": "任務已恢復",
+    "running": "執行中",
+    "status": "排程器狀態",
+    "status_label": "狀態",
+    "stopped": "已停止",
+    "submit": "新增",
+    "success": "成功",
+    "time": "執行時間",
+    "title": "任務排程器",
+    "trigger": "觸發器",
+    "trigger_now": "立即執行",
+    "triggered": "任務已加入即時執行佇列",
+    "job_desc_thumbnail_integrity_check": "縮圖完整性檢查（移除過時/不一致的縮圖）"
+  },
+  "sd_bridge": {
+    "inserted": "已插入"
+  },
+  "sd_nai_convert": {
+    "copied": "已複製"
+  },
+  "search": {
+    "count": {
+      "normal": "找到 {count} 筆結果",
+      "partial": "{shown} / {total} 項",
+      "prompt_match": "{count} 筆結果（提示詞匹配）",
+      "suffix_results": "筆結果",
+      "unit": "{count}",
+      "zero": "0 筆結果"
+    },
+    "error": {
+      "failed": "搜尋失敗：{message}",
+      "generic": "搜尋時發生錯誤",
+      "network": "無法連線到伺服器。請確認伺服器正在執行。",
+      "regex": "正規表達式錯誤：{error}"
+    },
+    "export_csv_hint": "將 {count} 筆結果匯出為 CSV（可從「+新增條件」選單變更限制）",
+    "live": {
+      "title": "即時搜尋（自動）",
+      "toast_off": "即時搜尋：關閉",
+      "toast_on": "即時搜尋：開啟"
+    },
+    "loading_more": "載入中...",
+    "partial_warning": "已達顯示上限（{limit}）。縮小條件或增加顯示數量以顯示所有結果。",
+    "path_tip": {
+      "message": "同時搜尋標籤名稱和檔案/資料夾名稱。如需精確結果，請在搜尋欄中輸入標籤，並透過「新增條件」→「資料夾」指定檔案/資料夾名稱。",
+      "move_btn": "📂 移至資料夾搜尋"
+    },
+    "placeholder": {
+      "plain": "範例：1girl, blonde_hair, -nsfw",
+      "regex": "範例：1girl, blue_(hair|eyes)  正規表達式標籤搜尋"
+    },
+    "regex_note": "（正規表達式篩選）",
+    "regex_warn_confirm": "⚠️ 正規表達式搜尋在大型資料集上可能較慢。\n繼續搜尋？",
+    "state": {
+      "empty_db_hint1": "前往設定頁面並註冊圖片資料夾",
+      "empty_db_hint2": "點擊「開始掃描」以匯入圖片中繼資料",
+      "empty_db_hint3": "掃描後，圖片將出現在搜尋結果中",
+      "empty_db_message": "在設定中新增圖片資料夾以開始",
+      "empty_db_settings_link": "開啟設定",
+      "empty_db_title": "資料庫中尚無圖片",
+      "collection_empty_title": "此收藏夾還沒有任何項目",
+      "collection_empty_message": "點擊圖片右下角的星星即可加入此收藏夾。",
+      "collection_empty_filtered_message": "此收藏夾中沒有符合搜尋條件的圖片，請嘗試減少篩選條件。",
+      "empty_title": "沒有符合條件的圖片",
+      "error_title": "發生錯誤",
+      "example1": "標籤搜尋：1girl, blue eyes（逗號分隔 = AND）",
+      "example2": "排除：-bad quality（減號前綴）",
+      "example3": "使用 +新增條件 進行模型/日期篩選",
+      "example4": "正規表達式：girl.*hair（模式匹配）",
+      "examples_label": "範例：",
+      "first_message": "輸入標籤或條件以搜尋圖片",
+      "first_title": "試試搜尋",
+      "hint1": "檢查標籤拼寫（範例：1girl, blue_eyes）",
+      "hint2": "嘗試擴大日期範圍",
+      "hint3": "在正規表達式模式下，使用 .*keyword.* 進行部分匹配",
+      "hint4": "減少條件以擴大搜尋範圍",
+      "hint_label": "提示：",
+      "start_prompt": "按下搜尋按鈕或 Enter",
+      "unknown_error": "未知錯誤"
+    }
+  },
+  "semantic_search.elapsed": "elapsed",
+  "semantic_search.elapsed_suffix": "elapsed",
+  "server_info": {
+    "files": "個檔案",
+    "load_failed": "無法載入伺服器資訊",
+    "startup_initializing": "伺服器初始化中",
+    "startup_migration": "啟動時資料庫升級",
+    "startup_stage_backfill": "正在更新現有記錄的搜尋欄位。",
+    "startup_stage_backup": "正在建立升級前的安全備份。",
+    "startup_stage_backup_reused": "正在重複使用未變更的現有備份。",
+    "startup_stage_backup_skipped": "大型資料庫略過備份以縮短啟動時間。",
+    "startup_stage_file_cache": "正在建立檔案元資料快取，即將就緒。",
+    "startup_stage_finalizing": "升級完成，正在完成啟動…",
+    "startup_stage_migrate": "正在套用資料庫結構描述更新。",
+    "startup_stage_prepare": "正在準備升級檢查。",
+    "startup_stage_rebuild_fts": "正在為新結構描述重建搜尋索引。",
+    "startup_upgrade_in_progress": "資料庫升級中",
+    "startup_upgrade_wait": "大型資料庫可能需要幾分鐘。",
+    "tags": "個標籤"
+  },
+  "settings": {
+    "apikeys_created": "建立時間：",
+    "apikeys_empty": "尚未建立 API 金鑰。",
+    "apikeys_full_access": "完整存取",
+    "apikeys_last_used": "上次使用：",
+    "apikeys_revoke": "撤銷此金鑰",
+    "apikeys_toast_copied": "API 金鑰已複製",
+    "apikeys_toast_create_failed": "無法建立 API 金鑰",
+    "apikeys_toast_created": "API 金鑰已建立",
+    "apikeys_toast_mcp_copied": "MCP 程式碼片段已複製",
+    "apikeys_toast_revoke_failed": "無法撤銷 API 金鑰",
+    "apikeys_toast_revoked": "API 金鑰已撤銷",
+    "blocker_local_only": "此操作僅允許從本機執行",
+    "blocker_pin_not_active": "PIN 認證未啟用（需要重啟）",
+    "blocker_pin_session": "需要 PIN 認證工作階段",
+    "blocker_restart_disabled": "重啟 API 已停用（--allow-restart 或 TAGDB_ALLOW_RESTART=1）",
+    "blocker_token_missing": "未設定遠端重啟令牌",
+    "conditions_not_met": "條件未滿足",
+    "container_nav_continuous": "繼續到下一個資料夾/ZIP",
+    "container_nav_continuous_hint": "在檢視器中到達結尾時導覽到相鄰的資料夾/ZIP",
+    "container_nav_order": "群組導覽順序",
+    "container_nav_order_hint": "在資料夾/ZIP 之間導覽的順序",
+    "container_nav_order_name": "名稱順序",
+    "container_nav_order_result": "搜尋結果順序",
+    "database": "資料庫",
+    "delete": "刪除",
+    "disabled": "已停用",
+    "enabled": "已啟用",
+    "env_var": "環境變數",
+    "error": "錯誤",
+    "ext_disable": "停用",
+    "ext_disabled": "已停用",
+    "ext_disabled_msg": "擴充功能已停用。",
+    "ext_enable": "啟用",
+    "ext_enabled": "已啟用",
+    "ext_enabled_msg": "擴充功能已啟用。",
+    "ext_restart_required": "需要重新啟動才能套用。",
+    "ext_toggle_failed": "擴充功能切換失敗",
+    "failed": "失敗",
+    "files_tags": "檔案 / 標籤",
+    "json_saved": "✅ JSON 已儲存",
+    "lan_public": "區域網路公開",
+    "load_failed": "載入失敗",
+    "local_only": "僅限本機",
+    "lock_failed": "鎖定失敗",
+    "meta_breakdown": "中繼資料統計",
+    "modal_kb_guide": "在檢視器中顯示鍵盤指南",
+    "modal_kb_guide_hint": "在模態檢視器底部顯示鍵盤快捷鍵提示",
+    "network": "網路",
+    "no_extensions": "未安裝擴充功能。",
+    "no_roots": "未註冊資料夾。",
+    "none_detected": "未偵測到",
+    "not_set": "未設定",
+    "path_updated": "路徑已更新",
+    "pin_active": "PIN 已啟用",
+    "pin_disabled": "PIN 已停用",
+    "pin_pending": "PIN 已設定（需要重啟）",
+    "pin_source": "PIN 來源",
+    "profile_active_badge": "使用中",
+    "profile_ago": "前",
+    "profile_create": "建立設定檔",
+    "profile_create_failed": "建立失敗",
+    "profile_days": "天",
+    "profile_delete": "刪除",
+    "profile_delete_confirm": "刪除設定檔「{label}」？此操作無法復原。",
+    "profile_delete_failed": "刪除失敗",
+    "profile_desc_prompt": "描述（選填）：",
+    "profile_dup_failed": "複製失敗",
+    "profile_dup_label_prompt": "新顯示標籤：",
+    "profile_dup_name_prompt": "新設定檔名稱：",
+    "profile_duplicate": "複製",
+    "profile_empty": "尚未設定任何設定檔。",
+    "profile_export_failed": "匯出失敗",
+    "profile_import_exists": "設定檔「{name}」已存在。有 {count} 個欄位不同。\n匯入模式：完整（覆寫）或差異（合併變更）？",
+    "profile_import_failed": "匯入失敗",
+    "profile_import_prompt": "貼上 QR 設定檔資料（JSON）：",
+    "profile_import_success": "設定檔匯入成功。",
+    "profile_just_now": "剛才",
+    "profile_label_prompt": "顯示標籤：",
+    "profile_last_used": "上次使用",
+    "profile_name_prompt": "設定檔名稱（英數字、連字號、底線）：",
+    "profile_never_used": "從未使用",
+    "profile_no_desc": "無描述",
+    "profile_no_pin": "設定檔管理需要 PIN 認證。請設定 PIN 並重啟。",
+    "profile_qr_hint": "複製下方資料或掃描 QR 碼以在另一個實例上匯入。",
+    "profile_qr_import": "QR 匯入",
+    "profile_qr_title": "設定檔匯出",
+    "profile_rename": "重新命名",
+    "profile_rename_failed": "重新命名失敗",
+    "profile_rename_prompt": "新名稱：",
+    "profile_switch_back": "伺服器已使用新設定檔恢復。重新載入中...",
+    "profile_switch_btn": "切換",
+    "profile_switch_confirm": "切換到設定檔「{label}」？伺服器將重啟。",
+    "profile_switch_failed": "設定檔切換失敗",
+    "profile_switch_sending": "正在傳送設定檔切換請求...",
+    "profile_switch_timeout": "設定檔切換請求已傳送，但伺服器在 90 秒內未回應。",
+    "profile_switch_waiting": "設定檔切換已接受。等待伺服器恢復中...",
+    "profile_toggle_fav": "切換收藏",
+    "recursive_scan": "遞迴掃描",
+    "remote_restart_off": "遠端重啟：關閉",
+    "remote_restart_on": "遠端重啟：開啟",
+    "remove_root_confirm": "取消註冊此資料夾？",
+    "restart_api": "重啟 API",
+    "restart_back": "伺服器已恢復。重新載入中...",
+    "restart_confirm": "重啟伺服器？（幾秒鐘內無法存取）",
+    "restart_failed": "重啟失敗",
+    "restart_sending": "正在傳送重啟請求...",
+    "restart_server": "重啟伺服器",
+    "restart_timeout": "重啟請求已傳送，但伺服器在 90 秒內未回應。",
+    "restart_waiting": "重啟已接受。等待伺服器恢復中...",
+    "rfs_enum_max": "列舉上限",
+    "rfs_probe_max": "探測上限",
+    "rfs_total_max": "總上限",
+    "save_failed": "儲存失敗",
+    "save_path": "儲存路徑",
+    "saved": "✅ 已儲存",
+    "saved_cli_override": "⚠ 已儲存（CLI --pin 優先。請檢視啟動選項以套用）",
+    "saved_restart_needed": "✅ 已儲存（需要重啟以套用）",
+    "saving": "儲存中...",
+    "screen_lock": "螢幕鎖定",
+    "security": "安全性",
+    "source": "來源",
+    "toggle_root": "啟用/停用",
+    "token_not_set": "令牌：未設定",
+    "token_set": "令牌：已設定",
+    "unit_hours": "小時",
+    "unit_min": "分鐘",
+    "unit_minutes": "分",
+    "unit_sec": "秒",
+    "unknown": "未知",
+    "uptime": "運行時間",
+    "version": "版本"
+  },
+  "settings.bitwarden_desc": "透過 bw CLI 連結密鑰至 Bitwarden 以動態擷取。需要安裝並解鎖 Bitwarden CLI。",
+  "settings.bitwarden_title": "Bitwarden CLI",
+  "settings.bsky_auto_dismiss_follow": "自動隱藏追蹤",
+  "settings.bsky_auto_dismiss_like": "自動隱藏按讚",
+  "settings.bsky_auto_dismiss_repost": "自動隱藏轉發",
+  "settings.bsky_auto_respond": "啟用自動回覆",
+  "settings.bsky_monitor_desc": "監控 Bluesky 的提及、回覆及其他通知。設定分類條件和自動回覆模板。",
+  "settings.bsky_monitor_title": "Bluesky 監控",
+  "settings.bsky_notify_connect": "MCP 連線時通知",
+  "settings.bsky_poll_interval": "輪詢間隔 (分鐘)",
+  "settings.bsky_poll_now": "立即輪詢",
+  "settings.bsky_polling": "輪詢中...",
+  "settings.bsky_response_mention": "提及回覆",
+  "settings.bsky_response_reply": "回覆回應",
+  "settings.bsky_response_title": "自動回覆模板",
+  "settings.bsky_save_failed": "儲存監控設定失敗",
+  "settings.bsky_save_monitor": "儲存監控設定",
+  "settings.bsky_saved": "監控設定已儲存",
+  "settings.bsky_triage_mention": "提及",
+  "settings.bsky_triage_quote": "引用",
+  "settings.bsky_triage_reply": "回覆",
+  "settings.bsky_triage_title": "分類提示詞",
+  "settings.sns_bluesky_title": "Bluesky",
+  "settings.theme_applied": "Theme applied:",
+  "settings.theme_click_to_apply": "Click to apply",
+  "settings.theme_hint": "Click a theme to apply it instantly.",
+  "settings_schema.agent_safety_budget_preset": "Budget 預設",
+  "settings_schema.agent_safety_circuit_breaker_cooldown_seconds": "Circuit Breaker 冷卻 (秒)",
+  "settings_schema.agent_safety_circuit_breaker_enabled": "啟用 Circuit Breaker",
+  "settings_schema.agent_safety_circuit_breaker_error_rate_threshold": "錯誤率閾值 (0.0-1.0)",
+  "settings_schema.agent_safety_circuit_breaker_max_actions_per_minute": "每分鐘最大動作數",
+  "settings_schema.agent_safety_circuit_breaker_max_consecutive_errors": "最大連續錯誤次數",
+  "settings_schema.agent_safety_circuit_breaker_max_identical_consecutive": "同一呼叫最大連續次數",
+  "settings_schema.agent_safety_circuit_breaker_max_same_tool_per_minute": "同一工具每分鐘最大次數",
+  "settings_schema.ai_analysis_api_key": "Anthropic (Claude) API 金鑰",
+  "settings_schema.ai_analysis_openai_api_key": "OpenAI API 金鑰",
+  "settings_schema.ai_analysis_openai_compat_api_key": "OpenAI Compatible API 金鑰",
+  "settings_schema.archive_cleanup_llm_api_key": "Archive Cleanup Anthropic API 金鑰",
+  "settings_schema.archive_cleanup_llm_openai_api_key": "Archive Cleanup OpenAI API 金鑰",
+  "settings_schema.archive_cleanup_llm_openai_compat_api_key": "Archive Cleanup OpenAI Compat API 金鑰",
+  "settings_schema.archive_throttle_ms": "封存節流 (ms)",
+  "settings_schema.backup_backup_dir": "備份目錄",
+  "settings_schema.backup_backup_on_scan_complete": "掃描完成時備份",
+  "settings_schema.backup_cooldown_minutes": "冷卻時間 (分鐘)",
+  "settings_schema.backup_enabled": "啟用自動備份",
+  "settings_schema.backup_max_generations": "最大備份世代數",
+  "settings_schema.backup_periodic_interval_hours": "定期備份間隔 (小時)",
+  "settings_schema.brace_choice": "大括號選擇",
+  "settings_schema.compute_hash": "pHash 計算",
+  "settings_schema.direct_prompt_convert": "直接提示詞轉換",
+  "settings_schema.enable_fts": "啟用全文搜尋 (FTS5)",
+  "settings_schema.extensions_builtin-nai-bridge_api_token": "NovelAI API 令牌",
+  "settings_schema.extract_a1111": "A1111 中繼資料擷取",
+  "settings_schema.extract_comfyui": "ComfyUI 中繼資料擷取",
+  "settings_schema.lowercase_tags": "標籤小寫化",
+  "settings_schema.preserve_templates": "保留範本",
+  "settings_schema.server_allow_remote_restart": "啟用遠端重啟 API",
+  "settings_schema.server_allow_restart": "啟用重啟 API",
+  "settings_schema.server_host": "繫結主機",
+  "settings_schema.server_lan": "啟用 LAN 存取",
+  "settings_schema.server_pin": "PIN 認證碼",
+  "settings_schema.server_pin_boss_login_ui": "Boss 登入 UI",
+  "settings_schema.server_port": "連接埠號",
+  "settings_schema.server_quick_lock_enabled": "啟用快速鎖定",
+  "settings_schema.server_restart_token": "遠端重啟令牌",
+  "settings_schema.sns_bluesky_app_password": "Bluesky 應用程式密碼",
+  "settings_schema.sns_bluesky_handle": "Bluesky 帳號",
+  "settings_schema.sns_post_template": "貼文範本",
+  "settings_schema.timezone": "時區",
+  "settings_schema.ui": "UI 主題 (default/custom)",
+  "settings_schema.video_analysis_enabled": "啟用影片分析",
+  "settings_schema.video_analysis_keyframe_count": "關鍵幀數量",
+  "settings_schema.video_analysis_scene_threshold": "場景閾值",
+  "settings_schema.video_analysis_strategy": "關鍵幀策略",
+  "settings_schema.webhook_secret": "Webhook 簽署密鑰",
+  "similar.error": "An error occurred",
+  "similar.none_found": "No similar images were found. Run hash calculation first.",
+  "similar.searching": "Searching...",
+  "similar.title": "Similar Images",
+  "stats": {
+    "load_failed": "無法載入統計資料",
+    "no_model_data": "無可用的模型資料",
+    "no_resolution_data": "無可用的解析度資料",
+    "period": {
+      "dawn": "清晨 (03-09時)",
+      "day": "白天 (09-15時)",
+      "evening": "傍晚 (15-21時)",
+      "night": "深夜 (21-03時)"
+    },
+    "personality": {
+      "balanced": {
+        "advice": "擁有靈活的工作方式！",
+        "description": "不受時間束縛的自由創作者",
+        "type": "均衡型"
+      },
+      "daytime": {
+        "advice": "保持著健康的節奏！",
+        "description": "作息規律的創作者",
+        "type": "日間型"
+      },
+      "early_bird": {
+        "advice": "非常好的生活習慣！",
+        "description": "善於利用清晨專注力的創作者",
+        "type": "早起型"
+      },
+      "evening": {
+        "advice": "充分利用了黃金時段！",
+        "description": "傍晚開始發揮實力的創作者",
+        "type": "傍晚集中型"
+      },
+      "night_owl": {
+        "advice": "注意身體健康喔！",
+        "description": "熱愛深夜寧靜的創作者",
+        "type": "夜貓子型"
+      },
+      "unknown": {
+        "advice": "",
+        "description": "資料不足",
+        "type": "未知"
+      }
+    }
+  },
+  "story": {
+    "event": {
+      "first_month": {
+        "desc": "以 {count} 張圖片起步",
+        "title": "創作旅程開始"
+      },
+      "milestone_100": {
+        "desc": "累計總數：{total}",
+        "title": "100 張圖片！"
+      },
+      "milestone_100k": {
+        "desc": "累計總數：{total}",
+        "title": "100,000 張圖片！"
+      },
+      "milestone_10k": {
+        "desc": "累計總數：{total}",
+        "title": "10,000 張圖片！"
+      },
+      "milestone_1k": {
+        "desc": "累計總數：{total}",
+        "title": "1,000 張圖片！"
+      },
+      "milestone_2k": {
+        "desc": "累計總數：{total}",
+        "title": "2,000 張圖片！"
+      },
+      "milestone_500": {
+        "desc": "累計總數：{total}",
+        "title": "500 張圖片！"
+      },
+      "milestone_50k": {
+        "desc": "累計總數：{total}",
+        "title": "50,000 張圖片！"
+      },
+      "milestone_5k": {
+        "desc": "累計總數：{total}",
+        "title": "5,000 張圖片！"
+      },
+      "new_source": {
+        "desc": "開始使用 {source}",
+        "title": "新工具：{source}"
+      },
+      "peak_month": {
+        "desc": "創作了 {count} 張圖片",
+        "title": "最高產月份"
+      },
+      "productivity_down": {
+        "desc": "比上個月 -{percent}%",
+        "title": "安靜時期"
+      },
+      "productivity_up": {
+        "desc": "比上個月 +{percent}%",
+        "title": "生產力飆升"
+      },
+      "quiet_month": {
+        "desc": "本月僅 {count} 張圖片",
+        "title": "平靜的月份"
+      },
+      "tag_diversity": {
+        "desc": "本月 {count} 個獨特標籤",
+        "title": "創意多樣性紀錄"
+      }
+    },
+    "load_failed": "無法載入故事",
+    "no_data": "資料不足，尚無法建立您的故事",
+    "on_this_day": "一年前的今天（{date}）：創作了 {count} 張圖片"
+  },
+  "sweep.card_loading": "載入中…",
+  "sweep.card_no_axis": "無軸資訊",
+  "sweep.card_open_view_btn": "🔎 開啟 Sweep 檢視",
+  "sweep.card_others_btn": "🖼️ 顯示此 Sweep 的其他圖像",
+  "sweep.card_others_empty": "此資料夾中未找到相符圖像。",
+  "sweep.card_others_error": "失敗: ",
+  "sweep.card_rerun_btn": "🔁 重新執行此 Sweep",
+  "sweep.card_rerun_no_seed_btn": "🎲 以新種子重跑",
+  "sweep.card_rerun_other_bridge_btn": "於其他 Bridge 重跑",
+  "sweep.card_rerun_with_seed_btn": "🔁 以相同種子重跑",
+  "sweep.card_title": "Sweep",
+  "sweep.resume_not_found": "該檔案上未找到 Sweep 元資料。",
+  "sweep.resume_populated": "Sweep 已還原。按 Generate 重新執行。",
+  "sweep.resume_unknown_param": "Sweep: 此橋接不支援的參數: ",
+  "sweep.resume_wrong_bridge": "Sweep 在其他橋接上執行: ",
+  "tags.add_tag": "Add tag",
+  "toast": {
+    "checkpoint_search": "Checkpoint 搜尋：{model}",
+    "conditions_cleared": "所有搜尋條件已清除",
+    "copy_done": "已複製",
+    "copy_done_strong": "已複製！",
+    "copy_failed": "複製失敗",
+    "copy_failed_short": "複製失敗",
+    "copy_with_label": "{label} 已複製",
+    "dir_open_failed": "無法開啟目錄",
+    "dir_opened": "已開啟目錄",
+    "error_occurred": "發生錯誤"
+  },
+  "tools": {
+    "ai_analyzing": "AI 分析中...",
+    "analyzing": "分析中...",
+    "analyzing_trends": "分析提示詞趨勢中...",
+    "api_key_set": "API 金鑰已設定",
+    "bulk_register_failed": "批次註冊失敗",
+    "cache_clear_failed": "快取清除失敗",
+    "cache_cleared": "個檔案快取已清除",
+    "cancel": "取消",
+    "checking_roots": "檢查已註冊資料夾...",
+    "clear_cache_confirm": "清除所有縮圖快取？\n下次顯示時會重新生成。",
+    "click_copy_path": "點擊複製路徑",
+    "click_preview": "點擊預覽",
+    "compute_hash_confirm": "計算 {type} 雜湊值。\n如果檔案很多，這可能需要一些時間。",
+    "computing_hashes": "計算雜湊值中...",
+    "confirm_db_delete": "從資料庫刪除 {count} 個檔案。\n（實際檔案將保留在磁碟上）",
+    "confirm_hard_delete": "警告：永久刪除 {count} 個檔案。\n此操作無法復原！\n\n確定要繼續嗎？",
+    "counting_files": "計算檔案中...",
+    "db_path": "資料庫路徑：",
+    "db_size": "資料庫大小：",
+    "delete": "刪除",
+    "delete_failed": "刪除失敗",
+    "deleted": "已刪除",
+    "deleting": "刪除中...",
+    "disable": "停用",
+    "drag_to_move": "拖曳移動",
+    "dup_groups_found": "找到重複群組",
+    "duplicate": "重複",
+    "enable": "啟用",
+    "enter_folder_path": "請輸入資料夾路徑",
+    "enter_search_query": "輸入搜尋關鍵字",
+    "error": "錯誤",
+    "exact_match": "完全匹配",
+    "ext_enabled": "已啟用",
+    "fetch_failed": "取得失敗",
+    "file": "檔案",
+    "file_and_perceptual": "檔案 + 感知",
+    "file_count": "檔案數量：",
+    "file_hash_computed": "檔案雜湊值已計算",
+    "files": "個檔案",
+    "files_deleted": "已刪除 {count} 個檔案",
+    "folder_dialog_failed": "無法開啟資料夾選擇對話框。\n請手動輸入路徑。",
+    "force_rescan": "強制重新掃描（重新分析所有檔案）",
+    "frequent_tags": "常用標籤：",
+    "group": "群組",
+    "hash_not_computed": "雜湊值未計算。請先執行「計算雜湊值」。",
+    "hash_stats_total": "總檔案數",
+    "include_subfolders": "包含子資料夾",
+    "items": "個項目",
+    "keep": "保留",
+    "load_failed": "載入失敗",
+    "loading": "載入中...",
+    "no_analysis_yet": "尚未分析任何檔案",
+    "no_duplicates": "未找到重複項",
+    "no_extensions": "無擴充功能",
+    "no_files_in_db": "資料庫中沒有檔案",
+    "no_normalize_needed": "無需正規化的標籤",
+    "no_registered_roots": "未註冊資料夾",
+    "no_results": "無結果",
+    "no_subdirs": "無子目錄",
+    "normalize_confirm": "正規化標籤？此操作無法復原。",
+    "normalize_items": "需要正規化的項目",
+    "normalizing": "正規化中...",
+    "normalizing_tags": "正規化標籤中...",
+    "open_detail_tab": "在新分頁中開啟詳細",
+    "perceptual": "感知",
+    "phash_computed": "感知雜湊值已計算",
+    "phash_not_computed": "感知雜湊值未計算。請先執行「計算雜湊值」。",
+    "preparing": "準備中...",
+    "processed_files": "已處理檔案：",
+    "prompt_trends": "提示詞趨勢分析",
+    "recommendations": "建議：",
+    "register_all": "全部註冊到 config.json",
+    "register_failed": "註冊失敗",
+    "register_to_config": "註冊到 config.json",
+    "remove_root_confirm": "取消註冊此資料夾？（實際檔案不會被刪除）",
+    "rescan": "重新掃描",
+    "rescan_all": "重新掃描全部",
+    "rescanning_all": "正在重新掃描所有資料夾...",
+    "roots_drag_hint": "拖曳調整順序 | Shift+↑↓ 移動 | 順序影響資料夾排序",
+    "same_size": "相同大小",
+    "save_failed": "儲存失敗",
+    "saved": "已儲存",
+    "scan_all_complete": "所有資料夾掃描完成",
+    "scan_complete": "掃描完成",
+    "scanning": "掃描中...",
+    "schema_version": "Schema 版本：",
+    "search_zips": "搜尋 ZIP 檔案內部",
+    "searching": "搜尋中...",
+    "select": "選取",
+    "select_all_dupes": "選取所有重複項",
+    "select_files_to_delete": "請選擇要刪除的檔案",
+    "showing_first": "顯示前",
+    "similar_images": "相似圖片",
+    "start_scan": "開始掃描",
+    "starting": "啟動中...",
+    "strengths": "優點：",
+    "style": "風格",
+    "style_tendency": "風格傾向：",
+    "tag_count": "標籤數量：",
+    "th_deleted": "已刪除",
+    "th_format": "格式",
+    "th_path": "路徑",
+    "th_prompt": "提示詞",
+    "th_size": "大小",
+    "th_source": "來源",
+    "toggle_failed": "切換失敗",
+    "unexplored_themes": "未探索的主題：",
+    "unit_hours": "小時",
+    "unit_minutes": "分",
+    "uptime": "運行時間：",
+    "weaknesses": "待改善之處：",
+    "wt_batch_failed": "批次啟動失敗",
+    "wt_close": "關閉",
+    "wt_complete": "完成",
+    "wt_config_failed": "無法儲存設定",
+    "wt_config_saved": "WD-Tagger 設定已儲存",
+    "wt_download_failed": "下載失敗",
+    "wt_downloading": "下載模型中...",
+    "wt_model_check_failed": "模型狀態檢查失敗",
+    "wt_model_not_downloaded": "模型未下載",
+    "wt_model_ready": "模型已就緒",
+    "wt_no_tags": "無標籤",
+    "wt_processing": "處理中...",
+    "wt_sec_elapsed": "秒已過",
+    "wt_tagged_files": "已標記檔案",
+    "wt_total_tags": "總標籤數",
+    "wt_unique": "獨特",
+    "wt_untagged": "未標記的未知",
+    "wt_xmp_dc_subject": "dc:subject 標籤：",
+    "wt_xmp_load_failed": "無法載入 XMP 資料",
+    "wt_xmp_not_found": "未找到 XMP 資料",
+    "wt_xmp_raw_xml": "原始 XML",
+    "wt_xmp_title": "XMP 中繼資料",
+    "wt_xmp_wdtag_info": "wdtag 資訊："
+  },
+  "yolo_stream.detect_error": "Detection failed",
+  "yolo_stream.register": "Register",
+  "sd_bridge.api_key_set": "(已設定金鑰)",
+  "comfyui_bridge.api_key_set": "(已設定金鑰)",
+  "common.delete": "刪除",
+  "common.save": "儲存",
+  "settings.apikeys_mcp_jump": "查看程式碼片段",
+  "settings.apikeys_mcp_updated": "↓ MCP 程式碼片段已用此金鑰更新",
+  "settings.tsr_desc": "管理分散式標籤推論伺服器（Hailo Remote、ONNX Local 等）。支援平行批量標籤處理。",
+  "settings.tsr_mesh_redirect": "單位網格推論切換在",
+  "settings.tsr_mesh_redirect_link": "網格推論矩陣",
+  "settings.tsr_mesh_redirect_suffix": "頁面中管理",
+  "settings.tsr_title": "Tagger Server Registry",
+  "bridge.pl.load_tooltip": "載入 PL",
+  "bridge.pl.save_tooltip": "儲存 PL",
+  "conditions.hasAnnotation.desc": "僅顯示有附註的檔案（筆記）",
+  "conditions.hasAnnotation.label": "📝 有筆記"
+}

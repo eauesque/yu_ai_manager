@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="page.gateway_title">YU AI Manager - Gateway</title>
+  <link rel="stylesheet" href="static/css/main.css?v=20260215">
+  <link rel="stylesheet" href="static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260225">
+  <link rel="stylesheet" href="static/css/dark-mode/tags/dark-mode-tags-enhanced.css?v=20260225">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tokens.css?v=20260504b">
+  <link rel="stylesheet" href="static/css/atelier/atelier-components.css?v=20260504b">
+  <link rel="stylesheet" href="static/css/atelier/atelier-index.css?v=20260504b">
+  <link rel="stylesheet" href="/static/css/pages/gateway-page.css?v={{ version }}">
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_nav.html" %}
+
+  <div class="page-container" id="gateway-page">
+    <h1 class="page-title" data-i18n="gateway.title">Gateway</h1>
+
+    <section class="card" id="gw-backends-section">
+      <h2 data-i18n="gateway.backends_title">バックエンド</h2>
+      <p style="font-size:13px;margin-top:4px;">
+        <span data-i18n="gateway.apikeys_link_prefix">APIキーの管理は</span>
+        <a href="/settings#cat-auth" data-i18n="gateway.apikeys_link_anchor" style="color:var(--accent);">設定 → Gateway APIキー</a>
+        <span data-i18n="gateway.apikeys_link_suffix">から行えます</span>。
+      </p>
+      <div id="gw-backends-list">
+        <table id="gw-backends-table">
+          <thead>
+            <tr>
+              <th scope="col" data-i18n="gateway.col_type">タイプ</th>
+              <th scope="col" data-i18n="gateway.col_port">ポート</th>
+              <th scope="col" data-i18n="gateway.col_state">状態</th>
+              <th scope="col" data-i18n="gateway.col_actions">操作</th>
+            </tr>
+          </thead>
+          <tbody id="gw-backends-tbody"></tbody>
+        </table>
+      </div>
+      <form id="gw-add-form" class="row gap-2 mt-2">
+        <select id="gw-add-type" name="type" required>
+          <option value="sd_webui">SD WebUI</option>
+          <option value="comfyui">ComfyUI</option>
+          <option value="ollama">Ollama</option>
+          <option value="gradio">Gradio</option>
+        </select>
+        <input id="gw-add-port" type="number" name="port" min="1" max="65535" data-i18n-placeholder="gateway.port_placeholder" placeholder="ポート番号" required>
+        <button id="gw-add-submit" type="submit" class="btn btn-primary" data-i18n="gateway.add_button">追加</button>
+      </form>
+    </section>
+
+    <section class="card" id="gw-scan-section">
+      <h2 data-i18n="gateway.scan_title">スキャン</h2>
+      <div class="col gap-1">
+        <label for="gw-scan-defaults">
+          <input type="checkbox" id="gw-scan-defaults" name="scan_defaults" checked>
+          <span data-i18n="gateway.scan_defaults">デフォルトポート (7860/8188/11434)</span>
+        </label>
+        <label for="gw-scan-range">
+          <input type="checkbox" id="gw-scan-range" name="scan_range">
+          <span data-i18n="gateway.scan_range">ポート範囲</span>
+        </label>
+        <div id="gw-scan-range-inputs" class="row gap-1 hidden">
+          <input type="number" id="gw-scan-range-min" name="range_min" min="1" max="65535" data-i18n-placeholder="gateway.scan_range_min" placeholder="最小">
+          <span>〜</span>
+          <input type="number" id="gw-scan-range-max" name="range_max" min="1" max="65535" data-i18n-placeholder="gateway.scan_range_max" placeholder="最大">
+        </div>
+        <label for="gw-scan-full">
+          <input type="checkbox" id="gw-scan-full" name="scan_full">
+          <span data-i18n="gateway.scan_full">全ポートスキャン</span>
+        </label>
+        <label for="gw-scan-auto-register">
+          <input type="checkbox" id="gw-scan-auto-register" name="auto_register">
+          <span data-i18n="gateway.scan_auto_register">見つかったら自動登録</span>
+        </label>
+      </div>
+      <div class="row gap-2 mt-2">
+        <button id="gw-scan-start" type="button" class="btn btn-primary" data-i18n="gateway.scan_start">スキャン開始</button>
+        <button id="gw-scan-cancel" type="button" class="btn btn-secondary hidden" data-i18n="gateway.scan_cancel">キャンセル</button>
+      </div>
+      <div id="gw-scan-progress" class="hidden mt-1">
+        <progress id="gw-scan-bar" value="0" max="100"></progress>
+        <span id="gw-scan-counter">0 / 0</span>
+      </div>
+      <div id="gw-scan-results" class="mt-2"></div>
+    </section>
+
+    <section class="card" id="gw-health-section">
+      <h2 data-i18n="gateway.health_title">ヘルス履歴</h2>
+      <div id="gw-health-list"></div>
+    </section>
+
+    <section class="card" id="gw-headroom-section">
+      <h2 data-i18n="gateway.headroom_title">headroom</h2>
+      <div id="gw-hr-status" class="row gap-2 align-center">
+        <span class="dot dot-gray" id="gw-hr-dot">&#9679;</span>
+        <span id="gw-hr-label" data-i18n="gateway.headroom_checking">確認中…</span>
+      </div>
+      <div class="mt-1 muted" id="gw-hr-url"></div>
+      <div class="mt-2 col gap-1">
+        <label for="gw-hr-base-url" style="font-size:0.9em;font-weight:600;" data-i18n="gateway.headroom_url_label">接続先 URL</label>
+        <input id="gw-hr-base-url" type="url" style="width:100%;" placeholder="http://127.0.0.1:8787">
+        <label for="gw-hr-auth-key" style="font-size:0.9em;font-weight:600;margin-top:6px;" data-i18n="gateway.headroom_auth_key_label">認証トークン</label>
+        <input id="gw-hr-auth-key" type="password" style="width:100%;" data-i18n-placeholder="gateway.headroom_auth_key_placeholder" placeholder="Bearer トークン（任意）">
+        <div class="row gap-2 mt-1">
+          <button id="gw-hr-save" type="button" class="btn btn-primary" data-i18n="gateway.headroom_save">保存</button>
+        </div>
+        <div id="gw-hr-save-msg" class="muted" style="font-size:0.85em;min-height:1.2em;"></div>
+      </div>
+    </section>
+
+    <section class="card" id="gw-agentmemory-section">
+      <h2 data-i18n="gateway.agentmemory_title">agentmemory</h2>
+      <div id="gw-agentmemory-status" class="row gap-2 align-center">
+        <span class="dot dot-gray" id="gw-am-dot">&#9679;</span>
+        <span id="gw-am-label" data-i18n="gateway.agentmemory_checking">確認中…</span>
+      </div>
+      <div class="mt-1 muted" id="gw-am-url"></div>
+      <div class="mt-1" id="gw-am-scopes" style="font-size:0.85em;">
+        <span data-i18n="gateway.agentmemory_scopes_label">スコープ:</span>
+        <code>memory:read</code> · <code>memory:write</code> · <code>memory:admin</code>
+      </div>
+      <div class="mt-2 col gap-1">
+        <label for="gw-am-base-url" style="font-size:0.9em;font-weight:600;" data-i18n="gateway.agentmemory_url_label">接続先 URL</label>
+        <div class="row gap-2">
+          <input id="gw-am-base-url" type="url" style="flex:1;" placeholder="http://127.0.0.1:3111">
+          <button id="gw-am-save" type="button" class="btn btn-primary" data-i18n="gateway.agentmemory_save">保存</button>
+        </div>
+        <div id="gw-am-save-msg" class="muted" style="font-size:0.85em;min-height:1.2em;"></div>
+      </div>
+    </section>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/js/gateway-page.js?v={{ version }}"></script>
+</body>
+</html>

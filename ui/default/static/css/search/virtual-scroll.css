@@ -1,0 +1,32 @@
+/* virtual-scroll.css
+ *
+ * Style adjustments when virtual scroll is active.
+ * .vs-active is applied to #results.
+ */
+
+.results-grid.vs-active {
+  /* Maintain scroll position via padding (dynamically set from JS) */
+  transition: padding-top 0s, padding-bottom 0s;
+  /* Ensure minimum content height */
+  min-height: 100vh;
+}
+
+/* Avoid layout impact when prompt is expanded */
+.results-grid.vs-active .result-card .prompt-expanded {
+  position: absolute;
+  z-index: 10;
+  left: 0;
+  right: 0;
+  background: var(--card-bg, #1a1a2e);
+  border-radius: 0 0 8px 8px;
+  padding: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Limit repaint scope to individual cards.
+   `layout style` tells the browser card internals don't affect external layout.
+   `paint` is intentionally excluded — it would create a stacking context,
+   potentially clipping tooltips and hover effects that overflow card boundaries. */
+.results-grid.vs-active .result-card {
+  contain: layout style;
+}

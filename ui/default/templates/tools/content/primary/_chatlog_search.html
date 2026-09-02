@@ -1,0 +1,20 @@
+    <details class="tool-item" id="tool-chatlog-search">
+      <summary class="tool-item-header">
+        <span class="tool-item-header__title" data-i18n="tools.chatlog_search">💬 Chat Log Search</span>
+        <span class="tool-item-header__desc" data-i18n="tools.chatlog_search_desc">Search imported chat conversations.</span>
+        <span class="tool-item-header__chevron">▼</span>
+      </summary>
+      <div class="tool-item-body">
+        <div class="tool-form-grid">
+          <div class="tool-field tool-field--full">
+            <label class="tool-label" for="chatlogQuery" data-i18n="tools.chatlog_search">Chat Log Search</label>
+            <input class="tool-input" type="text" id="chatlogQuery" placeholder="Search messages..." aria-label="Chat log search">
+          </div>
+        </div>
+        <div class="tool-actions">
+          <button type="button" id="chatlogSearchBtn" class="btn btn-sm" data-i18n="tools.chatlog_search_btn">Search</button>
+        </div>
+        <div class="tool-result" id="chatlogStats"></div>
+        <div class="tool-result" id="chatlogResults"></div>
+      </div>
+    </details>

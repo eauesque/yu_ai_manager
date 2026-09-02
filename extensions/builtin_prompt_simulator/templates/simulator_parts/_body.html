@@ -1,0 +1,226 @@
+<h1><span aria-hidden="true">🧪</span> <span data-sim-i18n="title" data-i18n="simulator.title">Prompt Simulator</span></h1>
+
+<!-- Editor toolbar -->
+<div class="sim-editor-toolbar">
+  <button class="sim-btn" data-action="simClearInput" data-sim-i18n-attr="title:clear_title" data-i18n-title="simulator.clear_title">🗑</button>
+  <button class="sim-btn" data-action="simToggleSed" data-sim-i18n="btn_sed" data-i18n="simulator.btn_sed">sed</button>
+  <button class="sim-btn sim-ac-tag-toggle" id="simAcTagToggle" data-action="simToggleDanbooruAc" title="">🏷 <span data-sim-i18n="btn_ac_tags" data-i18n="simulator.btn_ac_tags">Tags</span></button>
+  <button class="sim-btn" id="simWcToggleBtn" data-action="simToggleWcSection" data-sim-i18n="btn_wc_toggle" data-i18n="simulator.btn_wc_toggle">🃏 Wildcards</button>
+  <button class="sim-btn" data-action="simToggleCheat" data-action-arg="dp" data-sim-i18n="btn_dp_cheat" data-i18n="simulator.btn_dp_cheat">DP Cheatsheet</button>
+  <button class="sim-btn" data-action="simToggleCheat" data-action-arg="nai" data-sim-i18n="btn_nai_cheat" data-i18n="simulator.btn_nai_cheat">NAI Syntax</button>
+</div>
+
+<!-- Input (syntax-highlighted editor) -->
+<div style="position:relative;">
+  <div id="simEditorContainer"></div>
+</div>
+
+<!-- Action buttons -->
+<div class="btn-row sim-action-row">
+  <button class="sim-btn primary" data-action="simSimulate" data-sim-i18n="btn_simulate" data-i18n="simulator.btn_simulate">▶ Simulate</button>
+  <button class="sim-btn primary" data-action="simConvert" data-action-arg="nai_to_sd" data-i18n="simulator.btn_nai_to_sd">NAI → SD</button>
+  <button class="sim-btn primary" data-action="simConvert" data-action-arg="sd_to_nai" data-i18n="simulator.btn_sd_to_nai">SD → NAI</button>
+  <button class="sim-btn" data-action="simConvert" data-action-arg="expand" data-sim-i18n="btn_dp_expand" data-i18n="simulator.btn_dp_expand">DP Expand</button>
+  <button class="sim-btn" data-action="simDpAnalyze" data-sim-i18n="btn_dp_analyze" data-i18n="simulator.btn_dp_analyze">DP Analyze</button>
+  <button class="sim-btn" data-action="simWeightCalc" data-sim-i18n="btn_weight" data-i18n="simulator.btn_weight">Weight Calc</button>
+  <button class="sim-btn" data-action="simParse" data-sim-i18n="btn_parse" data-i18n="simulator.btn_parse">Parse</button>
+  <button class="sim-btn" data-action="simSendToBridge" data-action-arg="nai" data-sim-i18n-attr="title:btn_send_nai_title" data-sim-i18n="btn_send_nai" data-i18n="simulator.btn_send_nai" data-i18n-title="simulator.btn_send_nai_title">NAI Bridge に送る</button>
+  <button class="sim-btn" data-action="simSendToBridge" data-action-arg="sd" data-sim-i18n-attr="title:btn_send_sd_title" data-sim-i18n="btn_send_sd" data-i18n="simulator.btn_send_sd" data-i18n-title="simulator.btn_send_sd_title">SD WebUI に送る</button>
+  <button class="sim-btn" data-action="simSendToBridge" data-action-arg="comfy" data-sim-i18n-attr="title:btn_send_comfy_title" data-sim-i18n="btn_send_comfy" data-i18n="simulator.btn_send_comfy" data-i18n-title="simulator.btn_send_comfy_title">ComfyUI に送る</button>
+</div>
+
+<!-- Sed bar -->
+<div id="simSedBar" class="section sim-sed-bar" style="display:none;">
+  <div style="display:flex;align-items:center;gap:6px;">
+    <code style="color:#e67e22;font-size:12px;">sed</code>
+    <input class="sim-sed-input" id="simSedInput" type="text" data-sim-i18n-attr="placeholder:sed_placeholder"
+           placeholder="s/old/new/g  /pat/d  y/ab/AB/" data-i18n-placeholder="simulator.sed_placeholder" aria-label="sed expression" data-i18n-aria-label="simulator.sed_aria_label"
+           data-action-enter="simExecSed">
+    <button class="copy-btn" data-action="simExecSed" data-i18n="simulator.btn_run">Run</button>
+    <button class="copy-btn" data-action="simShowSedRef" title="Reference" data-i18n-title="simulator.sed_ref_btn_title">?</button>
+    <button class="copy-btn" data-action="simHideSed" data-i18n-aria-label="simulator.btn_close_aria">✕</button>
+  </div>
+</div>
+
+<!-- Simulation Result -->
+<div id="simSimSection" class="section" hidden>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+    <h2 style="font-size:16px;" data-sim-i18n="sim_result" data-i18n="simulator.sim_result">Simulation Result</h2>
+    <button class="copy-btn" data-action="simCopySimResult" data-sim-i18n="btn_copy" data-i18n="simulator.btn_copy">Copy</button>
+    <button class="copy-btn" data-action="simSimToInput" data-sim-i18n="btn_to_input_short" data-i18n="simulator.btn_to_input_short">To Input</button>
+    <button class="copy-btn" data-action="simSimulate" data-sim-i18n="btn_reroll" data-i18n="simulator.btn_reroll">🎲 Re-roll</button>
+    <span style="border-left:1px solid rgba(128,128,128,0.3);height:16px;margin:0 2px;"></span>
+    <button class="copy-btn" data-action="simSendOutputToBridge" data-action-arg="nai" title="NAI Bridge に送る" data-i18n-title="simulator.send_output_nai_title">→NAI</button>
+    <button class="copy-btn" data-action="simSendOutputToBridge" data-action-arg="sd" title="SD Bridge に送る" data-i18n-title="simulator.send_output_sd_title">→SD</button>
+    <button class="copy-btn" data-action="simSendOutputToBridge" data-action-arg="comfyui" title="ComfyUI に送る" data-i18n-title="simulator.send_output_comfy_title">→ComfyUI</button>
+  </div>
+  <div id="simSimText" class="output-pre sim-result-pre"></div>
+</div>
+
+<!-- Output -->
+<div id="simOutputSection" class="section" hidden>
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+    <h2 id="simOutputLabel" style="font-size:16px;" data-sim-i18n="output" data-i18n="simulator.output">Output</h2>
+    <button class="copy-btn" data-action="simCopyOutput" data-sim-i18n="btn_copy" data-i18n="simulator.btn_copy">Copy</button>
+    <button class="copy-btn" data-action="simOutputToInput" data-sim-i18n="btn_to_input_short" data-i18n="simulator.btn_to_input_short">To Input</button>
+    <span style="border-left:1px solid rgba(128,128,128,0.3);height:16px;margin:0 2px;"></span>
+    <button class="copy-btn" data-action="simSendOutputToBridge" data-action-arg="nai" title="NAI Bridge に送る" data-i18n-title="simulator.send_output_nai_title">→NAI</button>
+    <button class="copy-btn" data-action="simSendOutputToBridge" data-action-arg="sd" title="SD Bridge に送る" data-i18n-title="simulator.send_output_sd_title">→SD</button>
+    <button class="copy-btn" data-action="simSendOutputToBridge" data-action-arg="comfyui" title="ComfyUI に送る" data-i18n-title="simulator.send_output_comfy_title">→ComfyUI</button>
+  </div>
+  <pre id="simOutputText" class="output-pre"></pre>
+</div>
+
+<!-- Wildcard Directory Config -->
+<div id="simWcDirConfig" class="section" style="display:none;">
+  <h2 style="font-size:16px;" data-sim-i18n="wc_dir_title" data-i18n="simulator.wc_dir_title">Wildcard Directories</h2>
+  <div id="simWcDirList" style="margin-bottom:8px;"></div>
+  <div style="display:flex;gap:6px;align-items:center;">
+    <input type="text" id="simWcDirInput" placeholder="/path/to/wildcards" data-i18n-placeholder="simulator.wc_dir_placeholder" aria-label="Wildcard directory path" data-i18n-aria-label="simulator.wc_dir_aria_label"
+           data-action-enter="simAddWcDir"
+           style="flex:1;padding:5px 8px;border-radius:4px;border:1px solid rgba(128,128,128,0.3);background:rgba(30,30,50,0.8);color:var(--text,#e0e0e0);font-family:monospace;font-size:12px;">
+    <button class="sim-btn" data-action="simAddWcDir" data-sim-i18n="wc_dir_add" data-i18n="simulator.wc_dir_add">Add</button>
+  </div>
+</div>
+
+<!-- Wildcard Files (2-column editor) -->
+<div id="simWildcardSection" class="section" style="display:none;">
+  <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+    <h2 style="font-size:16px;" data-sim-i18n="wc_title" data-i18n="simulator.wc_title">Wildcard Files</h2>
+    <label class="sim-btn" style="cursor:pointer;padding:3px 10px;font-size:11px;" data-sim-i18n="btn_wc_load" data-i18n="simulator.btn_wc_load">📂 Wildcards
+      <input type="file" id="simWcFileInput" multiple accept=".txt,.zip" style="display:none;" data-action="simLoadWildcardFiles" data-action-event="change" data-action-this="1">
+    </label>
+    <button class="sim-btn" style="padding:3px 10px;font-size:11px;" data-action="simLoadFromDirs" data-sim-i18n="btn_wc_load_dirs" data-i18n="simulator.btn_wc_load_dirs">📁 Load from Dirs</button>
+    <button class="sim-btn" style="padding:3px 10px;font-size:11px;" data-action="simToggleWcDirConfig" data-sim-i18n="btn_wc_dir_config" data-i18n="simulator.btn_wc_dir_config">⚙ Dir Settings</button>
+    <a href="/ext/prompt-sim/manager" class="copy-btn" style="text-decoration:none;" data-sim-i18n="wc_open_manager" data-i18n="simulator.wc_open_manager">Manager ↗</a>
+    <a href="/ext/prompt-sim/sweep-axes-manager" class="copy-btn" style="text-decoration:none;" data-i18n="simulator.sweep_axes_manager">🎯 Sweep Axes ↗</a>
+    <button class="copy-btn" data-action="simClearWildcards" data-sim-i18n="wc_clear" data-i18n="simulator.wc_clear">Clear All</button>
+  </div>
+  <div class="wc-editor-wrap">
+    <div class="wc-editor-left">
+      <div id="simWildcardList" style="font-size:12px;"></div>
+    </div>
+    <div class="wc-editor-right" id="simWcDetailPanel">
+      <div id="simWcDetailHint" class="wc-detail-hint" data-sim-i18n="wc_select_hint" data-i18n="simulator.wc_select_hint">Click a wildcard name to view/edit entries</div>
+      <div id="simWcDetailContent" style="display:none;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+          <code id="simWcDetailName" style="color:#7cc;font-size:13px;"></code>
+          <span id="simWcDetailCount" style="color:var(--muted,#aab2c0);font-size:11px;"></span>
+        </div>
+        <div id="simWcEditorContainer"></div>
+        <div style="display:flex;gap:6px;margin-top:6px;">
+          <button class="sim-btn" data-action="simSaveWcDetail" data-sim-i18n="wc_save" data-i18n="simulator.wc_save">Save</button>
+          <button class="sim-btn" data-action="simAddWcEntry" data-sim-i18n="wc_add_entry" data-i18n="simulator.wc_add_entry">+ Add Entry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DP Probability -->
+<div id="simDpSection" class="section" hidden>
+  <h2 style="font-size:16px;" data-sim-i18n="dp_probability" data-i18n="simulator.dp_probability">DP Probability Analysis</h2>
+  <div id="simDpContent"></div>
+</div>
+
+<!-- Emphasis Weights -->
+<div id="simWeightSection" class="section" hidden>
+  <h2 style="font-size:16px;" data-sim-i18n="emphasis_weights" data-i18n="simulator.emphasis_weights">Emphasis Weights</h2>
+  <div id="simWeightContent"></div>
+</div>
+
+<!-- Parse Result -->
+<div id="simParseSection" class="section parse-section" hidden>
+  <h2 style="font-size:16px;" data-sim-i18n="analysis_result" data-i18n="simulator.analysis_result">Analysis Result</h2>
+  <div id="simParseContent"></div>
+</div>
+
+{% raw %}
+<!-- Cheatsheet Side Panel -->
+<div class="sim-cheat-panel" id="simCheatPanel">
+  <div class="sim-cheat-header">
+    <div class="sim-cheat-tabs">
+      <button class="sim-cheat-tab active" data-action="simSwitchCheatTab" data-action-arg="dp" id="simCheatTabDp">DP</button>
+      <button class="sim-cheat-tab" data-action="simSwitchCheatTab" data-action-arg="nai" id="simCheatTabNai">NAI</button>
+    </div>
+    <button class="copy-btn" data-action="simCloseCheat" data-i18n-aria-label="simulator.btn_close_aria">✕</button>
+  </div>
+  <div class="sim-cheat-body">
+    <div id="simCheatDp">
+      <h2 style="font-size:16px;" data-sim-i18n="dp_syntax_title" data-i18n="simulator.dp_syntax_title">Dynamic Prompts Syntax</h2>
+      <table>
+        <tr><td data-sim-i18n="dp_random" data-i18n="simulator.dp_random">Random choice</td><td>{red|blue|green}</td></tr>
+        <tr><td data-sim-i18n="dp_pick_n" data-i18n="simulator.dp_pick_n">Pick N items</td><td>{2$$red|blue|green|yellow}</td></tr>
+        <tr><td data-sim-i18n="dp_pick_range" data-i18n="simulator.dp_pick_range">Pick N-M items</td><td>{1-3$$red|blue|green}</td></tr>
+        <tr><td data-sim-i18n="dp_separator" data-i18n="simulator.dp_separator">Custom separator</td><td>{2$$ and $$red|blue|green}</td></tr>
+        <tr><td data-sim-i18n="dp_wildcard" data-i18n="simulator.dp_wildcard">Wildcard file</td><td>__colors__</td></tr>
+        <tr><td data-sim-i18n="dp_nested" data-i18n="simulator.dp_nested">Nested</td><td>{wearing {red|blue} {hat|scarf}}</td></tr>
+        <tr><td data-sim-i18n="dp_weighted" data-i18n="simulator.dp_weighted">Weighted</td><td>{3::red|1::blue|1::green}</td></tr>
+      </table>
+      <div class="note" data-sim-i18n="dp_note" data-i18n="simulator.dp_note">Use the "DP Expand" button to test expansion of {choices}. Use "DP Analyze" to see probabilities.</div>
+    </div>
+    <div id="simCheatNai" style="display:none;">
+      <h2 style="font-size:16px;" data-sim-i18n="nai_syntax_title" data-i18n="simulator.nai_syntax_title">NovelAI Prompt Syntax</h2>
+      <table>
+        <tr><td data-sim-i18n="nai_emphasis" data-i18n="simulator.nai_emphasis">Emphasis (×1.05)</td><td>{blue eyes}</td></tr>
+        <tr><td data-sim-i18n="nai_strong" data-i18n="simulator.nai_strong">Strong (×1.05²)</td><td>{{blue eyes}}</td></tr>
+        <tr><td data-sim-i18n="nai_weaken" data-i18n="simulator.nai_weaken">Weaken (÷1.05)</td><td>[blue eyes]</td></tr>
+        <tr><td data-sim-i18n="nai_alternatives" data-i18n="simulator.nai_alternatives">Alternatives</td><td>{red hair|blue hair|blonde}</td></tr>
+        <tr><td data-sim-i18n="nai_mixing" data-i18n="simulator.nai_mixing">Prompt mixing</td><td>{cat|dog}</td></tr>
+        <tr><td data-sim-i18n="nai_literal_paren" data-i18n="simulator.nai_literal_paren">Literal parentheses</td><td>\(text\)</td></tr>
+        <tr><td data-sim-i18n="nai_literal_bracket" data-i18n="simulator.nai_literal_bracket">Literal brackets</td><td>\[text\]</td></tr>
+        <tr><td data-sim-i18n="nai_quality" data-i18n="simulator.nai_quality">Quality tags (auto)</td><td>masterpiece, best quality</td></tr>
+      </table>
+      <div class="note" data-sim-i18n="nai_note" data-i18n="simulator.nai_note">NAI uses {} for emphasis (SD uses ()). Use NAI→SD / SD→NAI buttons to convert.</div>
+    </div>
+  </div>
+</div>
+<!-- Sed reference popup -->
+<div class="sim-overlay" id="simSedRefOverlay" data-action="simHideSedRef" data-action-self="1" role="dialog" aria-modal="true" aria-labelledby="simSedRefTitle">
+  <div class="sim-modal sim-sed-ref">
+    <div style="display:flex;align-items:center;margin-bottom:12px;">
+      <h3 id="simSedRefTitle" style="flex:1;" data-sim-i18n="sed_ref_title" data-i18n="simulator.sed_ref_title">sed Reference</h3>
+      <button class="copy-btn" data-action="simHideSedRef" data-i18n-aria-label="simulator.btn_close_aria">✕</button>
+    </div>
+    <div class="sim-sed-ref-body">
+      <table class="sim-sed-ref-table">
+        <thead>
+          <tr><th data-sim-i18n="sed_ref_syntax" data-i18n="simulator.sed_ref_syntax">Syntax</th><th data-sim-i18n="sed_ref_desc" data-i18n="simulator.sed_ref_desc">Description</th><th data-sim-i18n="sed_ref_example" data-i18n="simulator.sed_ref_example">Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>s/old/new/flags</code></td><td data-sim-i18n="sed_ref_s" data-i18n="simulator.sed_ref_s">Replace — all lines</td><td><code>s/cat/dog/g</code></td></tr>
+          <tr><td><code>/pat/s/old/new/flags</code></td><td data-sim-i18n="sed_ref_addr_s" data-i18n="simulator.sed_ref_addr_s">Replace — matching lines only</td><td><code>/^cat/s/,/|/g</code></td></tr>
+          <tr><td><code>/pat/d</code></td><td data-sim-i18n="sed_ref_d" data-i18n="simulator.sed_ref_d">Delete matching lines</td><td><code>/^#/d</code></td></tr>
+          <tr><td><code>/pat/!d</code></td><td data-sim-i18n="sed_ref_nd" data-i18n="simulator.sed_ref_nd">Keep only matching lines (grep)</td><td><code>/blue/!d</code></td></tr>
+          <tr><td><code>y/src/dst/</code></td><td data-sim-i18n="sed_ref_y" data-i18n="simulator.sed_ref_y">Transliterate chars (like tr)</td><td><code>y/ABC/abc/</code></td></tr>
+          <tr><td><code>/pat/a\text</code></td><td data-sim-i18n="sed_ref_a" data-i18n="simulator.sed_ref_a">Insert text after matching lines</td><td><code>/header/a\---</code></td></tr>
+          <tr><td><code>/pat/i\text</code></td><td data-sim-i18n="sed_ref_i" data-i18n="simulator.sed_ref_i">Insert text before matching lines</td><td><code>/footer/i\---</code></td></tr>
+        </tbody>
+      </table>
+      <h4 data-sim-i18n="sed_ref_flags_title" data-i18n="simulator.sed_ref_flags_title">Flags (s command)</h4>
+      <table class="sim-sed-ref-table">
+        <tbody>
+          <tr><td><code>g</code></td><td data-sim-i18n="sed_ref_flag_g" data-i18n="simulator.sed_ref_flag_g">Replace all occurrences in each line</td></tr>
+          <tr><td><code>i</code></td><td data-sim-i18n="sed_ref_flag_i" data-i18n="simulator.sed_ref_flag_i">Case-insensitive matching</td></tr>
+        </tbody>
+      </table>
+      <h4 data-sim-i18n="sed_ref_regex_title" data-i18n="simulator.sed_ref_regex_title">Regex (JavaScript RegExp)</h4>
+      <table class="sim-sed-ref-table">
+        <tbody>
+          <tr><td><code>.</code></td><td data-sim-i18n="sed_ref_re_dot" data-i18n="simulator.sed_ref_re_dot">Any character</td></tr>
+          <tr><td><code>^</code> <code>$</code></td><td data-sim-i18n="sed_ref_re_anchor" data-i18n="simulator.sed_ref_re_anchor">Start / end of line</td></tr>
+          <tr><td><code>*</code> <code>+</code> <code>?</code></td><td data-sim-i18n="sed_ref_re_quant" data-i18n="simulator.sed_ref_re_quant">Quantifiers (0+, 1+, 0-1)</td></tr>
+          <tr><td><code>\d</code> <code>\w</code> <code>\s</code></td><td data-sim-i18n="sed_ref_re_class" data-i18n="simulator.sed_ref_re_class">Digit, word char, whitespace</td></tr>
+          <tr><td><code>[abc]</code> <code>[^abc]</code></td><td data-sim-i18n="sed_ref_re_set" data-i18n="simulator.sed_ref_re_set">Character set / negated set</td></tr>
+          <tr><td><code>(foo|bar)</code></td><td data-sim-i18n="sed_ref_re_alt" data-i18n="simulator.sed_ref_re_alt">Alternation & grouping</td></tr>
+          <tr><td><code>\b</code></td><td data-sim-i18n="sed_ref_re_boundary" data-i18n="simulator.sed_ref_re_boundary">Word boundary</td></tr>
+          <tr><td><code>(?=pat)</code> <code>(?!pat)</code></td><td data-sim-i18n="sed_ref_re_look" data-i18n="simulator.sed_ref_re_look">Lookahead / negative lookahead</td></tr>
+          <tr><td><code>$1</code> <code>$2</code></td><td data-sim-i18n="sed_ref_re_backref" data-i18n="simulator.sed_ref_re_backref">Back-reference in replacement</td></tr>
+        </tbody>
+      </table>
+      <h4 data-sim-i18n="sed_ref_delim_title" data-i18n="simulator.sed_ref_delim_title">Delimiter</h4>
+      <p data-sim-i18n="sed_ref_delim_body" data-i18n="simulator.sed_ref_delim_body">The character after s or y is the delimiter. Use \/ to include a literal delimiter.</p>
+    </div>
+  </div>
+</div>
+{% endraw %}

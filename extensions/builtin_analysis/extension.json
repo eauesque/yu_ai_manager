@@ -1,0 +1,16 @@
+{
+  "name": "builtin-analysis",
+  "version": "1.0.0",
+  "description": "AI image analysis engines (Claude, OpenAI, Ollama, Hailo VLM)",
+  "type": "general",
+  "category": "ai",
+  "entry": "analysis_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/api/analysis",
+  "core_shim": "analysis",
+  "config": {
+    "enabled": true,
+    "priority": 150
+  }
+}

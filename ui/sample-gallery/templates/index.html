@@ -1,0 +1,74 @@
+{% extends "_base.html" %}
+{% set active = "search" %}
+{% block title %}Gallery — YU AI Manager{% endblock %}
+
+{% block content %}
+<!-- Floating search bar -->
+<div class="search-float" id="searchFloat">
+  <div class="search-float-inner">
+    <input type="text" class="search-input" id="searchInput"
+           placeholder="Search images..." autofocus aria-label="Search images">
+    <select class="search-select" id="sortSelect" aria-label="Sort order">
+      <option value="date">Newest</option>
+      <option value="date_asc">Oldest</option>
+      <option value="path">Path A-Z</option>
+      <option value="path_desc">Path Z-A</option>
+    </select>
+    <span class="search-count" id="resultCount" aria-live="polite"></span>
+  </div>
+</div>
+
+<!-- Large image grid -->
+<div class="gallery-grid" id="grid" role="list"></div>
+
+<!-- Load more -->
+<div class="load-more-wrap" id="loadMoreWrap" style="display:none;">
+  <button class="btn-load-more" id="loadMoreBtn">Load more</button>
+</div>
+
+<!-- Fullscreen lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Image viewer" aria-hidden="true">
+  <div class="lightbox-top">
+    <div class="lightbox-info" id="lightboxInfo"></div>
+    <div class="lightbox-controls">
+      <button class="lb-btn" id="lbInfo" type="button" title="Details" aria-label="Toggle details">&#9432;</button>
+      <button class="lb-btn" id="lbSlideshow" type="button" title="Slideshow" aria-label="Toggle slideshow">&#9654;</button>
+      <button class="lb-btn" id="lbClose" type="button" title="Close (Esc)" aria-label="Close">&times;</button>
+    </div>
+  </div>
+  <button class="lb-arrow lb-prev" id="lbPrev" type="button" aria-label="Previous image">&#10094;</button>
+  <button class="lb-arrow lb-next" id="lbNext" type="button" aria-label="Next image">&#10095;</button>
+  <div class="lightbox-stage">
+    <img class="lightbox-img" id="lightboxImg" src="" alt="Full size image">
+  </div>
+  <div class="lightbox-meta" id="lightboxMeta">
+    <div class="lb-stars" id="lbStars"></div>
+    <div class="lb-prompt" id="lbPrompt"></div>
+  </div>
+  <div class="lightbox-detail" id="lightboxDetail" style="display:none;">
+    <div class="ld-section" id="ldPromptSection" style="display:none;">
+      <div class="ld-label">Prompt</div>
+      <div class="ld-text" id="ldPrompt"></div>
+    </div>
+    <div class="ld-section" id="ldNegSection" style="display:none;">
+      <div class="ld-label">Negative</div>
+      <div class="ld-text" id="ldNeg"></div>
+    </div>
+    <div class="ld-section" id="ldParamsSection" style="display:none;">
+      <div class="ld-label">Parameters</div>
+      <div class="ld-text" id="ldParams"></div>
+    </div>
+    <div class="ld-section" id="ldTagsSection" style="display:none;">
+      <div class="ld-label">Tags</div>
+      <div class="ld-tags" id="ldTags"></div>
+    </div>
+  </div>
+  <div class="filmstrip-wrap" id="filmstripWrap">
+    <div class="filmstrip" id="filmstrip" role="list" aria-label="Film strip navigation"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ csp_nonce }}">document.addEventListener('DOMContentLoaded', function() { GalleryUI.initSearch(); });</script>
+{% endblock %}

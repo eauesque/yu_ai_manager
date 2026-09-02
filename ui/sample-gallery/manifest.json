@@ -1,0 +1,10 @@
+{
+  "name": "sample-gallery",
+  "version": "1.0.0",
+  "description": "Cinema/gallery immersive UI — fullscreen lightbox, film strip navigation, photography-inspired dark theme",
+  "author": "YU AI Manager Team",
+  "api_version": "1",
+  "type": "full",
+  "label": "サンプル: ギャラリー",
+  "is_sample": true
+}

@@ -1,0 +1,16 @@
+{
+  "name": "builtin-wd-tagger",
+  "version": "1.0.0",
+  "description": "WD-Tagger image auto-tagging (ONNX, VLM, composite engines)",
+  "type": "general",
+  "category": "ai",
+  "entry": "wd_tagger_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "wd_tagger_core",
+  "config": {
+    "enabled": true,
+    "priority": 150,
+    "auto_tag_on_import": false
+  }
+}

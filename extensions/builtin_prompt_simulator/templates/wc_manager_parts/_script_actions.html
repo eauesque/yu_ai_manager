@@ -1,0 +1,207 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Wildcard Manager JS — Actions (upload, dir config, load) ── */
+
+/* ── File upload ── */
+function wmLoadFiles(files) {
+  if (!files || !files.length) return;
+  var txtFiles = [], zipFiles = [];
+  for (var i = 0; i < files.length; i++) {
+    if (/\.zip$/i.test(files[i].name)) zipFiles.push(files[i]);
+    else txtFiles.push(files[i]);
+  }
+  var remaining = txtFiles.length + zipFiles.length;
+  function onDone() {
+    remaining--;
+    if (remaining <= 0) {
+      wmRenderTree();
+      document.getElementById('wmFileInput').value = '';
+    }
+  }
+  txtFiles.forEach(function(file) {
+    var name = file.name.replace(/\.txt$/i, '');
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var rawLines = e.target.result.split(/\r?\n/);
+      var entryCount = rawLines.filter(function(l) { var t = l.trim(); return t && !t.startsWith('#'); }).length;
+      if (rawLines.length > 0) {
+        _wmWildcards[name] = rawLines;
+        wmToast(_wmt('toast_uploaded').replace('{0}', name).replace('{1}', entryCount));
+      }
+      onDone();
+      _wmPersist();
+    };
+    reader.onerror = function() { wmToast(_wmt('fetch_error')); onDone(); };
+    reader.readAsText(file);
+  });
+  zipFiles.forEach(function(file) {
+    var fd = new FormData();
+    fd.append('file', file);
+    fetch('/ext/prompt-sim/load-wildcards-zip', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd
+    })
+      .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(function(data) {
+        if (!data.error) {
+          var wc = data.wildcards || {};
+          var count = 0;
+          Object.keys(wc).forEach(function(name) { _wmWildcards[name] = wc[name]; count++; });
+          wmToast(_wmt('toast_uploaded').replace('{0}', file.name).replace('{1}', count));
+        }
+        onDone();
+        _wmPersist();
+      })
+      .catch(function() { wmToast(_wmt('fetch_error')); onDone(); });
+  });
+}
+
+/* ── Directory browse ── */
+function wmBrowseDir() {
+  var input = document.getElementById('wmDirInput');
+  var current = input.value.trim();
+  fetch('/api/tools/select-folder' + (current ? '?initial=' + encodeURIComponent(current) : ''))
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(data) {
+      if (data.path) {
+        input.value = data.path;
+        return;
+      }
+      if (data.cancelled) return; // user backed out of the native dialog — respect it
+      // headless_unsupported (native-dialog feature not compiled) or other non-fatal response
+      window.dirPickerFallback(current, function(path) { input.value = path; });
+    })
+    .catch(function() {
+      window.dirPickerFallback(current, function(path) { input.value = path; });
+    });
+}
+
+/* ── Directory config ── */
+function wmShowDirConfig() {
+  var el = document.getElementById('wmDirOverlay');
+  el.classList.add('active');
+  wmFetchDirs();
+  if (window.FocusTrap) FocusTrap.activate(el, wmHideDirConfig);
+  else { var fb = el.querySelector('input,button'); if (fb) fb.focus(); }
+}
+
+function wmHideDirConfig() {
+  var el = document.getElementById('wmDirOverlay');
+  el.classList.remove('active');
+  if (window.FocusTrap) FocusTrap.deactivate(el);
+}
+
+function wmFetchDirs() {
+  /* Manager only needs the dir list here; no wildcard payload requested */
+  fetch('/ext/prompt-sim/wildcards')
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(data) { _wmDirs = data.dirs || []; wmRenderDirList(); })
+    .catch(function() { wmToast(_wmt('fetch_error')); });
+}
+
+function wmRenderDirList(validation) {
+  var list = document.getElementById('wmDirList');
+  if (_wmDirs.length === 0) {
+    list.innerHTML = '';
+    var hint = document.createElement('div');
+    hint.style.cssText = 'color:var(--muted,#aab2c0);font-size:12px;';
+    hint.textContent = _wmt('no_dirs_configured');
+    list.appendChild(hint);
+    return;
+  }
+  var valMap = {};
+  if (validation) validation.forEach(function(v) { valMap[v.path] = v.exists; });
+  list.innerHTML = '';
+  _wmDirs.forEach(function(dir, idx) {
+    var item = document.createElement('div');
+    item.className = 'wm-dir-item';
+    var code = document.createElement('code');
+    code.title = dir;
+    code.textContent = dir;
+    item.appendChild(code);
+    if (validation && valMap[dir] !== undefined) {
+      var ok = valMap[dir];
+      var statusSpan = document.createElement('span');
+      statusSpan.style.cssText = 'font-size:11px;color:' + (ok ? '#4caf50' : '#e74c3c') + ';';
+      statusSpan.textContent = _wmt(ok ? 'dir_exists' : 'dir_not_found');
+      item.appendChild(statusSpan);
+    }
+    var btn = document.createElement('button');
+    btn.className = 'wm-btn-sm';
+    btn.dataset.action = 'wmRemoveDir';
+    btn.dataset.actionArg = String(idx);
+    btn.title = _wmt('btn_dir_remove');
+    btn.textContent = '✕';
+    item.appendChild(btn);
+    list.appendChild(item);
+  });
+}
+
+function wmAddDir() {
+  var input = document.getElementById('wmDirInput');
+  var val = input.value.trim();
+  if (!val) return;
+  if (_wmDirs.indexOf(val) === -1) _wmDirs.push(val);
+  input.value = '';
+  wmSaveDirs();
+}
+
+function wmRemoveDir(idx) {
+  _wmDirs.splice(idx, 1);
+  wmSaveDirs();
+}
+
+function wmSaveDirs() {
+  fetch('/ext/prompt-sim/wildcard-dirs', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Requested-With': 'XMLHttpRequest'
+    },
+    body: JSON.stringify({ dirs: _wmDirs }),
+  })
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(data) {
+      _wmDirs = data.saved || [];
+      wmRenderDirList(data.validation);
+    })
+    .catch(function() { wmToast(_wmt('fetch_error')); });
+}
+
+function wmLoadFromDirs(silent) {
+  /* raw=1 → preserve comments and blank lines so the editor can round-trip
+     the file to disk without losing user formatting.
+
+     Disk is the source of truth: every entry returned by the API
+     unconditionally overwrites the local cache for the same name. The previous
+     "merge — don't overwrite" semantics caused stale localStorage entries to
+     mask on-disk changes (e.g. files edited externally, or saved via the API
+     but never refreshed in this tab). Entries that exist locally but not on
+     disk are preserved untouched, so unsaved manual additions ("+ 新規" before
+     pressing Save) are not lost by an auto-load. */
+  fetch('/ext/prompt-sim/wildcards?raw=1')
+    .then(function(r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+    .then(function(data) {
+      if (!data.dirs || data.dirs.length === 0) {
+        if (!silent) wmToast(_wmt('toast_no_dirs'));
+        return;
+      }
+      var wc = data.wildcards || {};
+      _wmSources = data.sources || {};
+      var names = Object.keys(wc);
+      names.forEach(function(name) {
+        _wmWildcards[name] = wc[name];
+      });
+      /* If the currently selected entry was refreshed from disk and the editor
+         is not dirty, push the new content into the textarea so the user
+         actually sees the disk state instead of the previous in-memory copy. */
+      if (_wmSelectedWc && !_wmDirty && wc[_wmSelectedWc]) {
+        wmShowEditor(_wmSelectedWc);
+      }
+      wmRenderTree();
+      _wmPersist();
+      if (!silent) wmToast(_wmt('toast_loaded').replace('{0}', names.length));
+    })
+    .catch(function() { if (!silent) wmToast(_wmt('fetch_error')); });
+}
+</script>

@@ -1,0 +1,15 @@
+{
+  "name": "builtin-inference",
+  "version": "1.0.0",
+  "description": "ONNX Runtime provider detection and GPU acceleration helpers",
+  "type": "general",
+  "category": "ai",
+  "entry": "inference_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "inference_core",
+  "config": {
+    "enabled": true,
+    "priority": 100
+  }
+}

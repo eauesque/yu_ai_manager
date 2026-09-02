@@ -1,0 +1,23 @@
+    <details class="tool-item" id="tool-prompt-convert">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.prompt_convert">Prompt Converter</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.prompt_convert_desc">Convert prompts between SD and NAI formats, analyze syntax</p>
+      <div>
+        <textarea class="tool-textarea" id="promptConvertInput" rows="3" placeholder="Enter prompt text..." aria-label="Prompt input"></textarea>
+      </div>
+      <div>
+        <button type="button" class="btn btn-sm" id="promptToNaiBtn">SD → NAI</button>
+        <button type="button" class="btn btn-sm" id="promptToSdBtn">NAI → SD</button>
+        <button type="button" class="btn btn-sm" id="promptAnalyzeBtn" data-i18n="tools.prompt_analyze">Analyze</button>
+      </div>
+      <div id="promptConvertResult">
+        <div data-i18n="tools.prompt_result">Result:</div>
+        <pre id="promptConvertOutput"></pre>
+        <button type="button" class="btn btn-sm" id="promptCopyResultBtn" data-i18n="tools.copy_result">Copy</button>
+      </div>
+      </div>
+</details>

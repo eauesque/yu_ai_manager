@@ -1,0 +1,45 @@
+<h1 data-i18n="sd_convert.page_title"><span aria-hidden="true">🔄</span> SD ↔ NAI Prompt Converter</h1>
+
+<div class="direction-toggle">
+  <button id="btnSdToNai" class="active" data-action="setDirection" data-action-arg="sd_to_nai" data-i18n="sd_convert.sd_to_nai">SD → NAI</button>
+  <button id="btnNaiToSd" data-action="setDirection" data-action-arg="nai_to_sd" data-i18n="sd_convert.nai_to_sd">NAI → SD</button>
+</div>
+
+<div class="options">
+  <label><input type="checkbox" id="optStripLora" checked aria-label="LoRA除去"> <span data-i18n="sd_convert.strip_lora">LoRA除去</span></label>
+  <label><input type="checkbox" id="optStripEmbed" checked aria-label="Embedding除去"> <span data-i18n="sd_convert.strip_embed">Embedding除去</span></label>
+  <label><input type="checkbox" id="optEmphasis" checked aria-label="強調構文変換"> <span data-i18n="sd_convert.emphasis_convert">強調構文変換</span></label>
+</div>
+
+<div class="panel">
+  <div>
+    <span id="lblInput"><span data-i18n="sd_convert.input_sd">入力 (SD形式)</span> <button class="copy-btn" data-action="copyText" data-action-arg="inputPrompt">📋</button></span>
+    <div id="convertInputContainer"></div>
+  </div>
+  <div>
+    <span id="lblOutput"><span data-i18n="sd_convert.output_nai">出力 (NAI形式)</span> <button class="copy-btn" data-action="copyText" data-action-arg="outputPrompt">📋</button></span>
+    <textarea id="outputPrompt" readonly placeholder="変換結果がここに表示されます" data-i18n-placeholder="sd_convert.output_placeholder" aria-label="Converted output" data-i18n-aria-label="sd_convert.converted_output_aria"></textarea>
+  </div>
+</div>
+
+<div class="panel">
+  <div>
+    <span><span data-i18n="sd_convert.negative_input">Negative (入力)</span> <button class="copy-btn" data-action="copyText" data-action-arg="inputNeg">📋</button></span>
+    <div id="convertNegContainer"></div>
+  </div>
+  <div>
+    <span><span data-i18n="sd_convert.negative_output">Negative (出力)</span> <button class="copy-btn" data-action="copyText" data-action-arg="outputNeg">📋</button></span>
+    <textarea id="outputNeg" readonly placeholder="" rows="3" aria-label="Negative output" data-i18n-aria-label="sd_convert.negative_output_aria"></textarea>
+  </div>
+</div>
+
+<div class="btn-row">
+  <button class="btn btn-primary" data-action="doConvert" data-i18n="sd_convert.convert">変換</button>
+  <button class="btn" data-action="clearAll" data-i18n="sd_convert.clear">クリア</button>
+  <button class="btn" data-action="swapIO" data-i18n="sd_convert.swap_io">↔ 入出力入替</button>
+  <button class="btn" id="cvtBtnNai" data-action="sendToBridge" data-action-arg="nai" title="出力プロンプトを NAI Bridge に送る" data-i18n-title="sd_convert.send_to_nai_title" data-i18n="sd_convert.send_to_nai">NAI Bridge に送る</button>
+  <button class="btn" id="cvtBtnSd" data-action="sendToBridge" data-action-arg="sd" title="出力プロンプトを SD WebUI Bridge に送る" data-i18n-title="sd_convert.send_to_sd_title" data-i18n="sd_convert.send_to_sd">SD WebUI に送る</button>
+  <button class="btn" id="cvtBtnComfy" data-action="sendToBridge" data-action-arg="comfy" title="出力プロンプトを ComfyUI Bridge に送る" data-i18n-title="sd_convert.send_to_comfy_title" data-i18n="sd_convert.send_to_comfy">ComfyUI に送る</button>
+</div>
+
+<div id="diffOutput" class="diff"></div>

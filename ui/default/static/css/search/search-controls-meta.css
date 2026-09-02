@@ -1,0 +1,36 @@
+/* MetaRenderer unified style */
+.meta-section {
+  background: rgba(128, 128, 128, 0.08);
+  border-radius: 8px;
+  padding: 14px;
+  margin-bottom: 10px;
+  border-left: 3px solid rgba(128, 128, 128, 0.2);
+}
+
+body.dark .meta-section {
+  background: rgba(255, 255, 255, 0.04);
+  border-left-color: rgba(255, 255, 255, 0.1);
+}
+
+.meta-section h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+  color: var(--muted, #888);
+}
+
+.tag-chip {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  background: rgba(102, 126, 234, 0.15);
+  color: #4338ca;  /* WCAG AA: 5.5:1 on tinted bg; was #667eea (3.26:1 fail) */
+  transition: background 0.15s;
+}
+body.dark .tag-chip {
+  color: #667eea;
+}
+
+.tag-chip:hover {
+  background: rgba(102, 126, 234, 0.3);
+}

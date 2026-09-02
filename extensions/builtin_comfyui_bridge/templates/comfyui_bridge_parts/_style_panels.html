@@ -1,0 +1,139 @@
+<style>
+  /* Discovery panel (LoRA / Embeddings / Custom Nodes) */
+  .cfb-discovery-section {
+    margin-bottom: 16px;
+    border: 1px solid rgba(128,128,128,0.15);
+    border-radius: 8px;
+    padding: 8px 14px;
+    background: rgba(30,30,50,0.3);
+  }
+  .cfb-discovery-section summary {
+    cursor: pointer; font-size: 14px; font-weight: 600;
+    user-select: none; color: var(--text, #f0f0f0);
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0; min-height: 32px;
+  }
+  .cfb-discovery-badge {
+    font-size: 11px; color: var(--text-secondary, #aaa);
+  }
+  .cfb-discovery-category-row {
+    display: flex; align-items: center; gap: 8px;
+    margin-top: 10px; margin-bottom: 8px;
+  }
+  .cfb-discovery-category-row label {
+    font-size: 12px; color: var(--text-secondary, #aaa);
+    white-space: nowrap;
+  }
+  .cfb-discovery-category-row select {
+    flex: 1; padding: 5px 10px; border-radius: 4px; font-size: 12px;
+    border: 1px solid rgba(128,128,128,0.2);
+    background: rgba(30,30,50,0.8);
+    color: var(--text, #e0e0e0);
+  }
+  .cfb-discovery-category-row select:focus {
+    outline: none; border-color: var(--accent, #667eea);
+  }
+  .cfb-discovery-search { margin-bottom: 8px; }
+  .cfb-discovery-search input {
+    width: 100%; padding: 6px 10px; border-radius: 6px;
+    border: 1px solid rgba(128,128,128,0.2); background: rgba(30,30,50,0.8);
+    color: var(--text, #e0e0e0); font-size: 13px;
+  }
+  .cfb-discovery-search input:focus { outline: none; border-color: var(--accent, #667eea); }
+  .cfb-disc-content {
+    max-height: 260px; overflow-y: auto;
+    border-radius: 6px;
+  }
+  .cfb-disc-empty {
+    padding: 16px; text-align: center;
+    font-size: 12px; color: var(--text-secondary, #aaa);
+  }
+  .cfb-disc-item {
+    display: flex; align-items: center; gap: 8px;
+    padding: 5px 10px; border-radius: 4px; cursor: pointer;
+    font-size: 12px; transition: background 0.12s;
+  }
+  .cfb-disc-item:hover { background: rgba(102,126,234,0.15); }
+  .cfb-disc-item-name { flex: 1; word-break: break-all; }
+  .cfb-disc-item-cat {
+    font-size: 11px; color: var(--text-secondary, #aaa);
+    max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .cfb-disc-item-insert {
+    font-size: 10px; padding: 2px 6px; border-radius: 3px;
+    background: rgba(102,126,234,0.2); color: var(--accent, #8fa4f0);
+    border: none; cursor: pointer; white-space: nowrap;
+  }
+  .cfb-disc-item-insert:hover { background: rgba(102,126,234,0.35); }
+
+  /* Light mode overrides for discovery */
+  body:not(.dark):not([data-theme=dark]) .cfb-discovery-section {
+    background: rgba(102,126,234,0.04);
+    border-color: rgba(128,128,128,0.15);
+  }
+  body:not(.dark):not([data-theme=dark]) .cfb-discovery-section summary { color: var(--text, #333); }
+  body:not(.dark):not([data-theme=dark]) .cfb-discovery-category-row select {
+    background: var(--bg, #fff);
+    color: var(--text, #222);
+    border-color: rgba(128,128,128,0.25);
+  }
+  body:not(.dark):not([data-theme=dark]) .cfb-discovery-search input {
+    background: var(--bg, #fff);
+    color: var(--text, #222);
+    border-color: rgba(128,128,128,0.25);
+  }
+  body:not(.dark):not([data-theme=dark]) .cfb-disc-item:hover {
+    background: rgba(102,126,234,0.08);
+  }
+
+  /* Options section (ControlNet / Upscale) */
+  .cfb-options-section {
+    margin-bottom: 16px;
+    border: 1px solid rgba(128,128,128,0.15);
+    border-radius: 8px;
+    padding: 8px 14px;
+    background: rgba(30,30,50,0.3);
+  }
+  .cfb-options-section summary {
+    cursor: pointer; font-size: 13px; font-weight: 600;
+    color: var(--text, #f0f0f0); user-select: none;
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 0; min-height: 32px;
+  }
+  body:not(.dark):not([data-theme=dark]) .cfb-options-section {
+    background: rgba(102,126,234,0.04);
+    border-color: rgba(128,128,128,0.15);
+  }
+  body:not(.dark):not([data-theme=dark]) .cfb-options-section summary { color: var(--text, #333); }
+
+  /* Greyed-out model selector */
+  .cfb-field-disabled select {
+    opacity: 0.4; pointer-events: none;
+  }
+  .cfb-field-disabled label {
+    opacity: 0.4;
+  }
+
+  /* Drop overlay */
+  .cfb-drop-overlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: rgba(102,126,234,0.15);
+    backdrop-filter: blur(4px);
+    display: flex; align-items: center; justify-content: center;
+    pointer-events: none;
+  }
+  .cfb-drop-overlay-text {
+    font-size: 20px; font-weight: 700; color: var(--accent, #8fa4f0);
+    padding: 30px 50px; border-radius: 16px;
+    border: 3px dashed var(--accent, #667eea);
+    background: rgba(15,15,26,0.85);
+  }
+  body:not(.dark):not([data-theme=dark]) .cfb-drop-overlay {
+    background: rgba(102,126,234,0.1);
+  }
+  body:not(.dark):not([data-theme=dark]) .cfb-drop-overlay-text {
+    background: rgba(255,255,255,0.9);
+    color: var(--accent, #4060e0);
+    border-color: var(--accent, #4060e0);
+  }
+</style>

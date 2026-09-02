@@ -1,0 +1,134 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+  (function () {
+    function $(id) { return document.getElementById(id); }
+
+    var _sdwbImg2ImgData = null;
+
+    function sdwbUpdateImg2ImgStatus() {
+      $("sdwbImg2ImgStatus").textContent = _sdwbImg2ImgData ? window.tr('sd_bridge.img2img_1_image', '(1 image)') : "";
+    }
+
+    function sdwbUpdateGenLabel() {
+      var btn = $("sdwbGenBtn");
+      if (!btn) return;
+      if (_sdwbImg2ImgData) {
+        btn.textContent = window.tr('sd_bridge.img2img_generate', 'img2img Generate');
+      } else {
+        btn.textContent = window.tr('sd_bridge.send_to_sd', 'SD WebUI に送信');
+      }
+    }
+
+    function _sdwbApplyImgDimensions(dataUrl) {
+      var img = new Image();
+      img.onload = function() {
+        var w = Math.min(Math.max(img.naturalWidth || 0, 64), 2048);
+        var h = Math.min(Math.max(img.naturalHeight || 0, 64), 2048);
+        if (!w || !h) return;
+        var wEl = $("sdwbWidth"), hEl = $("sdwbHeight");
+        if (!wEl || !hEl) return;
+        wEl.value = w;
+        hEl.value = h;
+        var presetEl = $("sdwbResolutionPreset");
+        if (presetEl) presetEl.value = "custom";
+      };
+      img.src = dataUrl;
+    }
+
+    window.sdwbClickImg2ImgFile = function() {
+      var input = $("sdwbImg2ImgFile");
+      if (input) input.click();
+    };
+
+    window.sdwbSetImg2ImgFile = function(file) {
+      // data-action-this="1" hands the <input> element itself, not a File.
+      if (file && file.tagName === "INPUT") file = file.files && file.files[0];
+      if (!file || !file.type.startsWith("image/")) return;
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        var dataUrl = e.target.result;
+        _sdwbImg2ImgData = dataUrl.replace(/^data:image\/[^;]+;base64,/, "");
+        $("sdwbImg2ImgImg").src = dataUrl;
+        $("sdwbImg2ImgPlaceholder").style.display = "none";
+        $("sdwbImg2ImgPreview").style.display = "";
+        sdwbUpdateImg2ImgStatus();
+        sdwbUpdateGenLabel();
+        _sdwbApplyImgDimensions(dataUrl);
+      };
+      reader.readAsDataURL(file);
+    };
+
+    window.sdwbClearImg2Img = function() {
+      _sdwbImg2ImgData = null;
+      $("sdwbImg2ImgImg").src = "";
+      $("sdwbImg2ImgPlaceholder").style.display = "";
+      $("sdwbImg2ImgPreview").style.display = "none";
+      $("sdwbImg2ImgFile").value = "";
+      sdwbUpdateImg2ImgStatus();
+      sdwbUpdateGenLabel();
+    };
+
+    window.sdwbCollectImg2Img = function() {
+      if (!_sdwbImg2ImgData) return null;
+      return {
+        image: _sdwbImg2ImgData,
+        denoising_strength: parseFloat($("sdwbDenoising").value) || 0.75,
+      };
+    };
+
+    // -- img2img drag & drop ----------------------------------------
+
+    (function() {
+      var drop = $("sdwbImg2ImgDrop");
+      if (!drop) return;
+
+      drop.addEventListener("dragover", function(e) {
+        e.preventDefault();
+        drop.classList.add("dragover");
+      });
+      drop.addEventListener("dragleave", function() {
+        drop.classList.remove("dragover");
+      });
+      drop.addEventListener("drop", function(e) {
+        e.preventDefault();
+        drop.classList.remove("dragover");
+        var files = e.dataTransfer && e.dataTransfer.files;
+        if (files && files.length > 0) {
+          window.sdwbSetImg2ImgFile(files[0]);
+        }
+      });
+    })();
+
+    // -- Set img2img from base64 (result panel action) ---------------
+
+    window._sdwbSetImg2ImgBase64 = function(b64) {
+      if (!b64) return;
+      _sdwbImg2ImgData = b64;
+      var mime = "image/png";
+      try { var h = atob(b64.slice(0, 12)); if (h.charCodeAt(0) === 0xFF && h.charCodeAt(1) === 0xD8) mime = "image/jpeg"; else if (h.charCodeAt(0) === 0x52 && h.charCodeAt(8) === 0x57) mime = "image/webp"; } catch(e) {}
+      var dataUrl = "data:" + mime + ";base64," + b64;
+      $("sdwbImg2ImgImg").src = dataUrl;
+      $("sdwbImg2ImgPlaceholder").style.display = "none";
+      $("sdwbImg2ImgPreview").style.display = "";
+      sdwbUpdateImg2ImgStatus();
+      sdwbUpdateGenLabel();
+      _sdwbApplyImgDimensions(dataUrl);
+      // Open the img2img section
+      var section = $("sdwbImg2ImgSection");
+      if (section && !section.open) section.open = true;
+      section.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      window.showToast(window.tr('sd_bridge.img2img_set', 'img2img にセットしました'));
+    };
+
+    window._sdwbSendImg2ImgTo = function(target, b64) {
+      if (!b64) return;
+      localStorage.setItem("bridge_send_image", JSON.stringify({
+        base64: b64,
+        source: "sd-bridge"
+      }));
+      if (target === "nai") {
+        window.tauriCrossTab.sendToBridge("nai", {});
+      }
+    };
+  })();
+</script>

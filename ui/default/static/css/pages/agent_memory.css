@@ -1,0 +1,182 @@
+/* agent_memory.css */
+
+.am-page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 72px 16px 48px;
+}
+
+.am-page-title {
+  font-size: clamp(20px, 3vw, 32px);
+  font-weight: 600;
+  margin: 0 0 1.2em;
+  color: var(--text, #222);
+}
+
+/* ---- Offline banner ---- */
+
+.am-offline-banner {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 10px 16px;
+  background: var(--warn-bg, #fff3cd);
+  border-bottom: 1px solid var(--warn-border, #ffc107);
+  color: var(--warn-text, #856404);
+  font-size: 14px;
+}
+
+/* ---- Tabs ---- */
+
+.am-tabs {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--border, #e6e6e6);
+  margin-bottom: 20px;
+}
+
+.am-tab-btn {
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  padding: 8px 16px;
+  margin-bottom: -2px;
+  cursor: pointer;
+  font-size: 14px;
+  color: var(--muted, #666);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.am-tab-btn:hover {
+  color: var(--text, #222);
+}
+
+.am-tab-btn.active {
+  color: var(--accent, #007aff);
+  border-bottom-color: var(--accent, #007aff);
+  font-weight: 600;
+}
+
+/* ---- Cards ---- */
+
+.am-card {
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #e6e6e6);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+
+.am-card h2 {
+  font-size: 15px;
+  font-weight: 600;
+  margin: 0 0 0.6em;
+  color: var(--text, #222);
+}
+
+.am-status-row {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.am-status-row.ok { color: #1a9a4a; }
+.am-status-row.error { color: #d32f2f; }
+
+.am-meta-row {
+  font-size: 13px;
+  color: var(--muted, #666);
+  margin-bottom: 3px;
+}
+
+/* ---- Actions bar ---- */
+
+.am-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.am-select,
+.am-search {
+  font-size: 13px;
+  padding: 5px 10px;
+  border: 1px solid var(--border, #e6e6e6);
+  border-radius: 6px;
+  background: var(--input-bg, #fff);
+  color: var(--text, #222);
+}
+
+/* ---- Tables ---- */
+
+.am-table-wrap {
+  overflow-x: auto;
+}
+
+.am-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+/* Override base-controls.css global button style — secondary action, not primary */
+.am-actions .secondary-btn {
+  background: var(--btn-bg, #fff);
+  color: var(--btn-text, #222);
+  border: 1px solid var(--border, #e6e6e6);
+  padding: 6px 14px;
+  font-size: 13px;
+}
+.am-actions .secondary-btn:hover:not(:disabled) {
+  background: var(--bg-hover, #dde0e6);
+}
+.am-actions .secondary-btn:disabled {
+  background: var(--btn-bg, #fff);
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.am-table th {
+  text-align: left;
+  padding: 8px 12px;
+  background: var(--table-head, #f5f5f5);
+  border-bottom: 2px solid var(--border, #e6e6e6);
+  font-weight: 600;
+}
+
+.am-table td {
+  padding: 7px 12px;
+  border-bottom: 1px solid var(--border, #e6e6e6);
+  vertical-align: top;
+  word-break: break-all;
+  max-width: 400px;
+}
+
+.am-table tr:hover td { background: var(--row-hover, #f9f9f9); }
+
+/* ---- Graph ---- */
+
+.am-graph-container {
+  width: 100%;
+  height: 500px;
+  border: 1px solid var(--border, #e6e6e6);
+  border-radius: 8px;
+  background: var(--card, #fff);
+  margin-bottom: 12px;
+}
+
+/* ---- Misc ---- */
+
+.am-placeholder {
+  color: var(--muted, #888);
+  font-size: 14px;
+  padding: 20px 0;
+  text-align: center;
+}
+
+.am-note {
+  font-size: 12px;
+  color: var(--muted, #888);
+  margin-bottom: 8px;
+}

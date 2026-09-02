@@ -1,0 +1,73 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+  (function () {
+    var TARGETS = ["cfbPrompt", "cfbNegative", "cfbWorkflowJson"];
+
+    function pickTarget() {
+      var active = document.activeElement;
+      if (active && active.tagName === "TEXTAREA" && TARGETS.indexOf(active.id) !== -1) {
+        return active;
+      }
+      for (var i = 0; i < TARGETS.length; i++) {
+        var el = document.getElementById(TARGETS[i]);
+        if (el) return el;
+      }
+      return null;
+    }
+
+    function insertAtCursor(el, text) {
+      var start = typeof el.selectionStart === "number" ? el.selectionStart : el.value.length;
+      var end = typeof el.selectionEnd === "number" ? el.selectionEnd : el.value.length;
+      var before = el.value.slice(0, start);
+      var after = el.value.slice(end);
+      el.value = before + text + after;
+      var pos = start + text.length;
+      el.selectionStart = el.selectionEnd = pos;
+      el.dispatchEvent(new Event("input", { bubbles: true }));
+      el.dispatchEvent(new Event("change", { bubbles: true }));
+    }
+
+    function tr(key, fallback) {
+      return typeof window.tr === "function" ? window.tr(key, fallback) : fallback;
+    }
+
+    function toast(msg, isError) {
+      if (typeof window.showToast === "function") window.showToast(msg, !!isError);
+    }
+
+    async function sendClipboardToBridge() {
+      var target = pickTarget();
+      if (!target) {
+        toast(tr("bridge_clipboard.no_target", "No prompt field found"), true);
+        return;
+      }
+      if (!navigator.clipboard || typeof navigator.clipboard.readText !== "function") {
+        toast(tr("bridge_clipboard.unsupported", "Clipboard API not available"), true);
+        return;
+      }
+      try {
+        var text = await navigator.clipboard.readText();
+        if (!text) {
+          toast(tr("bridge_clipboard.empty", "Clipboard is empty"));
+          return;
+        }
+        target.focus();
+        insertAtCursor(target, text);
+        toast(tr("bridge_clipboard.pasted", "Clipboard inserted"));
+      } catch (e) {
+        console.warn("clipboard read failed", e);
+        toast(tr("bridge_clipboard.error", "Failed to read clipboard"), true);
+      }
+    }
+
+    document.addEventListener("keydown", function (e) {
+      if ((e.ctrlKey || e.metaKey) && e.altKey && !e.shiftKey && (e.key === "v" || e.key === "V")) {
+        if (!pickTarget()) return;
+        e.preventDefault();
+        sendClipboardToBridge();
+      }
+    });
+
+    window.BridgeClipboard = { send: sendClipboardToBridge, targets: TARGETS };
+  })();
+</script>

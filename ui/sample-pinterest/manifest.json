@@ -1,0 +1,10 @@
+{
+  "name": "sample-pinterest",
+  "version": "1.0.0",
+  "description": "Pinterest/Masonry-style UI -- waterfall layout with natural aspect ratios and warm color scheme",
+  "author": "YU AI Manager Team",
+  "api_version": "1",
+  "type": "full",
+  "label": "サンプル: Pinterest風",
+  "is_sample": true
+}

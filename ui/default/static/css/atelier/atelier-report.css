@@ -1,0 +1,236 @@
+/*
+ * Atelier System (γ) — Monthly Report editorial retrofit
+ *
+ * Report is a data dashboard but reads naturally as a monthly editorial.
+ * Push h1 / h2 to Fraunces display, anchor numeric values with tabular
+ * Fraunces lining figures, and let card chrome stay quiet so the data
+ * carries the page.
+ *
+ * Scoped under body.theme-atelier-{light,dark} so classic / dark themes
+ * keep the existing pages/report.css presentation untouched.
+ */
+
+/* ----- Header ----- */
+
+body.theme-atelier-light .report-header h1,
+body.theme-atelier-dark .report-header h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h1), "wght" 400;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 8px 0;
+}
+
+body.theme-atelier-light .report-header h1 [aria-hidden="true"],
+body.theme-atelier-dark .report-header h1 [aria-hidden="true"] {
+  font-size: 0.55em;
+  vertical-align: middle;
+  margin-right: 0.2em;
+  opacity: 0.7;
+}
+
+/* Month selector controls — UI grade. */
+body.theme-atelier-light .report-nav-btn,
+body.theme-atelier-dark .report-nav-btn,
+body.theme-atelier-light .report-month-select,
+body.theme-atelier-dark .report-month-select {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  border-radius: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+body.theme-atelier-light .report-nav-btn:hover,
+body.theme-atelier-dark .report-nav-btn:hover,
+body.theme-atelier-light .report-month-select:hover,
+body.theme-atelier-dark .report-month-select:hover {
+  background: var(--surface-raised);
+  border-color: color-mix(in srgb, var(--accent-tool) 40%, var(--border));
+}
+
+body.theme-atelier-light .report-nav-btn:focus-visible,
+body.theme-atelier-dark .report-nav-btn:focus-visible,
+body.theme-atelier-light .report-month-select:focus-visible,
+body.theme-atelier-dark .report-month-select:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 1px;
+  border-color: var(--accent-tool);
+}
+
+/* ----- Loading / Empty ----- */
+
+body.theme-atelier-light .report-loading,
+body.theme-atelier-dark .report-loading,
+body.theme-atelier-light .report-empty,
+body.theme-atelier-dark .report-empty {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 16px;
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 400;
+}
+
+/* ----- Summary cards ----- */
+
+body.theme-atelier-light .report-card,
+body.theme-atelier-dark .report-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  padding: 24px 20px;
+  transition: box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+body.theme-atelier-light .report-card:hover,
+body.theme-atelier-dark .report-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* The "primary" card gets a warm decorative tint instead of the
+ * action-blue gradient, so it reads as featured rather than CTA. */
+body.theme-atelier-light .report-card-primary,
+body.theme-atelier-dark .report-card-primary {
+  border-color: color-mix(in srgb, var(--accent-warm) 50%, var(--border));
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--accent-warm) 12%, var(--surface)),
+      color-mix(in srgb, var(--accent-warm) 3%, var(--surface))
+    );
+}
+
+body.theme-atelier-light .report-card-value,
+body.theme-atelier-dark .report-card-value {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h2), "wght" 500;
+  font-size: 44px;
+  line-height: 1.05;
+  color: var(--text);
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+body.theme-atelier-light .report-card-label,
+body.theme-atelier-dark .report-card-label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+body.theme-atelier-light .report-card-mom,
+body.theme-atelier-dark .report-card-mom {
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 10px;
+  letter-spacing: 0.02em;
+}
+
+body.theme-atelier-light .report-card-sub,
+body.theme-atelier-dark .report-card-sub {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ----- Trophies ----- */
+
+body.theme-atelier-light .report-trophy-text,
+body.theme-atelier-dark .report-trophy-text {
+  font-family: var(--font-body);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 500;
+  font-size: 15px;
+  color: var(--text);
+}
+
+/* ----- Section headings ----- */
+
+body.theme-atelier-light .report-section h2,
+body.theme-atelier-dark .report-section h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h2), "wght" 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0 0 16px;
+}
+
+body.theme-atelier-light .report-section h3,
+body.theme-atelier-dark .report-section h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 500;
+  font-size: 20px;
+  line-height: 1.2;
+  color: var(--text);
+  margin: 0 0 12px;
+}
+
+/* ----- Ranking list ----- */
+
+body.theme-atelier-light .report-rank-item,
+body.theme-atelier-dark .report-rank-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 16px;
+}
+
+body.theme-atelier-light .report-rank-num,
+body.theme-atelier-dark .report-rank-num {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 500;
+  font-size: 22px;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+body.theme-atelier-light .report-rank-tag,
+body.theme-atelier-dark .report-rank-tag {
+  font-family: var(--font-body);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 400;
+  font-size: 16px;
+  color: var(--text);
+}
+
+body.theme-atelier-light .report-rank-count,
+body.theme-atelier-dark .report-rank-count {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light .report-rank-change,
+body.theme-atelier-dark .report-rank-change {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+body.theme-atelier-light .report-rank-change.new,
+body.theme-atelier-dark .report-rank-change.new {
+  color: var(--accent-tool);
+}
+
+/* ----- Side blocks ----- */
+
+body.theme-atelier-light .report-side-block,
+body.theme-atelier-dark .report-side-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: var(--shadow-sm);
+}

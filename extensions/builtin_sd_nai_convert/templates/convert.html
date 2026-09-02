@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="sd_convert.title">SD ↔ NAI Prompt Converter</title>
+  {% include "convert_parts/_style.html" %}
+  <link rel="stylesheet" href="/ext/syntax/style.css">
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+  {% include "convert_parts/_body.html" %}
+  </main>
+  <script nonce="{{ csp_nonce }}" src="/ext/syntax/engine.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/syntax/widget.js"></script>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/power-vim-edit.js"></script>
+  {% include "convert_parts/_script.html" %}
+</body>
+</html>

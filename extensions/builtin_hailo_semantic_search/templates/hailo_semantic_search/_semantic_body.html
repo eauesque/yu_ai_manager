@@ -1,0 +1,196 @@
+<!-- Semantic Search Tool Section (Tools Page) -->
+<div class="tool-section" id="semanticSearchSection">
+  <h2>
+    <span aria-hidden="true">&#x1f9e0;</span>
+    <span data-i18n="semantic_search.heading">Semantic Search (Hailo-10H)</span>
+  </h2>
+  <p data-i18n="semantic_search.description">CLIP 埋め込みベクトルによる自然言語画像検索。Hailo-10H NPU でエンコードします。</p>
+
+  <!-- Unified health (source of truth: /api/extensions health field, shared renderer) -->
+  <div id="semanticHealth" class="ss-health" style="margin-bottom:8px;"></div>
+  <script nonce="{{ csp_nonce }}">
+    (function(){
+      var run = function(){
+        if (window.extensionHealthApi && typeof window.extensionHealthApi.renderInto === 'function') {
+          window.extensionHealthApi.renderInto('semanticHealth', 'builtin-hailo-semantic-search', 'details');
+        }
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run, { once: true });
+      } else { run(); }
+    })();
+  </script>
+
+  <!-- Runtime counts. Unified health above owns backend/device health. -->
+  <div id="semanticStatus" class="ss-status">
+    <span class="ss-muted" data-i18n="semantic_search.loading_status">ステータス読み込み中...</span>
+  </div>
+
+  <!-- Index Progress -->
+  <div id="semanticProgress" style="display:none;" class="ss-progress-wrap">
+    <div class="ss-progress-header">
+      <span id="semanticProgressLabel" data-i18n="semantic_search.indexing">インデックス構築中...</span>
+      <span id="semanticProgressPct">0%</span>
+    </div>
+    <div class="ss-progress-track">
+      <div id="semanticProgressBar" class="ss-progress-fill" style="width:0%;"></div>
+    </div>
+    <div id="semanticProgressDetail" class="ss-progress-detail"></div>
+  </div>
+
+  <!-- Model Download -->
+  <div class="ss-model-section">
+    <label class="ss-label" data-i18n="semantic_search.model_status">モデル状態</label>
+    <div id="semanticModelStatus" class="ss-model-status">
+      <span class="ss-muted" data-i18n="semantic_search.loading_status">ステータス読み込み中...</span>
+    </div>
+    <div class="ss-model-row">
+      <span class="ss-model-name" data-i18n="semantic_search.model_clip_onnx">CLIP ONNX (画像エンコーダ)</span>
+      <button class="btn btn-secondary" id="semanticModelDownloadBtn" data-action="semanticDownloadModel">
+        <span aria-hidden="true">&#x2b07;</span>
+        <span data-i18n="semantic_search.model_download">ダウンロード</span>
+      </button>
+    </div>
+    <div id="semanticModelProgress" class="ss-progress-wrap" style="display:none;">
+      <div class="ss-progress-header">
+        <span id="semanticModelProgressLabel" data-i18n="semantic_search.model_downloading">ダウンロード中...</span>
+        <span id="semanticModelProgressPct"></span>
+      </div>
+      <div class="ss-progress-track">
+        <div id="semanticModelProgressBar" class="ss-progress-fill" style="width:0%;"></div>
+      </div>
+    </div>
+    <div id="semanticModelResult" class="ss-model-result" style="display:none;"></div>
+  </div>
+
+  <!-- Settings -->
+  <div class="ss-field">
+    <label class="ss-label" for="semanticBatchSize" data-i18n="semantic_search.batch_size">バッチサイズ:</label>
+    <div class="ss-slider-row">
+      <input type="range" id="semanticBatchSize" min="1" max="128" step="1" value="32" class="ss-slider">
+      <span id="semanticBatchSizeVal" class="ss-slider-val">32</span>
+    </div>
+  </div>
+
+  <div class="checkbox-group ss-checkbox">
+    <label>
+      <input type="checkbox" id="semanticAutoIndex" aria-label="Auto-index after scan" data-i18n-aria-label="semantic_search.auto_index_aria">
+      <span data-i18n="semantic_search.auto_index_after_scan">スキャン後に自動インデックス</span>
+    </label>
+  </div>
+
+  <div class="ss-field">
+    <label class="ss-label" for="semanticBackend" data-i18n="semantic_search.backend">バックエンド:</label>
+    <select id="semanticBackend" name="semanticBackend" class="ss-select">
+      <option value="auto" data-i18n="semantic_search.backend_auto">自動 (最適)</option>
+      <option value="hailo" data-i18n="semantic_search.backend_hailo">Hailo-10H</option>
+      <option value="onnx" data-i18n="semantic_search.backend_onnx">ONNX</option>
+      <option value="coreml" data-i18n="semantic_search.backend_coreml">CoreML (macOS)</option>
+    </select>
+    <span id="semanticBackendStatus" class="ss-backend-status"></span>
+  </div>
+
+  <!-- Actions -->
+  <div class="tool-actions">
+    <button class="btn btn-primary" id="semanticStartBtn" data-action="semanticStartIndex">
+      <span aria-hidden="true">&#x25b6;</span>
+      <span data-i18n="semantic_search.build_index">インデックス構築</span>
+    </button>
+    <button class="btn btn-secondary" id="semanticStopBtn" data-action="semanticStopIndex" style="display:none;">
+      <span aria-hidden="true">&#x23f9;</span>
+      <span data-i18n="semantic_search.stop">停止</span>
+    </button>
+    <button class="btn btn-danger" id="semanticClearBtn" data-action="semanticClearIndex">
+      <span aria-hidden="true">&#x1f5d1;</span>
+      <span data-i18n="semantic_search.clear_index">インデックス削除</span>
+    </button>
+  </div>
+
+  <!-- Result -->
+  <div id="semanticResult" class="result-box" style="display:none;"></div>
+
+  <!-- VLM Caption Generation -->
+  <div class="ss-caption-section">
+    <h2 class="ss-caption-title" style="font-size:16px;">
+      <span aria-hidden="true">&#x1f4dd;</span>
+      <span data-i18n="semantic_search.vlm_caption_title">VLM キャプション生成</span>
+    </h2>
+    <p class="ss-caption-desc" data-i18n="semantic_search.vlm_caption_desc">
+      VLM で画像のキャプションを生成します。VLM 動作中は CLIP インデックスが一時停止します。
+    </p>
+
+    <!-- Caption Prompt -->
+    <div class="ss-field">
+      <label class="ss-label ss-label-sm" for="captionPrompt" data-i18n="semantic_search.caption_prompt_label">プロンプト:</label>
+      <input type="text" id="captionPrompt" value="Describe this image in detail."
+             class="ss-text-input">
+    </div>
+
+    <!-- Caption Progress -->
+    <div id="captionProgress" style="display:none;" class="ss-progress-wrap">
+      <div class="ss-progress-header">
+        <span id="captionProgressLabel" data-i18n="semantic_search.generating_captions">キャプション生成中...</span>
+        <span id="captionProgressPct">0%</span>
+      </div>
+      <div class="ss-progress-track">
+        <div id="captionProgressBar" class="ss-progress-fill ss-progress-fill-caption" style="width:0%;"></div>
+      </div>
+      <div id="captionProgressDetail" class="ss-progress-detail"></div>
+    </div>
+
+    <!-- Caption Actions -->
+    <div class="tool-actions ss-caption-actions">
+      <button class="btn btn-secondary" id="captionStartBtn" data-action="captionStartBatch"
+              title="検索結果の画像にキャプションを生成" data-i18n-title="semantic_search.caption_search_results_title" disabled>
+        <span aria-hidden="true">&#x1f4dd;</span>
+        <span data-i18n="semantic_search.caption_search_results">検索結果をキャプション</span>
+      </button>
+      <button class="btn btn-secondary" id="captionStopBtn" data-action="captionStop" style="display:none;">
+        <span aria-hidden="true">&#x23f9;</span>
+        <span data-i18n="semantic_search.caption_stop">停止</span>
+      </button>
+    </div>
+    <p id="captionHint" class="ss-caption-hint" data-i18n="semantic_search.caption_hint">先にセマンティック検索を実行してください</p>
+
+    <!-- Caption Result -->
+    <div id="captionResult" class="result-box" style="display:none;"></div>
+  </div>
+</div>
+
+<style>
+/* Semantic Search scoped styles */
+.ss-status{margin:12px 0;font-size:13px;background:var(--bg,#f5f6f8);padding:4px 8px;border-radius:4px;}
+.ss-muted{color:var(--muted,#aab2c0);}
+.ss-ok{color:#166534;}
+.ss-err{color:#b91c1c;}
+.ss-progress-wrap{margin:12px 0;}
+.ss-progress-header{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.ss-progress-track{height:6px;border-radius:3px;background:rgba(128,128,128,0.2);overflow:hidden;}
+.ss-progress-fill{height:100%;width:0%;background:var(--accent,#667eea);border-radius:3px;transition:width 0.3s;}
+.ss-progress-fill-caption{background:#e67e22;}
+.ss-progress-detail{font-size:11px;color:var(--muted,#aab2c0);margin-top:4px;}
+.ss-field{margin:12px 0;}
+.ss-label{display:block;margin-bottom:5px;font-weight:600;}
+.ss-label-sm{font-size:12px;margin-bottom:4px;}
+.ss-slider-row{display:flex;align-items:center;gap:8px;}
+.ss-slider{flex:1;}
+.ss-slider-val{font-size:12px;min-width:32px;text-align:right;}
+.ss-checkbox{margin:8px 0;}
+.ss-text-input{width:100%;padding:6px 8px;border:1px solid var(--border,rgba(128,128,128,0.3));border-radius:4px;background:var(--bg-secondary,#f8f8f8);color:var(--text,#333);font-size:13px;box-sizing:border-box;}
+body.dark .ss-text-input{background:var(--bg-secondary,#1e1e1e);color:var(--text,#e0e0e0);}
+.ss-caption-section{margin-top:20px;border-top:1px solid var(--border,rgba(128,128,128,0.2));padding-top:16px;}
+.ss-caption-title{margin:0 0 8px;font-size:15px;}
+.ss-caption-desc{font-size:12px;color:var(--muted,#888);margin:0 0 12px;}
+.ss-caption-actions{margin-top:8px;}
+.ss-caption-hint{font-size:11px;color:var(--muted,#888);margin:6px 0 0;}
+.ss-select{width:100%;padding:6px 8px;border:1px solid var(--border,rgba(128,128,128,0.3));border-radius:4px;background:var(--bg-secondary,#f8f8f8);color:var(--text,#333);font-size:13px;box-sizing:border-box;}
+body.dark .ss-select{background:var(--bg-secondary,#1e1e1e);color:var(--text,#e0e0e0);}
+.ss-backend-status{display:block;font-size:11px;color:var(--muted,#888);margin-top:4px;}
+.ss-backend-status .ss-avail{color:#166534;}
+.ss-backend-status .ss-unavail{color:#b91c1c;}
+.ss-model-section{margin:12px 0;padding:10px;background:var(--bg,#f5f6f8);border-radius:6px;border:1px solid var(--border,rgba(128,128,128,0.2));}
+.ss-model-status{font-size:12px;margin:6px 0;}
+.ss-model-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;}
+.ss-model-name{font-size:13px;font-weight:500;}
+.ss-model-result{font-size:12px;margin-top:6px;}
+</style>

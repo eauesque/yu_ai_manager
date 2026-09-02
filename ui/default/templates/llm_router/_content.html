@@ -1,0 +1,82 @@
+<main id="main-content" class="container" style="padding-top:50px;">
+  <header class="lr-header">
+    <h1><span aria-hidden="true">&#x1F916;</span> <span data-i18n="llm_router.title">LLM Router</span></h1>
+    <div class="lr-header-actions">
+      <button id="lrRefreshAllBtn" type="button" class="lr-btn primary" data-i18n="llm_router.refresh_all">Refresh All</button>
+    </div>
+  </header>
+
+  <section class="lr-summary-card" data-i18n-aria-label="llm_router.title" aria-label="LLM Router summary">
+    <div class="lr-summary-grid">
+      <div class="lr-summary-cell">
+        <div class="lr-summary-label" data-i18n="llm_router.summary.backends">Backends</div>
+        <div class="lr-summary-value" id="lrSummaryBackends">—</div>
+      </div>
+      <div class="lr-summary-cell">
+        <div class="lr-summary-label" data-i18n="llm_router.summary.enabled">Enabled</div>
+        <div class="lr-summary-value" id="lrSummaryEnabled">—</div>
+      </div>
+      <div class="lr-summary-cell">
+        <div class="lr-summary-label" data-i18n="llm_router.summary.models">Models</div>
+        <div class="lr-summary-value" id="lrSummaryModels">—</div>
+      </div>
+      <div class="lr-summary-cell">
+        <div class="lr-summary-label" data-i18n="llm_router.summary.aliases">Routing aliases</div>
+        <div class="lr-summary-value" id="lrSummaryAliases">—</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lr-section" data-i18n-aria-label="llm_router.title" aria-label="Backends">
+    <h2 data-i18n="llm_router.backends_section">Backends</h2>
+    <div class="lr-table-wrap">
+      <table class="lr-table" id="lrBackendsTable">
+        <thead>
+          <tr>
+            <th data-i18n="llm_router.col.alias">Alias</th>
+            <th data-i18n="llm_router.col.base_url">Base URL</th>
+            <th data-i18n="llm_router.col.status">Status</th>
+            <th data-i18n="llm_router.col.slo">SLO</th>
+            <th data-i18n="llm_router.col.models">Models</th>
+            <th data-i18n="llm_router.col.last_seen">Last Seen</th>
+            <th data-i18n="llm_router.col.actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="lrBackendsBody">
+          <tr><td colspan="7" data-i18n="llm_router.loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="lr-section" data-i18n-aria-label="llm_router.aliases_section" aria-label="Routing aliases">
+    <h2 data-i18n="llm_router.aliases_section">Routing Aliases</h2>
+    <div class="lr-table-wrap">
+      <table class="lr-table" id="lrAliasesTable">
+        <thead>
+          <tr>
+            <th data-i18n="llm_router.col.alias_name">Alias</th>
+            <th data-i18n="llm_router.col.physical">Physical Model</th>
+          </tr>
+        </thead>
+        <tbody id="lrAliasesBody">
+          <tr><td colspan="2" data-i18n="llm_router.loading">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="lr-section" id="lrAgentmemorySection" aria-label="agentmemory">
+    <h2>agentmemory <span id="lrAmDot" class="dot dot-gray" style="font-size:0.7em;">&#9679;</span></h2>
+    <p style="margin:0 0 0.5em;">
+      <span data-i18n="llm_router.agentmemory_desc">Memory proxy — accessible via Gateway auth.</span>
+    </p>
+    <dl style="display:grid;grid-template-columns:max-content 1fr;gap:0.2em 1em;margin:0 0 0.75em;font-size:0.9em;">
+      <dt style="font-weight:600;" data-i18n="llm_router.agentmemory_url_label">AGENTMEMORY_URL</dt>
+      <dd style="margin:0;"><code id="lrAmUrl">—</code></dd>
+      <dt style="font-weight:600;" data-i18n="llm_router.agentmemory_scopes_label">Scopes</dt>
+      <dd style="margin:0;"><code>memory:read</code> · <code>memory:write</code> · <code>memory:admin</code></dd>
+    </dl>
+    <a href="/gateway" style="font-size:0.9em;" data-i18n="llm_router.agentmemory_gateway_link">Gateway 設定 →</a>
+  </section>
+</main>

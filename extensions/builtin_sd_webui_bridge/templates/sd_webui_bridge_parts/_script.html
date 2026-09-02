@@ -1,0 +1,1122 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  "use strict";
+
+  var BASE = "/ext/sd-webui";
+  var pollTimer = null;
+  var generating = false;
+  var looping = false;
+  var loopCount = 0;
+  var _sdwbBatchCancel = false;
+  var _sdwbAbort = null;
+  // Current batch position label (e.g. "2/3"). Empty string outside multi-batch runs.
+  var _sdwbBatchLabel = "";
+
+  // -- Helpers ---------------------------------------------------
+
+  function $(id) { return document.getElementById(id); }
+
+  function isLocalUrl(url) {
+    try {
+      var h = new URL(url).hostname;
+      if (h === "localhost" || h === "127.0.0.1" || h === "::1") return true;
+      if (/^10\./.test(h)) return true;
+      if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return true;
+      if (/^192\.168\./.test(h)) return true;
+      return false;
+    } catch (_) { return false; }
+  }
+
+  function postJSON(path, body) {
+    return fetch(BASE + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+      body: JSON.stringify(body),
+    }).then(function(r) { return r.json(); });
+  }
+
+  function getJSON(path) {
+    return fetch(BASE + path).then(function(r) { return r.json(); });
+  }
+
+  function renderConnText(el, text) {
+    var raw = String(text || "");
+    var urlMatch = raw.match(/https?:\/\/\S+/);
+    if (!urlMatch) {
+      el.textContent = raw;
+      return;
+    }
+    el.textContent = raw.slice(0, urlMatch.index);
+    var code = document.createElement("code");
+    code.className = "bridge-url-code";
+    code.textContent = urlMatch[0];
+    el.appendChild(code);
+    el.appendChild(document.createTextNode(raw.slice((urlMatch.index || 0) + urlMatch[0].length)));
+  }
+
+  function setConn(ok, text) {
+    var dot = $("sdwbConnDot");
+    dot.className = "sdwb-conn-dot " + (ok ? "ok" : "err");
+    renderConnText($("sdwbConnText"), text);
+  }
+
+  // -- Connection test -------------------------------------------
+
+  window.sdwbTestConnection = function() {
+    setConn(false, window.tr('sd_bridge.status_testing', 'Testing...'));
+    return postJSON("/api/test-connection", {}).then(function(d) {
+      if (d.ok) {
+        setConn(true, window.tr('sd_bridge.status_connected', 'Connected') + " — " + (d.model || window.tr('sd_bridge.unknown_model', 'unknown model')));
+        if (typeof sdwbRefreshScripts === "function") sdwbRefreshScripts();
+        sdwbLoadUpscalers();
+        sdwbLoadModels(d.model || "");
+      } else {
+        setConn(false, d.error || window.tr('sd_bridge.connection_failed', 'Connection failed'));
+      }
+      return d;
+    }).catch(function(e) {
+      setConn(false, window.tr('sd_bridge.request_failed', 'Request failed') + ": " + e.message);
+      return { ok: false, error: e.message };
+    });
+  };
+
+  // -- Save-state diagnostic -------------------------------------
+
+  window.sdwbDiagSaveState = function() {
+    var pre = $("sdwbDiagSaveStateResult");
+    if (!pre) return;
+    pre.style.display = "";
+    pre.textContent = window.tr(
+      'sd_bridge.diag_save_state_loading', 'Diagnosing...');
+    getJSON("/api/save-state-diag").then(function(body) {
+      if (!body || body.ok === false) {
+        var msg = (body && body.error) || "unknown";
+        pre.textContent = window.tr(
+          'sd_bridge.diag_save_state_error', 'Diag error: {0}'
+        ).replace('{0}', msg);
+        return;
+      }
+      var d = body;
+      var lines = [];
+      lines.push("api_url: " + d.api_url);
+      lines.push("bridge_managed_save: " + d.bridge_managed_save);
+      lines.push("options_reachable: " + d.options_reachable);
+      lines.push("api_type_guess: " + d.api_type_guess);
+      if (d.options_reachable) {
+        lines.push("samples_save: " + d.samples_save);
+        lines.push("grid_save:    " + d.grid_save);
+        lines.push("");
+        lines.push("save-related bool keys (" + (d.save_keys || []).length + "):");
+        (d.save_keys || []).forEach(function(kv) {
+          lines.push("  " + kv.key + " = " + kv.value);
+        });
+      } else {
+        lines.push("error: " + (d.error || "(unknown)"));
+      }
+      lines.push("");
+      lines.push("verdict: " + d.verdict);
+      lines.push(window.tr(d.verdict_message_key, d.verdict));
+      pre.textContent = lines.join("\n");
+    }).catch(function(e) {
+      pre.textContent = window.tr(
+        'sd_bridge.diag_save_state_error', 'Diag error: {0}'
+      ).replace('{0}', e && e.message ? e.message : String(e));
+    });
+  };
+
+  // Auto-retry the connection test on page load when the first attempt
+  // fails (typical cause: SD WebUI is starting up but not ready yet when
+  // the bridge page loads). Stops as soon as one attempt succeeds.
+  window.sdwbAutoTestConnectionWithRetry = function() {
+    var attempts = [0, 2000, 5000, 10000];  // ms delays
+    function _try(i) {
+      if (i >= attempts.length) return;
+      setTimeout(function() {
+        window.sdwbTestConnection().then(function(d) {
+          if (!d || !d.ok) _try(i + 1);
+        });
+      }, attempts[i]);
+    }
+    _try(0);
+  };
+
+  // -- Samplers / Models refresh ----------------------------------
+
+  window.sdwbLoadSamplers = function() {
+    getJSON("/api/samplers").then(function(d) {
+      if (!d.ok) return;
+      var samplers = d.samplers || [];
+      if (!samplers.length) return;
+      var selects = [$("sdwbSampler"), $("sdwbCfgSampler")];
+      selects.forEach(function(sel) {
+        var cur = sel.value;
+        sel.innerHTML = "";
+        samplers.forEach(function(s) {
+          var opt = document.createElement("option");
+          opt.textContent = s;
+          opt.value = s;
+          sel.appendChild(opt);
+        });
+        if (samplers.indexOf(cur) >= 0) sel.value = cur;
+      });
+    }).catch(function() {});
+  };
+
+  window.sdwbLoadModels = function(currentModel) {
+    getJSON("/api/models").then(function(d) {
+      if (!d.ok) return;
+      var models = d.models || [];
+      if (!models.length) return;
+      var info = models.length + " " + window.tr('sd_bridge.models_available', 'model(s) available');
+      var connText = $("sdwbConnText").textContent;
+      if (connText.indexOf("Connected") === 0) {
+        $("sdwbConnText").textContent = connText.split(" — ")[0] + " — " + info;
+      }
+      // Populate model switch dropdown
+      var msel = $("sdwbModelSelect");
+      if (msel) {
+        msel.innerHTML = "";
+        models.forEach(function(m) {
+          var opt = document.createElement("option");
+          opt.textContent = m;
+          opt.value = m;
+          msel.appendChild(opt);
+        });
+        if (currentModel && models.indexOf(currentModel) >= 0) {
+          msel.value = currentModel;
+        }
+        msel.style.display = "";
+      }
+      // Also apply model list to Refiner checkpoint select
+      var refSel = $("sdwbRefinerCheckpoint");
+      if (refSel) {
+        var cur = refSel.value;
+        refSel.innerHTML = '<option value="">' + window.tr('sd_bridge.select_placeholder', '-- Select --') + '</option>';
+        models.forEach(function(m) {
+          var opt = document.createElement("option");
+          opt.textContent = m;
+          opt.value = m;
+          refSel.appendChild(opt);
+        });
+        if (cur && models.indexOf(cur) >= 0) refSel.value = cur;
+      }
+    }).catch(function() {});
+  };
+
+  window.sdwbRefreshAssets = function() {
+    var btn = document.querySelector('[data-action="sdwbRefreshAssets"]');
+    if (btn) btn.disabled = true;
+    postJSON("/api/refresh-assets", {}).then(function(d) {
+      if (btn) btn.disabled = false;
+      if (!d || !d.ok) {
+        window.showToast(window.tr('sd_bridge.refresh_assets_failed', 'Refresh failed') + ": " + ((d && d.error) || "unknown"), true);
+        return;
+      }
+      var results = d.results || {};
+      var ok = [];
+      var failed = [];
+      Object.keys(results).forEach(function(k) {
+        if (results[k] && results[k].ok) ok.push(k);
+        else failed.push(k);
+      });
+      var msg = window.tr('sd_bridge.refresh_assets_done', 'Refreshed') + ": " + (ok.length ? ok.join(", ") : "(none)");
+      if (failed.length) msg += " — " + window.tr('sd_bridge.refresh_assets_skipped', 'unsupported by this fork') + ": " + failed.join(", ");
+      window.showToast(msg);
+      // Re-fetch models so the dropdown reflects the new on-disk set.
+      if (window.sdwbLoadModels) window.sdwbLoadModels($("sdwbModelSelect") ? $("sdwbModelSelect").value : "");
+    }).catch(function(e) {
+      if (btn) btn.disabled = false;
+      window.showToast(window.tr('sd_bridge.refresh_assets_failed', 'Refresh failed') + ": " + e.message, true);
+    });
+  };
+
+  window.sdwbLoadUpscalers = function() {
+    getJSON("/api/upscalers").then(function(d) {
+      if (!d.ok) return;
+      var upscalers = d.upscalers || [];
+      if (!upscalers.length) return;
+      var sel = $("sdwbHiresUpscaler");
+      if (!sel) return;
+      var cur = sel.value;
+      sel.innerHTML = "";
+      upscalers.forEach(function(u) {
+        var opt = document.createElement("option");
+        opt.textContent = u;
+        opt.value = u;
+        sel.appendChild(opt);
+      });
+      if (upscalers.indexOf(cur) >= 0) sel.value = cur;
+      else if (upscalers.indexOf("Latent") >= 0) sel.value = "Latent";
+    }).catch(function() {});
+  };
+
+  // Hires Fix / Refiner state management
+  window.sdwbUpdateHiresState = function() {
+    var section = $("sdwbHiresSection");
+    var enabled = $("sdwbHiresEnable").checked;
+    if (enabled) {
+      section.removeAttribute("data-disabled");
+      $("sdwbHiresStatus").textContent = "(ON)";
+    } else {
+      section.setAttribute("data-disabled", "");
+      $("sdwbHiresStatus").textContent = "";
+    }
+  };
+
+  window.sdwbUpdateRefinerState = function() {
+    var section = $("sdwbRefinerSection");
+    var enabled = $("sdwbRefinerEnable").checked;
+    if (enabled) {
+      section.removeAttribute("data-disabled");
+      $("sdwbRefinerStatus").textContent = "(ON)";
+    } else {
+      section.setAttribute("data-disabled", "");
+      $("sdwbRefinerStatus").textContent = "";
+    }
+  };
+
+  // -- Seed reset -------------------------------------------------
+
+  window.sdwbResetSeed = function() {
+    var el = $("sdwbSeed");
+    if (el) el.value = "-1";
+  };
+
+  // -- Seed auto-reset after generation ---------------------------
+  // Persisted in localStorage so the user only has to enable it once.
+  (function() {
+    var cb = document.getElementById("sdwbSeedAutoReset");
+    if (!cb) return;
+    try { cb.checked = localStorage.getItem("sdwb_seed_auto_reset") === "1"; } catch(_) {}
+    cb.addEventListener("change", function() {
+      try { localStorage.setItem("sdwb_seed_auto_reset", cb.checked ? "1" : "0"); } catch(_) {}
+    });
+  })();
+  window._sdwbApplySeedAutoReset = function() {
+    var cb = document.getElementById("sdwbSeedAutoReset");
+    if (cb && cb.checked) {
+      var el = document.getElementById("sdwbSeed");
+      if (el) el.value = "-1";
+    }
+  };
+
+  // -- Generate ---------------------------------------------------
+
+  // Update the "Total: N" label when batch_count or batch_size changes.
+  function _sdwbUpdateBatchTotal() {
+    var c = parseInt(($("sdwbBatchCount") || {}).value, 10) || 1;
+    var s = parseInt(($("sdwbBatchSize") || {}).value, 10) || 1;
+    var el = $("sdwbBatchTotal");
+    if (!el) return;
+    var tmpl = window.tr ? window.tr('bridge.total_images', 'Total: {n}') : 'Total: {n}';
+    el.textContent = tmpl.replace('{n}', c * s);
+  }
+  // Expose for lastparams restore
+  window._sdwbUpdateBatchTotal = _sdwbUpdateBatchTotal;
+
+  // Show/hide graceful stop button.
+  function _sdwbShowStopAfter(show) {
+    var btn = $("sdwbStopAfterCurrentBtn");
+    if (!btn) return;
+    btn.style.display = show ? "" : "none";
+    btn.disabled = false;
+    btn.textContent = window.tr ? window.tr('bridge.action.stop_after_current', 'Stop after current')
+                                : 'Stop after current';
+  }
+
+  window.sdwbStopAfterCurrent = function() {
+    _sdwbBatchCancel = true;
+    looping = false;  // also stop forever loop after current image
+    var btn = $("sdwbStopAfterCurrentBtn");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = window.tr ? window.tr('bridge.status.stopping_graceful', 'Stopping…')
+                                  : 'Stopping…';
+    }
+  };
+
+  // Build the request body from current UI state. Returns null if validation
+  // fails (and shows a toast). Exposed so the sweep runner can reuse it.
+  window._sdwbBuildBody = function() {
+    var prompt = (typeof _sdwbGetPrompt === "function" ? _sdwbGetPrompt() : $("sdwbPrompt").value).trim();
+    if (!prompt) { window.showToast(window.tr('sd_bridge.prompt_required', 'Prompt is required'), true); return null; }
+    var body = {
+      prompt: prompt,
+      negative_prompt: (typeof _sdwbGetNegative === "function" ? _sdwbGetNegative() : $("sdwbNegative").value).trim(),
+      steps: parseInt($("sdwbSteps").value, 10) || 28,
+      sampler_name: $("sdwbSampler").value,
+      cfg_scale: parseFloat($("sdwbCfg").value) || 7,
+      width: parseInt($("sdwbWidth").value, 10) || 512,
+      height: parseInt($("sdwbHeight").value, 10) || 768,
+      seed: parseInt($("sdwbSeed").value, 10) || -1,
+      image_format: $("sdwbImageFormat").value,
+    };
+    // Always expand wildcards (like NAI bridge) — WC button only controls browser panel
+    body.expand_wildcards = true;
+    try {
+      var wm = localStorage.getItem('wm_wildcards');
+      if (wm) body.client_wildcards = JSON.parse(wm);
+    } catch(_) {}
+
+    // alwayson_scripts (ADetailer etc.)
+    var alwayson = (typeof sdwbCollectAlwaysonScripts === "function")
+      ? sdwbCollectAlwaysonScripts() : null;
+    if (alwayson) body.alwayson_scripts = alwayson;
+
+    // Hires Fix
+    if ($("sdwbHiresEnable") && $("sdwbHiresEnable").checked) {
+      body.enable_hr = true;
+      body.hr_upscaler = $("sdwbHiresUpscaler").value;
+      body.hr_scale = parseFloat($("sdwbHiresScale").value) || 2.0;
+      body.hr_second_pass_steps = parseInt($("sdwbHiresSteps").value, 10) || 0;
+      body.denoising_strength = parseFloat($("sdwbHiresDenoising").value) || 0.7;
+      var hrResX = parseInt($("sdwbHiresResizeX").value, 10) || 0;
+      var hrResY = parseInt($("sdwbHiresResizeY").value, 10) || 0;
+      if (hrResX > 0) body.hr_resize_x = hrResX;
+      if (hrResY > 0) body.hr_resize_y = hrResY;
+    }
+
+    // Refiner (SDXL)
+    if ($("sdwbRefinerEnable") && $("sdwbRefinerEnable").checked) {
+      var refCkpt = $("sdwbRefinerCheckpoint").value;
+      if (refCkpt) {
+        body.refiner_checkpoint = refCkpt;
+        body.refiner_switch_at = parseFloat($("sdwbRefinerSwitchAt").value) || 0.8;
+      }
+    }
+
+    // img2img data
+    var i2i = sdwbCollectImg2Img();
+    if (i2i) {
+      body.init_images = [i2i.image];
+      body.denoising_strength = i2i.denoising_strength;
+    }
+
+    body.bridge = "sd-webui";
+    return body;
+  };
+
+  // LAN Cowork dispatch routing is handled by window.bridgeFetch.
+
+  window._sdwbIsGenerating = function() { return generating; };
+
+  window.sdwbGenerate = async function() {
+    if (generating) return;
+
+    // Sweep mode short-circuit (existing)
+    if (typeof window.sdwbRunSweep === "function" && $("sdwbSweepEnabled") && $("sdwbSweepEnabled").checked) {
+      window.sdwbRunSweep();
+      return;
+    }
+
+    // Loop mode init.
+    var foreverCb = $("sdwbForever");
+    if (foreverCb && foreverCb.checked && !looping) {
+      if (foreverCb.dataset.loopConfirmed !== "1") {
+        var ok = await window.customConfirm(window.tr(
+          'bridge.loop_generation_confirm',
+          'Loop generation will keep submitting jobs until stopped. Continue?'));
+        if (!ok) {
+          foreverCb.checked = false;
+          return;
+        }
+        foreverCb.dataset.loopConfirmed = "1";
+      }
+      looping = true;
+      loopCount = 0;
+      $("sdwbLoopCount").style.display = "";
+      $("sdwbLoopCount").textContent = "#0";
+    }
+
+    var bodyTmpl = window._sdwbBuildBody();
+    if (!bodyTmpl) return;
+    bodyTmpl.bridge = "sd-webui";
+
+    var batchCount = Math.max(1, parseInt(($("sdwbBatchCount") || {}).value, 10) || 1);
+    var batchSize  = Math.max(1, parseInt(($("sdwbBatchSize") || {}).value, 10) || 1);
+    var baseSeed   = (typeof bodyTmpl.seed === "number" && bodyTmpl.seed >= 0) ? bodyTmpl.seed : -1;
+
+    _sdwbBatchCancel = false;
+    setGenerating(true);
+    $("sdwbResult").textContent = "";
+    if (batchCount > 1 || looping) _sdwbShowStopAfter(true);
+
+    var fanOutStates = null;
+    var useFanOut = false;
+    if (window.BridgeFanOut && typeof window.BridgeFanOut.initFanOut === "function") {
+      fanOutStates = await window.BridgeFanOut.initFanOut("sd_webui");
+      if (!fanOutStates.length) {
+        $("sdwbResult").innerHTML = '<div class="sdwb-result-info" style="color:#f44336;">'
+          + window.tr('sd_bridge.generation_failed', 'Generation failed') + '</div>';
+        setGenerating(false);
+        return;
+      }
+      useFanOut = !window.BridgeFanOut.isDefaultFanOut(fanOutStates);
+    }
+
+    var progressText = $("sdwbProgressText");
+    function _setLoopText(i) {
+      if (!progressText || batchCount <= 1) return;
+      // Keep batch position visible throughout this iteration (poller reads _sdwbBatchLabel).
+      _sdwbBatchLabel = (i + 1) + '/' + batchCount;
+      if (progressText) progressText.textContent = _sdwbBatchLabel + ' — 0%';
+    }
+
+    var loopFatal = false;  // server error / request error: break + don't continue forever loop
+    var lastElapsed = 0;
+    try {
+      for (var i = 0; i < batchCount; i++) {
+        if (_sdwbBatchCancel) break;
+        var callBody = JSON.parse(JSON.stringify(bodyTmpl));
+        callBody.batch_count = 1;
+        callBody.batch_size = batchSize;
+        callBody.seed = (baseSeed >= 0) ? (baseSeed + i) : -1;
+
+        _sdwbAbort = (typeof AbortController !== "undefined") ? new AbortController() : null;
+        _setLoopText(i);
+
+        try {
+          var d;
+          if (useFanOut) {
+            var fanOutResults = await window.BridgeFanOut.runFanOut(
+              fanOutStates,
+              callBody,
+              BASE + "/api/generate"
+            );
+            d = mergeFanOutResults(fanOutResults);
+          } else {
+            var resp = await window.bridgeFetch("sd-webui", "generate", callBody, {
+              signal: _sdwbAbort ? _sdwbAbort.signal : undefined,
+            });
+            d = await resp.json();
+          }
+          if (!d.ok) {
+            var errMsg = '<div class="sdwb-result-info" style="color:#f44336;">'
+              + window.tr('sd_bridge.error_prefix', 'Error') + ': '
+              + escHtml(d.error || window.tr('sd_bridge.generation_failed', 'Generation failed'))
+              + ' (' + (i + 1) + '/' + batchCount + ')</div>';
+            $("sdwbResult").innerHTML = errMsg;
+            loopFatal = true;
+            break;
+          }
+          renderResult(d, i > 0);
+          lastElapsed = d.elapsed_ms || 0;
+          if (typeof window.sdwbSaveLastParams === "function") window.sdwbSaveLastParams();
+          if (typeof window._sdwbApplySeedAutoReset === "function") window._sdwbApplySeedAutoReset();
+        } catch (e) {
+          if (e && (e.name === "AbortError" || /aborted/i.test(e.message || ""))) {
+            break;  // user-initiated abort: don't show as error
+          }
+          var reqErrMsg = '<div class="sdwb-result-info" style="color:#f44336;">'
+            + window.tr('sd_bridge.request_failed', 'Request failed') + ': '
+            + escHtml(e.message) + '</div>';
+          $("sdwbResult").innerHTML = reqErrMsg;
+          loopFatal = true;
+          break;
+        }
+      }
+    } finally {
+      _sdwbAbort = null;
+      _sdwbBatchLabel = "";
+      // keep stop-after button visible during forever loop inter-frame pause;
+      // _sdwbShowStopAfter(false) is called by setGenerating when loop ends.
+      if (!looping) _sdwbShowStopAfter(false);
+    }
+
+    if (loopFatal) looping = false;
+
+    // Forever loop continuation (existing logic)
+    var _foreverCb = $("sdwbForever");
+    if (looping && (!_foreverCb || !_foreverCb.checked)) looping = false;
+    // Cloud safety cap: stop the forever loop after 50 iterations when
+    // the configured api_url is non-local (matches sweep cap). Local
+    // stays uncapped because there is no per-request cost.
+    if (looping) {
+      var _urlEl = $("sdwbCfgUrl");
+      var _isLocal = (_urlEl && typeof isLocalUrl === "function" && isLocalUrl(_urlEl.value));
+      if (!_isLocal && (loopCount + 1) >= 50) {
+        looping = false;
+        if (_foreverCb) _foreverCb.checked = false;
+        window.showToast(window.tr('sd_bridge.forever_cloud_cap_reached', 'Forever ループの上限 (クラウド: 50 回) に達しました'));
+      }
+    }
+    if (looping) {
+      loopCount++;
+      var elapsed = lastElapsed ? " — " + (lastElapsed / 1000).toFixed(1) + "s" : "";
+      $("sdwbLoopCount").textContent = "#" + loopCount + elapsed;
+      setGenerating(false);
+      setTimeout(sdwbGenerate, 500);
+    } else {
+      setGenerating(false);
+    }
+  };
+
+  if (window.BridgeLeaveGuard) {
+    window.BridgeLeaveGuard.install({ isGenerating: function () { return generating; } });
+  }
+
+  function mergeFanOutResults(results) {
+    var merged = { ok: false, images: [], saved: [] };
+    (results || []).forEach(function(item) {
+      var d = item && item.data;
+      if (!d || d.ok === false) return;
+      merged.ok = true;
+      if (!merged.image_format && d.image_format) merged.image_format = d.image_format;
+      if (!merged.expanded_prompt && d.expanded_prompt) merged.expanded_prompt = d.expanded_prompt;
+      if (!merged.original_prompt && d.original_prompt) merged.original_prompt = d.original_prompt;
+      if (typeof merged.final_negative !== "string" && typeof d.final_negative === "string") {
+        merged.final_negative = d.final_negative;
+      }
+      if (d.elapsed_ms) merged.elapsed_ms = Math.max(merged.elapsed_ms || 0, d.elapsed_ms);
+      if (Array.isArray(d.images)) merged.images = merged.images.concat(d.images);
+      if (Array.isArray(d.saved)) merged.saved = merged.saved.concat(d.saved);
+      if (Array.isArray(d.adetailer)) merged.adetailer = (merged.adetailer || []).concat(d.adetailer);
+    });
+    if (!merged.ok) merged.error = "All selected servers failed";
+    return merged;
+  }
+
+  function setGenerating(active) {
+    generating = active;
+    $("sdwbGenBtn").disabled = active;
+    $("sdwbCancelBtn").style.display = (active || looping) ? "" : "none";
+
+    var prog = $("sdwbProgress");
+    if (active) {
+      prog.classList.add("active");
+      $("sdwbProgressFill").style.width = "0%";
+      $("sdwbProgressText").textContent = "0%";
+      startPolling();
+    } else {
+      prog.classList.remove("active");
+      stopPolling();
+      if (!looping) {
+        $("sdwbLoopCount").style.display = "none";
+        loopCount = 0;
+        _sdwbShowStopAfter(false);
+      }
+    }
+  }
+
+  // append=true: batch-count loop の 2 回目以降は sdwbResult に追記する（上書きしない）。
+  function renderResult(d, append) {
+    var html = "";
+    var images = d.images || [];
+    var _mimeMap = {"png": "image/png", "webp": "image/webp", "jpg": "image/jpeg"};
+    var _mime = _mimeMap[d.image_format] || _mimeMap[$("sdwbImageFormat").value] || "image/png";
+    images.forEach(function(img, i) {
+      html += '<div style="margin-bottom:12px;">';
+      html += '<img src="data:' + _mime + ';base64,' + img.base64 + '" alt="Generated image ' + (i + 1) + '">';
+      html += '<div class="sdwb-result-info">Seed: ' + escHtml(String(img.seed || "?")) + '</div>';
+      html += '</div>';
+    });
+    var sdwbPromptOpenEl = $("sdwbCfgPromptOpen");
+    var sdwbPromptOpen = sdwbPromptOpenEl ? sdwbPromptOpenEl.checked : (localStorage.getItem("sdwb_prompt_open") !== "false");
+    var sdwbOpenAttr = sdwbPromptOpen ? " open" : "";
+    if (d.expanded_prompt) {
+      var sdwbPromptLabel = d.original_prompt
+        ? window.tr('sd_bridge.expanded', 'Expanded')
+        : window.tr('sd_bridge.result_prompt', 'Prompt');
+      html += '<details' + sdwbOpenAttr + '><summary style="font-size:12px;color:#4fc3f7;">' + sdwbPromptLabel + '</summary>';
+      html += '<div class="sdwb-result-info" style="white-space:pre-wrap;font-size:11px;">' +
+        escHtml(d.expanded_prompt) + '</div></details>';
+    }
+    if (typeof d.final_negative === 'string') {
+      html += '<details' + sdwbOpenAttr + '><summary style="font-size:12px;color:#ef9a9a;">' + window.tr('sd_bridge.result_negative', 'Negative') + '</summary>';
+      html += '<div class="sdwb-result-info" style="white-space:pre-wrap;font-size:11px;">' +
+        (d.final_negative ? escHtml(d.final_negative) : '<span style="opacity:0.5;">' + window.tr('common.none', '(なし)') + '</span>') + '</div></details>';
+    }
+    if (Array.isArray(d.adetailer) && d.adetailer.length) {
+      d.adetailer.forEach(function(ad, ai) {
+        var adTitle = window.tr('sd_bridge.result_adetailer', 'ADetailer') +
+          (d.adetailer.length > 1 ? ' ' + (ai + 1) : '') +
+          (ad.model ? ': ' + ad.model : '');
+        html += '<details' + sdwbOpenAttr + '><summary style="font-size:12px;color:#a5d6a7;">' + escHtml(adTitle) + '</summary>';
+        html += '<div class="sdwb-result-info" style="white-space:pre-wrap;font-size:11px;">';
+        if (ad.prompt) html += escHtml(ad.prompt);
+        if (ad.negative) html += '\n<span style="color:#ef9a9a;">[' +
+          window.tr('sd_bridge.result_negative', 'Negative') + '] ' + escHtml(ad.negative) + '</span>';
+        html += '</div></details>';
+      });
+    }
+    if (d.elapsed_ms) {
+      html += '<div class="sdwb-result-info">' + window.tr('sd_bridge.generated_in', 'Generated in') + ' ' + (d.elapsed_ms / 1000).toFixed(1) + 's</div>';
+    }
+    if (Array.isArray(d.saved) && d.saved.length) {
+      html += '<div class="sdwb-result-info" style="color:#4caf50;">' + window.tr('sd_bridge.saved_prefix', 'Saved') + ': ' +
+        d.saved.map(function(p) { return escHtml(p); }).join(", ") + '</div>';
+    }
+    if (!images.length) {
+      html += '<div class="sdwb-result-info">' + window.tr('sd_bridge.no_images_returned', 'No images returned.') + '</div>';
+    }
+        if (append) {
+      var sep = '<hr style="border:none;border-top:1px solid rgba(255,255,255,0.15);margin:12px 0;">';
+      $("sdwbResult").insertAdjacentHTML("beforeend", sep + html);
+    } else {
+      $("sdwbResult").innerHTML = html;
+    }
+    // Update result panel
+    if (window._sdwbThumbStrip) window._sdwbThumbStrip.update(images, _mime, {
+      elapsed_ms: d.elapsed_ms,
+      expanded_prompt: d.expanded_prompt,
+      original_prompt: d.original_prompt,
+      final_negative: d.final_negative,
+      adetailer: d.adetailer,
+      saved: d.saved,
+    });
+  }
+
+  // -- Progress polling -------------------------------------------
+
+  function startPolling() {
+    stopPolling();
+    pollTimer = setInterval(function() {
+      window.bridgeFetch("sd-webui", "progress", {}).then(function(r) { return r.json(); }).then(function(d) {
+        if (!generating) return;
+        var pct = Math.round((d.progress || 0) * 100);
+        $("sdwbProgressFill").style.width = pct + "%";
+        var text = pct + "%";
+        if (d.step && d.total_steps) {
+          text += " (step " + d.step + "/" + d.total_steps + ")";
+        }
+        // Prepend batch position so it stays visible while progress updates.
+        if (_sdwbBatchLabel) text = _sdwbBatchLabel + " — " + text;
+        $("sdwbProgressText").textContent = text;
+      }).catch(function() {});
+    }, 1000);
+  }
+
+  function stopPolling() {
+    if (pollTimer) { clearInterval(pollTimer); pollTimer = null; }
+  }
+
+  // -- Cancel -----------------------------------------------------
+
+  window.sdwbCancel = function() {
+    _sdwbBatchCancel = true;
+    if (_sdwbAbort) { try { _sdwbAbort.abort(); } catch (_) {} }
+    looping = false;
+    window.bridgeFetch("sd-webui", "cancel", {}).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.ok) {
+        setGenerating(false);
+        $("sdwbResult").innerHTML = '<div class="sdwb-result-info">' + window.tr('sd_bridge.cancelled', 'Cancelled.') + '</div>';
+      }
+    }).catch(function() {});
+  };
+
+  // -- Config -----------------------------------------------------
+
+  window.sdwbBrowseSaveFolder = function() {
+    fetch("/api/tools/select-folder")
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.path) $("sdwbCfgSaveFolder").value = d.path;
+        else if (d.error) window.showToast(window.tr('sd_bridge.folder_selection_failed', 'Folder selection failed') + ": " + (d.error || "unknown"), true);
+      })
+      .catch(function(e) { window.showToast(window.tr('sd_bridge.folder_selection_failed', 'Folder selection failed') + ": " + e.message, true); });
+  };
+
+  // Restore prompt-open preference on page load
+  (function() {
+    var el = $("sdwbCfgPromptOpen");
+    if (el) el.checked = localStorage.getItem("sdwb_prompt_open") !== "false";
+  })();
+
+  window.sdwbSaveConfig = function() {
+    // Save prompt-open preference to localStorage (client-only setting)
+    var promptOpenEl = $("sdwbCfgPromptOpen");
+    if (promptOpenEl) localStorage.setItem("sdwb_prompt_open", promptOpenEl.checked ? "true" : "false");
+    var body = {
+      api_url: $("sdwbCfgUrl").value.trim(),
+      gateway_url: ($("sdwbCfgGatewayUrl") || {}).value !== undefined ? ($("sdwbCfgGatewayUrl").value || "").trim() : undefined,
+      default_sampler: $("sdwbCfgSampler").value,
+      auto_send: $("sdwbCfgAutoSend").checked,
+      save_folder: $("sdwbCfgSaveFolder").value.trim(),
+      auto_save: $("sdwbCfgAutoSave").checked,
+      save_naming: $("sdwbCfgSaveNaming").value,
+      default_image_format: $("sdwbCfgImageFormat").value,
+      auto_import: $("sdwbCfgAutoImport").checked,
+      bridge_managed_save: $("sdwbCfgBridgeManagedSave") ? $("sdwbCfgBridgeManagedSave").checked : false,
+      max_batch_size: parseInt(($("sdwbCfgMaxBatchSize") || {}).value, 10) || 8,
+    };
+    var apiKeyEl = $("sdwbCfgApiKey");
+    if (apiKeyEl && apiKeyEl.value.trim()) body.api_key_enc = apiKeyEl.value.trim();
+    postJSON("/api/config", body).then(function(d) {
+      if (d.ok) {
+        window.showToast(window.tr('sd_bridge.settings_saved', 'Settings saved'));
+        if (apiKeyEl && apiKeyEl.value.trim()) { apiKeyEl.value = ""; apiKeyEl.placeholder = window.tr('sd_bridge.api_key_set', '(設定済み)'); }
+        // Sync generation panel defaults from saved config
+        $("sdwbSampler").value = body.default_sampler;
+        $("sdwbImageFormat").value = body.default_image_format;
+        // Apply new max_batch_size to the batch size input
+        var bsEl = $("sdwbBatchSize");
+        if (bsEl) {
+          bsEl.max = body.max_batch_size;
+          if (parseInt(bsEl.value, 10) > body.max_batch_size) bsEl.value = body.max_batch_size;
+          if (typeof _sdwbUpdateBatchTotal === "function") _sdwbUpdateBatchTotal();
+        }
+        // Forever loop is now allowed for cloud too (capped at 50 in the
+        // run loop). Always-enabled here.
+      }
+      else window.showToast(window.tr('sd_bridge.save_failed', 'Save failed') + ": " + (d.error || "unknown"), true);
+    }).catch(function(e) {
+      window.showToast(window.tr('sd_bridge.save_failed', 'Save failed') + ": " + e.message, true);
+    });
+  };
+
+  function loadConfig() {
+    return getJSON("/api/config").then(function(d) {
+      if (!d.ok) return;
+      if (d.api_url) {
+        $("sdwbCfgUrl").value = d.api_url;
+      }
+      if (typeof d.gateway_url === "string" && $("sdwbCfgGatewayUrl")) {
+        $("sdwbCfgGatewayUrl").value = d.gateway_url;
+      }
+      var akEl = $("sdwbCfgApiKey");
+      if (akEl) akEl.placeholder = d.api_key_enc === "***" ? window.tr('sd_bridge.api_key_set', '(設定済み)') : "";
+      if (d.default_sampler) {
+        $("sdwbCfgSampler").value = d.default_sampler;
+        $("sdwbSampler").value = d.default_sampler;
+      }
+      if (d.auto_send) $("sdwbCfgAutoSend").checked = true;
+      if (d.save_folder) $("sdwbCfgSaveFolder").value = d.save_folder;
+      if (d.auto_save) $("sdwbCfgAutoSave").checked = true;
+      if (d.save_naming) $("sdwbCfgSaveNaming").value = d.save_naming;
+      if (d.default_image_format) {
+        $("sdwbCfgImageFormat").value = d.default_image_format;
+        $("sdwbImageFormat").value = d.default_image_format;
+      }
+      $("sdwbCfgAutoImport").checked = d.auto_import !== false;
+      if ($("sdwbCfgBridgeManagedSave")) $("sdwbCfgBridgeManagedSave").checked = !!d.bridge_managed_save;
+      if (typeof d.max_batch_size === "number") {
+        var cfgMbs = $("sdwbCfgMaxBatchSize");
+        if (cfgMbs) cfgMbs.value = d.max_batch_size;
+        var bsEl = $("sdwbBatchSize");
+        if (bsEl) {
+          bsEl.max = d.max_batch_size;
+          // Clamp current value if it exceeds new max
+          if (parseInt(bsEl.value, 10) > d.max_batch_size) bsEl.value = d.max_batch_size;
+        }
+      }
+    }).catch(function() {});
+  }
+
+  // -- Util -------------------------------------------------------
+
+  function escHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  // -- img2img: extracted to _script_img2img.html ------------------
+  //   exports: window.sdwbSetImg2ImgFile, window.sdwbClearImg2Img,
+  //            window.sdwbCollectImg2Img, window._sdwbSetImg2ImgBase64,
+  //            window._sdwbSendImg2ImgTo (drag & drop init also moved)
+
+  window.sdwbClearPrompts = function() {
+    // Clear via editor API if syntax engine is active, otherwise clear textarea
+    if (typeof _sdwbSetPrompt === "function") {
+      _sdwbSetPrompt("");
+    } else {
+      var pos = $("sdwbPrompt");
+      if (pos) pos.value = "";
+    }
+    if (typeof _sdwbSetNegative === "function") {
+      _sdwbSetNegative("");
+    } else {
+      var neg = $("sdwbNegative");
+      if (neg) neg.value = "";
+    }
+  };
+
+  // -- Receive prompt from other tools ----------------------------
+
+  var _sdwbReceivedPrompt = false;
+
+  // bridge-app.js (type=module) registers window.bridgeStorage; its load is
+  // deferred so this inline script may run first. Wait briefly, fall through
+  // to legacy localStorage if the module never registers.
+  function _sdwbWaitBridgeStorage() {
+    return new Promise(function(resolve) {
+      if (window.bridgeStorage) return resolve(window.bridgeStorage);
+      var tries = 0;
+      var iv = setInterval(function() {
+        if (window.bridgeStorage) { clearInterval(iv); resolve(window.bridgeStorage); }
+        else if (++tries >= 100) { clearInterval(iv); resolve(null); }
+      }, 30);
+    });
+  }
+
+  async function _sdwbRead(key) {
+    var bs = await _sdwbWaitBridgeStorage();
+    if (bs) {
+      var v = await bs.get(key);
+      if (v !== undefined && v !== null) {
+        await bs.remove(key);
+        return v;
+      }
+    }
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    localStorage.removeItem(key);
+    try { return JSON.parse(raw); } catch (_e) { return null; }
+  }
+
+  async function receivePrompt() {
+    try {
+      var data = await _sdwbRead('bridge_send_prompt');
+      if (!data) return;
+      _sdwbReceivedPrompt = true;
+      if (typeof data.convert_warning === "string" && data.convert_warning && typeof window.showToast === "function") {
+        window.showToast(data.convert_warning, true);
+      }
+      if (data.prompt) {
+        if (typeof _sdwbSetPrompt === "function") _sdwbSetPrompt(data.prompt);
+        else $("sdwbPrompt").value = data.prompt;
+      }
+      if (data.negative) {
+        if (typeof _sdwbSetNegative === "function") _sdwbSetNegative(data.negative);
+        else $("sdwbNegative").value = data.negative;
+      }
+      var paramsApplied = false;
+      if (typeof data.seed === "number" && isFinite(data.seed) && data.seed >= 0) {
+        var seedEl = $("sdwbSeed");
+        if (seedEl) {
+          seedEl.value = String(data.seed);
+          try { seedEl.dispatchEvent(new Event("change", { bubbles: true })); } catch (_e) {}
+          try { seedEl.dispatchEvent(new Event("input", { bubbles: true })); } catch (_e) {}
+          paramsApplied = true;
+        }
+      }
+      if (typeof data.steps === "number" && isFinite(data.steps) && data.steps > 0) {
+        var stepsEl = $("sdwbSteps");
+        if (stepsEl) { stepsEl.value = String(Math.round(data.steps)); paramsApplied = true; }
+      }
+      if (typeof data.scale === "number" && isFinite(data.scale)) {
+        var cfgEl = $("sdwbCfg");
+        if (cfgEl) { cfgEl.value = String(data.scale); paramsApplied = true; }
+      }
+      if (typeof data.sampler === "string" && data.sampler) {
+        var sdwbSamplerEl = $("sdwbSampler");
+        if (sdwbSamplerEl) {
+          for (var i = 0; i < sdwbSamplerEl.options.length; i++) {
+            if (sdwbSamplerEl.options[i].value === data.sampler) { sdwbSamplerEl.value = data.sampler; paramsApplied = true; break; }
+          }
+        }
+      }
+      if (typeof data.width === "number" && isFinite(data.width) && data.width > 0) {
+        var sdwbWidthEl = $("sdwbWidth");
+        if (sdwbWidthEl) { sdwbWidthEl.value = String(data.width); paramsApplied = true; }
+      }
+      if (typeof data.height === "number" && isFinite(data.height) && data.height > 0) {
+        var sdwbHeightEl = $("sdwbHeight");
+        if (sdwbHeightEl) { sdwbHeightEl.value = String(data.height); paramsApplied = true; }
+      }
+      if ((data.prompt || data.negative || paramsApplied) && typeof window.showToast === "function") {
+        var sdwbToastKey = data.source === "recipe_import" ? 'bridge.received_recipe_sd' : (paramsApplied ? 'bridge.received_hint_prompt_with_seed' : 'bridge.received_hint_prompt');
+        var sdwbToastFb = data.source === "recipe_import"
+          ? 'レシピからパラメータを読み込みました（モデルは手動で切り替えてください）'
+          : (paramsApplied ? 'プロンプトとパラメータ（ステップ・CFG・シード等）を反映しました' : 'プロンプトを反映しました');
+        window.showToast(window.tr(sdwbToastKey, sdwbToastFb));
+      }
+    } catch (_e) {}
+  }
+
+  async function receiveImage() {
+    try {
+      var data = await _sdwbRead('bridge_send_image');
+      if (!data) return;
+      if (data.base64) {
+        window._sdwbSetImg2ImgBase64(data.base64);
+        if (typeof window.showToast === "function") {
+          window.showToast(window.tr('bridge.received_hint_image',
+            'img2img に画像をセットしました（生成パラメータは手動で調整してください）'));
+        }
+      }
+    } catch (_e) {}
+  }
+
+  // -- Last params save/restore: extracted to _script_lastparams.html
+  //   exports: window._sdwbLastParamsConfig, window.sdwbSaveLastParams,
+  //            window.sdwbRestoreLast
+
+  // -- Send to other Bridge -----------------------------------------
+
+  window.sdwbSendToBridge = function(target, evt) {
+    var pos = (typeof _sdwbGetPrompt === "function" ? _sdwbGetPrompt() : $("sdwbPrompt").value).trim();
+    var neg = (typeof _sdwbGetNegative === "function" ? _sdwbGetNegative() : $("sdwbNegative").value).trim();
+    if (!pos) { window.showToast(window.tr('sd_bridge.prompt_empty', 'Prompt is empty'), true); return; }
+
+    if (target === "nai") {
+      // SD -> NAI auto-convert
+      fetch("/ext/convert/sd-to-nai", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({prompt: pos, negative: neg})
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        localStorage.setItem("bridge_send_prompt", JSON.stringify({
+          prompt: d.prompt || pos, negative: d.negative || neg, source: "sd-bridge"
+        }));
+        window.tauriCrossTab.sendToBridge("nai", {}, evt);
+      }).catch(function() {
+        localStorage.setItem("bridge_send_prompt", JSON.stringify({prompt: pos, negative: neg, source: "sd-bridge"}));
+        window.tauriCrossTab.sendToBridge("nai", {}, evt);
+      });
+    } else {
+      localStorage.setItem("bridge_send_prompt", JSON.stringify({prompt: pos, negative: neg, source: "sd-bridge"}));
+      window.tauriCrossTab.sendToBridge("comfyui", {}, evt);
+    }
+  };
+
+  // Add auxclick (middle-click) listeners for send-to-bridge buttons
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('[data-action="sdwbSendToBridge"][data-action-arg]').forEach(function(btn) {
+      btn.addEventListener("auxclick", function(e) {
+        if (e.button !== 1) return;
+        e.preventDefault();
+        window.sdwbSendToBridge(btn.getAttribute("data-action-arg"), e);
+      });
+    });
+
+    // Batch count/size total label updater
+    ["sdwbBatchCount", "sdwbBatchSize"].forEach(function(id) {
+      var el = $(id);
+      if (el) el.addEventListener("input", _sdwbUpdateBatchTotal);
+    });
+    _sdwbUpdateBatchTotal();
+  });
+
+  // -- Keyboard shortcuts ------------------------------------------
+
+  document.addEventListener("keydown", function(e) {
+    // Ctrl+Enter -> Generate
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+      e.preventDefault();
+      sdwbGenerate();
+    }
+    // Esc -> Cancel
+    if (e.key === "Escape" && generating) {
+      e.preventDefault();
+      sdwbCancel();
+    }
+  });
+
+  // -- Model switch ------------------------------------------------
+
+  (function() {
+    var msel = $("sdwbModelSelect");
+    if (!msel) return;
+    msel.addEventListener("change", function() {
+      var model = msel.value;
+      if (!model) return;
+      msel.disabled = true;
+      setConn(true, window.tr('sd_bridge.switching_model', 'Switching model...'));
+      postJSON("/api/models/switch", { model: model }).then(function(d) {
+        msel.disabled = false;
+        if (d.ok) {
+          var name = d.model || model;
+          setConn(true, window.tr('sd_bridge.status_connected', 'Connected') + " — " + name);
+          window.showToast(window.tr('sd_bridge.model_switched', 'Model switched') + ": " + name);
+        } else {
+          setConn(true, window.tr('sd_bridge.switch_failed', 'Switch failed') + ": " + (d.error || "unknown"));
+        }
+      }).catch(function(e) {
+        msel.disabled = false;
+        setConn(true, window.tr('sd_bridge.switch_failed', 'Switch failed') + ": " + e.message);
+      });
+    });
+  })();
+
+  // -- Init -------------------------------------------------------
+
+  // Initialize hires/refiner disabled state
+  sdwbUpdateHiresState();
+  sdwbUpdateRefinerState();
+
+  // Receive prompt/image and load server config in parallel. Last-params
+  // restore still waits for all of them so it does not overwrite received
+  // prompt data, while config is not delayed by bridgeStorage probing.
+  Promise.all([receivePrompt(), receiveImage(), loadConfig()])
+    .then(function() {
+      // Skip last-params restore when the page is resuming a sweep
+      // (`?resume_sweep=N`). Sweep resume populates the prompt textarea
+      // from the XMP `prompt_template` shortly after, and a brief flash of
+      // the unrelated last-prompt before that override is visually
+      // distracting (esp. on cross-bridge re-run).
+      var resumingSweep = false;
+      try { resumingSweep = !!new URL(location.href).searchParams.get("resume_sweep"); } catch (_) {}
+      if (!_sdwbReceivedPrompt && !resumingSweep && window.BridgeLastParams && window._sdwbLastParamsConfig) {
+        window.BridgeLastParams.restore(window._sdwbLastParamsConfig);
+      }
+    });
+  sdwbAutoTestConnectionWithRetry();
+
+  // Resolution preset + W/H swap.
+  // bridge-app.js is a deferred ES module, so window.BridgeResolutionPresets
+  // is not defined yet at this sync-inline point. Wait for DOMContentLoaded,
+  // which fires after module scripts have executed.
+  document.addEventListener('DOMContentLoaded', function() {
+    var foreverEl = document.getElementById('sdwbForever');
+    if (foreverEl) {
+      foreverEl.addEventListener('change', async function() {
+        if (!foreverEl.checked) {
+          delete foreverEl.dataset.loopConfirmed;
+          return;
+        }
+        var ok = await window.customConfirm(window.tr(
+          'bridge.loop_generation_confirm',
+          'Loop generation will keep submitting jobs until stopped. Continue?'));
+        if (!ok) {
+          foreverEl.checked = false;
+          delete foreverEl.dataset.loopConfirmed;
+        } else {
+          foreverEl.dataset.loopConfirmed = "1";
+        }
+      });
+    }
+
+    var rpSelEl = document.getElementById('sdwbResolutionPreset');
+    var rpWEl = document.getElementById('sdwbWidth');
+    var rpHEl = document.getElementById('sdwbHeight');
+    var rpSwapEl = document.getElementById('sdwbSwapWH');
+    var rpRatioEl = document.getElementById('sdwbAspectRatio');
+    var rpLockEl = document.getElementById('sdwbAspectLock');
+
+    var aspectHandle = null;
+    if (window.BridgeAspectLock && rpWEl && rpHEl && rpRatioEl && rpLockEl) {
+      aspectHandle = window.BridgeAspectLock.attach({
+        widthEl: rpWEl, heightEl: rpHEl,
+        ratioEl: rpRatioEl, lockBtnEl: rpLockEl,
+      });
+    }
+
+    if (window.BridgeResolutionPresets && rpSelEl && rpWEl && rpHEl && rpSwapEl) {
+      window.BridgeResolutionPresets.attach({
+        selectEl: rpSelEl,
+        widthEl: rpWEl,
+        heightEl: rpHEl,
+        swapBtnEl: rpSwapEl,
+        i18nPrefix: 'sd_bridge',
+        onSwap: function() { if (aspectHandle) aspectHandle.onSwap(); },
+        onPresetApplied: function() { if (aspectHandle) aspectHandle.onPresetApplied(); },
+      });
+    }
+  });
+
+  // Setup NAI syntax detection banners for SD bridge (nai_to_sd mode: warn when NAI syntax is used in SD bridge)
+  (function() {
+    if (typeof window.setupSyntaxBanner !== "function") return;
+    var sdwbPrompt = $("sdwbPrompt");
+    var sdwbNegative = $("sdwbNegative");
+    if (sdwbPrompt) {
+      window.setupSyntaxBanner(sdwbPrompt, "sdwbSyntaxBanner", "nai_to_sd", "sdwb-syntax-convert", "sdwb-syntax-dismiss");
+    }
+    if (sdwbNegative) {
+      window.setupSyntaxBanner(sdwbNegative, "sdwbNegSyntaxBanner", "nai_to_sd", "sdwb-neg-syntax-convert", "sdwb-neg-syntax-dismiss");
+    }
+  })();
+
+})();
+</script>

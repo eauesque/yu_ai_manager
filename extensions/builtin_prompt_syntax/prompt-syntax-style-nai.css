@@ -1,0 +1,24 @@
+/** prompt-syntax styles — NAI */
+
+.ps-nai-w                { border-radius: 2px; }
+.ps-nai-w.ps-w-high      { background: rgba(100,140,255,0.12); }
+.ps-nai-w.ps-w-low       { background: rgba(100,140,255,0.06); }
+.ps-nai-w .ps-delim      { color: #7cacff; }
+.ps-nai-w .ps-weight     { color: #ffcc66; }
+
+.ps-nai-choice           { background: rgba(180,120,255,0.1); border-radius: 2px; }
+.ps-nai-choice .ps-delim { color: #c084fc; font-weight: 700; }
+.ps-nai-choice .ps-pipe  { color: #c084fc; }
+
+.ps-nai-em .ps-bracket   { font-weight: 700; }
+.ps-nai-em {
+  background: rgba(180, 120, 255, 0.06);
+  border-radius: 2px;
+}
+
+.ps-nai-sup              { color: #888; text-decoration: line-through; text-decoration-color: rgba(200,200,200,0.3); }
+.ps-nai-sup .ps-bracket  { font-weight: 700; color: #888 !important; }
+
+.ps-mixing-sep           { color: #ffaa44; font-weight: 700; background: rgba(255,170,68,0.12); border-radius: 2px; }
+.ps-mixing-w .ps-delim   { color: #ffaa44; }
+.ps-mixing-w .ps-weight  { color: #ffcc66; font-weight: 600; }

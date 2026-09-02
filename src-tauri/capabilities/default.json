@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/nicegui/nicegui-pack/refs/heads/main/.schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Default capabilities for YU AI Manager",
+  "windows": ["main"],
+  "permissions": [
+    "core:default",
+    "shell:allow-open"
+  ]
+}

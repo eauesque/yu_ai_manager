@@ -1,0 +1,9 @@
+{% extends "_base.html" %}
+{% set active = "" %}
+{% block title %}Error {{ status_code }} — YU AI Manager{% endblock %}
+{% block content %}
+<div class="placeholder">
+  <h2>{{ status_code }}</h2>
+  <p>{{ message }}</p>
+</div>
+{% endblock %}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="page.lan_cowork_title">YU AI Manager - LAN Cowork</title>
+  <link rel="stylesheet" href="static/css/main.css?v=20260213">
+  <link rel="stylesheet" href="static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260225">
+  <link rel="stylesheet" href="static/css/dark-mode/tags/dark-mode-tags-enhanced.css?v=20260225">
+  <link rel="stylesheet" href="static/css/pages/lan_cowork.css?v=20260421c">
+  <!-- Atelier System (γ): tokens → components → editorial -->
+  <link rel="stylesheet" href="static/css/atelier/atelier-tokens.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-components.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-index.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tool-tokens.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tool-components.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tool-lan-cowork.css?v=20260507">
+</head>
+<body class="atelier-tool" data-1p-ignore data-lpignore="true">
+  {% include "_nav.html" %}
+  {% include "lan_cowork/_content.html" %}
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/lan-cowork-app.js?v={{ dist_v }}"></script>
+</body>
+</html>

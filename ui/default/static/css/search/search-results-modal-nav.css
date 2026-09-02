@@ -1,0 +1,99 @@
+/* Modal navigation arrows — inside .modal-image-container (absolute) */
+
+.modal-nav-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 80px;
+  background: rgba(0, 0, 0, 0.25);
+  color: rgba(255, 255, 255, 0.7);
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  z-index: 11;
+  transition: opacity 0.2s, background 0.15s, width 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.modal-image-container:hover .modal-nav-arrow,
+.modal-nav-arrow:focus-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-nav-arrow:hover {
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  width: 50px;
+}
+
+.modal-nav-arrow:focus-visible {
+  outline: 3px solid #7cc4ff;
+  outline-offset: 2px;
+}
+
+/* Disabled state: dimmed when visible on hover */
+.modal-image-container:hover .modal-nav-arrow:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.modal-nav-arrow:disabled:hover {
+  background: rgba(0, 0, 0, 0.25);
+  width: 40px;
+}
+
+.modal-nav-left {
+  left: 0;
+  border-radius: 0 6px 6px 0;
+}
+
+.modal-nav-right {
+  right: 0;
+  border-radius: 6px 0 0 6px;
+}
+
+/* Dark mode */
+body.dark .modal-nav-arrow {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.6);
+}
+body.dark .modal-nav-arrow:hover {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+/* Immersive: full-height click area, gradient reveal */
+.modal.immersive .modal-nav-arrow {
+  top: 0;
+  bottom: 72px;
+  transform: none;
+  height: auto;
+  width: 60px;
+  background: transparent; border-radius: 0; font-size: 36px;
+  opacity: 0; pointer-events: auto;
+}
+.modal.immersive .modal-image-container:hover .modal-nav-arrow { opacity: 1; }
+.modal.immersive .modal-nav-arrow:hover { width: 80px; }
+.modal.immersive .modal-nav-left:hover {
+  background: linear-gradient(to right, rgba(0,0,0,0.35), transparent);
+}
+.modal.immersive .modal-nav-right:hover {
+  background: linear-gradient(to left, rgba(0,0,0,0.35), transparent);
+}
+
+/* Responsive: narrower arrows on small screens */
+@media (max-width: 640px) {
+  .modal-nav-arrow {
+    width: 32px;
+    height: 64px;
+    font-size: 22px;
+  }
+  .modal-nav-arrow:hover {
+    width: 36px;
+  }
+}

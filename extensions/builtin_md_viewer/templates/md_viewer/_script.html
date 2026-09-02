@@ -1,0 +1,622 @@
+<script nonce="{{ csp_nonce }}" type="module" src="/static/dist/md-viewer-vendor.js"></script>
+<script nonce="{{ csp_nonce }}">
+(function() {
+  'use strict';
+
+  var API_BASE = '/ext/md-viewer';
+  var searchTimer = null;
+  var currentFileId = null;
+  var currentContent = '';
+  var viewMode = 'rendered';  // 'rendered' | 'raw'
+  var scanPollTimer = null;
+  var cachedRoots = [];       // current root list (path strings)
+
+  var kbFocusIndex = -1;      // keyboard focus position
+
+
+  // ── DOM refs ─────────────────────────────────────────
+  var elSearch, elPathFilter, elLangFilter, elFileList, elFileCount;
+  var elTitle, elBody, elContentHeader;
+  var elToggleRendered, elToggleRaw;
+  var elScanBtn, elScanBar, elScanMsg, elScanFill;
+    // Root management
+  var elRootsToggle, elRootsArrow, elRootsBody, elRootsCount;
+  var elRootsList, elRootBrowse, elRootManual;
+  var elRootInputRow, elRootInput, elRootInputOk, elRootInputCancel;
+    // Mobile drawer
+  var elSidebar, elBackdrop, elDrawerToggle;
+
+  function init() {
+    elSearch = document.getElementById('mdvSearch');
+    elPathFilter = document.getElementById('mdvPathFilter');
+    elLangFilter = document.getElementById('mdvLangFilter');
+    elFileList = document.getElementById('mdvFileList');
+    elFileCount = document.getElementById('mdvFileCount');
+    elTitle = document.getElementById('mdvTitle');
+    elBody = document.getElementById('mdvBody');
+    elContentHeader = document.getElementById('mdvContentHeader');
+    elToggleRendered = document.getElementById('mdvToggleRendered');
+    elToggleRaw = document.getElementById('mdvToggleRaw');
+    elScanBtn = document.getElementById('mdvScanBtn');
+    elScanBar = document.getElementById('mdvScanBar');
+    elScanMsg = document.getElementById('mdvScanMsg');
+    elScanFill = document.getElementById('mdvScanFill');
+
+        // Root management DOM refs
+    elRootsToggle = document.getElementById('mdvRootsToggle');
+    elRootsArrow = document.getElementById('mdvRootsArrow');
+    elRootsBody = document.getElementById('mdvRootsBody');
+    elRootsCount = document.getElementById('mdvRootsCount');
+    elRootsList = document.getElementById('mdvRootsList');
+    elRootBrowse = document.getElementById('mdvRootBrowse');
+    elRootManual = document.getElementById('mdvRootManual');
+    elRootInputRow = document.getElementById('mdvRootInputRow');
+    elRootInput = document.getElementById('mdvRootInput');
+    elRootInputOk = document.getElementById('mdvRootInputOk');
+    elRootInputCancel = document.getElementById('mdvRootInputCancel');
+
+        // Mobile drawer DOM refs
+    elSidebar = document.querySelector('.mdv-sidebar');
+    elBackdrop = document.getElementById('mdvBackdrop');
+    elDrawerToggle = document.getElementById('mdvDrawerToggle');
+
+    // Event binding
+    elSearch.addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(loadFiles, 300);
+    });
+    elPathFilter.addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(loadFiles, 300);
+    });
+    elLangFilter.addEventListener('change', loadFiles);
+    elScanBtn.addEventListener('click', startScan);
+    elToggleRendered.addEventListener('click', function() { setViewMode('rendered'); });
+    elToggleRaw.addEventListener('click', function() { setViewMode('raw'); });
+
+        // Root management events
+    elRootsToggle.addEventListener('click', toggleRootsPanel);
+    elRootBrowse.addEventListener('click', addRootBrowse);
+    elRootManual.addEventListener('click', showManualInput);
+    elRootInputOk.addEventListener('click', function() {
+      var p = elRootInput.value.trim();
+      if (p) addRootPath(p);
+    });
+    elRootInputCancel.addEventListener('click', hideManualInput);
+    elRootInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { var p = elRootInput.value.trim(); if (p) addRootPath(p); }
+      if (e.key === 'Escape') hideManualInput();
+    });
+
+        // Mobile drawer events
+    if (elDrawerToggle) {
+      elDrawerToggle.addEventListener('click', toggleDrawer);
+    }
+    if (elBackdrop) {
+      elBackdrop.addEventListener('click', closeDrawer);
+    }
+
+        // Keyboard navigation
+    elSearch.addEventListener('keydown', onSearchKeydown);
+    elFileList.addEventListener('keydown', onFileListKeydown);
+
+    loadFiles();
+    loadLanguages();
+    loadScanRoots();
+    checkScanStatus();
+
+        // Open file directly via URL parameter (?file=123)
+    var urlParams = new URLSearchParams(window.location.search);
+    var fileParam = urlParams.get('file');
+    if (fileParam) {
+      var fid = parseInt(fileParam, 10);
+      if (fid) loadFileDetail(fid);
+    }
+  }
+
+    // ── Language filter ────────────────────────────────
+  var _LANG_LABELS = {
+    'ja': '日本語', 'en': 'English', 'ko': '한국어',
+    'zh-cn': '简体中文', 'zh-tw': '繁體中文',
+    'de': 'Deutsch', 'fr': 'Français', 'es': 'Español',
+    'ru': 'Русский', 'pt': 'Português',
+  };
+
+  function loadLanguages() {
+    fetch(API_BASE + '/api/languages')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var langs = data.languages || [];
+        var current = elLangFilter.value;
+        // Keep first option (all languages)
+        while (elLangFilter.options.length > 1) {
+          elLangFilter.remove(1);
+        }
+        for (var i = 0; i < langs.length; i++) {
+          var opt = document.createElement('option');
+          opt.value = langs[i].lang;
+          var label = _LANG_LABELS[langs[i].lang] || langs[i].lang;
+          opt.textContent = label + ' (' + langs[i].count + ')';
+          elLangFilter.appendChild(opt);
+        }
+        // Restore selection
+        elLangFilter.value = current;
+      })
+      .catch(function(e) { console.error('MD Viewer: load languages error', e); });
+  }
+
+    // ── Mobile drawer ─────────────────────────────────
+  function toggleDrawer() {
+    if (elSidebar.classList.contains('drawer-open')) {
+      closeDrawer();
+    } else {
+      elSidebar.classList.add('drawer-open');
+      elBackdrop.classList.add('active');
+    }
+  }
+
+  function closeDrawer() {
+    elSidebar.classList.remove('drawer-open');
+    elBackdrop.classList.remove('active');
+  }
+
+    // ── Keyboard navigation ──────────────────────────
+  function onSearchKeydown(e) {
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      var items = elFileList.querySelectorAll('.mdv-file-item');
+      if (items.length > 0) {
+        kbFocusIndex = 0;
+        updateKbFocus(items);
+        items[0].focus();
+      }
+    } else if (e.key === 'Escape') {
+      if (elSearch.value) {
+        elSearch.value = '';
+        loadFiles();
+      }
+    }
+  }
+
+  function onFileListKeydown(e) {
+    var items = elFileList.querySelectorAll('.mdv-file-item');
+    if (!items.length) return;
+
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      kbFocusIndex = Math.min(kbFocusIndex + 1, items.length - 1);
+      updateKbFocus(items);
+      items[kbFocusIndex].focus();
+      scrollIntoViewIfNeeded(items[kbFocusIndex]);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (kbFocusIndex <= 0) {
+        kbFocusIndex = -1;
+        clearKbFocus(items);
+        elSearch.focus();
+        return;
+      }
+      kbFocusIndex--;
+      updateKbFocus(items);
+      items[kbFocusIndex].focus();
+      scrollIntoViewIfNeeded(items[kbFocusIndex]);
+    } else if (e.key === 'Enter') {
+      e.preventDefault();
+      if (kbFocusIndex >= 0 && kbFocusIndex < items.length) {
+        items[kbFocusIndex].click();
+      }
+    } else if (e.key === 'Escape') {
+      kbFocusIndex = -1;
+      clearKbFocus(items);
+      elSearch.focus();
+    }
+  }
+
+  function updateKbFocus(items) {
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.toggle('kb-focus', i === kbFocusIndex);
+    }
+  }
+
+  function clearKbFocus(items) {
+    for (var i = 0; i < items.length; i++) {
+      items[i].classList.remove('kb-focus');
+    }
+  }
+
+  function scrollIntoViewIfNeeded(el) {
+    var rect = el.getBoundingClientRect();
+    var parent = elFileList.getBoundingClientRect();
+    if (rect.bottom > parent.bottom) el.scrollIntoView({ block: 'nearest' });
+    if (rect.top < parent.top) el.scrollIntoView({ block: 'nearest' });
+  }
+
+    // ── Load file list ─────────────────────────────
+  function loadFiles() {
+    var query = elSearch.value.trim();
+    var pathFilter = elPathFilter.value.trim();
+    var langFilter = elLangFilter.value;
+    var params = new URLSearchParams();
+    if (query) params.set('query', query);
+    if (pathFilter) params.set('path_filter', pathFilter);
+    if (langFilter) params.set('lang', langFilter);
+    params.set('limit', '200');
+
+    fetch(API_BASE + '/api/files?' + params.toString())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var files = data.files || [];
+        var total = data.total || 0;
+        renderFileList(files, query);
+        elFileCount.textContent = total + ' 件';
+
+                // Show guidance when empty
+        if (total === 0 && !query && !pathFilter) {
+          renderEmptyGuide();
+        }
+      })
+      .catch(function(e) {
+        console.error('MD Viewer: load files error', e);
+      });
+  }
+
+    // ── Search highlight ────────────────────────────────────
+  function highlightText(text, query) {
+    if (!query) return escapeHtml(text);
+    var escaped = escapeHtml(text);
+    var qEscaped = escapeRegex(query);
+    var re = new RegExp('(' + qEscaped + ')', 'gi');
+    return escaped.replace(re, '<mark>$1</mark>');
+  }
+
+  function escapeRegex(s) {
+    return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  }
+
+  function renderFileList(files, query) {
+    kbFocusIndex = -1;
+    if (!files.length) {
+      if (query || elPathFilter.value.trim()) {
+        elFileList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--muted)">'
+          + '一致するファイルがありません</div>';
+      }
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < files.length; i++) {
+      var f = files[i];
+      var cls = 'mdv-file-item' + (f.id === currentFileId ? ' active' : '');
+      var sizeStr = formatSize(f.size || 0);
+      var dateStr = f.mtime ? new Date(f.mtime * 1000).toLocaleDateString('ja-JP') : '';
+      var titleHtml = highlightText(f.title || '(untitled)', query);
+      var pathHtml = highlightText(shortenPath(f.path || ''), query);
+      var langBadge = f.lang ? '<span class="mdv-lang-badge">' + escapeHtml(f.lang) + '</span>' : '';
+      html += '<div class="' + cls + '" data-id="' + f.id + '" tabindex="-1">'
+        + '<div class="mdv-file-title">' + titleHtml + langBadge + '</div>'
+        + '<div class="mdv-file-path">' + pathHtml + '</div>'
+        + '<div class="mdv-file-meta">' + sizeStr + ' / ' + dateStr + '</div>'
+        + '</div>';
+    }
+    elFileList.innerHTML = html;
+
+        // Click event
+    var items = elFileList.querySelectorAll('.mdv-file-item');
+    for (var j = 0; j < items.length; j++) {
+      items[j].addEventListener('click', onFileClick);
+    }
+  }
+
+    // ── Empty state guidance ──────────────────────────────────
+  function renderEmptyGuide() {
+    var hasRoots = cachedRoots.length > 0;
+    var html;
+    if (hasRoots) {
+      html = '<div class="mdv-empty-guide">'
+        + '<div class="mdv-empty-guide-icon">&#128196;</div>'
+        + '<div class="mdv-empty-guide-title">MD ファイルが見つかりません</div>'
+        + '<div class="mdv-empty-steps">'
+        + '<div class="mdv-empty-step">'
+        + '<span class="mdv-empty-step-num">1</span>'
+        + '<span class="mdv-empty-step-text">上部の「スキャン」ボタンを押して、登録済みディレクトリをスキャンしてください</span>'
+        + '</div></div></div>';
+    } else {
+      html = '<div class="mdv-empty-guide">'
+        + '<div class="mdv-empty-guide-icon">&#128203;</div>'
+        + '<div class="mdv-empty-guide-title">はじめに</div>'
+        + '<div class="mdv-empty-steps">'
+        + '<div class="mdv-empty-step">'
+        + '<span class="mdv-empty-step-num">1</span>'
+        + '<span class="mdv-empty-step-text">「スキャンディレクトリ」を開いて、Markdown ファイルがあるフォルダを追加</span>'
+        + '</div>'
+        + '<div class="mdv-empty-step">'
+        + '<span class="mdv-empty-step-num">2</span>'
+        + '<span class="mdv-empty-step-text">「スキャン」ボタンで MD ファイルを検出</span>'
+        + '</div>'
+        + '<div class="mdv-empty-step">'
+        + '<span class="mdv-empty-step-num">3</span>'
+        + '<span class="mdv-empty-step-text">ファイルを選択して閲覧開始</span>'
+        + '</div></div></div>';
+    }
+    elFileList.innerHTML = html;
+  }
+
+  function onFileClick(e) {
+    var el = e.currentTarget;
+    var fileId = parseInt(el.getAttribute('data-id'), 10);
+    if (fileId === currentFileId) return;
+
+        // Toggle active
+    var prev = elFileList.querySelector('.mdv-file-item.active');
+    if (prev) prev.classList.remove('active');
+    el.classList.add('active');
+
+    loadFileDetail(fileId);
+
+        // Close mobile drawer
+    closeDrawer();
+  }
+
+    // ── Load file details ─────────────────────────────
+  function loadFileDetail(fileId) {
+    currentFileId = fileId;
+    fetch(API_BASE + '/api/files/' + fileId)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          elBody.innerHTML = '<div class="mdv-placeholder">File not found</div>';
+          return;
+        }
+        elTitle.textContent = data.title || '(untitled)';
+        elContentHeader.style.display = '';
+        currentContent = data.content || '';
+        renderContent();
+      })
+      .catch(function(e) {
+        console.error('MD Viewer: load detail error', e);
+      });
+  }
+
+    // ── Display mode switching ──────────────────────────────────
+  function setViewMode(mode) {
+    viewMode = mode;
+    elToggleRendered.classList.toggle('active', mode === 'rendered');
+    elToggleRaw.classList.toggle('active', mode === 'raw');
+    renderContent();
+  }
+
+  function renderContent() {
+    if (!currentContent) {
+      elBody.innerHTML = '<div class="mdv-placeholder">コンテンツなし</div>';
+      return;
+    }
+    if (viewMode === 'raw') {
+      elBody.innerHTML = '<pre class="mdv-raw">' + escapeHtml(currentContent) + '</pre>';
+    } else {
+            // Render with marked.js
+      var marked = window._mdvMarked;
+      if (marked) {
+        try {
+          var rendered = typeof marked === 'function' ? marked(currentContent) : marked.parse(currentContent);
+          elBody.innerHTML = '<div class="mdv-rendered">' + sanitizeHtml(rendered) + '</div>';
+                    // Hide duplicate title
+          hideDuplicateTitle();
+        } catch (e) {
+          elBody.innerHTML = '<pre class="mdv-raw">' + escapeHtml(currentContent) + '</pre>';
+        }
+      } else {
+                // Fallback when marked.js is not loaded
+        elBody.innerHTML = '<pre class="mdv-raw">' + escapeHtml(currentContent) + '</pre>';
+      }
+    }
+    elBody.scrollTop = 0;
+  }
+
+    // ── Hide duplicate title ────────────────────────────────
+  function hideDuplicateTitle() {
+    var renderedEl = elBody.querySelector('.mdv-rendered');
+    if (!renderedEl) return;
+    var firstH1 = renderedEl.querySelector('h1:first-child');
+    if (!firstH1) return;
+    var titleText = (elTitle.textContent || '').trim();
+    var h1Text = (firstH1.textContent || '').trim();
+    if (titleText && h1Text && titleText === h1Text) {
+      firstH1.classList.add('mdv-dup-title');
+    }
+  }
+
+    // ── Scan ────────────────────────────────────────
+  function startScan() {
+    if (cachedRoots.length === 0) {
+            // Open panel and show warning
+      if (elRootsBody.style.display === 'none') toggleRootsPanel();
+      alert('スキャンディレクトリが登録されていません。\nフォルダを追加してからスキャンしてください。');
+      return;
+    }
+    elScanBtn.disabled = true;
+    fetch(API_BASE + '/api/scan', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          alert(data.error);
+          elScanBtn.disabled = false;
+          return;
+        }
+        pollScanStatus();
+      })
+      .catch(function(e) {
+        console.error('MD Viewer: scan error', e);
+        elScanBtn.disabled = false;
+      });
+  }
+
+  function checkScanStatus() {
+    fetch(API_BASE + '/api/scan/status')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.running) {
+          pollScanStatus();
+        }
+      })
+      .catch(function() {});
+  }
+
+  function pollScanStatus() {
+    elScanBar.classList.add('active');
+    clearInterval(scanPollTimer);
+    scanPollTimer = setInterval(function() {
+      fetch(API_BASE + '/api/scan/status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          elScanMsg.textContent = data.message || data.phase || 'scanning...';
+          elScanFill.style.width = (data.percent || 0) + '%';
+          if (!data.running) {
+            clearInterval(scanPollTimer);
+            elScanBar.classList.remove('active');
+            elScanBtn.disabled = false;
+            loadFiles();
+            loadLanguages();
+          }
+        })
+        .catch(function() {
+          clearInterval(scanPollTimer);
+          elScanBar.classList.remove('active');
+          elScanBtn.disabled = false;
+        });
+    }, 500);
+  }
+
+    // ── Root management ────────────────────────────────────
+  function loadScanRoots() {
+    fetch(API_BASE + '/api/scan-roots')
+      .then(function(r) {
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        return r.text();
+      })
+      .then(function(text) {
+        var data = JSON.parse(text);
+        renderRootsList(data.roots || [], data.is_custom);
+      })
+      .catch(function(e) { console.error('MD Viewer: load roots error', e); });
+  }
+
+  function renderRootsList(validation, isCustom) {
+    cachedRoots = validation.map(function(v) { return v.path; });
+    elRootsCount.textContent = cachedRoots.length;
+
+    if (!validation.length) {
+      elRootsList.innerHTML = '<div class="mdv-roots-fallback">'
+        + (isCustom ? 'ディレクトリ未登録' : 'グローバル scan_roots を使用中 (未設定)')
+        + '</div>';
+      return;
+    }
+
+    var html = '';
+    if (!isCustom) {
+      html += '<div class="mdv-roots-fallback">グローバル scan_roots を使用中</div>';
+    }
+    for (var i = 0; i < validation.length; i++) {
+      var v = validation[i];
+      var iconCls = v.exists ? 'mdv-roots-item-icon ok' : 'mdv-roots-item-icon ng';
+      var iconChar = v.exists ? '&#10003;' : '&#10007;';
+      html += '<div class="mdv-roots-item">'
+        + '<span class="' + iconCls + '">' + iconChar + '</span>'
+        + '<span class="mdv-roots-item-path" title="' + escapeAttr(v.path) + '">' + escapeHtml(v.path) + '</span>'
+        + '<button class="mdv-roots-item-del" data-index="' + i + '" title="削除">&times;</button>'
+        + '</div>';
+    }
+    elRootsList.innerHTML = html;
+
+        // Delete button events
+    var dels = elRootsList.querySelectorAll('.mdv-roots-item-del');
+    for (var j = 0; j < dels.length; j++) {
+      dels[j].addEventListener('click', onRemoveRoot);
+    }
+  }
+
+  function toggleRootsPanel() {
+    var open = elRootsBody.style.display !== 'none';
+    elRootsBody.style.display = open ? 'none' : 'block';
+    elRootsArrow.classList.toggle('open', !open);
+  }
+
+  function addRootBrowse() {
+    fetch('/api/tools/select-folder')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.path) addRootPath(data.path);
+      })
+      .catch(function(e) { console.error('MD Viewer: folder select error', e); });
+  }
+
+  function showManualInput() {
+    elRootInputRow.style.display = 'flex';
+    elRootInput.value = '';
+    elRootInput.focus();
+  }
+
+  function hideManualInput() {
+    elRootInputRow.style.display = 'none';
+    elRootInput.value = '';
+  }
+
+  function addRootPath(path) {
+        // Duplicate check (case-insensitive)
+    var lc = path.toLowerCase().replace(/\\/g, '/');
+    for (var i = 0; i < cachedRoots.length; i++) {
+      if (cachedRoots[i].toLowerCase().replace(/\\/g, '/') === lc) {
+        alert('このパスは既に登録されています。');
+        return;
+      }
+    }
+    var newRoots = cachedRoots.concat([path]);
+    saveScanRoots(newRoots);
+    hideManualInput();
+  }
+
+  function saveScanRoots(roots) {
+    fetch(API_BASE + '/api/scan-roots', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify({ roots: roots }),
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) loadScanRoots();
+        else if (data.error) alert(data.error);
+      })
+      .catch(function(e) { console.error('MD Viewer: save roots error', e); });
+  }
+
+  function onRemoveRoot(e) {
+    var idx = parseInt(e.currentTarget.getAttribute('data-index'), 10);
+    var path = cachedRoots[idx] || '';
+    if (!confirm('このディレクトリを削除しますか?\n' + path)) return;
+    fetch(API_BASE + '/api/scan-roots/' + idx, {
+      method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) loadScanRoots();
+        else if (data.error) alert(data.error);
+      })
+      .catch(function(e) { console.error('MD Viewer: remove root error', e); });
+  }
+
+    // ── Initialization ──────────────────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>

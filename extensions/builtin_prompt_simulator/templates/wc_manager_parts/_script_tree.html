@@ -1,0 +1,373 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Wildcard Manager JS — Tree, CRUD, editor helpers ── */
+
+function _wmGetTextarea() {
+  if (_wmEditor) return _wmEditor.getTextarea();
+  return document.getElementById('wmEditorTextarea');
+}
+function _wmGetValue() {
+  if (_wmEditor) return _wmEditor.getValue();
+  var ta = document.getElementById('wmEditorTextarea');
+  return ta ? ta.value : '';
+}
+/* (A)(B) setValue — bypass execCommand and skip highlighting for large content */
+var _WM_HIGHLIGHT_THRESHOLD = 1000; /* lines */
+function _wmSetValue(v) {
+  var lineCount = (v.match(/\n/g) || []).length + 1;
+  var isLarge = lineCount > _WM_HIGHLIGHT_THRESHOLD;
+  if (_wmEditor) {
+    var editorTa = _wmEditor.getTextarea();
+    var wrap = editorTa.closest ? editorTa.closest('.ps-editor-wrap') : null;
+    if (wrap) wrap.style.height = ''; /* (F) allow height to be recalculated from new content */
+    editorTa.value = v;
+    editorTa.scrollTop = 0; /* (F) reset stale scroll position from previous wildcard */
+    if (isLarge) {
+      /* (B) Large content: skip expensive tokenize, but sync highlight with plain text.
+       *     The textarea is color:transparent so users see only .ps-highlight;
+       *     without this update the highlight would show stale content from
+       *     the previously loaded file. */
+      var hlDiv = wrap ? wrap.querySelector('.ps-highlight') : null;
+      if (hlDiv) {
+        hlDiv.textContent = v;
+        hlDiv.scrollTop = 0;
+      }
+    } else {
+      /* (A) Small content: full syntax highlighting */
+      _wmEditor.update();
+      /* (G) Re-sync highlight scroll after browser paints the new layout.
+       *     When the editor transitions from display:none → visible, the
+       *     initial reflow may not fully resolve absolute-positioned
+       *     children; a rAF ensures correct scroll sync after paint. */
+      var _hl = wrap ? wrap.querySelector('.ps-highlight') : null;
+      if (_hl) {
+        requestAnimationFrame(function() {
+          _hl.scrollTop = editorTa.scrollTop;
+        });
+      }
+    }
+  } else {
+    /* Fallback plain textarea */
+    var ta = document.getElementById('wmEditorTextarea');
+    if (ta) { ta.value = v; ta.scrollTop = 0; }
+  }
+  _wmDirty = true; /* Mark dirty — callers that load (not edit) reset this afterward */
+  if (window._wmGutter) window._wmGutter.scrollTop = 0; /* (F) sync gutter to top explicitly */
+  if (typeof _wmUpdateGutter === 'function') _wmUpdateGutter();
+  if (typeof _wmUpdateLineInfo === 'function') _wmUpdateLineInfo();
+}
+
+/* ── Warn on page leave with unsaved changes ── */
+window.addEventListener('beforeunload', function(e) {
+  if (_wmDirty) { e.preventDefault(); e.returnValue = ''; }
+});
+
+/* ── localStorage persistence ── */
+function _wmPersist() {
+  try {
+    localStorage.setItem('wm_wildcards', JSON.stringify(_wmWildcards));
+  } catch(_e) {}
+}
+
+/* Restore from localStorage on load */
+(function() {
+  try {
+    var saved = localStorage.getItem('wm_wildcards');
+    if (saved) {
+      var data = JSON.parse(saved);
+      if (data && typeof data === 'object') {
+        _wmWildcards = data;
+      }
+    }
+  } catch(_e) {}
+})();
+
+/* ── Toast ── */
+function wmToast(msg) {
+  var el = document.getElementById('wmToast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._tid);
+  el._tid = setTimeout(function() { el.classList.remove('show'); }, 2000);
+}
+
+/* ── Tree rendering ── */
+function wmRenderTree() {
+  var filter = (document.getElementById('wmFilter').value || '').trim().toLowerCase();
+  var names = Object.keys(_wmWildcards).sort();
+  if (filter) {
+    names = names.filter(function(n) { return n.toLowerCase().indexOf(filter) !== -1; });
+  }
+  document.getElementById('wmTotalCount').textContent = Object.keys(_wmWildcards).length;
+
+  if (names.length === 0) {
+    document.getElementById('wmTree').innerHTML =
+      '<div style="padding:20px;text-align:center;color:#555;font-size:12px;">' +
+      _wmEscHtml(Object.keys(_wmWildcards).length === 0 ? _wmt('no_wildcards') : _wmt('no_matches')) + '</div>';
+    return;
+  }
+  var topLevel = [], dirs = {};
+  names.forEach(function(name) {
+    var slash = name.indexOf('/');
+    if (slash === -1) { topLevel.push(name); }
+    else {
+      var dir = name.substring(0, slash);
+      if (!dirs[dir]) dirs[dir] = [];
+      dirs[dir].push(name);
+    }
+  });
+  var html = '';
+  function renderItem(name, displayName) {
+    var count = _wmWildcards[name].filter(function(l) { var t = l.trim(); return t && !t.startsWith('#'); }).length;
+    var sel = (_wmSelectedWc === name) ? ' selected' : '';
+    var yamlCls = _wmIsYaml(name) ? ' wm-yaml' : '';
+    html += '<div class="wm-item' + sel + yamlCls + '" data-wm-name="' + _wmEscAttr(name) + '" tabindex="0" role="listitem">';
+    html += '<code>__' + _wmEscHtml(displayName) + '__</code>';
+    if (_wmIsYaml(name)) html += '<span class="wm-yaml-badge" title="YAML">\uD83D\uDD12</span>';
+    html += '<span class="wm-item-count">' + count + '</span>';
+    html += '</div>';
+  }
+  topLevel.forEach(function(name) { renderItem(name, name); });
+  Object.keys(dirs).sort().forEach(function(dir) {
+    var open = _wmDirOpen[dir] === true;
+    html += '<div class="wm-dir-toggle" data-wm-dir="' + _wmEscAttr(dir) + '" tabindex="0" role="listitem">';
+    html += '<span class="wm-dir-arrow' + (open ? ' open' : '') + '">▶</span> ';
+    html += _wmEscHtml(dir) + ' <span style="color:var(--muted,#aab2c0);">(' + dirs[dir].length + ')</span>';
+    html += '</div>';
+    html += '<div class="wm-dir-children' + (open ? '' : ' collapsed') + '">';
+    dirs[dir].forEach(function(name) { renderItem(name, name.substring(dir.length + 1)); });
+    html += '</div>';
+  });
+  var tree = document.getElementById('wmTree');
+  tree.innerHTML = html;
+  tree.removeAttribute('aria-busy');
+}
+
+/* Event delegation for tree clicks & keyboard (avoids inline onclick with quote issues) */
+function _wmTreeAction(e) {
+  var item = e.target.closest('.wm-item[data-wm-name]');
+  if (item) { wmSelect(item.getAttribute('data-wm-name')); return; }
+  var dir = e.target.closest('.wm-dir-toggle[data-wm-dir]');
+  if (dir) { wmToggleDir(dir.getAttribute('data-wm-dir')); return; }
+}
+document.getElementById('wmTree').addEventListener('click', _wmTreeAction);
+document.getElementById('wmTree').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); _wmTreeAction(e); }
+});
+
+function wmToggleDir(dir) {
+  _wmDirOpen[dir] = !_wmDirOpen[dir];
+  wmRenderTree();
+}
+
+/* ── Selection & editing ── */
+function wmSelect(name) {
+  if (_wmDirty && _wmSelectedWc && name !== _wmSelectedWc) {
+    if (!confirm(_wmt('confirm_discard'))) return;
+  }
+  _wmSelectedWc = name;
+  wmRenderTree();
+  wmShowEditor(name);
+}
+
+function wmShowEditor(name) {
+  var hint = document.getElementById('wmEmptyHint');
+  var editor = document.getElementById('wmEditor');
+  if (!name || !_wmWildcards[name]) {
+    hint.style.display = '';
+    editor.style.display = 'none';
+    _wmDirty = false;
+    return;
+  }
+  hint.style.display = 'none';
+  editor.style.display = '';
+  document.getElementById('wmEditorName').textContent = '__' + name + '__';
+  var entries = _wmWildcards[name];
+  var entryCount = entries.filter(function(l) { var t = l.trim(); return t && !t.startsWith('#'); }).length;
+  document.getElementById('wmEditorCount').textContent = _wmt('entries').replace('{0}', entryCount);
+  _wmSetValue(entries.join('\n'));
+  _wmDirty = false;
+  _wmUpdateDirtyIndicator();
+
+  /* YAML read-only handling */
+  var isYaml = _wmIsYaml(name);
+  var yamlHint = document.getElementById('wmYamlHint');
+  if (yamlHint) yamlHint.style.display = isYaml ? '' : 'none';
+  /* Disable/enable editable buttons */
+  var editBtns = editor.querySelectorAll('[data-wm-editable]');
+  for (var i = 0; i < editBtns.length; i++) {
+    editBtns[i].disabled = isYaml;
+  }
+  /* Make textarea read-only */
+  var ta = _wmGetTextarea();
+  if (ta) ta.readOnly = isYaml;
+}
+
+function wmSave() {
+  if (!_wmSelectedWc) return;
+  var name = _wmSelectedWc;
+  var rawLines = _wmGetValue().split(/\r?\n/);
+  var entryCount = rawLines.filter(function(l) { var t = l.trim(); return t && !t.startsWith('#'); }).length;
+  /* POST to backend — only mark clean & toast on success so the unsaved-changes
+     warning still triggers if the write fails. */
+  fetch('/ext/prompt-sim/wildcard-file', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name, lines: rawLines }),
+  })
+    .then(function(r) {
+      return r.json().catch(function() { return {}; }).then(function(data) {
+        return { ok: r.ok, status: r.status, data: data };
+      });
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        var msg = (res.data && res.data.error) ? res.data.error : _wmt('save_failed');
+        if (res.data && res.data.code === 'no_dirs') msg = _wmt('save_no_dirs');
+        wmToast(msg);
+        return;
+      }
+      _wmWildcards[name] = rawLines;
+      document.getElementById('wmEditorCount').textContent = _wmt('entries').replace('{0}', entryCount);
+      _wmDirty = false;
+      _wmUpdateDirtyIndicator();
+      wmRenderTree();
+      _wmPersist();
+      var path = (res.data && res.data.saved_path) ? res.data.saved_path : '';
+      wmToast(path ? _wmt('toast_saved_to').replace('{0}', path) : _wmt('toast_saved'));
+    })
+    .catch(function() { wmToast(_wmt('save_failed')); });
+}
+
+function wmAddEntry() {
+  var ta = _wmGetTextarea();
+  if (!ta) return;
+  var val = _wmGetValue();
+  if (val && !val.endsWith('\n')) {
+    _wmSetValue(val + '\n');
+  }
+  ta.focus();
+  ta.selectionStart = ta.selectionEnd = ta.value.length;
+}
+
+function wmDeleteSelected() {
+  if (!_wmSelectedWc) return;
+  if (!confirm(_wmt('confirm_delete').replace('{0}', _wmSelectedWc))) return;
+  var name = _wmSelectedWc;
+  fetch('/ext/prompt-sim/wildcard-delete', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ name: name }),
+  })
+    .then(function(r) {
+      return r.json().catch(function() { return {}; }).then(function(data) {
+        return { ok: r.ok, status: r.status, data: data };
+      });
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        var msg = (res.data && res.data.error) ? res.data.error : _wmt('delete_failed');
+        if (res.data && res.data.code === 'no_dirs') msg = _wmt('save_no_dirs');
+        if (res.data && res.data.code === 'not_found') msg = _wmt('delete_not_found').replace('{0}', name);
+        wmToast(msg);
+        return;
+      }
+      delete _wmWildcards[name];
+      _wmSelectedWc = null;
+      _wmDirty = false;
+      wmShowEditor(null);
+      wmRenderTree();
+      _wmPersist();
+      wmToast(_wmt('toast_deleted').replace('{0}', name));
+    })
+    .catch(function() { wmToast(_wmt('delete_failed')); });
+}
+
+function wmRename() {
+  if (!_wmSelectedWc) return;
+  var oldName = _wmSelectedWc;
+  var newName = prompt(_wmt('rename_prompt'), oldName);
+  if (!newName || !newName.trim() || newName.trim() === oldName) return;
+  newName = newName.trim();
+  if (_wmWildcards[newName]) {
+    alert(_wmt('rename_exists').replace('{0}', newName));
+    return;
+  }
+  /* Server first — only mutate local state if the on-disk rename succeeded.
+     Note: any unsaved editor content for ``oldName`` is intentionally NOT
+     transferred. The user must save before renaming; otherwise renaming would
+     silently bake the unsaved buffer into a new file. */
+  if (_wmDirty) {
+    if (!confirm(_wmt('confirm_rename_dirty'))) return;
+  }
+  fetch('/ext/prompt-sim/wildcard-rename', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ old_name: oldName, new_name: newName }),
+  })
+    .then(function(r) {
+      return r.json().catch(function() { return {}; }).then(function(data) {
+        return { ok: r.ok, status: r.status, data: data };
+      });
+    })
+    .then(function(res) {
+      if (!res.ok) {
+        var msg = (res.data && res.data.error) ? res.data.error : _wmt('rename_failed');
+        if (res.data && res.data.code === 'no_dirs') msg = _wmt('save_no_dirs');
+        if (res.data && res.data.code === 'not_found') msg = _wmt('rename_not_found').replace('{0}', oldName);
+        if (res.data && res.data.code === 'collision') msg = _wmt('rename_exists').replace('{0}', newName);
+        wmToast(msg);
+        return;
+      }
+      _wmWildcards[newName] = _wmWildcards[oldName] || [];
+      delete _wmWildcards[oldName];
+      _wmSelectedWc = newName;
+      _wmDirty = false;
+      wmShowEditor(newName);
+      wmRenderTree();
+      _wmPersist();
+      wmToast(_wmt('toast_renamed').replace('{0}', oldName).replace('{1}', newName));
+    })
+    .catch(function() { wmToast(_wmt('rename_failed')); });
+}
+
+/* Rename click & keyboard handler */
+document.getElementById('wmEditorName').addEventListener('click', wmRename);
+document.getElementById('wmEditorName').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wmRename(); }
+});
+
+function wmCreateNew() {
+  if (_wmDirty && _wmSelectedWc) {
+    if (!confirm(_wmt('confirm_discard'))) return;
+  }
+  var name = prompt(_wmt('new_prompt'));
+  if (!name || !name.trim()) return;
+  name = name.trim();
+  if (_wmWildcards[name]) {
+    alert(_wmt('new_exists').replace('{0}', name));
+    return;
+  }
+  _wmWildcards[name] = [];
+  _wmSelectedWc = name;
+  _wmDirty = false;
+  wmShowEditor(name);
+  wmRenderTree();
+  _wmPersist();
+  wmToast(_wmt('toast_created').replace('{0}', name));
+  /* Focus the editor textarea for immediate typing */
+  var ta = _wmGetTextarea();
+  if (ta) ta.focus();
+}
+
+function wmClearAll() {
+  if (Object.keys(_wmWildcards).length === 0) return;
+  if (!confirm(_wmt('confirm_clear'))) return;
+  _wmWildcards = {};
+  _wmSelectedWc = null;
+  _wmDirOpen = {};
+  wmShowEditor(null);
+  wmRenderTree();
+  try { localStorage.removeItem('wm_wildcards'); } catch(_e) {}
+  wmToast(_wmt('toast_cleared'));
+}
+</script>

@@ -1,0 +1,129 @@
+<main id="main-content" class="container" style="padding-top:50px;">
+  <header class="sched-header">
+    <h1><span aria-hidden="true">&#x23F0;</span> <span data-i18n="scheduler.title">Task Scheduler</span></h1>
+    <div class="sched-header-actions">
+      <button id="schedAddBtn" type="button" class="sched-btn primary" data-i18n="scheduler.add_job">Add Job</button>
+      <button id="schedRefreshBtn" type="button" class="btn btn-sm" data-i18n="scheduler.refresh">Refresh</button>
+    </div>
+  </header>
+
+  <!-- Status card -->
+  <section class="sched-status-card" data-i18n-aria-label="scheduler.status" aria-label="Scheduler status">
+    <h2 data-i18n="scheduler.status">Scheduler Status</h2>
+    <div class="sched-status-indicator" id="schedStatusIndicator">
+      <span class="sched-dot" id="schedDot"></span>
+      <span id="schedStatusText">Loading...</span>
+    </div>
+  </section>
+
+  <!-- Jobs table -->
+  <section class="sched-section" data-i18n-aria-label="scheduler.jobs" aria-label="Scheduled jobs">
+    <h2 data-i18n="scheduler.jobs">Jobs</h2>
+    <div class="sched-table-wrap">
+      <table class="sched-table" id="schedJobsTable">
+        <thead>
+          <tr>
+            <th data-i18n="scheduler.job_id">Job ID</th>
+            <th data-i18n="scheduler.trigger">Trigger</th>
+            <th data-i18n="scheduler.next_run">Next Run</th>
+            <th data-i18n="scheduler.status_label">Status</th>
+            <th data-i18n="scheduler.last_result">Last Result</th>
+            <th data-i18n="scheduler.actions">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="schedJobsBody">
+          <tr><td colspan="6">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- History table -->
+  <section class="sched-section" data-i18n-aria-label="scheduler.history" aria-label="Execution history">
+    <h2 data-i18n="scheduler.history">Execution History</h2>
+    <div class="sched-table-wrap">
+      <table class="sched-table" id="schedHistoryTable">
+        <thead>
+          <tr>
+            <th data-i18n="scheduler.job_id">Job ID</th>
+            <th data-i18n="scheduler.time">Time</th>
+            <th data-i18n="scheduler.status_label">Status</th>
+            <th data-i18n="scheduler.result">Result</th>
+          </tr>
+        </thead>
+        <tbody id="schedHistoryBody">
+          <tr><td colspan="4">Loading...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Add Job Dialog -->
+  <dialog id="schedAddDialog" class="sched-dialog">
+    <form id="schedAddForm" method="dialog">
+      <h3 data-i18n="scheduler.add_dialog_title">Add Scheduled Job</h3>
+      <div class="sched-form-group">
+        <label for="schedNewJobId" data-i18n="scheduler.field_job_id">Job ID</label>
+        <input id="schedNewJobId" type="text" required placeholder="my_custom_job" autocomplete="off">
+      </div>
+      <div class="sched-form-group">
+        <label for="schedNewFunc" data-i18n="scheduler.field_func">Function</label>
+        <select id="schedNewFunc" required>
+          <option value="db_analyze">db_analyze</option>
+          <option value="db_vacuum">db_vacuum</option>
+          <option value="db_integrity_check">db_integrity_check</option>
+          <option value="thumbnail_cleanup">thumbnail_cleanup</option>
+          <option value="github_issue_poll">github_issue_poll</option>
+          <option value="bsky_notification_poll">bsky_notification_poll</option>
+          <option value="prune_unused_tags">prune_unused_tags</option>
+          <option value="refresh_monthly_stats">refresh_monthly_stats</option>
+          <option value="rebuild_groups_index">rebuild_groups_index</option>
+          <option value="db_backup">db_backup</option>
+        </select>
+      </div>
+      <div class="sched-form-group">
+        <label for="schedNewTrigger" data-i18n="scheduler.field_trigger_type">Trigger Type</label>
+        <select id="schedNewTrigger">
+          <option value="cron">cron</option>
+          <option value="interval">interval</option>
+        </select>
+      </div>
+      <div class="sched-form-row" id="schedCronFields">
+        <div class="sched-form-group sched-form-narrow">
+          <label for="schedNewHour" data-i18n="scheduler.field_hour">Hour</label>
+          <input id="schedNewHour" type="text" placeholder="*" value="3" pattern="(\*|([0-9]|1[0-9]|2[0-3])(,([0-9]|1[0-9]|2[0-3]))*)" title="0-23, comma-separated, or *" autocomplete="off">
+          <small class="sched-field-hint" data-i18n="scheduler.hint_hour">0-23, comma, or *</small>
+        </div>
+        <div class="sched-form-group sched-form-narrow">
+          <label for="schedNewMinute" data-i18n="scheduler.field_minute">Minute</label>
+          <input id="schedNewMinute" type="text" placeholder="*" value="0" pattern="(\*|([0-9]|[1-5][0-9])(,([0-9]|[1-5][0-9]))*)" title="0-59, comma-separated, or *" autocomplete="off">
+          <small class="sched-field-hint" data-i18n="scheduler.hint_minute">0-59, comma, or *</small>
+        </div>
+        <div class="sched-form-group sched-form-narrow">
+          <label for="schedNewDay" data-i18n="scheduler.field_day">Day</label>
+          <input id="schedNewDay" type="text" placeholder="*" value="*" pattern="(\*|([1-9]|[12][0-9]|3[01])(,([1-9]|[12][0-9]|3[01]))*)" title="1-31, comma-separated, or *" autocomplete="off">
+          <small class="sched-field-hint" data-i18n="scheduler.hint_day">1-31, comma, or *</small>
+        </div>
+        <div class="sched-form-group sched-form-narrow">
+          <label for="schedNewDow" data-i18n="scheduler.field_day_of_week">Day of Week</label>
+          <input id="schedNewDow" type="text" placeholder="*" value="*" autocomplete="off">
+          <small class="sched-field-hint" data-i18n="scheduler.hint_dow">mon-sun, 0-6, or *</small>
+        </div>
+      </div>
+      <div class="sched-form-row" id="schedIntervalFields" style="display:none;">
+        <div class="sched-form-group sched-form-narrow">
+          <label for="schedNewIntervalHours">Hours</label>
+          <input id="schedNewIntervalHours" type="number" min="0" value="1">
+        </div>
+        <div class="sched-form-group sched-form-narrow">
+          <label for="schedNewIntervalMinutes">Minutes</label>
+          <input id="schedNewIntervalMinutes" type="number" min="0" value="0">
+        </div>
+      </div>
+      <div class="sched-dialog-actions">
+        <button type="button" class="sched-btn" id="schedCancelBtn" data-i18n="scheduler.cancel">Cancel</button>
+        <button type="submit" class="sched-btn primary" data-i18n="scheduler.submit">Add</button>
+      </div>
+    </form>
+  </dialog>
+</main>

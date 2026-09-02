@@ -1,0 +1,21 @@
+/* Scan progress visual states */
+body.dark .scan-progress-bar {
+  background: rgba(30, 30, 30, 0.98);
+  border-top-color: #60a5fa;
+}
+
+.scan-progress-bar.complete .scan-progress-icon {
+  animation: none;
+}
+
+.scan-progress-bar.complete .scan-progress-fill {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.scan-progress-bar.error .scan-progress-fill {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.scan-progress-bar.error .scan-progress-icon {
+  animation: none;
+}

@@ -1,0 +1,46 @@
+  {% include "_nav.html" %}
+  <main id="main-content" class="container" style="padding-top:50px;">
+    <header>
+      <h1><span aria-hidden="true">📖</span> <span data-i18n="page.story.title">Story</span></h1>
+      <p style="margin:4px 0 0 0;font-size:13px;color:var(--muted);" data-i18n="page.story.desc">月ごとの生成活動・登録数・連続日数を振り返るタイムラインです。</p>
+      <p id="storyDateContext" style="margin:6px 0 0 0;font-size:13px;color:var(--muted);display:none;"></p>
+    </header>
+    <div id="summary" class="summary" style="display: none;">
+      <h2 data-i18n="story.your_journey">Your Journey</h2>
+      <div class="summary-stats">
+        <div class="summary-stat">
+          <div class="summary-stat-value" id="totalMonths">-</div>
+          <div class="summary-stat-label" data-i18n="story.active_months">Active Months</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-value" id="totalEvents">-</div>
+          <div class="summary-stat-label" data-i18n="story.key_events">Key Events</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-value" id="totalMilestones">-</div>
+          <div class="summary-stat-label" data-i18n="story.milestones">Milestones</div>
+        </div>
+        <div class="summary-stat">
+          <div class="summary-stat-value" id="streakDays">-</div>
+          <div class="summary-stat-label" data-i18n="story.streak_days">Streak Days</div>
+        </div>
+      </div>
+      <div id="onThisDayCard" style="display:none;margin-top:16px;padding:14px 18px;border-radius:10px;background:rgba(102,126,234,0.08);border:1px solid rgba(102,126,234,0.2);">
+        <span style="font-size:18px;margin-right:8px;">📅</span>
+        <span id="onThisDayText" style="font-size:14px;"></span>
+      </div>
+      <div id="trophyShelf" style="display:none;margin-top:16px;">
+        <h2 style="font-size:14px;margin-bottom:8px;color:var(--muted,#888);" data-i18n="story.trophies">Trophies</h2>
+        <div id="trophyList" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+
+    <!-- Trophy detail grid (lazy-loaded from /api/trophies) -->
+    <div id="trophyDetailSection" style="display:none;margin-top:24px;padding:18px;border-radius:10px;background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.15);"></div>
+
+    <div class="timeline" id="timeline"></div>
+
+    <div class="loading" id="loading">
+      <p data-i18n="story.loading">Loading your story...</p>
+    </div>
+  </main>

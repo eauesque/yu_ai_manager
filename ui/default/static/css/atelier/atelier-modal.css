@@ -1,0 +1,287 @@
+/*
+ * Atelier System (γ) — Detail modal
+ *
+ * Layers atelier tokens onto the existing modal structure:
+ *   - image area gets neutral --canvas (no warm tint affecting colour
+ *     perception of the AI-generated image)
+ *   - info panel gets warm --surface-raised + Fraunces body
+ *   - toolbar (already pill-shaped from v4.126.2) shifts to the
+ *     --accent-tool palette for active state
+ *   - close / nav arrows / fav button unify on --font-ui
+ *
+ * z-index discipline (preserved from v4.125.3 / v4.126.1):
+ *   close = 12, toolbar = 16, info-panel = 20
+ */
+
+/* ----- Modal scaffold ----- */
+
+body.theme-atelier-light .modal-overlay,
+body.theme-atelier-dark .modal-overlay {
+  background: rgba(20, 18, 14, 0.78);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+
+body.theme-atelier-light .detail-modal,
+body.theme-atelier-light .modal-content,
+body.theme-atelier-dark .detail-modal,
+body.theme-atelier-dark .modal-content {
+  background: var(--bg);
+  font-family: var(--font-ui);
+  color: var(--text);
+}
+
+/* ----- Image area (canvas, neutral grey) ----- */
+
+body.theme-atelier-light .modal-image-area,
+body.theme-atelier-light .modal-viewer,
+body.theme-atelier-light .modal-image-container,
+body.theme-atelier-dark .modal-image-area,
+body.theme-atelier-dark .modal-viewer,
+body.theme-atelier-dark .modal-image-container {
+  background: var(--canvas);
+}
+
+/* Filmstrip: keep canvas-aligned, sit just above canvas surface */
+body.theme-atelier-light .modal-filmstrip,
+body.theme-atelier-dark .modal-filmstrip {
+  background: var(--canvas-raised);
+  border-top: 1px solid var(--border);
+}
+
+/* ----- Info panel (warm surface, editorial body) ----- */
+
+body.theme-atelier-light .modal-info-panel,
+body.theme-atelier-light .info-panel,
+body.theme-atelier-dark .modal-info-panel,
+body.theme-atelier-dark .info-panel {
+  background: var(--surface-raised);
+  border-left: 1px solid var(--border);
+  font-family: var(--font-body);
+  color: var(--text);
+}
+
+body.theme-atelier-light .modal-info-panel h3,
+body.theme-atelier-light .info-panel h3,
+body.theme-atelier-dark .modal-info-panel h3,
+body.theme-atelier-dark .info-panel h3 {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  font-variation-settings: "opsz" var(--opsz-eyebrow);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 6px;
+  margin: 18px 0 8px;
+}
+
+body.theme-atelier-light .modal-info-panel .prompt-text,
+body.theme-atelier-light .info-panel .prompt-text,
+body.theme-atelier-dark .modal-info-panel .prompt-text,
+body.theme-atelier-dark .info-panel .prompt-text {
+  /* Roman, NOT italic — we keep the editorial feel without leaning into
+   * Fraunces' italic which reads as "fictional title". */
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-style: normal;
+  font-variation-settings: "opsz" var(--opsz-body), "wght" 400;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* Metadata table (key/value pairs): UI sans for keys, mono for values */
+body.theme-atelier-light .modal-info-panel dl,
+body.theme-atelier-light .info-panel dl,
+body.theme-atelier-dark .modal-info-panel dl,
+body.theme-atelier-dark .info-panel dl {
+  font-family: var(--font-ui);
+  font-size: 12px;
+}
+body.theme-atelier-light .modal-info-panel dt,
+body.theme-atelier-light .info-panel dt,
+body.theme-atelier-dark .modal-info-panel dt,
+body.theme-atelier-dark .info-panel dt {
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+}
+body.theme-atelier-light .modal-info-panel dd,
+body.theme-atelier-light .info-panel dd,
+body.theme-atelier-dark .modal-info-panel dd,
+body.theme-atelier-dark .info-panel dd {
+  font-family: var(--font-mono);
+  color: var(--text);
+}
+
+/* ----- Toolbar (v4.126.2 circular pills) atelier tint ----- */
+
+body.theme-atelier-light .modal-toolbar,
+body.theme-atelier-dark .modal-toolbar {
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px) saturate(1.1);
+  -webkit-backdrop-filter: blur(12px) saturate(1.1);
+  border: 1px solid var(--glass-border);
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light .modal-toolbar button,
+body.theme-atelier-dark .modal-toolbar button {
+  color: var(--text);
+  background: transparent;
+}
+
+body.theme-atelier-light .modal-toolbar button:hover,
+body.theme-atelier-dark .modal-toolbar button:hover {
+  background: var(--surface-raised);
+}
+
+body.theme-atelier-light .modal-toolbar button.is-active,
+body.theme-atelier-light .modal-toolbar button[aria-pressed="true"],
+body.theme-atelier-dark .modal-toolbar button.is-active,
+body.theme-atelier-dark .modal-toolbar button[aria-pressed="true"] {
+  background: var(--accent-tool);
+  color: #ffffff;
+}
+
+body.theme-atelier-light .modal-toolbar button:focus-visible,
+body.theme-atelier-dark .modal-toolbar button:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+}
+
+/* ----- Close / nav arrows / fav button: UI sans unification ----- */
+
+body.theme-atelier-light .modal-close,
+body.theme-atelier-light .modal-nav-arrow,
+body.theme-atelier-light .modal-fav-btn,
+body.theme-atelier-light .modal-viewing-toggle,
+body.theme-atelier-dark .modal-close,
+body.theme-atelier-dark .modal-nav-arrow,
+body.theme-atelier-dark .modal-fav-btn,
+body.theme-atelier-dark .modal-viewing-toggle {
+  font-family: var(--font-ui);
+  background: var(--glass-bg);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  color: var(--text);
+  border-radius: 999px;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+body.theme-atelier-light .modal-close:hover,
+body.theme-atelier-light .modal-nav-arrow:hover,
+body.theme-atelier-light .modal-fav-btn:hover,
+body.theme-atelier-light .modal-viewing-toggle:hover,
+body.theme-atelier-dark .modal-close:hover,
+body.theme-atelier-dark .modal-nav-arrow:hover,
+body.theme-atelier-dark .modal-fav-btn:hover,
+body.theme-atelier-dark .modal-viewing-toggle:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent-tool);
+}
+
+body.theme-atelier-light .modal-close:focus-visible,
+body.theme-atelier-light .modal-nav-arrow:focus-visible,
+body.theme-atelier-light .modal-fav-btn:focus-visible,
+body.theme-atelier-light .modal-viewing-toggle:focus-visible,
+body.theme-atelier-dark .modal-close:focus-visible,
+body.theme-atelier-dark .modal-nav-arrow:focus-visible,
+body.theme-atelier-dark .modal-fav-btn:focus-visible,
+body.theme-atelier-dark .modal-viewing-toggle:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+}
+
+body.theme-atelier-light .modal-viewing-toggle.is-active,
+body.theme-atelier-light .modal-viewing-toggle[aria-pressed="true"],
+body.theme-atelier-dark .modal-viewing-toggle.is-active,
+body.theme-atelier-dark .modal-viewing-toggle[aria-pressed="true"] {
+  background: var(--accent-tool);
+  border-color: var(--accent-tool);
+  color: #ffffff;
+}
+
+/* Favorite button when active: warm accent (atmosphere, not action) */
+body.theme-atelier-light .modal-fav-btn.is-favorited,
+body.theme-atelier-dark .modal-fav-btn.is-favorited {
+  background: var(--accent-warm);
+  border-color: var(--accent-warm);
+  color: #2a2620;
+}
+
+/* ----- z-index discipline (re-state for safety) ----- */
+
+body.theme-atelier-light .modal-close,
+body.theme-atelier-light .modal-viewing-toggle,
+body.theme-atelier-dark .modal-close,
+body.theme-atelier-dark .modal-viewing-toggle {
+  z-index: 12;
+}
+body.theme-atelier-light .modal-toolbar,
+body.theme-atelier-dark .modal-toolbar {
+  z-index: 16;
+}
+body.theme-atelier-light .modal-info-panel,
+body.theme-atelier-light .info-panel,
+body.theme-atelier-dark .modal-info-panel,
+body.theme-atelier-dark .info-panel {
+  z-index: 20;
+}
+
+/* ----- Legacy chip / badge contrast on atelier surfaces -----
+ *
+ * modal-prompt-tags.css ships color pairs (e.g. background:#e8f4f8;
+ * color:#2c5f7a) tuned for the original light theme and another set under
+ * body.dark for the legacy dark theme. Neither was tuned for atelier-dark
+ * (#25201a warm chrome) or atelier-light (#ede4d3 warm chrome), so the
+ * blue/purple chip variants land at borderline contrast and read as
+ * desaturated mush.
+ *
+ * Re-tone using --accent-tool (action blue) and --accent-warm (atelier
+ * warm) so the namespace / user variants stay visually distinct while
+ * holding 4.5:1+ on both atelier surfaces.
+ */
+
+body.theme-atelier-light .modal-info .tag-chip,
+body.theme-atelier-dark .modal-info .tag-chip {
+  background: color-mix(in srgb, var(--accent-tool) 14%, var(--surface-raised));
+  color: var(--accent-tool);
+  border: 1px solid color-mix(in srgb, var(--accent-tool) 35%, var(--border));
+}
+
+body.theme-atelier-light .modal-info .tag-chip:hover,
+body.theme-atelier-dark .modal-info .tag-chip:hover {
+  background: color-mix(in srgb, var(--accent-tool) 22%, var(--surface-raised));
+}
+
+body.theme-atelier-light .modal-info .tag-chip.namespace,
+body.theme-atelier-dark .modal-info .tag-chip.namespace {
+  background: color-mix(in srgb, var(--accent-warm) 22%, var(--surface-raised));
+  color: var(--text);
+  border: 1px solid color-mix(in srgb, var(--accent-warm) 50%, var(--border));
+}
+
+body.theme-atelier-light .modal-info .tag-chip.namespace:hover,
+body.theme-atelier-dark .modal-info .tag-chip.namespace:hover {
+  background: color-mix(in srgb, var(--accent-warm) 32%, var(--surface-raised));
+}
+
+/* tag-chip-user (user-tagged) — neutral surface with text-color so it reads
+ * as "applied" rather than as a category. */
+body.theme-atelier-light .tag-chip-user,
+body.theme-atelier-dark .tag-chip-user {
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* Generic .badge in modal — fall back to neutral surface tones unless a
+ * specific severity (warning/danger) re-colours it. */
+body.theme-atelier-light .modal-info .badge:not(.warning):not(.danger):not(.error),
+body.theme-atelier-dark .modal-info .badge:not(.warning):not(.danger):not(.error) {
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+}

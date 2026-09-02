@@ -1,0 +1,91 @@
+/* Dark mode tag visibility — consolidated
+ * Merged from: base, categories, negative-params sub-files.
+ * Colors are driven by CSS custom properties defined in base-theme.css (body.dark).
+ */
+
+/* ── Base tags and interactions ── */
+body.dark .prompt-text .tag {
+  background: var(--tag-bg);
+  color: var(--tag-text);
+  border: 1.5px solid var(--tag-border);
+  padding: 3px 8px;
+  font-weight: 500;
+  text-shadow: var(--tag-text-shadow);
+  transition: all 0.2s ease;
+}
+body.dark .prompt-text .tag:hover {
+  background: var(--tag-hover-bg);
+  border-color: var(--tag-hover-border);
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+body.dark .prompt-text .tag + .tag {
+  margin-left: 6px;
+}
+body.dark .prompt-text {
+  background: var(--prompt-text-bg);
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid var(--prompt-text-border);
+}
+body.dark .prompt-text .tag:focus-visible {
+  outline: 2px solid var(--tag-focus-ring);
+  outline-offset: 2px;
+}
+
+/* ── Category color variants ── */
+body.dark .prompt-text .tag.namespace {
+  background: var(--tag-ns-bg);
+  border-color: var(--tag-ns-border);
+  color: var(--tag-ns-text);
+}
+body.dark .prompt-text .weight-high {
+  background: var(--tag-wh-bg);
+  color: var(--tag-wh-text);
+  border-color: var(--tag-wh-border);
+  font-weight: 600;
+}
+body.dark .prompt-text .weight-low {
+  background: var(--tag-wl-bg);
+  color: var(--tag-wl-text);
+  border-color: var(--tag-wl-border);
+}
+body.dark .prompt-text .weight-emphasis {
+  background: var(--tag-we-bg);
+  color: var(--tag-we-text);
+  border-color: var(--tag-we-border);
+  font-weight: 600;
+}
+
+/* ── Negative prompt and params ── */
+body.dark .prompt-section.negative .prompt-text {
+  background: var(--neg-prompt-bg);
+  border-left: 3px solid var(--neg-prompt-border);
+  padding: 12px;
+}
+body.dark .prompt-section.negative .tag {
+  background: var(--neg-tag-bg);
+  color: var(--neg-tag-text);
+  border-color: var(--neg-tag-border);
+}
+body.dark .prompt-section.negative h3 {
+  color: var(--neg-heading);
+}
+body.dark .accordion-content {
+  background: var(--accordion-bg);
+  border: 1px solid var(--accordion-border);
+}
+body.dark .accordion-header {
+  background: var(--accordion-header-bg);
+  color: var(--accordion-header-text);
+}
+body.dark .accordion-header:hover {
+  background: var(--accordion-header-hover);
+}
+body.dark .param-value {
+  color: var(--param-value-text);
+  font-weight: 500;
+}
+body.dark .param-key {
+  color: var(--param-key-text);
+}

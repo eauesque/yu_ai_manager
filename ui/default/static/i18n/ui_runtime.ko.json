@@ -1,0 +1,1673 @@
+{
+  "a11y": {
+    "condition_added": "조건 \"{label}\"이(가) 추가되었습니다",
+    "condition_menu_opened": "조건 메뉴가 열렸습니다",
+    "condition_removed": "조건 \"{label}\"이(가) 제거되었습니다",
+    "focus_search": "검색 입력에 포커스",
+    "result_focus": "항목 {index} / {total}: {label}",
+    "results_list_label": "검색 결과"
+  },
+  "agent_journal": {
+    "scope_delete": "삭제",
+    "scopes_empty_with_default": "(범위 없음 — 기본값 적용)"
+  },
+  "analysis": {
+    "analyzed_at": "분석 일시: {date}",
+    "btn_reanalyze": "재분석",
+    "done_label": "분석 완료",
+    "label": {
+      "ai_tags": "AI 태그:",
+      "color": "색감:",
+      "composition": "구도:",
+      "engine": "엔진:",
+      "mood": "분위기:",
+      "quality": "품질:",
+      "style": "스타일:",
+      "suggestion": "프롬프트 제안:"
+    },
+    "status_done": "✅ 완료",
+    "status_done_engine": "✅ 완료 ({engine})",
+    "status_error": "❌ {error}",
+    "status_running": "분석 중...",
+    "status_running_engine": "{engine}으로 분석 중...",
+    "status_saved": "✅ {engine}"
+  },
+  "analysis.engine": "AI Engine",
+  "analysis.engine_default": "Auto",
+  "analysis.mode": "Analysis Mode",
+  "analysis.mode_full": "Full Analysis",
+  "analysis.mode_simple": "Color + Composition",
+  "analysis.model": "AI Model",
+  "api_error": {
+    "bad_zip_file": "아카이브 파일이 손상되었습니다",
+    "batch_empty": "배치가 비어 있습니다",
+    "batch_too_large": "배치 크기가 제한을 초과합니다",
+    "collection_not_found": "컬렉션을 찾을 수 없습니다",
+    "container_not_found": "이 파일의 컨테이너를 찾을 수 없습니다",
+    "convert_failed": "형식 변환에 실패했습니다",
+    "debug_disabled": "디버그 모드가 활성화되지 않았습니다",
+    "empty_sql": "SQL 쿼리가 비어 있습니다",
+    "extract_register_failed": "추출 파일 등록에 실패했습니다",
+    "file_missing": "디스크에 파일이 존재하지 않습니다",
+    "file_not_found": "파일을 찾을 수 없습니다",
+    "gateway_no_db": "데이터베이스를 사용할 수 없습니다 (게이트웨이 모드)",
+    "internal_error": "내부 서버 오류",
+    "invalid_content_type": "콘텐츠 유형이 올바르지 않습니다",
+    "invalid_index": "잘못된 인덱스입니다",
+    "invalid_json": "JSON 형식이 올바르지 않습니다",
+    "invalid_json_object": "JSON 객체가 필요합니다",
+    "invalid_mode": "잘못된 모드입니다",
+    "invalid_request": "잘못된 요청입니다",
+    "invalid_value": "잘못된 값입니다",
+    "job_running": "배치 작업이 이미 실행 중입니다",
+    "keyframe_error": "키프레임 추출에 실패했습니다",
+    "missing_dependency": "필요한 라이브러리가 설치되지 않았습니다",
+    "missing_file_id": "파일 ID가 필요합니다",
+    "model_not_available": "모델이 아직 다운로드되지 않았습니다",
+    "multi_stmt_rejected": "여러 SQL 문은 허용되지 않습니다",
+    "no_data": "데이터가 제공되지 않았습니다",
+    "not_found": "리소스를 찾을 수 없습니다",
+    "not_select": "SELECT 문만 사용할 수 있습니다",
+    "not_zip_member": "아카이브 멤버가 아닙니다",
+    "path_required": "경로가 필요합니다",
+    "purge_failed": "완전 삭제에 실패했습니다",
+    "roots_summary_failed": "스캔 루트 요약에 실패했습니다",
+    "scan_roots_config_failed": "스캔 루트 설정에 실패했습니다",
+    "sql_error": "SQL 실행 오류",
+    "unsupported_type": "이 파일 형식은 지원되지 않습니다",
+    "write_rejected": "쓰기 작업은 허용되지 않습니다",
+    "zip_entry_not_found": "아카이브에서 항목을 찾을 수 없습니다",
+    "zip_not_found": "아카이브 파일을 찾을 수 없습니다",
+    "zip_path_traversal": "경로 탐색이 차단되었습니다"
+  },
+  "boss_mode": {
+    "back": "뒤로",
+    "brand": "Daily Ledger",
+    "esc_hint": "Esc를 눌러 돌아가기",
+    "headline": "주요 지역 인플레이션 완화로 글로벌 시장 안정세",
+    "story1": "중앙은행, 다음 분기 정책 긴축 속도 완화 시사",
+    "story2": "태평양 횡단 항로 정상화로 운송비 하락",
+    "story3": "기업 수요 호조로 기술주 실적 예상 상회",
+    "story4": "2주간의 원자재 랠리 후 에너지 섹터 하락",
+    "subhead": "화요일 주요 지수가 전반적으로 안정세를 보인 가운데, 투자자들은 고용 데이터, 정책 시그널, 에너지 가격을 주시하고 있습니다.",
+    "top_stories": "주요 뉴스",
+    "watchlist": "관심 종목"
+  },
+  "bridge": {
+    "toolbar_legend": {
+      "title": "범례 / 기호"
+    }
+  },
+  "bridge.syntax_warning.converting": "Converting...",
+  "bridge.syntax_warning.error": "Conversion failed",
+  "character": {
+    "negative_label": "제외:",
+    "section_title": "NovelAI V4 캐릭터 프롬프트"
+  },
+  "checkpoint": {
+    "option_count": "{name} ({count})"
+  },
+  "collections": {
+    "created": "컬렉션이 생성되었습니다",
+    "deleted": "컬렉션이 삭제되었습니다",
+    "renamed": "컬렉션 이름이 변경되었습니다"
+  },
+  "common": {
+    "clear": "지우기",
+    "enabled": "활성화",
+    "error_prefix": "오류:",
+    "loading": "로딩 중...",
+    "range_sep": "–",
+    "reset": "초기화"
+  },
+  "common.saved": "Saved",
+  "common.saving": "Saving...",
+  "conditions": {
+    "aiAnalyzed": {
+      "label": "🧠 AI 분석 완료"
+    },
+    "artist": {
+      "label": "🎨 아티스트",
+      "placeholder": "아티스트 이름"
+    },
+    "checkpoint": {
+      "label": "🎯 체크포인트",
+      "placeholder": "예: animagine, pony"
+    },
+    "clear_all": "모두 지우기",
+    "collection": {
+      "all": "모든 즐겨찾기",
+      "label": "⭐ 컬렉션"
+    },
+    "csvLimit": {
+      "label": "📥 CSV 내보내기 한도"
+    },
+    "disabled_in_grouped": "폴더/ZIP 보기에서는 사용할 수 없습니다",
+    "favOnly": {
+      "label": "⭐ 즐겨찾기만"
+    },
+    "format": {
+      "ext_filter_hint": "확장자로 필터링 (선택 사항)",
+      "ext_group_audio": "오디오",
+      "ext_group_container": "컨테이너",
+      "ext_group_image": "이미지",
+      "ext_group_video": "동영상",
+      "label": "📄 형식"
+    },
+    "hasTags": {
+      "label": "🏷️ 태그 있음"
+    },
+    "hint": {
+      "count_many": "{count}개 조건",
+      "count_one": "1개 조건"
+    },
+    "inCharNeg": {
+      "label": "🚫 캐릭터 네거티브 내",
+      "placeholder": "캐릭터 네거티브 검색"
+    },
+    "inCharPos": {
+      "label": "✨ 캐릭터 포지티브 내",
+      "placeholder": "캐릭터 포지티브 검색"
+    },
+    "inFolder": {
+      "label": "📂 폴더",
+      "placeholder": "경로 일부 예: o:\\test"
+    },
+    "inNegative": {
+      "label": "🚫 네거티브 내",
+      "placeholder": "네거티브 내 키워드"
+    },
+    "inPrompt": {
+      "label": "🔤 프롬프트 내",
+      "placeholder": "프롬프트 내 키워드"
+    },
+    "limit": {
+      "label": "#️⃣ 수량",
+      "short_label": "수"
+    },
+    "model": {
+      "label": "🤖 모델"
+    },
+    "orTags": {
+      "label": "🔀 OR 태그",
+      "placeholder": "하나라도 포함 (쉼표 구분)"
+    },
+    "period": {
+      "label": "📅 기간"
+    },
+    "remove": "조건 제거",
+    "resolution": {
+      "label": "📐 해상도"
+    },
+    "sort": {
+      "label": "↕️ 정렬"
+    },
+    "tagCase": {
+      "label": "Aa 대소문자 구분"
+    },
+    "toggle": {
+      "close": "▲ 닫기",
+      "more": "▼ 더 보기"
+    }
+  },
+  "container": {
+    "folder_items": "폴더 내 이미지 {count}개",
+    "no_members": "컨테이너에 인덱싱된 항목이 없습니다.",
+    "preload_done": "폴더 / ZIP 카테고리 보기가 준비되었습니다",
+    "preloading_thumbs": "썸네일 생성 중... ({done}/{total})",
+    "zip_items": "ZIP 내 이미지 {count}개"
+  },
+  "convert": {
+    "btn_expand_dynamic": "Dynamic Prompts",
+    "btn_restore": "복원",
+    "failed": "변환 실패",
+    "failed_with_error": "변환 실패: {error}",
+    "label": {
+      "nai": "NAI 형식 ",
+      "sd": "SD 형식 "
+    }
+  },
+  "ctx.ai_analyze": "AI Analysis",
+  "ctx.clear_rating": "Clear",
+  "ctx.copied": "Copied",
+  "ctx.copied_nai": "Copied as NAI",
+  "ctx.copied_sd": "Copied as SD",
+  "ctx.copy_nai": "Copy as NAI",
+  "ctx.copy_negative": "Copy negative",
+  "ctx.copy_path": "Copy file path",
+  "ctx.copy_prompt": "Copy prompt",
+  "ctx.copy_sd": "Copy as SD",
+  "ctx.favorite": "Favorite ☆",
+  "ctx.find_similar": "Find similar",
+  "ctx.path_copied": "Path copied",
+  "ctx.qr_share": "Share via QR",
+  "ctx.rating": "Rating",
+  "ctx.save_pl": "Save to PL",
+  "ctx.send_bridge": "Send to Bridge",
+  "ctx.show_detail": "Show detail",
+  "detail": {
+    "audio_unsupported": "브라우저가 오디오 재생을 지원하지 않습니다.",
+    "image_alt": "이미지",
+    "load_failed": "상세 정보를 불러오지 못했습니다",
+    "modal": {
+      "analysis_mode": "분석 모드 전환",
+      "audio_playback": "오디오 재생",
+      "autoplay": "자동 재생 (P)",
+      "autoplay_interval": "간격 (초)",
+      "bar_collapse": "바 접기",
+      "bar_expand": "바 펼치기",
+      "close": "닫기",
+      "container_items": "{count}개 항목",
+      "container_view": "컨테이너 보기",
+      "display": "표시:",
+      "favorite": "즐겨찾기 전환",
+      "fullscreen": "전체 화면",
+      "info_toggle": "정보 패널 전환",
+      "mode_fit": "맞춤",
+      "mode_fit_custom": "사용자 정의",
+      "mode_fit_height": "세로맞춤",
+      "mode_fit_width": "가로맞춤",
+      "mode_original": "원본",
+      "mute": "음소거 (M)",
+      "next": "다음 이미지",
+      "prev": "이전 이미지",
+      "repeat_off": "반복: OFF (R)",
+      "repeat_on": "반복: ON (R)",
+      "resume_off": "이어보기 OFF",
+      "resume_on": "이어보기 ON",
+      "spread_direction": "읽기 방향 (D)",
+      "spread_view": "펼침 보기 (B)",
+      "toast_repeat_off": "반복: OFF",
+      "toast_repeat_on": "반복: ON",
+      "toast_resume_off": "이어보기: OFF",
+      "toast_resume_on": "이어보기: ON",
+      "toast_speed": "속도: {rate}x",
+      "toast_spread_ltr": "읽기: 좌→우",
+      "toast_spread_nav_rtl": "← 다음 / 이전 →",
+      "toast_spread_off": "펼침: OFF",
+      "toast_spread_on": "펼침: ON",
+      "toast_spread_rtl": "읽기: 우→좌",
+      "toolbar_aria": "이미지 표시 컨트롤",
+      "toolbar_hide": "툴바 숨기기",
+      "toolbar_overflow_menu": "더 보기",
+      "toolbar_show": "툴바 표시",
+      "unmute": "음소거 해제 (M)",
+      "video_playback": "동영상 재생",
+      "viewing_mode": "감상 모드 (V)",
+      "zoom_in": "확대",
+      "zoom_out": "축소",
+      "zoom_reset": "확대/축소 초기화"
+    },
+    "save_failed": "저장에 실패했습니다",
+    "saved_to_library": "프롬프트 라이브러리에 저장했습니다",
+    "video_unsupported": "브라우저가 동영상 태그를 지원하지 않습니다."
+  },
+  "detail.ann_add_label": "Add note",
+  "detail.ann_delete_confirm": "Delete this annotation?",
+  "detail.ann_empty": "No annotations yet.",
+  "detail.ann_load_failed": "Failed to load annotations.",
+  "detail.ann_placeholder": "Add a personal note for this file...",
+  "detail.ann_save_failed": "Save failed",
+  "detail.ann_source_user": "Your notes",
+  "detail.s2t_copied": "Copied to clipboard",
+  "detail.s2t_done": "Transcription complete",
+  "detail.s2t_error": "Transcription failed",
+  "detail.s2t_no_transcript": "No transcript yet. Click \"Transcribe\" to start.",
+  "detail.s2t_processing": "Processing...",
+  "detail.s2t_segments": "Segments",
+  "detail.s2t_transcribe": "Transcribe",
+  "detail.search_by_prompt": "Search by Prompt",
+  "detail.tab_ai": "AI Analysis",
+  "detail.tab_analysis_trace": "Trace",
+  "detail.tab_annotations": "Notes",
+  "detail.tab_info": "Info",
+  "detail.tab_ocr": "OCR",
+  "detail.tab_s2t": "S2T",
+  "detail.trace_date": "Analyzed",
+  "detail.trace_error": "Failed to load analysis trace",
+  "detail.trace_loading": "Loading...",
+  "detail.trace_meta_source": "Metadata Source",
+  "detail.trace_model": "Model",
+  "detail.trace_none": "No analysis trace",
+  "detail.trace_quality": "Quality Analysis",
+  "detail.trace_quality_score": "Quality",
+  "detail.trace_s2t": "Speech Recognition",
+  "detail.trace_source": "Source",
+  "detail.trace_tags": "tags",
+  "ext": {
+    "builtin-a1111": {
+      "config": {
+        "parse_negative": {
+          "description": "Negative prompt: 섹션을 분리하여 추출합니다",
+          "label": "Negative Prompt도 추출"
+        },
+        "parse_params": {
+          "description": "Steps, Sampler, CFG Scale, Model 등의 파라미터를 추출합니다",
+          "label": "생성 파라미터도 추출"
+        }
+      }
+    },
+    "builtin-chatlog": {
+      "config": {
+        "api_key": {
+          "description": "OpenAI / Claude API 사용 시 필요. 로컬 Ollama는 비워두세요",
+          "label": "API 키"
+        },
+        "base_url": {
+          "description": "AI 엔진의 API 엔드포인트 URL",
+          "label": "API 베이스 URL"
+        },
+        "engine_type": {
+          "description": "대화 분석에 사용할 AI 엔진 유형",
+          "label": "AI 엔진"
+        },
+        "model": {
+          "description": "사용할 모델명 (예: llama3.2:latest, gpt-4o-mini)",
+          "label": "모델명"
+        }
+      }
+    },
+    "builtin-comfyui": {
+      "config": {
+        "extract_workflow": {
+          "description": "ComfyUI 워크플로우 JSON을 raw_meta_json에 저장합니다",
+          "label": "워크플로우 정보도 추출"
+        }
+      }
+    },
+    "builtin-comfyui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "확인 대화상자 생략"
+        },
+        "default_sampler": {
+          "label": "기본 샘플러"
+        },
+        "default_scheduler": {
+          "label": "기본 스케줄러"
+        }
+      }
+    },
+    "builtin-nai-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "확인 대화상자 생략"
+        },
+        "default_model": {
+          "label": "기본 모델"
+        },
+        "default_noise_schedule": {
+          "label": "기본 노이즈 스케줄"
+        },
+        "default_sampler": {
+          "label": "기본 샘플러"
+        }
+      }
+    },
+    "builtin-novelai-v4": {
+      "config": {
+        "extract_vibe_transfer": {
+          "description": "Vibe Transfer의 strength/description을 추출합니다",
+          "label": "Vibe Transfer 정보도 추출"
+        },
+        "merge_character_prompts": {
+          "description": "base_caption + char_captions를 쉼표로 구분하여 결합합니다",
+          "label": "캐릭터 프롬프트를 베이스에 통합"
+        }
+      }
+    },
+    "builtin-ocr": {
+      "config": {
+        "batch_export_format": {
+          "label": "배치 내보내기 형식"
+        },
+        "batch_output_dir": {
+          "description": "배치 내보내기 시 서버 측 저장 경로. 비어있으면 ZIP으로 다운로드",
+          "label": "배치 출력 디렉토리 (비어있으면 다운로드)"
+        },
+        "default_target_lang": {
+          "label": "기본 번역 대상 언어"
+        },
+        "default_task": {
+          "label": "기본 OCR 작업"
+        },
+        "manga_ocr_enabled": {
+          "label": "manga-ocr 우선 사용 (ocr_manga 작업 시)"
+        }
+      }
+    },
+    "builtin-prompt-syntax": {
+      "config": {
+        "auto_detect": {
+          "description": "입력 텍스트의 NAI/SD/DP 구문을 자동으로 인식합니다",
+          "label": "구문 자동 인식"
+        },
+        "show_errors": {
+          "description": "괄호 불일치 및 비정상 가중치 값에 대해 경고를 표시합니다",
+          "label": "오류 표시"
+        }
+      }
+    },
+    "builtin-sd-nai-convert": {
+      "config": {
+        "convert_emphasis": {
+          "description": "SD ((tag)) 와 NAI {tag} 간의 강조 구문도 변환합니다",
+          "label": "강조 구문도 변환"
+        },
+        "strip_embedding": {
+          "description": "SD→NAI 변환 시 embedding:... 태그를 자동 제거합니다",
+          "label": "NAI 변환 시 Embedding 태그 제거"
+        },
+        "strip_lora": {
+          "description": "SD→NAI 변환 시 <lora:...> 태그를 자동 제거합니다",
+          "label": "NAI 변환 시 LoRA 태그 제거"
+        }
+      }
+    },
+    "builtin-sd-webui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "확인 대화상자 생략"
+        },
+        "default_sampler": {
+          "label": "기본 샘플러"
+        }
+      }
+    }
+  },
+  "fleet.button.back_to_cowork": "← LAN Cowork로 돌아가기",
+  "fleet.button.refresh": "새로고침",
+  "fleet.button.restart_node": "이 노드 재시작",
+  "fleet.consent.banner.approve_once": "이번만 승인",
+  "fleet.consent.banner.approve_permanent": "영구 승인",
+  "fleet.consent.banner.countdown": "남은 시간 {sec}초",
+  "fleet.consent.banner.deny": "거부",
+  "fleet.consent.banner.title": "{peer}에서 원격 업데이트 요청이 도착했습니다",
+  "fleet.consent.chief.cancel": "취소",
+  "fleet.consent.chief.re_request": "다시 요청",
+  "fleet.consent.chief.send_request": "동의 요청 보내기",
+  "fleet.consent.chief.send_request_for": "{peer}의 원격 업데이트가 비활성화되어 있습니다. 동의 요청을 보낼까요?",
+  "fleet.consent.chief.timeout": "동의 시간 초과. 다시 요청하세요.",
+  "fleet.consent.chief.waiting": "동의 대기 중 ⏱ (남은 시간 {sec}초)",
+  "fleet.error.branch_not_allowed": "브랜치가 허용되지 않습니다",
+  "fleet.error.cannot_dispatch_self": "치프 자체에는 디스패치할 수 없습니다",
+  "fleet.error.consent_denied": "동의가 거부되었습니다.",
+  "fleet.error.consent_token_invalid": "동의가 무효화되었습니다. 다시 요청하세요.",
+  "fleet.error.deny_cooldown": "거부 쿨다운 중 (남은 시간 {sec}초)",
+  "fleet.error.git_not_available": "git을 사용할 수 없습니다",
+  "fleet.error.invalid_source": "잘못된 소스",
+  "fleet.error.local_path_not_allowed": "로컬 경로가 허용되지 않습니다",
+  "fleet.error.not_in_allowlist": "허용 목록에 없습니다",
+  "fleet.error.other_chief_pending": "다른 치프가 동의를 기다리고 있습니다 (남은 시간 {sec}초)",
+  "fleet.error.remote_update_disabled": "원격 업데이트가 비활성화되어 있습니다",
+  "fleet.error.update_failed_token_consumed": "업데이트 실패 — 동의가 소비되었습니다. 다시 요청하시겠습니까?",
+  "fleet.error.update_in_progress": "업데이트가 이미 진행 중입니다",
+  "fleet.logs.autoscroll": "자동 스크롤",
+  "fleet.logs.clear": "지우기",
+  "fleet.logs.copied": "복사됨",
+  "fleet.logs.copy": "복사",
+  "fleet.logs.copy_failed": "복사 실패",
+  "fleet.logs.download": "다운로드",
+  "fleet.logs.pause": "일시정지",
+  "fleet.logs.peer_select": "노드 선택",
+  "fleet.logs.placeholder": "로그 — 노드를 선택하여 스트리밍 시작",
+  "fleet.logs.resume": "재개",
+  "fleet.node.status.degraded": "정보 취득 실패",
+  "fleet.node.status.offline": "오프라인",
+  "fleet.node.status.online": "온라인",
+  "fleet.node.status.restarting": "재시작 중",
+  "fleet.settings.col.action": "Action",
+  "fleet.settings.col.log_stream": "Log stream",
+  "fleet.settings.col.peer": "Peer",
+  "fleet.settings.col.status": "Status",
+  "fleet.settings.col.update": "Update",
+  "fleet.settings.local.allow_remote_update": "Enable remote updates (master switch)",
+  "fleet.settings.local.desc": "Configure whether this node allows other peers to stream logs or perform remote updates. Toggle checkboxes per peer.",
+  "fleet.settings.local.save": "Save",
+  "fleet.settings.local.title": "This node's settings",
+  "fleet.settings.remote.already_granted": "Already granted",
+  "fleet.settings.remote.desc": "Use the pairing token to add the chief's peer_id to the target peer's allowlist. You don't need to log in on the peer, but a pairing token is required.",
+  "fleet.settings.remote.done": "Done",
+  "fleet.settings.remote.failed": "Failed",
+  "fleet.settings.remote.grant": "Grant on this peer",
+  "fleet.settings.remote.not_granted": "Not granted",
+  "fleet.settings.remote.revoke": "Revoke on this peer",
+  "fleet.settings.remote.status_unreachable": "Cannot check",
+  "fleet.settings.remote.title": "Remote grant (chief only)",
+  "fleet.settings.save_failed": "Save failed",
+  "fleet.settings.saved": "Saved",
+  "fleet.tab.logs": "로그",
+  "fleet.tab.overview": "개요",
+  "fleet.tab.settings": "Settings",
+  "fleet.tab.update": "업데이트",
+  "fleet.title": "Fleet 관리",
+  "fleet.update.branch": "브랜치:",
+  "fleet.update.button.dispatch": "선택 노드 일괄 업데이트",
+  "fleet.update.button.pull_restart": "Pull & Restart",
+  "fleet.update.button.restart_only": "재시작만",
+  "fleet.update.button.restart_only_dispatch": "선택 노드 재시작",
+  "fleet.update.col.action": "작업",
+  "fleet.update.col.branch": "브랜치",
+  "fleet.update.col.commit": "커밋",
+  "fleet.update.col.node": "노드",
+  "fleet.update.col.progress": "진행",
+  "fleet.update.col.version": "버전",
+  "fleet.update.confirm.chief": "자기 노드를 업데이트하면 관리 화면이 일시적으로 끊어집니다. 계속하시겠습니까?",
+  "fleet.update.confirm.restart": "선택한 노드를 재시작합니다. 계속하시겠습니까?",
+  "fleet.update.confirm.update": "선택한 노드를 업데이트합니다. git pull 후 재시작됩니다. 계속하시겠습니까?",
+  "fleet.update.no_selection": "노드를 선택해 주세요",
+  "fleet.update.placeholder": "업데이트 탭은 Phase 4에서 구현됩니다.",
+  "fleet.update.source": "소스:",
+  "fleet.warning.multi_chief": "여러 치프 노드가 감지되었습니다. 충돌하는 치프 노드를 재시작하세요.",
+  "genai.chat_delete_confirm": "Delete this conversation?",
+  "genai.chat_image_only": "Image-only messages are not supported",
+  "genai.chat_no_conversations": "No conversations",
+  "genai.chat_rename_prompt": "Enter a conversation name",
+  "genai.chat_search_sources": "Search sources",
+  "grid": {
+    "auto": "자동",
+    "col_fixed": "열 (고정)",
+    "col_unit": "열",
+    "count_prefix": "표시: ",
+    "count_unit": "건 / ",
+    "image_only": " / 이미지만",
+    "size_hint": " / 크기는 자동 모드에서 적용"
+  },
+  "grouping": {
+    "btn_archive": "아카이브",
+    "btn_files": "파일",
+    "btn_folders": "폴더",
+    "btn_zip": "ZIP",
+    "count_folders": "{count}개 폴더 발견",
+    "count_zips": "{count}개 ZIP 아카이브 발견",
+    "rebuild": "그룹 재구성",
+    "rebuilt": "그룹 재구성 완료: {folders}개 폴더, {zips}개 ZIP",
+    "summary": "그룹화: {visible} / {total}",
+    "summary_folders": "폴더: {visible} ({total}개 파일)",
+    "summary_zips": "ZIP: {visible} ({total}개 파일)"
+  },
+  "input_hint": {
+    "artist": "Esc: 포커스 해제 | Alt+0/$: 줄 시작/끝 | Ctrl+W: 단어 삭제 | ?: 도움말",
+    "condition": "Esc: 포커스 해제 | /: 검색으로 | ?: 단축키 목록",
+    "default": "/: 검색 | Esc: 닫기 | ?: 키보드 도움말",
+    "inPrompt": "Esc: 포커스 해제 | Alt+W/B: 단어 이동 | Ctrl+U: 전체 지우기 | ?: 도움말",
+    "tagQuery": "Esc: 포커스 해제 | /: 검색으로 | Alt+W/B: 단어 이동 | Ctrl+K: 끝까지 삭제 | ?: 도움말"
+  },
+  "inspect": {
+    "conv_expand": "Dynamic Prompt 확장 결과",
+    "conv_nai_sd": "NAI → SD 변환 결과",
+    "conv_sd_nai": "SD → NAI 변환 결과",
+    "conv_warn_already_nai": "입력이 이미 NAI 형식인 것 같습니다",
+    "conv_warn_already_sd": "입력이 이미 SD 형식인 것 같습니다",
+    "conv_warn_mixed": "입력에 NAI와 SD 구문이 혼합되어 있습니다",
+    "copied": "복사됨",
+    "copy": "복사",
+    "error": "오류",
+    "fmt_a1111": "형식: A1111 (Stable Diffusion)",
+    "fmt_json": "형식: JSON",
+    "fmt_plain": "형식: 일반 텍스트",
+    "negative": "네거티브",
+    "network_error": "네트워크 오류",
+    "open_in_sim": "Prompt Simulator에서 열기",
+    "output": "출력",
+    "parse_error": "구문 분석 오류",
+    "positive": "포지티브",
+    "resolution": "해상도",
+    "sim_choices": "선택지",
+    "sim_combinations": "{count}개 조합",
+    "sim_depth": "깊이",
+    "sim_dp_analyze": "DP 확률 분석",
+    "sim_link": "Prompt Simulator 열기",
+    "sim_link_text": "Prompt Simulator 열기",
+    "sim_pick_n": "{total}개 중 {n}개 선택",
+    "sim_probability": "확률",
+    "sim_syntax": "구문",
+    "sim_token": "토큰",
+    "sim_weight": "가중치",
+    "sim_weight_calc": "강조 가중치 계산기",
+    "tag_count": "태그 수",
+    "wh_not_found": "크기: WxH 또는 width/height 패턴을 찾을 수 없습니다",
+    "wh_swap_result": "W/H 교환 결과",
+    "zip_select": "ZIP 내 이미지"
+  },
+  "kb_help": {
+    "basic": {
+      "close_or_blur": "닫기 / 포커스 해제",
+      "focus_search": "검색 입력에 포커스 (어디서든)",
+      "run_search": "검색 실행",
+      "screen_lock": "화면 잠금 (PIN 설정 시)",
+      "title": "기본",
+      "toggle_help": "이 도움말 표시/숨기기"
+    },
+    "edit": {
+      "delete_prev_word": "이전 단어 삭제",
+      "kill_line": "줄 전체 삭제",
+      "kill_to_end": "커서부터 줄 끝까지 삭제",
+      "title": "텍스트 편집 (Emacs 스타일)"
+    },
+    "existing": {
+      "open_condition_menu": "조건 추가 메뉴 열기",
+      "regex_cheatsheet": "정규식 치트시트 열기",
+      "title": "기존 단축키",
+      "toggle_regex": "정규식 ON/OFF 전환"
+    },
+    "footer": {
+      "close": "닫기",
+      "hint_line": "힌트: 필드에 포커스하면 하단에 도움말이 표시됩니다",
+      "or": "또는",
+      "regex_intro_link": "정규식이란? (초보자 소개)"
+    },
+    "move": {
+      "delete_char": "문자 삭제",
+      "line_end": "줄 끝으로 이동",
+      "line_start": "줄 시작으로 이동",
+      "next_word": "다음 단어로 이동",
+      "prev_word": "이전 단어로 이동",
+      "title": "커서 이동 (Vim 스타일)"
+    },
+    "regex_intro": {
+      "desc": "세 가지 예시만으로도 검색이 훨씬 쉬워집니다",
+      "open": "소개 열기",
+      "title": "정규식이 처음이신가요?"
+    },
+    "title": "키보드 단축키"
+  },
+  "keyboard": {
+    "close": "닫기",
+    "guide": {
+      "autoplay": "자동 재생",
+      "close": "닫기",
+      "copy": "복사",
+      "dismiss": "키보드 가이드 숨기기",
+      "dismiss_toast": "H를 누르면 다시 표시됩니다",
+      "filmstrip_nav": "이전/다음 파일 (미디어에서도 작동)",
+      "filmstrip_toggle": "필름스트립",
+      "focus_move": "포커스 이동",
+      "media_controls": "미디어",
+      "modal_label": "모달",
+      "move": "이동",
+      "open": "열기",
+      "prev_next": "이전/다음",
+      "prev_next_or_seek": "이전/다음 (미디어에서 5초 탐색)",
+      "results_label": "결과",
+      "scroll": "스크롤",
+      "speed": "속도",
+      "spread_toggle": "펼침 보기",
+      "to_search": "검색으로",
+      "toggle_btn": "키보드 가이드 (H)",
+      "volume": "볼륨"
+    },
+    "help": "도움말",
+    "prev_next": "이전/다음 이미지"
+  },
+  "lan_cowork.import.done": "가져오기 완료",
+  "lan_cowork.import.partial": "일부 파일을 가져오지 못했습니다",
+  "lan_cowork.import.err.no_folder": "가져오기 폴더를 지정하세요",
+  "lan_cowork.import.err.no_peer": "가져올 피어를 선택하세요",
+  "lan_cowork.import.error": "가져오기 실패",
+  "lan_cowork.import.folder": "가져오기 폴더",
+  "lan_cowork.import.folder.pick_failed": "Failed to choose folder",
+  "lan_cowork.import.mode": "모드",
+  "lan_cowork.import.mode.diff": "차분",
+  "lan_cowork.import.mode.full": "전체",
+  "lan_cowork.import.opt.favorites": "즐겨찾기 포함",
+  "lan_cowork.import.opt.merge": "메타데이터 병합（해시 일치 시）",
+  "lan_cowork.import.peer": "원본 피어",
+  "lan_cowork.import.running": "가져오는 중...",
+  "lan_cowork.import.start": "가져오기 시작",
+  "lan_cowork.import.timeout": "가져오기 시간 초과",
+  "lan_cowork.import.title": "원격 가져오기",
+  "lan_cowork.peers.discover_error": "피어 검색 실패",
+  "lan_cowork.peers.empty": "연결된 피어가 없습니다",
+  "lan_cowork.peers.extension_disabled": "LAN Cowork 확장 기능이 비활성화되어 있습니다. 확장 기능 관리에서 활성화한 뒤 서버를 다시 시작하세요.",
+  "lan_cowork.peers.offline": "오프라인",
+  "lan_cowork.peers.online": "온라인",
+  "lan_cowork.peers.pair_btn": "Pair request",
+  "lan_cowork.peers.pair_pin_prompt": "Enter the PIN shown on the other side.",
+  "lan_cowork.peers.pair_request_error": "Failed to request pairing",
+  "lan_cowork.peers.pair_request_sent": "Approve on the other side, then enter the displayed PIN.",
+  "lan_cowork.peers.pair_requesting": "Requesting...",
+  "lan_cowork.peers.pair_success": "Pairing completed",
+  "lan_cowork.peers.pair_verify_error": "PIN verification failed",
+  "lan_cowork.peers.paired": "Paired",
+  "lan_cowork.peers.refresh": "새로 고침",
+  "lan_cowork.peers.remove_btn": "Remove",
+  "lan_cowork.peers.remove_confirm": "Remove this peer?",
+  "lan_cowork.peers.remove_error": "Failed to remove peer",
+  "lan_cowork.peers.remove_success": "Removed",
+  "lan_cowork.peers.title": "연결된 피어",
+  "lan_cowork.peers.unpaired": "Unpaired",
+  "lan_cowork.pin_modal.error.empty": "Please enter PIN",
+  "lan_cowork.title": "LAN Cowork",
+  "lc_peers": {
+    "pair_modal": {
+      "close": "닫기"
+    },
+    "sse": {
+      "paired": "장치가 페어링되었습니다",
+      "pairing_request": "페어링 요청을 받았습니다"
+    }
+  },
+  "lc_peers.fleet.enable_notifications": "알림 활성화",
+  "lc_peers.nav.back": "← LAN Cowork",
+  "lc_peers.page_title": "피어 관리 - LAN Cowork",
+  "lc_peers.pair_modal.cancel": "취소",
+  "lc_peers.pair_modal.confirm": "확인",
+  "lc_peers.pair_modal.done": "닫기",
+  "lc_peers.pair_modal.error.generic": "오류가 발생했습니다",
+  "lc_peers.pair_modal.error.unknown": "원격 노드의 상태를 확인할 수 없습니다.",
+  "lc_peers.pair_modal.paired_toast": "페어링 완료",
+  "lc_peers.pair_modal.pin.error.empty": "PIN을 입력해 주세요",
+  "lc_peers.pair_modal.pin.error.invalid": "PIN이 올바르지 않습니다",
+  "lc_peers.pair_modal.pin.error.retryable": "PIN이 올바르지 않습니다. {attempts}회 남았습니다.",
+  "lc_peers.pair_modal.pin.error.attempts_exhausted": "PIN 시도 횟수가 최대에 도달했습니다.",
+  "lc_peers.pair_modal.repair_steps": "페어링을 다시 시작하고 다른 노드의 관리자에게 새 요청을 승인받으세요.",
+  "lc_peers.pair_modal.pin.label": "PIN",
+  "lc_peers.pair_modal.pin.placeholder": "••••••",
+  "lc_peers.pair_modal.step1.msg": "페어링 요청을 보내는 중...",
+  "lc_peers.pair_modal.step2.msg": "상대 호스트에서 PIN을 승인한 후 표시된 PIN을 입력해 주세요.",
+  "lc_peers.pair_modal.step3.msg": "페어링이 완료되었습니다.",
+  "lc_peers.pair_modal.title": "페어링",
+  "lc_peers.peers.col.actions": "작업",
+  "lc_peers.peers.col.address": "주소",
+  "lc_peers.peers.col.name": "피어 이름",
+  "lc_peers.peers.col.status": "상태",
+  "lc_peers.peers.col.token_expires": "토큰 만료일",
+  "lc_peers.peers.empty": "연결된 피어가 없습니다",
+  "lc_peers.peers.load_error": "토큰 목록을 가져오지 못했습니다",
+  "lc_peers.peers.pair_request_error": "페어링 요청에 실패했습니다",
+  "lc_peers.peers.refresh": "새로 고침",
+  "lc_peers.peers.revoke": "폐기",
+  "lc_peers.peers.revoke_confirm": "이 피어의 토큰을 폐기하시겠습니까?",
+  "lc_peers.peers.revoke_error": "폐기에 실패했습니다",
+  "lc_peers.peers.revoked": "토큰을 폐기했습니다",
+  "lc_peers.peers.status.auth_lost": "재페어링 필요",
+  "lc_peers.peers.status.paired": "페어링됨",
+  "lc_peers.peers.title": "연결된 피어 목록",
+  "lc_peers.requests.approve_error": "승인에 실패했습니다",
+  "lc_peers.requests.col.actions": "작업",
+  "lc_peers.requests.col.peer_name": "피어 이름",
+  "lc_peers.requests.col.requester": "요청자",
+  "lc_peers.requests.col.time": "수신 시각",
+  "lc_peers.requests.empty": "승인 대기 중인 페어링 요청이 없습니다",
+  "lc_peers.requests.load_error": "요청 목록을 가져오지 못했습니다",
+  "lc_peers.requests.refresh": "새로 고침",
+  "lc_peers.requests.reject_error": "거절에 실패했습니다",
+  "lc_peers.requests.rejected": "거절했습니다",
+  "lc_peers.requests.title": "승인 대기 중인 페어링 요청",
+  "lc_peers.title": "피어 관리",
+  "llm_router": {
+    "aliases_section": "라우팅 별칭",
+    "backends_section": "백엔드",
+    "col": {
+      "actions": "작업",
+      "alias": "별칭",
+      "alias_name": "별칭",
+      "base_url": "Base URL",
+      "last_seen": "마지막 확인",
+      "models": "모델 수",
+      "physical": "물리적 모델",
+      "slo": "SLO",
+      "status": "상태"
+    },
+    "disable": "비활성화",
+    "disabled_badge": "[비활성화됨]",
+    "enable": "활성화",
+    "loading": "로딩 중...",
+    "no_aliases": "설정된 라우팅 별칭이 없습니다",
+    "no_backends": "등록된 백엔드가 없습니다",
+    "refresh": "새로고침",
+    "refresh_all": "전체 새로고침",
+    "refresh_failed": "새로고침 실패",
+    "refreshed": "새로고침 완료",
+    "source": {
+      "mdns": "mDNS",
+      "static": "정적"
+    },
+    "status": {
+      "error": "오류",
+      "ok": "정상",
+      "unknown": "알 수 없음",
+      "unreachable": "연결 불가"
+    },
+    "summary": {
+      "aliases": "라우팅 별칭",
+      "backends": "백엔드 수",
+      "enabled": "활성화됨",
+      "models": "총 모델 수"
+    },
+    "title": "LLM Router",
+    "toggle_failed": "활성화/비활성화 전환 실패"
+  },
+  "mesh_inference": {
+    "action": {
+      "local_only": "로컬 전용 모드",
+      "local_only_tooltip": "로컬에 사용 가능한 추론 유형이 없습니다",
+      "refresh": "새로고침"
+    },
+    "col": {
+      "peer": "피어"
+    },
+    "empty": "연결된 피어가 없습니다.",
+    "subtitle": "피어별, 추론 유형별로 분산 추론의 활성화/비활성화를 전환합니다.",
+    "title": "분산 추론 매트릭스",
+    "toast": {
+      "load_failed": "로딩 실패",
+      "refreshed": "새로고침 완료",
+      "save_failed": "저장 실패",
+      "saved": "저장 완료"
+    },
+    "type": {
+      "clip": "clip",
+      "tagger": "tagger",
+      "whisper": "whisper",
+      "yolo": "yolo"
+    }
+  },
+  "meta": {
+    "checkpoint_search": "체크포인트 검색",
+    "click_open_dir": "클릭하여 디렉터리 열기",
+    "click_to_copy": "클릭하여 복사",
+    "copy_original": "복사",
+    "download_json": "다운로드",
+    "negative_label": "네거티브",
+    "no_metadata": "메타데이터 없음",
+    "parameters_title": "파라미터",
+    "parse_success": "구문 분석 성공",
+    "positive_label": "포지티브",
+    "seed_copy": "Seed 복사"
+  },
+  "nav": {
+    "back_title": "이전 위치로 돌아가기",
+    "bottom_aria": "맨 아래로 이동",
+    "bottom_title": "맨 아래로 이동 (End)",
+    "llm_router": "LLM Router",
+    "mesh_inference": "분산 추론",
+    "top_aria": "맨 위로 이동",
+    "top_title": "맨 위로 이동 (Home)"
+  },
+  "nav.lan_cowork": "LAN Cowork",
+  "path": {
+    "copy_label": "경로 ",
+    "copy_label_filename": "파일명 ",
+    "copy_label_zip": "ZIP 경로 ",
+    "copy_title": "경로 복사",
+    "copy_title_filename": "파일명 복사",
+    "copy_title_zip": "ZIP 경로 복사",
+    "label": "경로:"
+  },
+  "period": {
+    "12h": "12시간",
+    "24h": "24시간",
+    "3h": "3시간",
+    "8h": "8시간",
+    "custom": "사용자 지정",
+    "days3": "3일",
+    "days5": "5일",
+    "half_year": "6개월",
+    "last_month": "지난달",
+    "month1": "1개월",
+    "month2": "2개월",
+    "month3": "3개월",
+    "month9": "9개월",
+    "week1": "1주",
+    "week2": "2주",
+    "year1": "1년",
+    "yesterday": "어제까지"
+  },
+  "presets": {
+    "deleted": "프리셋 삭제됨: {name}",
+    "empty": "저장된 프리셋이 없습니다",
+    "loaded": "프리셋 불러옴: {name}",
+    "nothing_to_save": "저장할 검색 상태가 없습니다",
+    "rename_prompt": "새 프리셋 이름:",
+    "renamed": "프리셋 이름을 변경했습니다: {name}",
+    "save_prompt": "프리셋 이름:",
+    "saved": "프리셋 저장됨: {name}"
+  },
+  "prompt": {
+    "badge": {
+      "embedding": "Textual Inversion (Embedding)",
+      "lora_weight": "LoRA 가중치: {weight}",
+      "novelai_weight": "NovelAI 가중치: {weight}",
+      "paren_weight": "가중치: {weight} (괄호 {count}개)",
+      "random_choice": "랜덤 선택",
+      "weight": "가중치: {weight}"
+    }
+  },
+  "prompt_library.insert_as_is": "Insert as-is",
+  "prompt_library.insert_cancel": "Cancel",
+  "prompt_library.insert_convert_and_insert": "Convert and insert",
+  "prompt_library.insert_syntax_mismatch_body": "The selected prompt appears to use a different syntax from the current bridge. What do you want to do?",
+  "prompt_library.insert_syntax_mismatch_title": "Syntax mismatch detected",
+  "qr": {
+    "content_label": "QR 내용:",
+    "copy_text": "텍스트 복사",
+    "info": {
+      "compressing": "⚠️ 너무 길어서 텍스트를 압축합니다",
+      "meta_len": "📦 {count}자",
+      "negative_len": "🚫 {count}자",
+      "positive_len": "📝 {count}자",
+      "too_long": "⚠️ 텍스트가 QR에 비해 너무 깁니다. 텍스트 복사를 이용해 주세요.",
+      "url": "🔗 공유 URL"
+    },
+    "load_failed": "QR 라이브러리를 불러오지 못했습니다",
+    "mode": {
+      "meta": "전체 메타데이터 (JSON)",
+      "negative": "네거티브 프롬프트",
+      "positive": "포지티브 프롬프트",
+      "url": "공유 URL",
+      "url_local_disabled": "🚫 URL (localhost)"
+    },
+    "no_content": "내용 없음",
+    "save_image": "QR 이미지 저장",
+    "text_too_long": "텍스트가 너무 깁니다",
+    "use_text_copy": "텍스트 복사를 이용해 주세요"
+  },
+  "random": {
+    "empty": "랜덤 표시에 사용할 검색 결과가 없습니다",
+    "opened_one": "랜덤 결과 1건을 열었습니다"
+  },
+  "resolution": {
+    "landscape": "가로 W>=1024 H<=768",
+    "portrait": "세로 W<=768 H>=1024",
+    "square": "정사각형",
+    "square_1024": "1024x1024",
+    "w1024": "W>=1024",
+    "w512": "W>=512",
+    "w768": "W>=768"
+  },
+  "result": {
+    "ai_analysis": "AI 분석",
+    "copy_id_title": "파일 ID 복사",
+    "copy_prompt_title": "프롬프트 복사",
+    "detail_label": "상세",
+    "negative_label": "네거티브:",
+    "positive_label": "포지티브:",
+    "qr_share": "QR 공유",
+    "save_to_library": "라이브러리에 저장",
+    "show_detail_aria": "상세 보기"
+  },
+  "scan": {
+    "banner": {
+      "dismiss": "닫기",
+      "interrupted": "이전 스캔이 중단되었습니다",
+      "resume": "재개",
+      "resume_failed": "재개 실패",
+      "resuming": "스캔 재개 중...",
+      "scroll_top": "맨 위로",
+      "stop": "중지"
+    },
+    "complete_confirm_refresh": "스캔이 완료되었습니다. 결과를 새로고침하시겠습니까?",
+    "complete_label": "✓ 스캔 완료!",
+    "complete_toast": "스캔 완료: {count}개 파일 처리됨",
+    "details": {
+      "processed": "{total}개 파일 처리됨",
+      "progress": "{current} / {total}개 파일"
+    },
+    "failed_label": "✗ 스캔 실패",
+    "failed_toast": "스캔 실패: {error}",
+    "phase": {
+      "counting": "파일 수를 세는 중...",
+      "initializing": "초기화 중...",
+      "scanning": "이미지 스캔 중..."
+    },
+    "start_failed": "스캔 시작 실패",
+    "time": {
+      "minutes": "{m}분{s}초",
+      "seconds": "{n}초"
+    },
+    "unknown_error": "알 수 없는 오류"
+  },
+  "scheduler": {
+    "action_failed": "작업 실패",
+    "actions": "작업",
+    "active": "활성",
+    "add_dialog_title": "작업 추가",
+    "add_job": "작업 추가",
+    "added_msg": "작업이 추가되었습니다",
+    "cancel": "취소",
+    "delete": "삭제",
+    "delete_confirm": "작업 \"{id}\"을(를) 삭제하시겠습니까?",
+    "deleted_msg": "작업이 삭제되었습니다",
+    "duration": "소요 시간",
+    "error": "오류",
+    "failed": "실패",
+    "field_day": "일",
+    "field_day_of_week": "요일",
+    "field_func": "함수",
+    "field_hour": "시",
+    "field_job_id": "작업 ID",
+    "field_minute": "분",
+    "field_trigger_type": "트리거 유형",
+    "hint_day": "1-31, 쉼표 구분, 또는 *",
+    "hint_dow": "mon-sun, 0-6, 또는 *",
+    "hint_hour": "0-23, 쉼표 구분, 또는 *",
+    "hint_minute": "0-59, 쉼표 구분, 또는 *",
+    "history": "실행 기록",
+    "job_desc_bsky_notification_poll": "Bluesky 알림 폴링",
+    "job_desc_db_backup": "데이터베이스 백업",
+    "job_desc_db_integrity_check": "DB 무결성 검사",
+    "job_desc_db_vacuum": "SQLite VACUUM (공간 회수)",
+    "job_desc_github_issue_poll": "GitHub 이슈 폴링",
+    "job_desc_prune_unused_tags": "미사용 태그 정리",
+    "job_desc_rebuild_groups_index": "그룹 인덱스 재구축",
+    "job_desc_refresh_monthly_stats": "월간 통계 캐시 갱신",
+    "job_desc_thumbnail_cleanup": "썸네일 캐시 정리",
+    "job_id": "작업 ID",
+    "jobs": "작업 목록",
+    "loading": "로딩 중...",
+    "next_run": "다음 실행",
+    "no_history": "실행 기록이 없습니다",
+    "no_jobs": "등록된 작업이 없습니다",
+    "pause": "일시 중지",
+    "paused": "일시 중지",
+    "paused_msg": "작업이 일시 중지되었습니다",
+    "refresh": "새로고침",
+    "result": "결과",
+    "resume": "재개",
+    "resumed_msg": "작업이 재개되었습니다",
+    "running": "실행 중",
+    "status": "스케줄러 상태",
+    "status_label": "상태",
+    "stopped": "중지됨",
+    "submit": "추가",
+    "success": "성공",
+    "time": "실행 시간",
+    "title": "작업 스케줄러",
+    "trigger": "트리거",
+    "trigger_now": "지금 실행",
+    "triggered": "작업이 즉시 실행 큐에 추가되었습니다",
+    "job_desc_thumbnail_integrity_check": "썸네일 무결성 검사(오래되거나 불일치하는 썸네일 제거)"
+  },
+  "sd_bridge": {
+    "inserted": "삽입했습니다"
+  },
+  "sd_nai_convert": {
+    "copied": "복사했습니다"
+  },
+  "search": {
+    "count": {
+      "normal": "{count}건 발견",
+      "partial": "{shown} / {total}건",
+      "prompt_match": "{count}건 (프롬프트 일치)",
+      "suffix_results": "건",
+      "unit": "{count}",
+      "zero": "0건"
+    },
+    "error": {
+      "failed": "검색 실패: {message}",
+      "generic": "검색 중 오류가 발생했습니다",
+      "network": "서버에 연결할 수 없습니다. 서버가 실행 중인지 확인해 주세요.",
+      "regex": "정규식 오류: {error}"
+    },
+    "export_csv_hint": "{count}건의 결과를 CSV로 내보내기 (\"+조건 추가\" 메뉴에서 한도 변경 가능)",
+    "live": {
+      "title": "라이브 검색 (자동)",
+      "toast_off": "라이브 검색: OFF",
+      "toast_on": "라이브 검색: ON"
+    },
+    "loading_more": "로딩 중...",
+    "partial_warning": "표시 한도({limit})에 도달했습니다. 조건을 좁히거나 표시 수를 늘려 모든 결과를 확인하세요.",
+    "path_tip": {
+      "message": "태그 이름과 파일/폴더 이름을 모두 검색합니다. 정확한 결과를 위해 검색창에 태그를 입력하고 파일/폴더 이름은 \"조건 추가\" → \"폴더\"에서 지정하세요.",
+      "move_btn": "📂 폴더 검색으로 이동"
+    },
+    "placeholder": {
+      "plain": "예: 1girl, blonde_hair, -nsfw",
+      "regex": "예: 1girl, blue_(hair|eyes)  정규식 태그 검색"
+    },
+    "regex_note": " (정규식 필터 적용)",
+    "regex_warn_confirm": "⚠️ 정규식 검색은 대규모 데이터에서 느릴 수 있습니다.\n계속 검색하시겠습니까?",
+    "state": {
+      "empty_db_hint1": "설정 페이지에서 이미지 폴더를 등록하세요",
+      "empty_db_hint2": "\"스캔 시작\"을 클릭하여 이미지 메타데이터를 가져오세요",
+      "empty_db_hint3": "스캔 후 검색 결과에 이미지가 표시됩니다",
+      "empty_db_message": "설정에서 이미지 폴더를 추가하여 시작하세요",
+      "empty_db_settings_link": "설정 열기",
+      "empty_db_title": "데이터베이스에 이미지가 아직 없습니다",
+      "collection_empty_title": "이 컬렉션에는 아직 아무것도 없습니다",
+      "collection_empty_message": "이미지 오른쪽 아래의 별을 클릭하여 이 컬렉션에 추가할 수 있습니다.",
+      "collection_empty_filtered_message": "이 컬렉션에 검색 조건과 일치하는 이미지가 없습니다. 조건을 줄여보세요.",
+      "empty_title": "조건에 일치하는 이미지가 없습니다",
+      "error_title": "오류가 발생했습니다",
+      "example1": "태그 검색: 1girl, blue eyes (쉼표로 AND 조합)",
+      "example2": "제외: -bad quality (마이너스 접두사)",
+      "example3": "+조건 추가로 모델/날짜 필터 사용",
+      "example4": "정규식: girl.*hair (패턴 일치)",
+      "examples_label": "예시:",
+      "first_message": "태그나 조건을 입력하여 이미지를 검색합니다",
+      "first_title": "검색해 보세요",
+      "hint1": "태그 철자를 확인하세요 (예: 1girl, blue_eyes)",
+      "hint2": "날짜 범위를 넓혀 보세요",
+      "hint3": "정규식 모드에서는 .*keyword.* 로 부분 일치를 시도하세요",
+      "hint4": "조건을 줄여 검색 범위를 넓혀 보세요",
+      "hint_label": "힌트:",
+      "start_prompt": "검색 버튼 또는 Enter를 누르세요",
+      "unknown_error": "알 수 없는 오류"
+    }
+  },
+  "semantic_search.elapsed": "elapsed",
+  "semantic_search.elapsed_suffix": "elapsed",
+  "server_info": {
+    "files": "파일",
+    "load_failed": "서버 정보를 불러오지 못했습니다",
+    "startup_initializing": "서버 초기화 중",
+    "startup_migration": "시작 시 DB 업그레이드",
+    "startup_stage_backfill": "기존 레코드의 검색 열을 업데이트하는 중입니다.",
+    "startup_stage_backup": "업그레이드 전 안전 백업을 생성하는 중입니다.",
+    "startup_stage_backup_reused": "변경되지 않은 기존 백업을 재사용하는 중입니다.",
+    "startup_stage_backup_skipped": "대용량 DB로 인해 백업을 건너뜁니다.",
+    "startup_stage_file_cache": "파일 메타데이터 캐시를 구성하는 중입니다. 곧 준비됩니다.",
+    "startup_stage_finalizing": "업그레이드 완료. 시작을 마무리하는 중…",
+    "startup_stage_migrate": "데이터베이스 스키마 업데이트를 적용하는 중입니다.",
+    "startup_stage_prepare": "업그레이드 확인을 준비하는 중입니다.",
+    "startup_stage_rebuild_fts": "새 스키마에 대한 검색 인덱스를 재구성하는 중입니다.",
+    "startup_upgrade_in_progress": "데이터베이스 업그레이드 진행 중",
+    "startup_upgrade_wait": "대용량 데이터베이스의 경우 몇 분이 걸릴 수 있습니다.",
+    "tags": "태그"
+  },
+  "settings": {
+    "apikeys_created": "생성일:",
+    "apikeys_empty": "아직 생성된 API 키가 없습니다.",
+    "apikeys_full_access": "전체 액세스",
+    "apikeys_last_used": "마지막 사용:",
+    "apikeys_revoke": "이 키 폐기",
+    "apikeys_toast_copied": "API 키가 복사되었습니다",
+    "apikeys_toast_create_failed": "API 키 생성 실패",
+    "apikeys_toast_created": "API 키가 생성되었습니다",
+    "apikeys_toast_mcp_copied": "MCP 스니펫이 복사되었습니다",
+    "apikeys_toast_revoke_failed": "API 키 폐기 실패",
+    "apikeys_toast_revoked": "API 키가 폐기되었습니다",
+    "blocker_local_only": "이 작업은 로컬 머신에서만 허용됩니다",
+    "blocker_pin_not_active": "PIN 인증이 활성화되어 있지 않습니다 (재시작 필요)",
+    "blocker_pin_session": "PIN 인증 세션이 필요합니다",
+    "blocker_restart_disabled": "재시작 API가 비활성화되어 있습니다 (--allow-restart 또는 TAGDB_ALLOW_RESTART=1)",
+    "blocker_token_missing": "원격 재시작 토큰이 설정되지 않았습니다",
+    "conditions_not_met": "조건 미충족",
+    "container_nav_continuous": "다음 폴더/ZIP으로 계속",
+    "container_nav_continuous_hint": "뷰어에서 끝에 도달하면 인접한 폴더/ZIP으로 이동합니다",
+    "container_nav_order": "그룹 탐색 순서",
+    "container_nav_order_hint": "폴더/ZIP 간 이동 순서",
+    "container_nav_order_name": "이름 순",
+    "container_nav_order_result": "검색 결과 순",
+    "database": "데이터베이스",
+    "delete": "삭제",
+    "disabled": "비활성화",
+    "enabled": "활성화",
+    "env_var": "환경 변수",
+    "error": "오류",
+    "ext_disable": "비활성화",
+    "ext_disabled": "비활성화됨",
+    "ext_disabled_msg": "확장 기능이 비활성화되었습니다.",
+    "ext_enable": "활성화",
+    "ext_enabled": "활성화됨",
+    "ext_enabled_msg": "확장 기능이 활성화되었습니다.",
+    "ext_restart_required": "적용하려면 재시작이 필요합니다.",
+    "ext_toggle_failed": "확장 기능 전환 실패",
+    "failed": "실패",
+    "files_tags": "파일 / 태그",
+    "json_saved": "✅ JSON 저장됨",
+    "lan_public": "LAN 공개",
+    "load_failed": "불러오기 실패",
+    "local_only": "로컬 전용",
+    "lock_failed": "잠금 실패",
+    "meta_breakdown": "메타데이터 분류",
+    "modal_kb_guide": "뷰어에 키보드 가이드 표시",
+    "modal_kb_guide_hint": "모달 뷰어 하단에 키보드 단축키 힌트를 표시합니다",
+    "network": "네트워크",
+    "no_extensions": "설치된 확장 기능이 없습니다.",
+    "no_roots": "등록된 폴더가 없습니다.",
+    "none_detected": "감지되지 않음",
+    "not_set": "미설정",
+    "path_updated": "경로가 업데이트되었습니다",
+    "pin_active": "PIN 활성화됨",
+    "pin_disabled": "PIN 비활성화됨",
+    "pin_pending": "PIN 설정됨 (재시작 필요)",
+    "pin_source": "PIN 소스",
+    "profile_active_badge": "활성",
+    "profile_ago": "전",
+    "profile_create": "프로필 만들기",
+    "profile_create_failed": "생성 실패",
+    "profile_days": "일",
+    "profile_delete": "삭제",
+    "profile_delete_confirm": "프로필 \"{label}\"을(를) 삭제하시겠습니까? 이 작업은 취소할 수 없습니다.",
+    "profile_delete_failed": "삭제 실패",
+    "profile_desc_prompt": "설명 (선택 사항):",
+    "profile_dup_failed": "복제 실패",
+    "profile_dup_label_prompt": "새 표시 라벨:",
+    "profile_dup_name_prompt": "새 프로필 이름:",
+    "profile_duplicate": "복제",
+    "profile_empty": "구성된 프로필이 없습니다.",
+    "profile_export_failed": "내보내기 실패",
+    "profile_import_exists": "프로필 \"{name}\"이(가) 이미 존재합니다. {count}개 필드가 다릅니다.\n가져오기 모드: full (덮어쓰기) 또는 diff (변경 사항 병합)?",
+    "profile_import_failed": "가져오기 실패",
+    "profile_import_prompt": "QR 프로필 데이터 (JSON)를 붙여넣으세요:",
+    "profile_import_success": "프로필을 성공적으로 가져왔습니다.",
+    "profile_just_now": "방금",
+    "profile_label_prompt": "표시 라벨:",
+    "profile_last_used": "마지막 사용",
+    "profile_name_prompt": "프로필 이름 (영숫자, 하이픈, 밑줄):",
+    "profile_never_used": "사용한 적 없음",
+    "profile_no_desc": "설명 없음",
+    "profile_no_pin": "프로필 관리에는 PIN 인증이 필요합니다. PIN을 설정하고 재시작하세요.",
+    "profile_qr_hint": "아래 데이터를 복사하거나 QR 코드를 스캔하여 다른 인스턴스에서 가져오세요.",
+    "profile_qr_import": "QR 가져오기",
+    "profile_qr_title": "프로필 내보내기",
+    "profile_rename": "이름 변경",
+    "profile_rename_failed": "이름 변경 실패",
+    "profile_rename_prompt": "새 이름:",
+    "profile_switch_back": "새 프로필로 서버가 복구되었습니다. 새로고침 중...",
+    "profile_switch_btn": "전환",
+    "profile_switch_confirm": "프로필 \"{label}\"(으)로 전환하시겠습니까? 서버가 재시작됩니다.",
+    "profile_switch_failed": "프로필 전환 실패",
+    "profile_switch_sending": "프로필 전환 요청 전송 중...",
+    "profile_switch_timeout": "프로필 전환 요청이 전송되었지만 90초 이내에 서버가 응답하지 않았습니다.",
+    "profile_switch_waiting": "프로필 전환이 수락되었습니다. 서버가 복구되길 기다리는 중...",
+    "profile_toggle_fav": "즐겨찾기 전환",
+    "recursive_scan": "재귀 스캔",
+    "remote_restart_off": "원격 재시작: OFF",
+    "remote_restart_on": "원격 재시작: ON",
+    "remove_root_confirm": "이 폴더의 등록을 해제하시겠습니까?",
+    "restart_api": "재시작 API",
+    "restart_back": "서버가 복구되었습니다. 새로고침 중...",
+    "restart_confirm": "서버를 재시작하시겠습니까? (몇 초간 접속 불가)",
+    "restart_failed": "재시작 실패",
+    "restart_sending": "재시작 요청 전송 중...",
+    "restart_server": "서버 재시작",
+    "restart_timeout": "재시작 요청이 전송되었지만 90초 이내에 서버가 응답하지 않았습니다.",
+    "restart_waiting": "재시작이 수락되었습니다. 서버가 복구되길 기다리는 중...",
+    "rfs_enum_max": "열거 최대",
+    "rfs_probe_max": "탐색 최대",
+    "rfs_total_max": "전체 최대",
+    "save_failed": "저장 실패",
+    "save_path": "경로 저장",
+    "saved": "✅ 저장됨",
+    "saved_cli_override": "⚠ 저장됨 (CLI --pin이 우선합니다. 적용하려면 시작 옵션을 확인하세요)",
+    "saved_restart_needed": "✅ 저장됨 (적용하려면 재시작 필요)",
+    "saving": "저장 중...",
+    "screen_lock": "화면 잠금",
+    "security": "보안",
+    "source": "소스",
+    "toggle_root": "활성화/비활성화",
+    "token_not_set": "토큰: 미설정",
+    "token_set": "토큰: 설정됨",
+    "unit_hours": "시간",
+    "unit_min": "분",
+    "unit_minutes": "분",
+    "unit_sec": "초",
+    "unknown": "알 수 없음",
+    "uptime": "가동 시간",
+    "version": "버전"
+  },
+  "settings.bitwarden_desc": "bw CLI를 통해 Bitwarden에서 시크릿을 동적으로 가져옵니다. Bitwarden CLI 설치 및 잠금 해제가 필요합니다.",
+  "settings.bitwarden_title": "Bitwarden CLI",
+  "settings.bsky_auto_dismiss_follow": "팔로우 자동 숨김",
+  "settings.bsky_auto_dismiss_like": "좋아요 자동 숨김",
+  "settings.bsky_auto_dismiss_repost": "리포스트 자동 숨김",
+  "settings.bsky_auto_respond": "자동 응답 활성화",
+  "settings.bsky_monitor_desc": "Bluesky 멘션, 답글 및 기타 알림을 모니터링합니다. 분류 기준과 자동 응답 템플릿을 설정할 수 있습니다.",
+  "settings.bsky_monitor_title": "Bluesky 모니터",
+  "settings.bsky_notify_connect": "MCP 연결 시 알림",
+  "settings.bsky_poll_interval": "폴링 간격 (분)",
+  "settings.bsky_poll_now": "지금 폴링",
+  "settings.bsky_polling": "폴링 중...",
+  "settings.bsky_response_mention": "멘션 응답",
+  "settings.bsky_response_reply": "답글 응답",
+  "settings.bsky_response_title": "자동 응답 템플릿",
+  "settings.bsky_save_failed": "모니터 설정 저장에 실패했습니다",
+  "settings.bsky_save_monitor": "모니터 설정 저장",
+  "settings.bsky_saved": "모니터 설정이 저장되었습니다",
+  "settings.bsky_triage_mention": "멘션",
+  "settings.bsky_triage_quote": "인용",
+  "settings.bsky_triage_reply": "답글",
+  "settings.bsky_triage_title": "분류 프롬프트",
+  "settings.sns_bluesky_title": "Bluesky",
+  "settings.theme_applied": "Theme applied:",
+  "settings.theme_click_to_apply": "Click to apply",
+  "settings.theme_hint": "Click a theme to apply it instantly.",
+  "settings_schema.agent_safety_budget_preset": "Budget 프리셋",
+  "settings_schema.agent_safety_circuit_breaker_cooldown_seconds": "Circuit Breaker 쿨다운 (초)",
+  "settings_schema.agent_safety_circuit_breaker_enabled": "Circuit Breaker 활성화",
+  "settings_schema.agent_safety_circuit_breaker_error_rate_threshold": "오류율 임계값 (0.0-1.0)",
+  "settings_schema.agent_safety_circuit_breaker_max_actions_per_minute": "분당 최대 작업 수",
+  "settings_schema.agent_safety_circuit_breaker_max_consecutive_errors": "최대 연속 오류 횟수",
+  "settings_schema.agent_safety_circuit_breaker_max_identical_consecutive": "동일 호출 최대 연속 횟수",
+  "settings_schema.agent_safety_circuit_breaker_max_same_tool_per_minute": "동일 도구 분당 최대 횟수",
+  "settings_schema.ai_analysis_api_key": "Anthropic (Claude) API 키",
+  "settings_schema.ai_analysis_openai_api_key": "OpenAI API 키",
+  "settings_schema.ai_analysis_openai_compat_api_key": "OpenAI Compatible API 키",
+  "settings_schema.archive_cleanup_llm_api_key": "Archive Cleanup Anthropic API 키",
+  "settings_schema.archive_cleanup_llm_openai_api_key": "Archive Cleanup OpenAI API 키",
+  "settings_schema.archive_cleanup_llm_openai_compat_api_key": "Archive Cleanup OpenAI Compat API 키",
+  "settings_schema.archive_throttle_ms": "아카이브 스로틀 (ms)",
+  "settings_schema.backup_backup_dir": "백업 디렉터리",
+  "settings_schema.backup_backup_on_scan_complete": "스캔 완료 시 백업",
+  "settings_schema.backup_cooldown_minutes": "쿨다운 (분)",
+  "settings_schema.backup_enabled": "자동 백업 활성화",
+  "settings_schema.backup_max_generations": "최대 세대 수",
+  "settings_schema.backup_periodic_interval_hours": "정기 백업 간격 (시간)",
+  "settings_schema.brace_choice": "중괄호 선택",
+  "settings_schema.compute_hash": "pHash 계산",
+  "settings_schema.direct_prompt_convert": "프롬프트 직접 변환",
+  "settings_schema.enable_fts": "전문 검색 (FTS5) 활성화",
+  "settings_schema.extensions_builtin-nai-bridge_api_token": "NovelAI API 토큰",
+  "settings_schema.extract_a1111": "A1111 메타데이터 추출",
+  "settings_schema.extract_comfyui": "ComfyUI 메타데이터 추출",
+  "settings_schema.lowercase_tags": "태그 소문자화",
+  "settings_schema.preserve_templates": "템플릿 유지",
+  "settings_schema.server_allow_remote_restart": "원격 재시작 API 활성화",
+  "settings_schema.server_allow_restart": "재시작 API 활성화",
+  "settings_schema.server_host": "바인드 호스트",
+  "settings_schema.server_lan": "LAN 접근 활성화",
+  "settings_schema.server_pin": "PIN 인증 코드",
+  "settings_schema.server_pin_boss_login_ui": "보스 로그인 UI",
+  "settings_schema.server_port": "포트 번호",
+  "settings_schema.server_quick_lock_enabled": "빠른 잠금 활성화",
+  "settings_schema.server_restart_token": "원격 재시작 토큰",
+  "settings_schema.sns_bluesky_app_password": "Bluesky 앱 비밀번호",
+  "settings_schema.sns_bluesky_handle": "Bluesky 핸들",
+  "settings_schema.sns_post_template": "게시 템플릿",
+  "settings_schema.timezone": "시간대",
+  "settings_schema.ui": "UI 테마 (default/custom)",
+  "settings_schema.video_analysis_enabled": "동영상 분석 활성화",
+  "settings_schema.video_analysis_keyframe_count": "키프레임 수",
+  "settings_schema.video_analysis_scene_threshold": "씬 임계값",
+  "settings_schema.video_analysis_strategy": "키프레임 전략",
+  "settings_schema.webhook_secret": "Webhook 서명 시크릿",
+  "similar.error": "An error occurred",
+  "similar.none_found": "No similar images were found. Run hash calculation first.",
+  "similar.searching": "Searching...",
+  "similar.title": "Similar Images",
+  "stats": {
+    "load_failed": "통계를 불러오지 못했습니다",
+    "no_model_data": "모델 데이터가 없습니다",
+    "no_resolution_data": "해상도 데이터가 없습니다",
+    "period": {
+      "dawn": "새벽 (03-09시)",
+      "day": "낮 (09-15시)",
+      "evening": "저녁 (15-21시)",
+      "night": "심야 (21-03시)"
+    },
+    "personality": {
+      "balanced": {
+        "advice": "유연한 작업 스타일입니다!",
+        "description": "시간에 구애받지 않는 자유로운 크리에이터",
+        "type": "균형형"
+      },
+      "daytime": {
+        "advice": "건강한 리듬을 유지하고 있습니다!",
+        "description": "규칙적인 생활의 크리에이터",
+        "type": "주간형"
+      },
+      "early_bird": {
+        "advice": "훌륭한 생활 습관입니다!",
+        "description": "아침의 집중력을 활용하는 크리에이터",
+        "type": "얼리버드형"
+      },
+      "evening": {
+        "advice": "골든타임을 활용하고 있네요!",
+        "description": "저녁부터 본 실력을 발휘하는 크리에이터",
+        "type": "저녁 집중형"
+      },
+      "night_owl": {
+        "advice": "건강에 유의하세요!",
+        "description": "깊은 밤의 고요함을 사랑하는 크리에이터",
+        "type": "완전 야행성"
+      },
+      "unknown": {
+        "advice": "",
+        "description": "데이터가 부족합니다",
+        "type": "알 수 없음"
+      }
+    }
+  },
+  "story": {
+    "event": {
+      "first_month": {
+        "desc": "이미지 {count}개로 시작",
+        "title": "창작 여정의 시작"
+      },
+      "milestone_100": {
+        "desc": "누적 합계: {total}",
+        "title": "이미지 100개!"
+      },
+      "milestone_100k": {
+        "desc": "누적 합계: {total}",
+        "title": "이미지 100,000개!"
+      },
+      "milestone_10k": {
+        "desc": "누적 합계: {total}",
+        "title": "이미지 10,000개!"
+      },
+      "milestone_1k": {
+        "desc": "누적 합계: {total}",
+        "title": "이미지 1,000개!"
+      },
+      "milestone_2k": {
+        "desc": "누적 합계: {total}",
+        "title": "이미지 2,000개!"
+      },
+      "milestone_500": {
+        "desc": "누적 합계: {total}",
+        "title": "이미지 500개!"
+      },
+      "milestone_50k": {
+        "desc": "누적 합계: {total}",
+        "title": "이미지 50,000개!"
+      },
+      "milestone_5k": {
+        "desc": "누적 합계: {total}",
+        "title": "이미지 5,000개!"
+      },
+      "new_source": {
+        "desc": "{source} 사용 시작",
+        "title": "새로운 도구: {source}"
+      },
+      "peak_month": {
+        "desc": "이미지 {count}개 생성",
+        "title": "가장 생산적인 달"
+      },
+      "productivity_down": {
+        "desc": "지난달 대비 -{percent}%",
+        "title": "조용한 시기"
+      },
+      "productivity_up": {
+        "desc": "지난달 대비 +{percent}%",
+        "title": "생산성 급증"
+      },
+      "quiet_month": {
+        "desc": "이번 달 이미지 {count}개만",
+        "title": "조용한 달"
+      },
+      "tag_diversity": {
+        "desc": "이번 달 고유 태그 {count}개",
+        "title": "창작 다양성 기록"
+      }
+    },
+    "load_failed": "스토리를 불러오지 못했습니다",
+    "no_data": "스토리를 만들기에 충분한 데이터가 아직 없습니다",
+    "on_this_day": "1년 전 오늘 ({date}): 이미지 {count}개 생성됨"
+  },
+  "sweep.card_loading": "로딩 중…",
+  "sweep.card_no_axis": "축 정보 없음",
+  "sweep.card_open_view_btn": "🔎 Sweep 뷰 열기",
+  "sweep.card_others_btn": "🖼️ 이 Sweep의 다른 이미지 표시",
+  "sweep.card_others_empty": "이 폴더에서 일치하는 이미지를 찾을 수 없습니다.",
+  "sweep.card_others_error": "실패: ",
+  "sweep.card_rerun_btn": "🔁 이 Sweep 다시 실행",
+  "sweep.card_rerun_no_seed_btn": "🎲 새 시드로 재실행",
+  "sweep.card_rerun_other_bridge_btn": "다른 브리지에서 재실행",
+  "sweep.card_rerun_with_seed_btn": "🔁 같은 시드로 재실행",
+  "sweep.card_title": "Sweep",
+  "sweep.resume_not_found": "해당 파일에서 Sweep 메타데이터를 찾을 수 없습니다.",
+  "sweep.resume_populated": "Sweep 복원됨. Generate 클릭하여 다시 실행하세요.",
+  "sweep.resume_unknown_param": "Sweep: 이 브리지에서 지원하지 않는 매개변수: ",
+  "sweep.resume_wrong_bridge": "Sweep이 다른 브리지에서 실행됨: ",
+  "tags.add_tag": "Add tag",
+  "toast": {
+    "checkpoint_search": "체크포인트 검색: {model}",
+    "conditions_cleared": "모든 검색 조건이 초기화되었습니다",
+    "copy_done": "복사됨",
+    "copy_done_strong": "복사 완료!",
+    "copy_failed": "복사 실패",
+    "copy_failed_short": "복사 실패",
+    "copy_with_label": "{label} 복사됨",
+    "dir_open_failed": "디렉터리를 열지 못했습니다",
+    "dir_opened": "디렉터리가 열렸습니다",
+    "error_occurred": "오류가 발생했습니다"
+  },
+  "tools": {
+    "ai_analyzing": "AI 분석 중...",
+    "analyzing": "분석 중...",
+    "analyzing_trends": "프롬프트 트렌드 분석 중...",
+    "api_key_set": "API 키 설정됨",
+    "bulk_register_failed": "일괄 등록 실패",
+    "cache_clear_failed": "캐시 삭제 실패",
+    "cache_cleared": "파일 캐시가 삭제되었습니다",
+    "cancel": "취소",
+    "checking_roots": "등록된 폴더 확인 중...",
+    "clear_cache_confirm": "모든 썸네일 캐시를 삭제하시겠습니까?\n다음 표시 시 다시 생성됩니다.",
+    "click_copy_path": "클릭하여 경로 복사",
+    "click_preview": "클릭하여 미리보기",
+    "compute_hash_confirm": "{type} 해시를 계산합니다.\n파일이 많으면 시간이 걸릴 수 있습니다.",
+    "computing_hashes": "해시 계산 중...",
+    "confirm_db_delete": "데이터베이스에서 {count}개 파일을 삭제합니다.\n(실제 파일은 디스크에 남습니다)",
+    "confirm_hard_delete": "경고: {count}개 파일을 완전히 삭제합니다.\n이 작업은 취소할 수 없습니다!\n\n정말 진행하시겠습니까?",
+    "counting_files": "파일 수를 세는 중...",
+    "db_path": "데이터베이스 경로:",
+    "db_size": "데이터베이스 크기:",
+    "delete": "삭제",
+    "delete_failed": "삭제 실패",
+    "deleted": "삭제됨",
+    "deleting": "삭제 중...",
+    "disable": "비활성화",
+    "drag_to_move": "드래그하여 이동",
+    "dup_groups_found": "중복 그룹 발견",
+    "duplicate": "중복",
+    "enable": "활성화",
+    "enter_folder_path": "폴더 경로를 입력하세요",
+    "enter_search_query": "검색어를 입력하세요",
+    "error": "오류",
+    "exact_match": "정확히 일치",
+    "ext_enabled": "활성화됨",
+    "fetch_failed": "가져오기 실패",
+    "file": "파일",
+    "file_and_perceptual": "파일 + 지각",
+    "file_count": "파일 수:",
+    "file_hash_computed": "파일 해시 계산 완료",
+    "files": "파일",
+    "files_deleted": "{count}개 파일 삭제됨",
+    "folder_dialog_failed": "폴더 선택 대화상자를 열 수 없습니다.\n경로를 직접 입력해 주세요.",
+    "force_rescan": "강제 재스캔 (모든 파일 재분석)",
+    "frequent_tags": "빈번한 태그:",
+    "group": "그룹",
+    "hash_not_computed": "해시가 계산되지 않았습니다. 먼저 \"해시 계산\"을 실행하세요.",
+    "hash_stats_total": "전체 파일",
+    "include_subfolders": "하위 폴더 포함",
+    "items": "항목",
+    "keep": "유지",
+    "load_failed": "불러오기 실패",
+    "loading": "로딩 중...",
+    "no_analysis_yet": "아직 분석된 파일이 없습니다",
+    "no_duplicates": "중복 항목이 없습니다",
+    "no_extensions": "확장 기능 없음",
+    "no_files_in_db": "데이터베이스에 파일이 없습니다",
+    "no_normalize_needed": "정규화가 필요한 태그가 없습니다",
+    "no_registered_roots": "등록된 폴더 없음",
+    "no_results": "결과 없음",
+    "no_subdirs": "하위 디렉터리 없음",
+    "normalize_confirm": "태그를 정규화하시겠습니까? 이 작업은 취소할 수 없습니다.",
+    "normalize_items": "정규화할 항목",
+    "normalizing": "정규화 중...",
+    "normalizing_tags": "태그 정규화 중...",
+    "open_detail_tab": "새 탭에서 상세 열기",
+    "perceptual": "지각",
+    "phash_computed": "지각 해시 계산 완료",
+    "phash_not_computed": "지각 해시가 계산되지 않았습니다. 먼저 \"해시 계산\"을 실행하세요.",
+    "preparing": "준비 중...",
+    "processed_files": "처리된 파일:",
+    "prompt_trends": "프롬프트 트렌드 분석",
+    "recommendations": "추천:",
+    "register_all": "모두 config.json에 등록",
+    "register_failed": "등록 실패",
+    "register_to_config": "config.json에 등록",
+    "remove_root_confirm": "이 폴더의 등록을 해제하시겠습니까? (실제 파일은 삭제되지 않습니다)",
+    "rescan": "재스캔",
+    "rescan_all": "전체 재스캔",
+    "rescanning_all": "모든 폴더를 재스캔 중...",
+    "roots_drag_hint": "드래그하여 정렬 | Shift+↑↓로 이동 | 순서는 폴더 정렬에 영향",
+    "same_size": "동일 크기",
+    "save_failed": "저장 실패",
+    "saved": "저장됨",
+    "scan_all_complete": "모든 폴더 스캔 완료",
+    "scan_complete": "스캔 완료",
+    "scanning": "스캔 중...",
+    "schema_version": "스키마 버전:",
+    "search_zips": "ZIP 파일 내부 검색",
+    "searching": "검색 중...",
+    "select": "선택",
+    "select_all_dupes": "모든 중복 선택",
+    "select_files_to_delete": "삭제할 파일을 선택하세요",
+    "showing_first": "처음 표시",
+    "similar_images": "유사 이미지",
+    "start_scan": "스캔 시작",
+    "starting": "시작 중...",
+    "strengths": "강점:",
+    "style": "스타일",
+    "style_tendency": "스타일 경향:",
+    "tag_count": "태그 수:",
+    "th_deleted": "삭제됨",
+    "th_format": "형식",
+    "th_path": "경로",
+    "th_prompt": "프롬프트",
+    "th_size": "크기",
+    "th_source": "소스",
+    "toggle_failed": "전환 실패",
+    "unexplored_themes": "미탐색 주제:",
+    "unit_hours": "시간",
+    "unit_minutes": "분",
+    "uptime": "가동 시간:",
+    "weaknesses": "개선 사항:",
+    "wt_batch_failed": "일괄 처리 시작 실패",
+    "wt_close": "닫기",
+    "wt_complete": "완료",
+    "wt_config_failed": "설정 저장 실패",
+    "wt_config_saved": "WD-Tagger 설정이 저장되었습니다",
+    "wt_download_failed": "다운로드 실패",
+    "wt_downloading": "모델 다운로드 중...",
+    "wt_model_check_failed": "모델 상태 확인 실패",
+    "wt_model_not_downloaded": "모델 미다운로드",
+    "wt_model_ready": "모델 준비됨",
+    "wt_no_tags": "태그 없음",
+    "wt_processing": "처리 중...",
+    "wt_sec_elapsed": "초 경과",
+    "wt_tagged_files": "태그 부여된 파일",
+    "wt_total_tags": "전체 태그",
+    "wt_unique": "고유",
+    "wt_untagged": "미태그 불명",
+    "wt_xmp_dc_subject": "dc:subject 태그:",
+    "wt_xmp_load_failed": "XMP 데이터를 불러오지 못했습니다",
+    "wt_xmp_not_found": "XMP 데이터가 없습니다",
+    "wt_xmp_raw_xml": "원본 XML",
+    "wt_xmp_title": "XMP 메타데이터",
+    "wt_xmp_wdtag_info": "wdtag 정보:"
+  },
+  "yolo_stream.detect_error": "Detection failed",
+  "yolo_stream.register": "Register",
+  "sd_bridge.api_key_set": "(키 설정됨)",
+  "comfyui_bridge.api_key_set": "(키 설정됨)",
+  "common.delete": "삭제",
+  "common.save": "저장",
+  "settings.apikeys_mcp_jump": "코드 스니펫 보기",
+  "settings.apikeys_mcp_updated": "↓ MCP 코드 스니펫이 이 키로 업데이트되었습니다",
+  "settings.tsr_desc": "분산 태그 추론 서버 관리(Hailo Remote, ONNX Local 등). 병렬 배치 태깅을 지원합니다.",
+  "settings.tsr_mesh_redirect": "피어별 메시 추론 토글은 ",
+  "settings.tsr_mesh_redirect_link": "메시 추론 매트릭스",
+  "settings.tsr_mesh_redirect_suffix": " 페이지에서 관리됩니다.",
+  "settings.tsr_title": "Tagger Server Registry",
+  "bridge.pl.load_tooltip": "PL 로드",
+  "bridge.pl.save_tooltip": "PL 저장",
+  "conditions.hasAnnotation.desc": "주석(노트)이 있는 파일만 표시",
+  "conditions.hasAnnotation.label": "📝 노트 있음"
+}

@@ -1,0 +1,312 @@
+/*
+ * atelier-ext-overrides.css
+ *
+ * Extension pages (loaded via _ext_nav.html) ship their own scoped CSS that
+ * predates atelier — they hard-code colors like rgba(30,30,50,0.8) or define
+ * their own --nab-* / --cfb-* token systems. When a user is on an atelier
+ * theme we want those surfaces to match atelier warm chrome instead of the
+ * legacy purple-blue tint.
+ *
+ * Strategy:
+ *   - All overrides live under body:is(.theme-atelier-light, .theme-atelier-dark)
+ *     so classic dark / classic light themes are completely unaffected.
+ *   - Where an extension already uses CSS variables (NAI Bridge: --nab-*) we
+ *     simply re-declare the variable. Every existing rule referencing it
+ *     picks up the new value for free.
+ *   - Where an extension hard-coded colors (ComfyUI Bridge: .cfb-* with
+ *     literal rgba()) we override the offending properties directly using
+ *     atelier tokens.
+ */
+
+/* ============================================================
+ * NAI Bridge (extensions/builtin_nai_bridge) — token re-declare
+ * ============================================================ */
+body.theme-atelier-light,
+body.theme-atelier-dark {
+  --nab-surface: var(--surface);
+  --nab-surface-deep: var(--surface-raised);
+  --nab-surface-dim: var(--bg);
+  --nab-border: var(--border);
+  --nab-border-dim: var(--border);
+}
+
+/* NAI Bridge button variants pull from --accent which atelier already
+ * redefines — no extra work needed. Keep .nab-btn.primary text contrast
+ * legible on the warmer atelier accent. */
+body:is(.theme-atelier-light, .theme-atelier-dark) .nab-btn.primary {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .nab-btn:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent);
+}
+
+/* ============================================================
+ * ComfyUI Bridge (extensions/builtin_comfyui_bridge) — direct
+ * overrides because _style.html hard-codes rgba() literals.
+ * ============================================================ */
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-tab.active {
+  background: var(--surface-raised);
+  border-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-tab.active::after {
+  background: var(--bg);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-tabs {
+  border-bottom-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-conn,
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-section {
+  background: var(--surface-raised);
+  border-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-textarea,
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-input,
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-param input,
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-param select,
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-config-row select,
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-config-row input {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-btn {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-btn:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-btn.primary:hover {
+  filter: brightness(1.08);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-progress-bar {
+  background: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-progress-fill {
+  background: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .cfb-config {
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+/* ============================================================
+ * Prompt-syntax editor (extensions/builtin_prompt_syntax)
+ *  - .ps-editor-wrap is the dark navy frame around bridge prompt
+ *    textareas. Replace with atelier surface so the bridge prompt
+ *    UI matches the rest of the page in atelier mode.
+ *  - .ps-textarea itself stays transparent (it's the input layer
+ *    over a syntax-highlighting overlay), so we don't touch its
+ *    background — only its caret color for legibility.
+ * ============================================================ */
+body:is(.theme-atelier-light, .theme-atelier-dark) .ps-editor-wrap {
+  background: var(--surface);
+  border-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .ps-editor-wrap:focus-within {
+  border-color: var(--accent);
+}
+body.theme-atelier-light .ps-textarea { caret-color: var(--text); }
+body.theme-atelier-dark .ps-textarea { caret-color: var(--text); }
+
+/* ============================================================
+ * Bridge sweep quick-jump popover (.bsqj-*) — bridge-sweep-quick-jump.css
+ * uses var(--surface-1, #fff) / var(--text-2, #666) fallbacks. Atelier
+ * doesn't define those numbered tokens, so the popover renders pure-white
+ * with body-inherited text — readable in classic dark, but in atelier
+ * light the popover floats on cream parchment with cream-inherited text
+ * and rows become near-invisible. Bind to atelier surface/text directly.
+ * ============================================================ */
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-popover {
+  background: var(--surface-raised);
+  border-color: var(--border);
+  color: var(--text);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-popover-header {
+  border-bottom-color: var(--border);
+  color: var(--text-muted, var(--text));
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-row {
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-row:hover {
+  background: var(--surface);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-empty {
+  color: var(--text-muted, var(--text));
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-clear-all,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-complete-banner a {
+  color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-complete-banner {
+  background: var(--surface-raised);
+  border-color: var(--accent);
+}
+/* Inline list (used on the dedicated /sweep page) — same fallback issue
+ * as the popover above: bsqj-list defaults to var(--surface-1, #fff) which
+ * resolves to pure white in atelier and the inherited body text color
+ * blends in. Pin to atelier surface/text/border tokens. */
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list {
+  background: var(--surface-raised);
+  border-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-toolbar {
+  border-bottom-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-title {
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-count-label {
+  color: var(--text-muted, var(--text));
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-count-select,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter select,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter-tol,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter-sel,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter input[type="text"] {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter-btn {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter-btn:hover {
+  background: var(--surface);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter-mode {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter-grp-title {
+  color: var(--text-muted, var(--text));
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-row {
+  border-bottom-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-row:hover {
+  background: var(--surface);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter {
+  border-bottom-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter-chip {
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bsqj-list-filter-chip[data-disabled="true"] {
+  color: var(--text-muted, var(--text));
+  opacity: 0.5;
+}
+
+/* ============================================================
+ * Bridge Prompt Library (.bpl-*) and Bridge Result Panel (.brp-*)
+ *  — bridge-prompt-library.css hard-codes navy/purple literals
+ *    (rgba(30,30,50,...), rgba(102,126,234,...)) for modals and
+ *    history thumbs. Replace with atelier tokens so atelier mode
+ *    gets warm chrome instead of legacy navy.
+ * ============================================================ */
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-modal {
+  background: var(--surface-raised);
+  border-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-modal-header,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-pager {
+  border-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-modal-header h3,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-card-title {
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-search,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-input,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-textarea {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-search:focus,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-input:focus,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-textarea:focus {
+  border-color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-card {
+  border-bottom-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-card:hover {
+  background: var(--surface);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-card-params,
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-chars-summary label {
+  color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-pager-btn {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-pager-btn:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-save-btn {
+  background: var(--accent);
+  color: #fff;
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .bpl-chars-summary {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark) .brp-latest {
+  background: var(--surface);
+  border-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .brp-action-btn {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .brp-action-btn:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .brp-thumb:hover,
+body:is(.theme-atelier-light, .theme-atelier-dark) .brp-thumb.active {
+  border-color: var(--accent);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark) .brp-filmstrip-wrap {
+  border-top-color: var(--border);
+}
+
+/* ============================================================
+ * Generic h1 polish on extension pages — atelier-index.css
+ * already styles h1 globally under theme-atelier-*, but bridge
+ * pages override font-size to 20px in their own _style.html
+ * which knocks out the editorial scale. Keep the smaller size
+ * but apply the Fraunces display font for visual consistency.
+ * ============================================================ */
+body:is(.theme-atelier-light, .theme-atelier-dark) main#main-content > h1,
+body:is(.theme-atelier-light, .theme-atelier-dark) main#main-content > .nab-container > h1,
+body:is(.theme-atelier-light, .theme-atelier-dark) main#main-content > .cfb-container > h1 {
+  font-family: var(--font-display);
+  letter-spacing: -0.01em;
+}

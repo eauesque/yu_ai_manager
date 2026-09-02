@@ -1,0 +1,159 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+  (function () {
+    var MAX_CHARACTERS = 6;
+
+    function $(id) { return document.getElementById(id); }
+
+    function escHtml(s) {
+      var d = document.createElement("div");
+      d.appendChild(document.createTextNode(s));
+      return d.innerHTML;
+    }
+
+    function getCharCards() {
+      return $("nabCharList").querySelectorAll(".nab-char-card");
+    }
+
+    function updateCharCount() {
+      var n = getCharCards().length;
+      $("nabCharCount").textContent = n > 0 ? "(" + n + "/" + MAX_CHARACTERS + ")" : "";
+      $("nabAddCharBtn").disabled = n >= MAX_CHARACTERS;
+    }
+
+    function reindexCharCards() {
+      var cards = getCharCards();
+      cards.forEach(function(card, i) {
+        card.setAttribute("data-idx", i);
+        card.querySelector(".nab-char-num").textContent = "#" + (i + 1);
+        card.querySelector(".nab-char-del").setAttribute("data-action", "nabRemoveCharacter");
+        card.querySelector(".nab-char-del").setAttribute("data-action-arg", String(i));
+      });
+      updateCharCount();
+    }
+
+    window.nabAddCharacter = function(posVal, negVal, center) {
+      var list = $("nabCharList");
+      var n = getCharCards().length;
+      if (n >= MAX_CHARACTERS) return;
+
+      var hasCenter = center && typeof center.x === "number" && typeof center.y === "number";
+      var aiChecked = hasCenter ? "" : " checked";
+      var gridDisplay = hasCenter ? "" : "display:none;";
+
+      var card = document.createElement("div");
+      card.className = "nab-char-card";
+      card.setAttribute("data-idx", n);
+      var cardHtml =
+        '<div class="nab-char-header">' +
+          '<span class="nab-char-num">#' + (n + 1) + '</span>' +
+          '<div class="nab-char-header-actions">' +
+            '<button class="nab-btn small nab-char-sed-btn" title="' + escHtml(window.tr('nai_bridge.sed_btn_title', 'sed (stream editor)')) + '" aria-label="sed stream editor">Sed</button>' +
+            '<button class="nab-btn small nab-char-dedup-btn" title="' + escHtml(window.tr('nai_bridge.dedup_tooltip', '重複タグを削除')) + '" aria-label="Dedup tags">Dedup</button>' +
+            '<button class="nab-btn small nab-char-wc-btn" title="' + escHtml(window.tr('nai_bridge.char_wc_btn_title', 'Wildcard ブラウザ (上のパネルに表示)')) + '" aria-label="Wildcard browser">Wildcard</button>' +
+            '<button class="nab-btn small nab-char-clear-btn" title="' + escHtml(window.tr('nai_bridge.char_clear_btn_title', 'このキャラクターのプロンプトをクリア')) + '">' + window.tr('nai_bridge.char_clear_btn', 'クリア') + '</button>' +
+            '<button class="nab-btn small nab-char-del" data-action="nabRemoveCharacter" data-action-arg="' + n + '">' + window.tr('nai_bridge.delete_btn', '削除') + '</button>' +
+          '</div>' +
+        '</div>' +
+        '<div class="bridge-sed-bar nab-char-sed-bar" style="display:none;">' +
+          '<label>' + escHtml(window.tr('nai_bridge.sed_label', 'sed:')) + '</label>' +
+          '<input class="nab-char-sed-input" type="text" placeholder="' + escHtml(window.tr('nai_bridge.sed_placeholder', 's/old/new/g')) + '" spellcheck="false" aria-label="Sed expression">' +
+          '<span class="nab-char-sed-toast" style="display:none;"></span>' +
+        '</div>' +
+        '<div class="bridge-sed-bar nab-char-dedup-bar" style="display:none;">' +
+          '<label>' + escHtml(window.tr('nai_bridge.dedup_label', 'Dedup:')) + '</label>' +
+          '<button class="nab-btn small nab-char-dedup-first">' + escHtml(window.tr('nai_bridge.dedup_keep_first', '最初を残す')) + '</button>' +
+          '<button class="nab-btn small nab-char-dedup-last">' + escHtml(window.tr('nai_bridge.dedup_keep_last', '最後を残す')) + '</button>' +
+          '<span class="nab-char-dedup-toast" style="display:none;"></span>' +
+        '</div>' +
+        '<div class="nab-char-field">' +
+          '<label>' + window.tr('nai_bridge.char_positive', 'プロンプト') + '</label>' +
+          '<div class="nab-char-prompt-with-wc nab-prompt-with-wc">' +
+            '<div class="nab-char-pos-wrap nab-editor-wrap" style="flex:1;min-width:0;">' +
+              '<textarea class="nab-char-pos" name="nab-char-positive" rows="2" placeholder="1girl, blonde hair, ..." autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other">' + escHtml(posVal || "") + '</textarea>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="nab-char-field">' +
+          '<label>' + window.tr('nai_bridge.char_negative', '除外したい要素') + '</label>' +
+          '<div class="nab-char-neg-wrap nab-editor-wrap">' +
+            '<textarea class="nab-char-neg" name="nab-char-negative" rows="1" placeholder="lowres, bad anatomy" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other">' + escHtml(negVal || "") + '</textarea>' +
+          '</div>' +
+        '</div>' +
+        '<div class="nab-charpos">' +
+          '<label class="nab-charpos-label"><input type="checkbox" name="nab-charpos-ai" class="nab-charpos-ai"' + aiChecked + ' data-action="nabToggleCharAI" data-action-event="change" data-action-this="1"> ' + window.tr('nai_bridge.ai_choice', "AIにおまかせ") + '</label>' +
+          '<div class="nab-charpos-grid-wrap" style="' + gridDisplay + '">' +
+            '<div class="nab-charpos-grid"></div>' +
+          '</div>' +
+        '</div>';
+      card["innerHTML"] = cardHtml;
+      list.appendChild(card);
+      if (typeof nabInitCharPos === "function") nabInitCharPos(card);
+      if (typeof window._nabEnhanceCharCard === "function") window._nabEnhanceCharCard(card);
+
+      // When center coordinates are specified, reflect selection position on grid
+      if (hasCenter) {
+        card.setAttribute("data-pos-x", center.x.toFixed(2));
+        card.setAttribute("data-pos-y", center.y.toFixed(2));
+        // Select the nearest cell in the 5x5 grid
+        var col = Math.round(center.x * 4);
+        var row = Math.round(center.y * 4);
+        var grid = card.querySelector(".nab-charpos-grid");
+        if (grid) {
+          grid.querySelectorAll(".nab-charpos-cell").forEach(function(cell) {
+            cell.classList.remove("selected");
+            if (parseInt(cell.getAttribute("data-col")) === col &&
+                parseInt(cell.getAttribute("data-row")) === row) {
+              cell.classList.add("selected");
+            }
+          });
+        }
+      }
+
+      updateCharCount();
+    };
+
+    window.nabRemoveCharacter = function(idx) {
+      var cards = getCharCards();
+      if (idx >= 0 && idx < cards.length) {
+        cards[idx].remove();
+        reindexCharCards();
+      }
+    };
+
+    function collectCharacters() {
+      var result = [];
+      getCharCards().forEach(function(card) {
+        var pos = card._charPosEditor
+          ? card._charPosEditor.getValue().trim()
+          : card.querySelector(".nab-char-pos").value.trim();
+        if (!pos) return;
+        var neg = card._charNegEditor
+          ? card._charNegEditor.getValue().trim()
+          : card.querySelector(".nab-char-neg").value.trim();
+        var entry = {
+          prompt: pos,
+          negative: neg,
+        };
+        var charPos = (typeof nabGetCharPos === "function") ? nabGetCharPos(card) : null;
+        if (charPos) entry.center = charPos;
+        result.push(entry);
+      });
+      return result;
+    }
+    window._nabCollectCharacters = collectCharacters;
+
+    // Restore character prompts when loading PL
+    window._nabSetCharacters = function(characters) {
+      // Clear existing characters
+      var list = $("nabCharList");
+      if (list) list["innerHTML"] = "";
+      updateCharCount();
+      // Add new characters
+      if (!Array.isArray(characters)) return;
+      characters.forEach(function(c) {
+        window.nabAddCharacter(c.prompt || "", c.negative || "", c.center || null);
+      });
+    };
+  })();
+</script>

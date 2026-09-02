@@ -1,0 +1,28 @@
+{
+  "name": "builtin-video-analysis",
+  "version": "1.0.0",
+  "description": "Video AI analysis (multi-keyframe vision + optional Gemini direct video)",
+  "type": "general",
+  "category": "ai",
+  "entry": "video_analysis_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/",
+  "config": {
+    "enabled": true,
+    "priority": 155
+  },
+  "config_schema": {
+    "keyframe_count": {
+      "type": "number",
+      "label": "Keyframes to analyze",
+      "default": 4
+    },
+    "strategy": {
+      "type": "select",
+      "label": "Keyframe Strategy",
+      "options": ["uniform", "scene"],
+      "default": "uniform"
+    }
+  }
+}

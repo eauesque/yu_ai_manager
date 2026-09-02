@@ -1,0 +1,1041 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+
+  var BASE = "/ext/nai-bridge";
+  var generating = false;
+
+  // -- Helpers ---------------------------------------------------
+
+  function $(id) { return document.getElementById(id); }
+
+  function postJSON(path, body) {
+    return fetch(BASE + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest" },
+      body: JSON.stringify(body),
+    }).then(function(r) { return r.json(); });
+  }
+
+  function getJSON(path) {
+    return fetch(BASE + path).then(function(r) { return r.json(); });
+  }
+
+  function renderConnText(el, text) {
+    // This element's textContent is set dynamically here; data-i18n must be
+    // dropped or the i18n runtime's async post-load sweep
+    // (applyTranslations in core-shared.ts) overwrites it back to the
+    // dictionary's static "not connected" default. Same trap as the
+    // scheduler/llm-router pages (v4.64.1).
+    el.removeAttribute("data-i18n");
+    var raw = String(text || "");
+    var urlMatch = raw.match(/https?:\/\/\S+/);
+    if (!urlMatch) {
+      el.textContent = raw;
+      return;
+    }
+    el.textContent = raw.slice(0, urlMatch.index);
+    var code = document.createElement("code");
+    code.className = "bridge-url-code";
+    code.textContent = urlMatch[0];
+    el.appendChild(code);
+    el.appendChild(document.createTextNode(raw.slice((urlMatch.index || 0) + urlMatch[0].length)));
+  }
+
+  var NAB_CONN_CACHE_KEY = "nab_conn_cache";
+
+  function setConn(ok, text, hint, skipCache) {
+    var dot = $("nabConnDot");
+    dot.className = "nab-conn-dot " + (ok ? "ok" : "err");
+    renderConnText($("nabConnText"), text);
+    var hintEl = $("nabConnHint");
+    if (hintEl) {
+      while (hintEl.firstChild) hintEl.removeChild(hintEl.firstChild);
+      if (!ok && hint) {
+        var a = document.createElement("a");
+        a.href = "/settings#cat-auth";
+        a.style.cssText = "display:inline-flex;align-items:center;min-height:24px;font-size:12px;color:var(--text,#e0e0e0);text-decoration:underline;";
+        a.textContent = hint;
+        hintEl.appendChild(a);
+        hintEl.style.display = "";
+      } else {
+        hintEl.style.display = "none";
+      }
+    }
+    // Cache the last known result so a reload can repaint it instantly
+    // instead of flashing back to "not connected" while the real
+    // background test (nabTestConnection at init) is still in flight.
+    if (!skipCache) {
+      try { localStorage.setItem(NAB_CONN_CACHE_KEY, JSON.stringify({ ok: ok, text: text, hint: hint || "" })); } catch (_) {}
+    }
+  }
+
+  // Repaint the cached connection result immediately on load (no hint link,
+  // since it may point at a stale error); the real test still runs right
+  // after and will overwrite this once it resolves.
+  (function() {
+    try {
+      var raw = localStorage.getItem(NAB_CONN_CACHE_KEY);
+      if (!raw) return;
+      var cached = JSON.parse(raw);
+      if (cached && typeof cached.text === "string") setConn(cached.ok, cached.text, cached.hint, true);
+    } catch (_) {}
+  })();
+
+  function escHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  function fmtAnlas(n) {
+    return String(n).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  }
+
+  // -- Cost estimation (mirror of nai_cost.py — update both) ------
+
+  var _COEFF_BASE = 2.951823174884865e-6;
+  var _COEFF_STEP = 5.753298233447344e-7;
+  var _NORMAL_PORTRAIT_PX = 1011712;
+  var _NORMAL_SQUARE_PX = 1048576;
+
+  function nabEstimateCost() {
+    var w = parseInt($("nabWidth").value, 10) || 832;
+    var h = parseInt($("nabHeight").value, 10) || 1216;
+    var steps = parseInt($("nabSteps").value, 10) || 28;
+    var n = parseInt($("nabBatchCount").value, 10) || 1;
+    var r = Math.max(w * h, 65536);
+    if (r > _NORMAL_PORTRAIT_PX && r <= _NORMAL_SQUARE_PX) r = _NORMAL_PORTRAIT_PX;
+    var perImage = Math.max(Math.ceil(_COEFF_BASE * r + _COEFF_STEP * r * steps), 2);
+    var opusFree = steps <= 28 && (w * h) <= _NORMAL_SQUARE_PX;
+    // We always send 1 image per API call (client-side loop), so opus_free
+    // applies to every image when the resolution/steps are eligible.
+    var freeImages = opusFree ? n : 0;
+    var effective = Math.max(0, n - freeImages);
+    return perImage * effective;
+  }
+
+  function _nabUpdateBatchTotal() {
+    var n = parseInt(($("nabBatchCount") || {}).value, 10) || 1;
+    var el = $("nabBatchTotal");
+    if (!el) return;
+    var tmpl = window.tr ? window.tr('bridge.total_images', 'Total: {n}') : 'Total: {n}';
+    el.textContent = tmpl.replace('{n}', n);
+  }
+
+  function nabUpdateCost() {
+    var genCost = nabEstimateCost();
+    // encode-vibe costs 2 Anlas per loaded reference image regardless of opus free tier
+    var vibeCount = (typeof _nabVibeData !== "undefined" && _nabVibeData) ? 1 : 0;
+    var refCount = 0;
+    if (typeof nabGetRefCards === "function") {
+      var rcs = nabGetRefCards();
+      for (var ri = 0; ri < rcs.length; ri++) {
+        if (rcs[ri].getAttribute("data-ref-b64")) refCount++;
+      }
+    }
+    var encodeCost = (vibeCount + refCount) * 2;
+    var totalCost = genCost + encodeCost;
+    var badge = $("nabCostBadge");
+    if (totalCost <= 0) {
+      badge.textContent = window.tr('nai_bridge.cost_free', 'Free');
+      badge.className = "nab-cost-badge";
+      badge.title = "";
+    } else {
+      badge.textContent = "~" + fmtAnlas(totalCost) + " Anlas";
+      badge.className = "nab-cost-badge paid";
+      if (encodeCost > 0) {
+        var cnt = vibeCount + refCount;
+        var encPart = "encode-vibe \xd7" + cnt + " +" + encodeCost;
+        badge.title = genCost > 0
+          ? "gen ~" + genCost + "  " + encPart + "  = ~" + totalCost + " Anlas"
+          : encPart + " Anlas (gen: Free)";
+      } else {
+        badge.title = "";
+      }
+    }
+    _nabUpdateBatchTotal();
+  }
+  // expose so sibling scripts (_script_vibe, _script_ref) can trigger cost refresh
+  window.nabUpdateCost = nabUpdateCost;
+
+  // -- UC preset ----------------------------------------------------
+
+  // Which presets a generation offers, mirroring UC_PRESETS in
+  // nai_uc_presets.py — test_nai_uc_presets.py fails if the two disagree.
+  // The Anime/Furry switch does not affect this: both modes use the same UC
+  // wording. Fall back to Heavy if the current pick just became unavailable.
+  window.nabSyncUcPresetOptions = function() {
+    var modelEl = $("nabModel");
+    var ucEl = $("nabUcPreset");
+    if (!modelEl || !ucEl) return;
+    var model = String(modelEl.value || "");
+    var isV5 = model.indexOf("nai-diffusion-5") === 0;
+    var isV45 = model.indexOf("nai-diffusion-4-5") === 0;
+    // Mirrors UC_PRESETS in nai_uc_presets.py; test_nai_uc_presets.py checks it.
+    var allowed = { "3": isV5 || isV45, "4": isV5 };
+    for (var i = 0; i < ucEl.options.length; i++) {
+      var opt = ucEl.options[i];
+      if (opt.value in allowed) opt.disabled = !allowed[opt.value];
+    }
+    if (allowed[ucEl.value] === false) ucEl.value = "0";
+  };
+
+  // -- Resolution preset --------------------------------------------
+
+  // Aspect-lock handle (set on DOMContentLoaded once BridgeAspectLock is loaded).
+  var _nabAspect = null;
+
+  window.nabApplyPreset = function() {
+    var val = $("nabResPreset").value;
+    if (val === "custom") return;
+    var parts = val.split(",");
+    $("nabWidth").value = parts[0];
+    $("nabHeight").value = parts[1];
+    // Note: nabBatchCount max stays at the HTML-declared 50; actual NAI
+    // per-call cap is enforced via client-side batching in nabGenerate.
+    if (_nabAspect) _nabAspect.onPresetApplied();
+    nabUpdateCost();
+  };
+
+  window.nabOnManualSize = function() {
+    $("nabResPreset").value = "custom";
+    nabUpdateCost();
+  };
+
+  // Swap Width <-> Height. Mirrors SD/Comfy bridge swap UX.
+  window.nabSwapWH = function() {
+    var wEl = $("nabWidth");
+    var hEl = $("nabHeight");
+    var sel = $("nabResPreset");
+    if (!wEl || !hEl) return;
+    var w = wEl.value;
+    var h = hEl.value;
+    wEl.value = h;
+    hEl.value = w;
+    // Invert the aspect ratio BEFORE dispatching events so the lock listener
+    // (if enabled) recomputes from the new W using the inverted ratio and
+    // arrives at the swapped H value.
+    if (_nabAspect) _nabAspect.onSwap();
+    // Dispatch first (will set preset to "custom" via nabOnManualSize),
+    // then resolve the correct preset value from the swapped dimensions.
+    wEl.dispatchEvent(new Event("input", { bubbles: true }));
+    wEl.dispatchEvent(new Event("change", { bubbles: true }));
+    hEl.dispatchEvent(new Event("input", { bubbles: true }));
+    hEl.dispatchEvent(new Event("change", { bubbles: true }));
+    if (sel) {
+      var swapped = h + "," + w;
+      sel.value = "custom";
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === swapped) {
+          sel.value = swapped;
+          break;
+        }
+      }
+    }
+    nabUpdateCost();
+  };
+
+  // -- Connection test -------------------------------------------
+
+  function fmtUsageSuffix(usage) {
+    if (!usage || typeof usage.percent !== "number") return "";
+    var tmpl = window.tr('nai_bridge.usage_limit_label', 'V5 Usage {pct}%');
+    return " (" + tmpl.replace('{pct}', usage.percent) + ")";
+  }
+
+  window.nabTestConnection = function() {
+    // Update text only, not the dot color — keeps a cached "Connected" dot
+    // green while the real test runs instead of flashing it to err/red.
+    renderConnText($("nabConnText"), window.tr('nai_bridge.testing', 'Testing...'));
+    postJSON("/api/test-connection", {}).then(function(d) {
+      if (d.ok) {
+        var text = window.tr('nai_bridge.connected', 'Connected');
+        if (typeof d.anlas === "number") {
+          text += " -- " + fmtAnlas(d.anlas) + " Anlas";
+        }
+        text += fmtUsageSuffix(d.usage);
+        setConn(true, text);
+      } else {
+        setConn(false, d.error || window.tr('nai_bridge.connection_failed', 'Connection failed'), window.tr('nai_bridge.check_api_key', 'Check your API token in Settings → API Keys tab'));
+      }
+    }).catch(function(e) {
+      setConn(false, window.tr('nai_bridge.request_failed', 'Request failed') + ": " + e.message, window.tr('nai_bridge.check_api_key', 'Check your API token in Settings → API Keys tab'));
+    });
+  };
+
+  // -- Anlas refresh ---------------------------------------------
+
+  function refreshAnlas() {
+    getJSON("/api/anlas").then(function(d) {
+      if (d.ok && typeof d.anlas === "number") {
+        var connText = $("nabConnText").textContent;
+        if (connText.indexOf(window.tr('nai_bridge.connected', 'Connected')) === 0) {
+          setConn(true, window.tr('nai_bridge.connected', 'Connected') + " -- " + fmtAnlas(d.anlas) + " Anlas" + fmtUsageSuffix(d.usage));
+        }
+      }
+    }).catch(function() {});
+  }
+
+  // -- Character prompts: extracted to _script_chars.html ---------
+  //   exports: window.nabAddCharacter, window.nabRemoveCharacter,
+  //            window._nabCollectCharacters, window._nabSetCharacters
+
+  // -- Seed reset -------------------------------------------------
+
+  window.nabResetSeed = function() {
+    var el = $("nabSeed");
+    if (el) el.value = "-1";
+  };
+
+  // -- Seed auto-reset after generation ---------------------------
+  // Persisted in localStorage so the user only has to enable it once.
+  (function() {
+    var cb = document.getElementById("nabSeedAutoReset");
+    if (!cb) return;
+    try { cb.checked = localStorage.getItem("nab_seed_auto_reset") === "1"; } catch(_) {}
+    cb.addEventListener("change", function() {
+      try { localStorage.setItem("nab_seed_auto_reset", cb.checked ? "1" : "0"); } catch(_) {}
+    });
+  })();
+  window._nabApplySeedAutoReset = function() {
+    var cb = document.getElementById("nabSeedAutoReset");
+    if (cb && cb.checked) {
+      var el = document.getElementById("nabSeed");
+      if (el) el.value = "-1";
+    }
+  };
+
+  // -- Generate ---------------------------------------------------
+
+  // Build the request body from current UI state. Exposed so other modules
+  // (e.g. sweep runner in _script_sweep.html) can reuse the exact same logic.
+  window._nabBuildGenerateBody = function() {
+    var prompt = (typeof _nabGetPrompt === "function" ? _nabGetPrompt() : $("nabPrompt").value).trim();
+    if (!prompt) return null;
+    var body = {
+      prompt: prompt,
+      negative_prompt: (typeof _nabGetNegative === "function" ? _nabGetNegative() : $("nabNegative").value).trim(),
+      model: $("nabModel").value,
+      sampler: $("nabSampler").value,
+      noise_schedule: $("nabNoiseSchedule").value,
+      steps: parseInt($("nabSteps").value, 10) || 28,
+      scale: parseFloat($("nabScale").value) || 5,
+      cfg_rescale: parseFloat($("nabCfgRescale").value) || 0,
+      width: parseInt($("nabWidth").value, 10) || 832,
+      height: parseInt($("nabHeight").value, 10) || 1216,
+      seed: parseInt($("nabSeed").value, 10) || -1,
+      n_samples: parseInt($("nabBatchCount").value, 10) || 1,
+      quality_toggle: $("nabQualityToggle").checked,
+      uc_preset: parseInt($("nabUcPreset").value, 10) || 0,
+      mode: $("nabMode") ? $("nabMode").value : "anime",
+      dynamic_thresholding: $("nabDynThreshold").checked,
+      uncond_scale: parseFloat($("nabUncondScale").value) || 1.0,
+      variety_boost: $("nabVarietyBoost").checked,
+      image_format: $("nabImageFormat").value,
+    };
+    var chars = (typeof window._nabCollectCharacters === "function") ? window._nabCollectCharacters() : [];
+    if (chars.length > 0) body.characters = chars;
+    if (typeof nabCollectVibe === "function") {
+      var vibe = nabCollectVibe();
+      if (vibe) {
+        body.reference_image = vibe.reference_image;
+        body.reference_strength = vibe.reference_strength;
+        body.reference_information_extracted = vibe.reference_information_extracted;
+      }
+    }
+    if (typeof nabCollectReferences === "function") {
+      var refs = nabCollectReferences();
+      if (refs.length > 0) body.reference_image_multiple = refs;
+    }
+    if (typeof nabCollectImg2Img === "function") {
+      var i2i = nabCollectImg2Img();
+      if (i2i) { body.image = i2i.image; body.strength = i2i.strength; body.noise = i2i.noise; }
+    }
+    if (typeof nabCollectInpaint === "function") {
+      var inpaint = nabCollectInpaint();
+      if (inpaint) { body.image = inpaint.image; body.mask = inpaint.mask; body.strength = inpaint.strength; body.noise = inpaint.noise; }
+    }
+    try {
+      var wm = localStorage.getItem('wm_wildcards');
+      if (wm) body.client_wildcards = JSON.parse(wm);
+    } catch(_) {}
+    body.bridge = "nai";
+    return body;
+  };
+
+  // LAN Cowork dispatch routing is handled by window.bridgeFetch.
+
+  // Expose internal helpers for sweep runner reuse.
+  window._nabSetGenerating = function(active) { setGenerating(active); };
+  window._nabRenderResult = function(d) { renderResult(d); };
+  window._nabRefreshAnlas = function() { refreshAnlas(); };
+  window._nabEscHtml = function(s) { return escHtml(s); };
+  window._nabIsGenerating = function() { return generating; };
+
+  // Cancel flag for multi-batch runs (n_samples exceeds per-call cap).
+  var _nabBatchCancel = false;
+  window._nabRequestBatchCancel = function() { _nabBatchCancel = true; };
+  window.nabRequestBatchCancel = function() {
+    _nabBatchCancel = true;
+    // Sweep runs through its own IIFE-scoped flag; forward the intent so a
+    // sweep in flight also stops after the current image.
+    if (typeof window.nabSweepRequestCancel === "function") {
+      try { window.nabSweepRequestCancel(); } catch (_) {}
+    }
+    var btn = $("nabBatchCancelBtn");
+    if (btn) {
+      btn.disabled = true;
+      btn.textContent = window.tr ? window.tr('bridge.status.stopping_graceful', 'Stopping…')
+                                  : 'Stopping…';
+    }
+  };
+  function _nabShowBatchCancel(show) {
+    var btn = $("nabBatchCancelBtn");
+    if (btn) {
+      btn.style.display = show ? "" : "none";
+      btn.disabled = false;
+      if (show) {
+        btn.textContent = window.tr ? window.tr('bridge.action.stop_after_current', 'Stop after current')
+                                    : 'Stop after current';
+      }
+    }
+  }
+  // Expose so the sweep runner (separate <script> block) can toggle the
+  // same action-row button when sweep starts/finishes.
+  window._nabShowBatchCancel = _nabShowBatchCancel;
+
+  window.nabGenerate = function() {
+    if (generating) return;
+    if (typeof window.nabRunSweep === "function" && $("nabSweepEnabled") && $("nabSweepEnabled").checked) {
+      window.nabRunSweep();
+      return;
+    }
+    var prompt = (typeof _nabGetPrompt === "function" ? _nabGetPrompt() : $("nabPrompt").value).trim();
+    if (!prompt) { window.showToast(window.tr('nai_bridge.prompt_required', 'Prompt is required'), true); return; }
+
+    var body = {
+      prompt: prompt,
+      negative_prompt: (typeof _nabGetNegative === "function" ? _nabGetNegative() : $("nabNegative").value).trim(),
+      model: $("nabModel").value,
+      sampler: $("nabSampler").value,
+      noise_schedule: $("nabNoiseSchedule").value,
+      steps: parseInt($("nabSteps").value, 10) || 28,
+      scale: parseFloat($("nabScale").value) || 5,
+      cfg_rescale: parseFloat($("nabCfgRescale").value) || 0,
+      width: parseInt($("nabWidth").value, 10) || 832,
+      height: parseInt($("nabHeight").value, 10) || 1216,
+      seed: parseInt($("nabSeed").value, 10) || -1,
+      n_samples: parseInt($("nabBatchCount").value, 10) || 1,
+      quality_toggle: $("nabQualityToggle").checked,
+      uc_preset: parseInt($("nabUcPreset").value, 10) || 0,
+      mode: $("nabMode") ? $("nabMode").value : "anime",
+      dynamic_thresholding: $("nabDynThreshold").checked,
+      uncond_scale: parseFloat($("nabUncondScale").value) || 1.0,
+      variety_boost: $("nabVarietyBoost").checked,
+      image_format: $("nabImageFormat").value,
+    };
+
+    var chars = (typeof window._nabCollectCharacters === "function")
+      ? window._nabCollectCharacters() : [];
+    if (chars.length > 0) {
+      body.characters = chars;
+    }
+
+    // Vibe Transfer (added by _script_vibe.html)
+    if (typeof nabCollectVibe === "function") {
+      var vibe = nabCollectVibe();
+      if (vibe) {
+        body.reference_image = vibe.reference_image;
+        body.reference_strength = vibe.reference_strength;
+        body.reference_information_extracted = vibe.reference_information_extracted;
+      }
+    }
+
+    // Precise Reference (added by _script_ref.html)
+    if (typeof nabCollectReferences === "function") {
+      var refs = nabCollectReferences();
+      if (refs.length > 0) {
+        body.reference_image_multiple = refs;
+      }
+    }
+
+    // img2img (added by _script_img2img.html)
+    if (typeof nabCollectImg2Img === "function") {
+      var i2i = nabCollectImg2Img();
+      if (i2i) {
+        body.image = i2i.image;
+        body.strength = i2i.strength;
+        body.noise = i2i.noise;
+      }
+    }
+
+    // Inpainting (added by _script_inpaint.html) — overrides img2img
+    if (typeof nabCollectInpaint === "function") {
+      var inpaint = nabCollectInpaint();
+      if (inpaint) {
+        body.image = inpaint.image;
+        body.mask = inpaint.mask;
+        body.strength = inpaint.strength;
+        body.noise = inpaint.noise;
+      }
+    }
+
+        // NAI does not interpret __wc__ or {a|b|c}, so always send client_wildcards
+    try {
+      var wm = localStorage.getItem('wm_wildcards');
+      if (wm) body.client_wildcards = JSON.parse(wm);
+    } catch(_) {}
+
+    body.bridge = "nai";
+
+    setGenerating(true);
+    $("nabResult").innerHTML = "";
+
+    // Render an error message via DOM APIs (no innerHTML) — keeps the
+    // hook scanner happy and is XSS-safe regardless of the source string.
+    function _showError(msg) {
+      var el = $("nabResult");
+      el.innerHTML = "";
+      var div = document.createElement("div");
+      div.className = "nab-result-info";
+      div.style.color = "#f44336";
+      div.textContent = msg;
+      el.appendChild(div);
+    }
+
+    var nTotal = body.n_samples || 1;
+
+    // Single-call fast path — preserves the original UX when the user
+    // requested only one image (1 image per API call is also our loop unit).
+    if (nTotal <= 1) {
+      window.bridgeFetch("nai", "generate", body).then(function(r) { return r.json(); }).then(function(d) {
+        setGenerating(false);
+        if (!d.ok) {
+          _showError(window.tr('nai_bridge.error_prefix', 'Error') + ': '
+            + (d.error || window.tr('nai_bridge.generation_failed', 'Generation failed')));
+          return;
+        }
+        renderResult(d);
+        if (typeof window.nabSaveLastParams === "function") window.nabSaveLastParams();
+        window._nabApplySeedAutoReset();
+        refreshAnlas();
+      }).catch(function(e) {
+        setGenerating(false);
+        _showError(window.tr('nai_bridge.request_failed', 'Request failed') + ': ' + e.message);
+      });
+      return;
+    }
+
+    // Multi-image path: always 1 image per API call. Each call gets its
+    // own opus_free benefit when eligible (steps<=28 and resolution<=
+    // Normal Square), so this is the cheapest way to do continuous gen.
+    // Seeds: fixed seed >= 0 advances by 1 each step so the series matches
+    // a hypothetical single multi-sample call. seed=-1 stays -1 (random).
+    _nabBatchCancel = false;
+    _nabShowBatchCancel(true);
+    var baseSeed = (typeof body.seed === "number" && body.seed >= 0) ? body.seed : -1;
+    var totalImages = [];
+    var done = 0;
+
+    var progressText = $("nabProgressText");
+    function _updateBatchProgress() {
+      if (progressText) {
+        progressText.textContent = window.tr('nai_bridge.generating', 'Generating...')
+          + ' (' + done + '/' + nTotal + ')';
+      }
+    }
+    _updateBatchProgress();
+
+    function _runNextBatch() {
+      if (_nabBatchCancel) {
+        setGenerating(false);
+        _nabShowBatchCancel(false);
+        if (progressText) progressText.textContent = window.tr('nai_bridge.cancelled', 'Cancelled');
+        if (typeof window.nabSaveLastParams === "function") window.nabSaveLastParams();
+        refreshAnlas();
+        return;
+      }
+      if (done >= nTotal) {
+        setGenerating(false);
+        _nabShowBatchCancel(false);
+        if (progressText) progressText.textContent = window.tr('nai_bridge.generating', 'Generating...');
+        if (typeof window.nabSaveLastParams === "function") window.nabSaveLastParams();
+        window._nabApplySeedAutoReset();
+        refreshAnlas();
+        return;
+      }
+      var batchBody = JSON.parse(JSON.stringify(body));
+      batchBody.n_samples = 1;
+      batchBody.seed = (baseSeed >= 0) ? (baseSeed + done) : -1;
+
+      window.bridgeFetch("nai", "generate", batchBody).then(function(r) { return r.json(); }).then(function(d) {
+        if (!d.ok) {
+          setGenerating(false);
+          _nabShowBatchCancel(false);
+          _showError(window.tr('nai_bridge.error_prefix', 'Error') + ': '
+            + (d.error || window.tr('nai_bridge.generation_failed', 'Generation failed'))
+            + ' (' + done + '/' + nTotal + ')');
+          return;
+        }
+        var imgs = d.images || [];
+        for (var i = 0; i < imgs.length; i++) totalImages.push(imgs[i]);
+        done += 1;
+        // Render after each batch so the user sees images progressively.
+        var merged = JSON.parse(JSON.stringify(d));
+        merged.images = totalImages.slice();
+        renderResult(merged);
+        _updateBatchProgress();
+        // Yield so the browser can paint the new images, then continue.
+        setTimeout(_runNextBatch, 0);
+      }).catch(function(e) {
+        setGenerating(false);
+        _nabShowBatchCancel(false);
+        _showError(window.tr('nai_bridge.request_failed', 'Request failed') + ': '
+          + e.message + ' (' + done + '/' + nTotal + ')');
+      });
+    }
+    _runNextBatch();
+  };
+
+  if (window.BridgeLeaveGuard) {
+    window.BridgeLeaveGuard.install({ isGenerating: function () { return generating; } });
+  }
+
+  function setGenerating(active) {
+    generating = active;
+    $("nabGenBtn").disabled = active;
+    var prog = $("nabProgress");
+    if (active) {
+      prog.classList.add("active");
+      $("nabProgressText").textContent = window.tr('nai_bridge.generating', 'Generating...');
+    } else {
+      prog.classList.remove("active");
+    }
+  }
+
+  function renderResult(d) {
+    var html = "";
+    var images = d.images || [];
+    var mimeMap = {"png": "image/png", "webp": "image/webp", "jpg": "image/jpeg"};
+    var fmt = mimeMap[d.image_format] || mimeMap[$("nabImageFormat").value] || "image/png";
+    images.forEach(function(img, i) {
+      html += '<div style="margin-bottom:12px;">';
+      html += '<img src="data:' + escHtml(fmt) + ';base64,' + img.base64 + '" alt="' + window.tr('nai_bridge.generated_image_alt', 'Generated image') + ' ' + (i + 1) + '">';
+      html += '<div class="nab-result-info">' + window.tr('nai_bridge.result_seed', 'Seed') + ': ' + escHtml(String(img.seed || "?")) + '</div>';
+      html += '</div>';
+    });
+    var nabPromptOpenEl = $("nabCfgPromptOpen");
+    var nabPromptOpen = nabPromptOpenEl ? nabPromptOpenEl.checked : (localStorage.getItem("nab_prompt_open") !== "false");
+    var nabOpenAttr = nabPromptOpen ? " open" : "";
+    if (d.expanded_prompt) {
+      var nabPromptLabel = d.original_prompt
+        ? window.tr('nai_bridge.result_expanded', 'Expanded')
+        : window.tr('nai_bridge.result_prompt', 'Prompt');
+      html += '<details' + nabOpenAttr + '><summary style="font-size:12px;color:#4fc3f7;">' + nabPromptLabel + '</summary>';
+      html += '<div class="nab-result-info" style="white-space:pre-wrap;font-size:11px;">' +
+        escHtml(d.expanded_prompt) + '</div></details>';
+    }
+    if (typeof d.final_negative === 'string') {
+      html += '<details' + nabOpenAttr + '><summary style="font-size:12px;color:#ef9a9a;">' + window.tr('nai_bridge.result_negative', 'Negative') + '</summary>';
+      html += '<div class="nab-result-info" style="white-space:pre-wrap;font-size:11px;">' +
+        (d.final_negative ? escHtml(d.final_negative) : '<span style="opacity:0.5;">' + window.tr('common.none', '(なし)') + '</span>') + '</div></details>';
+    }
+    if (Array.isArray(d.characters) && d.characters.length) {
+      d.characters.forEach(function(ch, ci) {
+        html += '<details' + nabOpenAttr + '><summary style="font-size:12px;color:#ce93d8;">' +
+          window.tr('nai_bridge.result_character', 'Character') + ' ' + (ci + 1) + '</summary>';
+        html += '<div class="nab-result-info" style="white-space:pre-wrap;font-size:11px;">';
+        if (ch.prompt) html += escHtml(ch.prompt);
+        if (ch.negative) html += '\n<span style="color:#ef9a9a;">[' +
+          window.tr('nai_bridge.result_negative', 'Negative') + '] ' + escHtml(ch.negative) + '</span>';
+        html += '</div></details>';
+      });
+    }
+    if (d.elapsed_ms) {
+      html += '<div class="nab-result-info">' + window.tr('nai_bridge.result_generated_in', 'Generated in') + ' ' + (d.elapsed_ms / 1000).toFixed(1) + 's</div>';
+    }
+    if (Array.isArray(d.saved) && d.saved.length) {
+      html += '<div class="nab-result-info" style="color:#4caf50;">' + window.tr('nai_bridge.result_saved', 'Saved') + ': ' +
+        d.saved.map(function(p) { return escHtml(p); }).join(", ") + '</div>';
+    }
+    if (!images.length) {
+      html += '<div class="nab-result-info">' + window.tr('nai_bridge.no_images_returned', 'No images returned.') + '</div>';
+    }
+    $("nabResult").innerHTML = html;
+    // Update result panel
+    if (window._nabThumbStrip) {
+      window._nabThumbStrip.update(images, fmt, {
+        elapsed_ms: d.elapsed_ms,
+        expanded_prompt: d.expanded_prompt,
+        original_prompt: d.original_prompt,
+        final_negative: d.final_negative,
+        characters: d.characters,
+        saved: d.saved,
+      });
+    }
+  }
+
+  // -- Token toggle -----------------------------------------------
+
+  window.nabToggleToken = function() {
+    var inp = $("nabCfgToken");
+    var btn = $("nabTokenToggle");
+    if (inp.type === "password") {
+      inp.type = "text";
+      btn.textContent = window.tr('nai_bridge.token_hide_btn', 'Hide');
+    } else {
+      inp.type = "password";
+      btn.textContent = window.tr('nai_bridge.token_show_btn', 'Show');
+    }
+  };
+
+  // -- Dynamic dropdown loading ------------------------------------
+
+  function populateSelect(selectId, items, selectedValue) {
+    var sel = $(selectId);
+    if (!sel) return;
+    sel.innerHTML = "";
+    items.forEach(function(item) {
+      var opt = document.createElement("option");
+      opt.value = item.id;
+      opt.textContent = item.name;
+      sel.appendChild(opt);
+    });
+    if (selectedValue) sel.value = selectedValue;
+  }
+
+  function loadDropdowns() {
+    return Promise.all([
+      getJSON("/api/models"),
+      getJSON("/api/samplers"),
+      getJSON("/api/noise-schedules"),
+    ]).then(function(results) {
+      var models = results[0].ok ? results[0].models : [];
+      var samplers = results[1].ok ? results[1].samplers : [];
+      var noiseSchedules = results[2].ok ? results[2].noise_schedules : [];
+
+      populateSelect("nabModel", models);
+      populateSelect("nabCfgModel", models);
+      populateSelect("nabSampler", samplers);
+      populateSelect("nabCfgSampler", samplers);
+      populateSelect("nabNoiseSchedule", noiseSchedules);
+      populateSelect("nabCfgNoise", noiseSchedules);
+      // `.value = ...` never fires `change`, so every place that sets the
+      // model programmatically has to re-sync the V5-only UC options.
+      window.nabSyncUcPresetOptions();
+    }).catch(function(e) {
+      console.warn("Failed to load NAI dropdowns:", e);
+    });
+  }
+
+  // -- Config -----------------------------------------------------
+
+  // Restore prompt-open preference on page load
+  (function() {
+    var el = $("nabCfgPromptOpen");
+    if (el) el.checked = localStorage.getItem("nab_prompt_open") !== "false";
+  })();
+
+  window.nabSaveConfig = function() {
+    // Save prompt-open preference to localStorage (client-only setting)
+    var promptOpenEl = $("nabCfgPromptOpen");
+    if (promptOpenEl) localStorage.setItem("nab_prompt_open", promptOpenEl.checked ? "true" : "false");
+    var body = {
+      default_model: $("nabCfgModel").value,
+      default_sampler: $("nabCfgSampler").value,
+      default_noise_schedule: $("nabCfgNoise").value,
+      auto_send: $("nabCfgAutoSend").checked,
+      save_folder: $("nabCfgSaveFolder").value.trim(),
+      auto_save: $("nabCfgAutoSave").checked,
+      save_naming: $("nabCfgSaveNaming").value,
+      default_image_format: $("nabCfgImageFormat").value,
+      auto_import: $("nabCfgAutoImport").checked,
+      block_anlas_on_v5_limit: $("nabCfgBlockAnlasOnV5Limit").checked,
+    };
+    var tokenVal = $("nabCfgToken").value.trim();
+    if (tokenVal && tokenVal.indexOf("...") === -1 && tokenVal.indexOf("****") === -1) {
+      body.api_token = tokenVal;
+    }
+    postJSON("/api/config", body).then(function(d) {
+      if (d.ok) {
+        window.showToast(window.tr('nai_bridge.settings_saved', 'Settings saved'));
+        // Sync generation panel defaults from saved config
+        $("nabSampler").value = body.default_sampler;
+        $("nabImageFormat").value = body.default_image_format;
+      }
+      else window.showToast(window.tr('nai_bridge.save_failed', 'Save failed') + ": " + (d.error || "unknown"), true);
+    }).catch(function(e) {
+      window.showToast(window.tr('nai_bridge.save_failed', 'Save failed') + ": " + e.message, true);
+    });
+  };
+
+  function loadConfig() {
+    return getJSON("/api/config").then(function(d) {
+      if (!d.ok) return;
+      if (d.api_token) $("nabCfgToken").value = d.api_token;
+      if (d.default_model) {
+        $("nabCfgModel").value = d.default_model;
+        $("nabModel").value = d.default_model;
+        window.nabSyncUcPresetOptions();
+      }
+      if (d.default_sampler) {
+        $("nabCfgSampler").value = d.default_sampler;
+        $("nabSampler").value = d.default_sampler;
+      }
+      if (d.default_noise_schedule) {
+        $("nabCfgNoise").value = d.default_noise_schedule;
+        $("nabNoiseSchedule").value = d.default_noise_schedule;
+      }
+      if (d.auto_send) $("nabCfgAutoSend").checked = true;
+      if (d.save_folder) $("nabCfgSaveFolder").value = d.save_folder;
+      if (d.auto_save) $("nabCfgAutoSave").checked = true;
+      if (d.save_naming) $("nabCfgSaveNaming").value = d.save_naming;
+      if (d.default_image_format) {
+        $("nabCfgImageFormat").value = d.default_image_format;
+        $("nabImageFormat").value = d.default_image_format;
+      }
+      $("nabCfgAutoImport").checked = d.auto_import !== false;
+      $("nabCfgBlockAnlasOnV5Limit").checked = !!d.block_anlas_on_v5_limit;
+    }).catch(function() {});
+  }
+
+  // -- Receive prompt from other tools ----------------------------
+
+  var _nabReceivedPrompt = false;
+
+  // bridge-app.js (type=module) registers window.bridgeStorage; the module load
+  // is deferred so this inline script may run first. Wait briefly, then fall
+  // through to legacy localStorage if the module is unavailable.
+  function _nabWaitBridgeStorage() {
+    return new Promise(function(resolve) {
+      if (window.bridgeStorage) return resolve(window.bridgeStorage);
+      var tries = 0;
+      var iv = setInterval(function() {
+        if (window.bridgeStorage) { clearInterval(iv); resolve(window.bridgeStorage); }
+        else if (++tries >= 100) { clearInterval(iv); resolve(null); }
+      }, 30);
+    });
+  }
+
+  async function _nabRead(key) {
+    var bs = await _nabWaitBridgeStorage();
+    if (bs) {
+      var v = await bs.get(key);
+      if (v !== undefined && v !== null) {
+        await bs.remove(key);
+        return v;
+      }
+    }
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    localStorage.removeItem(key);
+    try { return JSON.parse(raw); } catch (_e) { return null; }
+  }
+
+  async function receivePrompt() {
+    try {
+      var data = await _nabRead('bridge_send_prompt');
+      if (!data) return;
+      _nabReceivedPrompt = true;
+      if (typeof data.convert_warning === "string" && data.convert_warning && typeof window.showToast === "function") {
+        window.showToast(data.convert_warning, true);
+      }
+      if (data.prompt) {
+        if (typeof _nabSetPrompt === "function") _nabSetPrompt(data.prompt);
+        else $("nabPrompt").value = data.prompt;
+      }
+      if (data.negative) {
+        if (typeof _nabSetNegative === "function") _nabSetNegative(data.negative);
+        else $("nabNegative").value = data.negative;
+      }
+      if (Array.isArray(data.characters)) {
+        data.characters.forEach(function(ch) {
+          nabAddCharacter(ch.prompt || "", ch.negative || "", ch.center || null);
+        });
+        if (data.characters.length > 0) {
+          $("nabCharSection").open = true;
+        }
+      }
+      var paramsApplied = false;
+      if (typeof data.seed === "number" && isFinite(data.seed) && data.seed >= 0) {
+        var seedEl = $("nabSeed");
+        if (seedEl) {
+          seedEl.value = String(data.seed);
+          try { seedEl.dispatchEvent(new Event("change", { bubbles: true })); } catch (_e) {}
+          try { seedEl.dispatchEvent(new Event("input", { bubbles: true })); } catch (_e) {}
+          paramsApplied = true;
+        }
+      }
+      if (typeof data.steps === "number" && isFinite(data.steps) && data.steps > 0) {
+        var stepsEl = $("nabSteps");
+        if (stepsEl) { stepsEl.value = String(Math.round(data.steps)); paramsApplied = true; }
+      }
+      if (typeof data.scale === "number" && isFinite(data.scale)) {
+        var scaleEl = $("nabScale");
+        if (scaleEl) { scaleEl.value = String(data.scale); paramsApplied = true; }
+      }
+      if (typeof data.cfg_rescale === "number" && isFinite(data.cfg_rescale)) {
+        var cfgRescaleEl = $("nabCfgRescale");
+        if (cfgRescaleEl) cfgRescaleEl.value = String(data.cfg_rescale);
+      }
+      if (typeof data.sampler === "string" && data.sampler) {
+        var nabSamplerEl = $("nabSampler");
+        if (nabSamplerEl) {
+          for (var i = 0; i < nabSamplerEl.options.length; i++) {
+            if (nabSamplerEl.options[i].value === data.sampler) { nabSamplerEl.value = data.sampler; paramsApplied = true; break; }
+          }
+        }
+      }
+      if (typeof data.model === "string" && data.model) {
+        var nabModelEl = $("nabModel");
+        if (nabModelEl) {
+          for (var j = 0; j < nabModelEl.options.length; j++) {
+            if (nabModelEl.options[j].value === data.model) { nabModelEl.value = data.model; window.nabSyncUcPresetOptions(); paramsApplied = true; break; }
+          }
+        }
+      }
+      if (typeof data.width === "number" && isFinite(data.width) && data.width > 0) {
+        var nabWidthEl = $("nabWidth");
+        if (nabWidthEl) { nabWidthEl.value = String(data.width); paramsApplied = true; }
+      }
+      if (typeof data.height === "number" && isFinite(data.height) && data.height > 0) {
+        var nabHeightEl = $("nabHeight");
+        if (nabHeightEl) { nabHeightEl.value = String(data.height); paramsApplied = true; }
+      }
+      // Reset preset to "custom" and update cost badge when recipe applied W/H
+      if (typeof data.width === "number" || typeof data.height === "number") {
+        var nabPresetEl = $("nabResPreset");
+        if (nabPresetEl) nabPresetEl.value = "custom";
+        if (typeof nabUpdateCost === "function") nabUpdateCost();
+      }
+      if ((data.prompt || data.negative || (Array.isArray(data.characters) && data.characters.length) || paramsApplied)
+          && typeof window.showToast === "function") {
+        var toastKey = data.source === "recipe_import" ? 'bridge.received_recipe' : (paramsApplied ? 'bridge.received_hint_prompt_with_seed' : 'bridge.received_hint_prompt');
+        var toastFb = data.source === "recipe_import"
+          ? 'レシピからパラメータを読み込みました'
+          : (paramsApplied ? 'プロンプトとパラメータ（ステップ・CFG・シード等）を反映しました' : 'プロンプトを反映しました');
+        window.showToast(window.tr(toastKey, toastFb));
+      }
+    } catch (_e) {}
+  }
+
+  async function receiveImage() {
+    try {
+      var data = await _nabRead('bridge_send_image');
+      if (!data) return;
+      if (data.base64 && typeof nabSetImg2ImgFile === "function") {
+        var byteStr = atob(data.base64);
+        var arr = new Uint8Array(byteStr.length);
+        for (var i = 0; i < byteStr.length; i++) arr[i] = byteStr.charCodeAt(i);
+        var mime = (arr[0] === 0xFF && arr[1] === 0xD8) ? "image/jpeg"
+                 : (arr[0] === 0x52 && arr[8] === 0x57) ? "image/webp"
+                 : "image/png";
+        var ext = mime === "image/jpeg" ? "jpg" : mime === "image/webp" ? "webp" : "png";
+        var blob = new Blob([arr], { type: mime });
+        var file = new File([blob], "from_bridge." + ext, { type: mime });
+        nabSetImg2ImgFile(file);
+        var section = $("nabImg2ImgSection");
+        if (section && !section.open) section.open = true;
+        if (window.showToast) window.showToast(window.tr('bridge.received_hint_image',
+          'img2img に画像をセットしました（生成パラメータは手動で調整してください）'));
+      }
+    } catch (_e) {}
+  }
+
+  // -- Last params save/restore + clear: extracted to _script_lastparams.html
+  //   exports: window._nabLastParamsConfig, window.nabSaveLastParams,
+  //            window.nabRestoreLast, window.nabClearPrompts
+
+  // -- Send to other Bridge -----------------------------------------
+
+  window.nabSendToBridge = function(target, evt) {
+    var pos = (typeof _nabGetPrompt === "function" ? _nabGetPrompt() : $("nabPrompt").value).trim();
+    var neg = (typeof _nabGetNegative === "function" ? _nabGetNegative() : $("nabNegative").value).trim();
+    if (!pos) { window.showToast(window.tr('nai_bridge.prompt_empty', 'Prompt is empty'), true); return; }
+
+    // NAI -> SD auto-convert (ComfyUI uses SD syntax)
+    fetch("/ext/convert/nai-to-sd", {
+      method: "POST",
+      headers: {"Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest"},
+      body: JSON.stringify({prompt: pos, negative: neg})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      localStorage.setItem("bridge_send_prompt", JSON.stringify({
+        prompt: d.prompt || pos, negative: d.negative || neg, source: "nai-bridge"
+      }));
+      window.tauriCrossTab.sendToBridge(target === "comfyui" ? "comfyui" : "a1111", {}, evt);
+    }).catch(function() {
+      localStorage.setItem("bridge_send_prompt", JSON.stringify({prompt: pos, negative: neg, source: "nai-bridge"}));
+      window.tauriCrossTab.sendToBridge(target === "comfyui" ? "comfyui" : "a1111", {}, evt);
+    });
+  };
+
+  // Add auxclick (middle-click) listeners for send-to-bridge buttons
+  document.addEventListener("DOMContentLoaded", function() {
+    document.querySelectorAll('[data-action="nabSendToBridge"][data-action-arg]').forEach(function(btn) {
+      btn.addEventListener("auxclick", function(e) {
+        if (e.button !== 1) return;
+        e.preventDefault();
+        window.nabSendToBridge(btn.getAttribute("data-action-arg"), e);
+      });
+    });
+  });
+
+  // -- Keyboard shortcuts ------------------------------------------
+
+  document.addEventListener("keydown", function(e) {
+    // Ctrl+Enter -> Generate
+    if (e.key === "Enter" && (e.ctrlKey || e.metaKey) && !e.shiftKey) {
+      e.preventDefault();
+      nabGenerate();
+    }
+  });
+
+  // -- Init -------------------------------------------------------
+
+  // receivePrompt/Image are async; chain so _nabReceivedPrompt is settled
+  // before BridgeLastParams.restore() decides whether to overwrite.
+  Promise.all([receivePrompt(), receiveImage()])
+    .then(function() { return loadDropdowns(); })
+    .then(function() { return loadConfig(); })
+    .then(function() {
+      // Skip last-params restore when the page is resuming a sweep
+      // (`?resume_sweep=N`). Sweep resume populates the prompt textarea
+      // from the XMP `prompt_template` shortly after, and a brief flash of
+      // the unrelated last-prompt before that override is visually
+      // distracting (esp. on cross-bridge re-run).
+      var resumingSweep = false;
+      try { resumingSweep = !!new URL(location.href).searchParams.get("resume_sweep"); } catch (_) {}
+      if (!_nabReceivedPrompt && !resumingSweep && window.BridgeLastParams && window._nabLastParamsConfig) {
+        window.BridgeLastParams.restore(window._nabLastParamsConfig);
+      }
+      nabUpdateCost();
+    });
+  nabTestConnection();
+  nabUpdateCost();
+
+  // Setup SD syntax detection banners (sd_to_nai mode: warn when SD syntax is used in NAI bridge)
+  (function() {
+    if (typeof window.setupSyntaxBanner !== "function") return;
+    var nabPromptEl = $("nabPrompt");
+    var nabNegativeEl = $("nabNegative");
+    if (nabPromptEl) {
+      window.setupSyntaxBanner(nabPromptEl, "nabSyntaxBanner", "sd_to_nai", "nab-syntax-convert", "nab-syntax-dismiss");
+    }
+    if (nabNegativeEl) {
+      window.setupSyntaxBanner(nabNegativeEl, "nabNegSyntaxBanner", "sd_to_nai", "nab-neg-syntax-convert", "nab-neg-syntax-dismiss");
+    }
+  })();
+
+  // Aspect-lock UI — bridge-app.js is a deferred ES module so we wait for
+  // DOMContentLoaded before BridgeAspectLock becomes available.
+  document.addEventListener("DOMContentLoaded", function() {
+    if (!window.BridgeAspectLock) return;
+    var w = $("nabWidth"), h = $("nabHeight"),
+        r = $("nabAspectRatio"), b = $("nabAspectLock");
+    if (w && h && r && b) {
+      _nabAspect = window.BridgeAspectLock.attach({
+        widthEl: w, heightEl: h, ratioEl: r, lockBtnEl: b,
+      });
+    }
+  });
+</script>

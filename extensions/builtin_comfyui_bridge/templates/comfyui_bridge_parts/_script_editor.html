@@ -1,0 +1,295 @@
+<script nonce="{{ csp_nonce }}">
+/* ── ComfyUI Bridge: PromptSyntaxWidget + Autocomplete + Vim Edit + Sed ── */
+(function() {
+  "use strict";
+
+  var _cfbPosEditor = null;
+  var _cfbNegEditor = null;
+  var _cfbAcEnabled = true;
+  var _cfbPosAc = null;
+  var _cfbNegAc = null;
+  var _cfbPosLinter = null;
+  var _cfbNegLinter = null;
+
+  // -- Track active textarea (insertion target for WC browser/sed/dedup) --
+  var _cfbActiveTextarea = null;
+  var _cfbActiveGetSet = null; // {get, set} for sed/dedup — follows focus (pos or neg)
+  var _cfbWcOriginalParent = null;
+
+  function _cfbTrackFocus(ta, getVal, setVal) {
+    ta.addEventListener("focus", function() {
+      _cfbActiveTextarea = ta;
+      if (getVal && setVal) _cfbActiveGetSet = { get: getVal, set: setVal };
+      _cfbRelocateWcBrowser(ta);
+    });
+  }
+
+  /**
+   * Move WC browser panel next to the focused textarea's
+   * cfb-prompt-with-wc container (like NAI bridge).
+   */
+  function _cfbRelocateWcBrowser(ta) {
+    var wcEl = document.getElementById("cfbWcBrowser");
+    if (!wcEl) return;
+    if (!_cfbWcOriginalParent) {
+      _cfbWcOriginalParent = wcEl.parentNode;
+    }
+    var container = ta.closest(".cfb-prompt-with-wc");
+    if (!container) container = _cfbWcOriginalParent;
+    if (wcEl.parentNode === container) return;
+    container.appendChild(wcEl);
+  }
+
+  function _cfbInitEditors() {
+    var posWrap = document.getElementById("cfbPromptWrap");
+    var negWrap = document.getElementById("cfbNegativeWrap");
+    if (!posWrap || !negWrap) return;
+
+    var posEl = posWrap.querySelector("textarea");
+    var negEl = negWrap.querySelector("textarea");
+    var posVal = posEl ? posEl.value : "";
+    var negVal = negEl ? negEl.value : "";
+
+    if (typeof PromptSyntaxWidget !== "undefined" && PromptSyntaxWidget.createEditor) {
+      try {
+        _cfbPosEditor = PromptSyntaxWidget.createEditor(posWrap, {
+          value: posVal,
+          placeholder: "1girl, masterpiece, best quality",
+          rows: 4, showSyntaxBar: true, showErrors: true,
+        });
+        _cfbNegEditor = PromptSyntaxWidget.createEditor(negWrap, {
+          value: negVal,
+          placeholder: "lowres, bad anatomy, worst quality",
+          rows: 2, showSyntaxBar: true, showErrors: true,
+        });
+      } catch (_e) { _cfbPosEditor = null; _cfbNegEditor = null; }
+    }
+
+    var posTa = _cfbPosEditor ? _cfbPosEditor.getTextarea() : posWrap.querySelector("textarea");
+    var negTa = _cfbNegEditor ? _cfbNegEditor.getTextarea() : negWrap.querySelector("textarea");
+
+    // Restore id/name so that <label for="..."> keeps working after
+    // PromptSyntaxWidget replaces the original textarea.
+    if (posTa) { posTa.id = "cfbPrompt"; posTa.name = "cfbPrompt"; }
+    if (negTa) { negTa.id = "cfbNegative"; negTa.name = "cfbNegative"; }
+
+    // Track textarea focus (for WC browser relocation + insertion target)
+    if (posTa) {
+      _cfbActiveTextarea = posTa;
+      _cfbActiveGetSet = { get: function() { return window._cfbGetPrompt(); }, set: function(v) { window._cfbSetPrompt(v); } };
+      _cfbTrackFocus(posTa,
+        function() { return window._cfbGetPrompt(); },
+        function(v) { window._cfbSetPrompt(v); });
+    }
+    if (negTa) {
+      _cfbTrackFocus(negTa,
+        function() { return window._cfbGetNegative(); },
+        function(v) { window._cfbSetNegative(v); });
+    }
+
+    if (typeof BridgeAutocomplete !== "undefined") {
+      var _acOpts = { bridgeBase: "/ext/comfyui-bridge" };
+      if (posTa) _cfbPosAc = BridgeAutocomplete.attach(posTa, _acOpts);
+      if (negTa) _cfbNegAc = BridgeAutocomplete.attach(negTa, _acOpts);
+    }
+
+    if (typeof PromptLinter !== "undefined") {
+      if (posTa) _cfbPosLinter = PromptLinter.attach(posTa, { syntaxMode: "sd", hasSyntaxWidget: !!_cfbPosEditor });
+      if (negTa) _cfbNegLinter = PromptLinter.attach(negTa, { syntaxMode: "sd", hasSyntaxWidget: !!_cfbNegEditor });
+    }
+
+    if (typeof keyboardPowerVimEdit !== "undefined") {
+      [posTa, negTa].forEach(function(ta) {
+        if (!ta) return;
+        ta.addEventListener("keydown", function(e) {
+          if (e.altKey && !e.ctrlKey && !e.metaKey) keyboardPowerVimEdit.handleVimNavigation(e, ta);
+          if (e.ctrlKey && !e.altKey && !e.metaKey) keyboardPowerVimEdit.handleCtrlShortcuts(e, ta);
+        });
+      });
+    }
+
+    if (typeof BridgeSed !== "undefined") {
+      var sedInput = document.getElementById("cfbSedInput");
+      if (sedInput) {
+        BridgeSed.attach({
+          input: sedInput,
+          getInput: function() { return _cfbActiveGetSet ? _cfbActiveGetSet.get() : window._cfbGetPrompt(); },
+          setInput: function(v) { if (_cfbActiveGetSet) _cfbActiveGetSet.set(v); else window._cfbSetPrompt(v); },
+          toast: function(msg) { _cfbSedToast(msg); },
+        });
+      }
+    }
+
+    if (typeof BridgeDedup !== "undefined") {
+      var _cfbDedup = BridgeDedup.attach({
+        getInput: function() { return _cfbActiveGetSet ? _cfbActiveGetSet.get() : window._cfbGetPrompt(); },
+        setInput: function(v) { if (_cfbActiveGetSet) _cfbActiveGetSet.set(v); else window._cfbSetPrompt(v); },
+        toast: function(msg) { _cfbDedupToast(msg); },
+      });
+      window._cfbDedupFirst = function() { _cfbDedup.runFirst(); };
+      window._cfbDedupLast  = function() { _cfbDedup.runLast();  };
+    }
+  }
+
+  function _cfbSedToast(msg) {
+    var el = document.getElementById("cfbSedToast");
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = "";
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.style.display = "none"; }, 3000);
+  }
+
+  function _cfbDedupToast(msg) {
+    var el = document.getElementById("cfbDedupToast");
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = "";
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.style.display = "none"; }, 3000);
+  }
+
+  window._cfbToggleSed = function() {
+    var bar = document.getElementById("cfbSedBar");
+    if (!bar) return;
+    bar.style.display = bar.style.display === "none" ? "" : "none";
+    if (bar.style.display !== "none") {
+      var si = document.getElementById("cfbSedInput");
+      if (si) { si.focus(); si.select(); }
+    }
+  };
+
+  window._cfbToggleDedup = function() {
+    var bar = document.getElementById("cfbDedupBar");
+    if (bar) bar.style.display = bar.style.display === "none" ? "" : "none";
+  };
+
+  window._cfbToggleAc = function() {
+    _cfbAcEnabled = !_cfbAcEnabled;
+    var btn = document.getElementById("cfbAcToggle");
+    if (btn) btn.classList.toggle("on", _cfbAcEnabled);
+    if (_cfbPosAc && _cfbPosAc.setEnabled) _cfbPosAc.setEnabled(_cfbAcEnabled);
+    if (_cfbNegAc && _cfbNegAc.setEnabled) _cfbNegAc.setEnabled(_cfbAcEnabled);
+  };
+
+  var _cfbWcEnabled = false;
+  var _cfbWcBrowser = null;
+
+  function _cfbInsertWildcard(name) {
+    var ta = _cfbActiveTextarea
+           || (_cfbPosEditor ? _cfbPosEditor.getTextarea() : null)
+           || document.getElementById("cfbPrompt");
+    if (!ta) return;
+    var tag = "__" + name + "__";
+    var start = ta.selectionStart;
+    var val = ta.value;
+    var needComma = start > 0 && !/[,\s]$/.test(val.substring(0, start));
+    var insert = (needComma ? ", " : "") + tag;
+    ta.value = val.substring(0, start) + insert + val.substring(ta.selectionEnd);
+    var newPos = start + insert.length;
+    ta.selectionStart = ta.selectionEnd = newPos;
+    ta.focus();
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function _cfbInitWcBrowser() {
+    var el = document.getElementById("cfbWcBrowser");
+    if (el && typeof BridgeWildcardBrowser !== "undefined") {
+      _cfbWcBrowser = BridgeWildcardBrowser.create({
+        container: el,
+        onInsert: _cfbInsertWildcard,
+      });
+    }
+  }
+
+  window._cfbToggleWc = function() {
+    _cfbWcEnabled = !_cfbWcEnabled;
+    var btn = document.getElementById("cfbWcToggle");
+    if (btn) btn.classList.toggle("on", _cfbWcEnabled);
+    if (_cfbWcEnabled) {
+      if (typeof BridgeWildcardCache !== "undefined") BridgeWildcardCache.fetch();
+      if (_cfbWcBrowser) _cfbWcBrowser.show();
+    } else {
+      if (_cfbWcBrowser) _cfbWcBrowser.hide();
+    }
+  };
+  window._cfbIsWcEnabled = function() { return _cfbWcEnabled; };
+
+  window._cfbGetPrompt = function() {
+    if (_cfbPosEditor && _cfbPosEditor.getValue) return _cfbPosEditor.getValue();
+    var el = document.getElementById("cfbPrompt");
+    return el ? el.value : "";
+  };
+  window._cfbSetPrompt = function(val) {
+    if (_cfbPosEditor && _cfbPosEditor.setValue) { _cfbPosEditor.setValue(val); return; }
+    var el = document.getElementById("cfbPrompt");
+    if (el) el.value = val;
+  };
+  window._cfbGetNegative = function() {
+    if (_cfbNegEditor && _cfbNegEditor.getValue) return _cfbNegEditor.getValue();
+    var el = document.getElementById("cfbNegative");
+    return el ? el.value : "";
+  };
+  window._cfbSetNegative = function(val) {
+    if (_cfbNegEditor && _cfbNegEditor.setValue) { _cfbNegEditor.setValue(val); return; }
+    var el = document.getElementById("cfbNegative");
+    if (el) el.value = val;
+  };
+
+    // bridge-app.js is type="module", so it runs after normal inline scripts.
+    // Delay initialization of all bridge-app.js derived modules until DOMContentLoaded.
+  function _cfbInitAllBridgeModules() {
+    _cfbInitEditors();
+    _cfbInitWcBrowser();
+
+    if (typeof BridgePromptLibrary !== "undefined") {
+      BridgePromptLibrary.attach({
+        prefix: "cfb",
+        getPrompt: function() { return window._cfbGetPrompt(); },
+        setPrompt: function(v) { window._cfbSetPrompt(v); },
+        getNegative: function() { return window._cfbGetNegative(); },
+        setNegative: function(v) { window._cfbSetNegative(v); },
+        getParams: function() {
+          return {
+            steps: document.getElementById("cfbSteps").value,
+            sampler: document.getElementById("cfbSampler").value,
+            cfg_scale: document.getElementById("cfbCfg").value,
+            seed: document.getElementById("cfbSeed").value,
+            model_name: document.getElementById("cfbModel").value
+          };
+        },
+        toolbarSelector: ".bridge-editor-toolbar",
+        syntaxMode: "none"
+      });
+    }
+
+    if (typeof BridgeQualityPresets !== "undefined") {
+      BridgeQualityPresets.attach({
+        prefix: "cfb",
+        bridgeType: "comfy",
+        getPrompt: function() { return window._cfbGetPrompt(); },
+        setPrompt: function(v) { window._cfbSetPrompt(v); },
+        getNegative: function() { return window._cfbGetNegative(); },
+        setNegative: function(v) { window._cfbSetNegative(v); },
+        toolbarSelector: ".bridge-editor-toolbar"
+      });
+    }
+
+    var _BRP = typeof BridgeResultPanel !== "undefined" ? BridgeResultPanel
+             : typeof BridgeGenThumbnails !== "undefined" ? BridgeGenThumbnails
+             : null;
+    if (_BRP) {
+      window._cfbThumbStrip = _BRP.attach({
+        prefix: "cfb",
+        containerSelector: ".brp-container"
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", _cfbInitAllBridgeModules);
+  } else {
+    setTimeout(_cfbInitAllBridgeModules, 0);
+  }
+})();
+</script>

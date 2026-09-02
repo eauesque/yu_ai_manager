@@ -1,0 +1,69 @@
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a href="/" class="sidebar-brand">
+      <span class="sidebar-brand-icon">
+        <svg width="24" height="24" viewBox="0 0 32 32" fill="none">
+          <rect x="3" y="3" width="11" height="11" rx="2" fill="#3b82f6"/>
+          <rect x="18" y="3" width="11" height="7" rx="2" fill="#60a5fa"/>
+          <rect x="18" y="14" width="11" height="15" rx="2" fill="#3b82f6" opacity="0.6"/>
+          <rect x="3" y="18" width="11" height="11" rx="2" fill="#60a5fa" opacity="0.8"/>
+        </svg>
+      </span>
+      <span class="sidebar-brand-text">YU Dashboard</span>
+    </a>
+    <button class="sidebar-close" id="sidebarClose" type="button" aria-label="Close menu">&times;</button>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="sidebar-section-label">Main</div>
+    <a href="/" class="sidebar-link{% if active == 'dashboard' %} active{% endif %}">
+      <span class="sidebar-icon">&#9632;</span> Dashboard
+    </a>
+    <a href="/search" class="sidebar-link{% if active == 'search' %} active{% endif %}">
+      <span class="sidebar-icon">&#128269;</span> Search
+    </a>
+    <a href="/stats" class="sidebar-link{% if active == 'stats' %} active{% endif %}">
+      <span class="sidebar-icon">&#128200;</span> Stats
+    </a>
+
+    <div class="sidebar-section-label">Tools</div>
+    <a href="/tools" class="sidebar-link{% if active == 'tools' %} active{% endif %}">
+      <span class="sidebar-icon">&#9881;</span> Tools
+    </a>
+    <a href="/inspect" class="sidebar-link{% if active == 'inspect' %} active{% endif %}">
+      <span class="sidebar-icon">&#128270;</span> Inspect
+    </a>
+
+    <div class="sidebar-section-label">Content</div>
+    <a href="/story" class="sidebar-link{% if active == 'story' %} active{% endif %}">
+      <span class="sidebar-icon">&#128214;</span> Story
+    </a>
+    <a href="/report" class="sidebar-link{% if active == 'report' %} active{% endif %}">
+      <span class="sidebar-icon">&#128196;</span> Report
+    </a>
+
+    <div class="sidebar-section-label">System</div>
+    <a href="/settings" class="sidebar-link{% if active == 'settings' %} active{% endif %}">
+      <span class="sidebar-icon">&#9881;</span> Settings
+    </a>
+    <a href="/extensions" class="sidebar-link{% if active == 'extensions' %} active{% endif %}">
+      <span class="sidebar-icon">&#128268;</span> Extensions
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <button class="sidebar-theme-btn" id="themeToggle" type="button" title="Toggle theme">
+      <span id="themeIcon">&#9789;</span> <span id="themeLabel">Dark Mode</span>
+    </button>
+  </div>
+</aside>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<header class="topbar" id="topbar">
+  <button class="topbar-hamburger" id="hamburger" type="button" aria-label="Open menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="topbar-title">{% block topbar_title %}Dashboard{% endblock %}</div>
+  <div class="topbar-spacer"></div>
+</header>

@@ -1,0 +1,404 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  "use strict";
+
+  var BASE = "/ext/comfyui-bridge";
+  var pollTimer = null;
+  var generating = false;
+  var activeTab = "simple";
+  var looping = false;
+  var loopCount = 0;
+
+  // -- Helpers ---------------------------------------------------
+
+  function $(id) { return document.getElementById(id); }
+
+  function _xhrHeaders(extra) {
+    return Object.assign({ "X-Requested-With": "XMLHttpRequest" }, extra || {});
+  }
+
+  function isLocalUrl(url) {
+    try {
+      var h = new URL(url).hostname;
+      if (h === "localhost" || h === "127.0.0.1" || h === "::1") return true;
+      if (/^10\./.test(h)) return true;
+      if (/^172\.(1[6-9]|2\d|3[01])\./.test(h)) return true;
+      if (/^192\.168\./.test(h)) return true;
+      return false;
+    } catch (_) { return false; }
+  }
+
+  function postJSON(path, body) {
+    return fetch(BASE + path, {
+      method: "POST",
+      headers: _xhrHeaders({ "Content-Type": "application/json" }),
+      body: JSON.stringify(body),
+    }).then(function(r) { return r.json(); });
+  }
+
+  function getJSON(path) {
+    return fetch(BASE + path).then(function(r) { return r.json(); });
+  }
+
+  function renderConnText(el, text) {
+    var raw = String(text || "");
+    var urlMatch = raw.match(/https?:\/\/\S+/);
+    if (!urlMatch) {
+      el.textContent = raw;
+      return;
+    }
+    el.textContent = raw.slice(0, urlMatch.index);
+    var code = document.createElement("code");
+    code.className = "bridge-url-code";
+    code.textContent = urlMatch[0];
+    el.appendChild(code);
+    el.appendChild(document.createTextNode(raw.slice((urlMatch.index || 0) + urlMatch[0].length)));
+  }
+
+  function setConn(ok, text) {
+    var dot = $("cfbConnDot");
+    dot.className = "cfb-conn-dot " + (ok ? "ok" : "err");
+    renderConnText($("cfbConnText"), text);
+  }
+
+  function escHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  // -- Tab switching ----------------------------------------------
+
+  window.cfbSwitchTab = function(tab) {
+    activeTab = tab;
+    var tabs = document.querySelectorAll(".cfb-tab");
+    var panels = document.querySelectorAll(".cfb-tab-panel");
+    tabs.forEach(function(t) {
+      t.classList.toggle("active", t.getAttribute("data-tab") === tab);
+    });
+    panels.forEach(function(p) {
+      p.classList.toggle("active", p.id === "cfbPanel" + tab.charAt(0).toUpperCase() + tab.slice(1));
+    });
+    // Show convert dropdown only in simple mode
+    var convertDropdown = document.querySelector(".cfb-convert-dropdown-wrap");
+    if (convertDropdown) {
+      convertDropdown.style.display = (tab === "simple") ? "" : "none";
+    }
+  };
+
+  // -- Connection test -------------------------------------------
+
+  window.cfbTestConnection = function() {
+    setConn(false, window.tr('comfyui_bridge.status_testing', 'Testing...'));
+    return postJSON("/api/test-connection", {}).then(function(d) {
+      if (d.ok) {
+        var info = window.tr('comfyui_bridge.status_connected', 'Connected');
+        if (d.version) info += " - v" + d.version;
+        if (d.device) info += " (" + d.device + ")";
+        setConn(true, info);
+        // Auto-load lists on successful connection
+        cfbLoadSamplers();
+        cfbLoadSchedulers();
+        cfbLoadModels();
+        cfbLoadVaes();
+        cfbLoadDiffusionModels();
+        cfbLoadTextEncoders();
+        cfbLoadClipTypes();
+        cfbLoadWeightDtypes();
+        cfbLoadControlnets();
+        cfbLoadUpscaleModels();
+      } else {
+        setConn(false, d.error || window.tr('comfyui_bridge.connection_failed', 'Connection failed'));
+      }
+      return d;
+    }).catch(function(e) {
+      setConn(false, window.tr('comfyui_bridge.request_failed', 'Request failed') + ": " + e.message);
+      return { ok: false, error: e.message };
+    });
+  };
+
+  // Auto-retry the connection test on page load when the first attempt
+  // fails (typical cause: ComfyUI is starting up but not ready yet when
+  // the bridge page loads). Stops as soon as one attempt succeeds.
+  window.cfbAutoTestConnectionWithRetry = function() {
+    var attempts = [0, 2000, 5000, 10000];  // ms delays
+    function _try(i) {
+      if (i >= attempts.length) return;
+      setTimeout(function() {
+        window.cfbTestConnection().then(function(d) {
+          if (!d || !d.ok) _try(i + 1);
+        });
+      }, attempts[i]);
+    }
+    _try(0);
+  };
+
+{% include "comfyui_bridge_parts/_script_loaders.html" %}
+
+{% include "comfyui_bridge_parts/_script_presets.html" %}
+
+{% include "comfyui_bridge_parts/_script_import.html" %}
+
+  // -- Seed reset -------------------------------------------------
+
+  window.cfbResetSeed = function() {
+    var el = $("cfbSeed");
+    if (el) el.value = "-1";
+  };
+
+  // -- Seed auto-reset after generation ---------------------------
+  // Persisted in localStorage so the user only has to enable it once.
+  (function() {
+    var cb = document.getElementById("cfbSeedAutoReset");
+    if (!cb) return;
+    try { cb.checked = localStorage.getItem("cfb_seed_auto_reset") === "1"; } catch(_) {}
+    cb.addEventListener("change", function() {
+      try { localStorage.setItem("cfb_seed_auto_reset", cb.checked ? "1" : "0"); } catch(_) {}
+    });
+  })();
+  window._cfbApplySeedAutoReset = function() {
+    var cb = document.getElementById("cfbSeedAutoReset");
+    if (cb && cb.checked) {
+      var el = document.getElementById("cfbSeed");
+      if (el) el.value = "-1";
+    }
+  };
+
+  // -- Generate (Simple mode) ------------------------------------
+
+  // Build the simple-mode request body from current UI state. Returns null
+  // if validation fails (and shows a toast). Exposed so the sweep runner can
+  // reuse the same logic.
+  window._cfbBuildSimpleBody = function() {
+    var prompt = (typeof _cfbGetPrompt === "function" ? _cfbGetPrompt() : $("cfbPrompt").value).trim();
+    if (!prompt) { window.showToast(window.tr('comfyui_bridge.prompt_required', 'Prompt is required'), true); return null; }
+    var _diffModel = ($("cfbDiffusionModel") || {}).value || "";
+    var _vaeVal = ($("cfbVae") || {}).value || "";
+    if (_diffModel && !_vaeVal) {
+      window.showToast(window.tr('comfyui_bridge.vae_required_error', 'VAE is required when using separate-load mode'), true);
+      return null;
+    }
+    var body = {
+      mode: "simple",
+      prompt: prompt,
+      negative_prompt: (typeof _cfbGetNegative === "function" ? _cfbGetNegative() : $("cfbNegative").value).trim(),
+      ckpt_name: $("cfbModel").value,
+      diffusion_model: _diffModel,
+      text_encoder_1: ($("cfbTextEncoder1") || {}).value || "",
+      text_encoder_2: ($("cfbTextEncoder2") || {}).value || "",
+      clip_type: ($("cfbClipType") || {}).value || "",
+      weight_dtype: ($("cfbWeightDtype") || {}).value || "default",
+      vae_name: _vaeVal,
+      controlnet_model: ($("cfbControlnetModel") || {}).value || "",
+      controlnet_strength: parseFloat(($("cfbControlnetStrength") || {}).value || "1.0") || 1.0,
+      controlnet_image_name: _cfbControlnetImageName,
+      upscale_model: ($("cfbUpscaleModel") || {}).value || "",
+      steps: parseInt($("cfbSteps").value, 10) || 20,
+      sampler_name: $("cfbSampler").value,
+      scheduler: $("cfbScheduler").value,
+      cfg: parseFloat($("cfbCfg").value) || 8,
+      width: parseInt($("cfbWidth").value, 10) || 512,
+      height: parseInt($("cfbHeight").value, 10) || 768,
+      seed: parseInt($("cfbSeed").value, 10) || -1,
+      image_format: $("cfbImageFormat").value,
+      a1111_mode: !!($("cfbA1111Mode") && $("cfbA1111Mode").checked),
+    };
+    body.expand_wildcards = true;
+    try {
+      var wm = localStorage.getItem('wm_wildcards');
+      if (wm) body.client_wildcards = JSON.parse(wm);
+    } catch(_) {}
+    if (typeof window.cfbCollectImg2Img === "function") {
+      var i2i = window.cfbCollectImg2Img();
+      if (i2i) {
+        body.image_base64 = i2i.image_base64;
+        body.denoise = i2i.denoise;
+      }
+    }
+    return body;
+  };
+
+  // Expose internals for sweep runner reuse.
+  window._cfbIsGenerating = function() { return generating; };
+  window._cfbDoGenerate = function(body) { doGenerate(body); };
+
+  if (window.BridgeLeaveGuard) {
+    window.BridgeLeaveGuard.install({ isGenerating: function () { return generating; } });
+  }
+
+  window.cfbGenerate = async function() {
+    if (generating) return;
+
+    // Sweep mode short-circuit (simple mode only)
+    if (typeof window.cfbRunSweep === "function" && $("cfbSweepEnabled") && $("cfbSweepEnabled").checked) {
+      window.cfbRunSweep();
+      return;
+    }
+
+    // Start loop mode if checkbox is checked (first call only)
+    var forever = $("cfbForever");
+    if (forever && forever.checked && !looping) {
+      if (forever.dataset.loopConfirmed !== "1") {
+        var ok = await window.customConfirm(window.tr(
+          'bridge.loop_generation_confirm',
+          'Loop generation will keep submitting jobs until stopped. Continue?'));
+        if (!ok) {
+          forever.checked = false;
+          return;
+        }
+        forever.dataset.loopConfirmed = "1";
+      }
+      looping = true;
+      loopCount = 0;
+      $("cfbLoopCount").style.display = "";
+      $("cfbLoopCount").textContent = "#0";
+    }
+
+    var body = window._cfbBuildSimpleBody();
+    if (!body) return;
+    doGenerate(body);
+  };
+
+  // -- Generate (JSON mode) --------------------------------------
+
+  window.cfbGenerateJson = function() {
+    var raw = $("cfbWorkflowJson").value.trim();
+    if (!raw) { window.showToast(window.tr('comfyui_bridge.workflow_json_required', 'Workflow JSON is required'), true); return; }
+    if (generating) return;
+
+    var workflow;
+    try {
+      workflow = JSON.parse(raw);
+    } catch (e) {
+      window.showToast(window.tr('comfyui_bridge.invalid_json', 'Invalid JSON') + ": " + e.message, true);
+      return;
+    }
+
+    doGenerate({ mode: "json", workflow: workflow });
+  };
+
+{% include "comfyui_bridge_parts/_script_generate.html" %}
+
+  // ComfyUI convert dropdown — simple mode only
+  (function() {
+    var menu = document.getElementById('cfbConvertMenu');
+    if (!menu) return;
+
+    async function convertPrompt(mode) {
+      var prompt = (typeof window._cfbGetPrompt === 'function')
+        ? window._cfbGetPrompt()
+        : (document.getElementById('cfbPrompt') || {}).value || '';
+      if (!prompt.trim()) {
+        window.showToast(window.tr('comfyui_bridge.prompt_required', 'Prompt is required'), true);
+        return;
+      }
+
+      try {
+        var resp = await fetch('/api/convert', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ prompt: prompt, mode: mode }),
+        });
+        var data = await resp.json();
+        if (data.result) {
+          if (typeof window._cfbSetPrompt === 'function') {
+            window._cfbSetPrompt(data.result);
+          } else {
+            var ta = document.getElementById('cfbPrompt');
+            if (ta) ta.value = data.result;
+          }
+        } else {
+          window.showToast(window.tr('bridge.syntax_warning.error', '変換に失敗しました'), true);
+        }
+      } catch (e) {
+        window.showToast(window.tr('bridge.syntax_warning.error', '変換に失敗しました'), true);
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      var target = e.target;
+
+      if (target.closest('[data-action="cfb-convert-toggle"]')) {
+        if (menu.hasAttribute('hidden')) {
+          menu.removeAttribute('hidden');
+        } else {
+          menu.setAttribute('hidden', '');
+        }
+        return;
+      }
+      if (target.closest('[data-action="cfb-convert-a1111-to-nai"]')) {
+        convertPrompt('sd_to_nai');
+        menu.setAttribute('hidden', '');
+        return;
+      }
+      if (target.closest('[data-action="cfb-convert-nai-to-a1111"]')) {
+        convertPrompt('nai_to_sd');
+        menu.setAttribute('hidden', '');
+        return;
+      }
+      // Close dropdown on outside click
+      if (!target.closest('.cfb-convert-dropdown-wrap')) {
+        menu.setAttribute('hidden', '');
+      }
+    });
+  })();
+
+  // Resolution preset + W/H swap.
+  // bridge-app.js is a deferred ES module, so window.BridgeResolutionPresets
+  // is not defined yet at this sync-inline point. Wait for DOMContentLoaded,
+  // which fires after module scripts have executed.
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize convert dropdown visibility based on initial tab state
+    var convertDropdown = document.querySelector(".cfb-convert-dropdown-wrap");
+    if (convertDropdown) {
+      convertDropdown.style.display = (activeTab === "simple") ? "" : "none";
+    }
+    var foreverEl = document.getElementById('cfbForever');
+    if (foreverEl) {
+      foreverEl.addEventListener('change', async function() {
+        if (!foreverEl.checked) {
+          delete foreverEl.dataset.loopConfirmed;
+          return;
+        }
+        var ok = await window.customConfirm(window.tr(
+          'bridge.loop_generation_confirm',
+          'Loop generation will keep submitting jobs until stopped. Continue?'));
+        if (!ok) {
+          foreverEl.checked = false;
+          delete foreverEl.dataset.loopConfirmed;
+        } else {
+          foreverEl.dataset.loopConfirmed = "1";
+        }
+      });
+    }
+
+    var rpSelEl = document.getElementById('cfbResolutionPreset');
+    var rpWEl = document.getElementById('cfbWidth');
+    var rpHEl = document.getElementById('cfbHeight');
+    var rpSwapEl = document.getElementById('cfbSwapWH');
+    var rpRatioEl = document.getElementById('cfbAspectRatio');
+    var rpLockEl = document.getElementById('cfbAspectLock');
+
+    var aspectHandle = null;
+    if (window.BridgeAspectLock && rpWEl && rpHEl && rpRatioEl && rpLockEl) {
+      aspectHandle = window.BridgeAspectLock.attach({
+        widthEl: rpWEl, heightEl: rpHEl,
+        ratioEl: rpRatioEl, lockBtnEl: rpLockEl,
+      });
+    }
+
+    if (window.BridgeResolutionPresets && rpSelEl && rpWEl && rpHEl && rpSwapEl) {
+      window.BridgeResolutionPresets.attach({
+        selectEl: rpSelEl,
+        widthEl: rpWEl,
+        heightEl: rpHEl,
+        swapBtnEl: rpSwapEl,
+        i18nPrefix: 'comfyui_bridge',
+        onSwap: function() { if (aspectHandle) aspectHandle.onSwap(); },
+        onPresetApplied: function() { if (aspectHandle) aspectHandle.onPresetApplied(); },
+      });
+    }
+  });
+
+})();
+</script>

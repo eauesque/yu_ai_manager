@@ -1,0 +1,51 @@
+{
+  "name": "builtin-hailo-semantic-search",
+  "version": "1.0.0",
+  "description": "Semantic Image Search (Hailo / ONNX)",
+  "type": "ui_widget",
+  "category": "ai",
+  "entry": "hailo_semantic_search.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/hailo-semantic",
+  "nav": {
+    "label": "Semantic",
+    "icon": "\ud83e\udde0"
+  },
+  "core_shim": "hailo_clip_core",
+  "config": {
+    "enabled": true,
+    "priority": 50
+  },
+  "config_schema": {
+    "auto_index_on_scan": {
+      "type": "bool",
+      "default": false,
+      "label": "Auto-index on scan",
+      "description": "Automatically index new files after scan completes"
+    },
+    "batch_size": {
+      "type": "int",
+      "default": 128,
+      "label": "Batch size",
+      "range": [
+        1,
+        512
+      ],
+      "description": "Number of images to process per batch during indexing"
+    },
+    "similarity_threshold": {
+      "type": "float",
+      "default": 0.2,
+      "label": "Similarity threshold",
+      "description": "Minimum cosine similarity score for search results (0.0-1.0)"
+    },
+    "preferred_backend": {
+      "type": "select",
+      "default": "auto",
+      "options": ["auto", "hailo", "onnx", "coreml"],
+      "label": "Preferred backend",
+      "description": "CLIP encoder backend: auto (best available), hailo, coreml, or onnx"
+    }
+  }
+}

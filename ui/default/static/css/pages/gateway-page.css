@@ -1,0 +1,108 @@
+/*
+ * gateway-page.css — layout utilities for /gateway page.
+ * .card, .dot, layout helpers used by gateway.html and gateway-page.js
+ * are not defined in main.css (search-focused) or atelier-components.css
+ * (scoped to body.theme-atelier-*), so we define minimal versions here.
+ */
+
+/* ---- Page chrome ---- */
+
+.page-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 72px 16px 40px;
+}
+
+.page-title {
+  font-size: clamp(22px, 3vw, 36px);
+  font-weight: 600;
+  margin: 0 0 1.2em;
+  color: var(--text, #222);
+}
+
+/* ---- Card section ---- */
+
+.card {
+  background: var(--card, #fff);
+  border: 1px solid var(--border, #e6e6e6);
+  border-radius: 8px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow, 0 1px 4px rgba(0,0,0,0.06));
+}
+
+.card h2 {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0 0 0.75em;
+  color: var(--text, #222);
+}
+
+/* ---- Layout helpers ---- */
+
+.row {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.col {
+  display: flex;
+  flex-direction: column;
+}
+
+.gap-1 { gap: 6px; }
+.gap-2 { gap: 10px; }
+.mt-1  { margin-top: 6px; }
+.mt-2  { margin-top: 12px; }
+.align-center { align-items: center; }
+
+/* ---- Status dots ---- */
+
+.dot {
+  display: inline-block;
+  font-size: 0.75em;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.dot-green { color: #22a855; }
+.dot-red   { color: #e53e3e; }
+.dot-gray  { color: #aaa; }
+
+/* ---- Text helpers ---- */
+
+.muted {
+  color: var(--muted, #5a5a5a);
+  font-size: 0.9em;
+}
+
+/* ---- Form elements ---- */
+
+#gw-add-form select,
+#gw-add-form input[type="number"],
+#gw-scan-range-inputs input[type="number"] {
+  padding: 8px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--border, rgba(128,128,128,0.3));
+  background: var(--bg-input, var(--card, #fff));
+  color: var(--text, #222);
+  font-size: 13px;
+  font-family: inherit;
+}
+
+#gw-add-form select:focus,
+#gw-add-form input[type="number"]:focus,
+#gw-scan-range-inputs input[type="number"]:focus {
+  outline: 2px solid var(--accent, #667eea);
+  outline-offset: 1px;
+}
+
+#gw-add-form select {
+  flex: 1;
+  min-width: 160px;
+}
+
+#gw-add-form input[type="number"] {
+  width: 120px;
+}

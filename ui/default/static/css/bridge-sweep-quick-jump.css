@@ -1,0 +1,214 @@
+.bsqj-popover {
+  position: absolute;
+  min-width: 280px;
+  max-width: 360px;
+  max-height: 400px;
+  overflow-y: auto;
+  background: var(--surface-1, #fff);
+  border: 1px solid var(--border-1, #ccc);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  padding: 8px 0;
+  z-index: 1000;
+}
+.bsqj-popover[hidden] { display: none; }
+.bsqj-popover-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 4px 12px 8px;
+  border-bottom: 1px solid var(--border-2, #eee);
+  margin-bottom: 4px;
+  font-size: 0.85em;
+  color: var(--text-2, #666);
+}
+.bsqj-clear-all {
+  background: none;
+  border: none;
+  color: var(--accent-1, #06c);
+  cursor: pointer;
+  font-size: 0.85em;
+}
+.bsqj-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.bsqj-row:hover { background: var(--surface-2, #f5f5f5); }
+.bsqj-row[aria-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.bsqj-status {
+  display: inline-block;
+  width: 1em;
+  text-align: center;
+  font-weight: bold;
+}
+.bsqj-status-running::before { content: "⟳"; }
+.bsqj-status-completed::before { content: "✓"; color: #2a8; }
+.bsqj-status-failed::before { content: "✕"; color: #c33; }
+.bsqj-status-cancelled::before { content: "−"; color: #888; }
+.bsqj-status-unknown::before { content: "●"; color: #aaa; }
+.bsqj-meta { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bsqj-empty {
+  padding: 16px 12px;
+  color: var(--text-2, #888);
+  font-size: 0.85em;
+  text-align: center;
+}
+.bsqj-complete-banner {
+  position: fixed;
+  bottom: 60px;
+  right: 20px;
+  padding: 10px 16px;
+  background: var(--surface-1, #fff);
+  border: 1px solid var(--accent-1, #06c);
+  border-radius: 6px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  z-index: 999;
+}
+.bsqj-complete-banner a {
+  color: var(--accent-1, #06c);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+/* Inline history list (used on the dedicated /sweep page). */
+.bsqj-list {
+  border: 1px solid var(--border-1, #ccc);
+  border-radius: 8px;
+  background: var(--surface-1, #fff);
+  overflow: hidden;
+}
+.bsqj-list-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-2, #eee);
+  font-size: 0.9em;
+}
+.bsqj-list-title {
+  font-weight: 600;
+  color: var(--text-1, #222);
+}
+.bsqj-list-count-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-2, #666);
+  font-size: 0.9em;
+}
+.bsqj-list-count-select {
+  padding: 2px 6px;
+  font-size: 0.95em;
+  border: 1px solid var(--border-1, #ccc);
+  border-radius: 4px;
+  background: var(--surface-1, #fff);
+  color: var(--text-1, #222);
+}
+.bsqj-list-toolbar .bsqj-clear-all {
+  margin-left: auto;
+}
+.bsqj-list-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+.bsqj-list-row {
+  border-bottom: 1px solid var(--border-2, #eee);
+  color: var(--text-1, #222);
+}
+.bsqj-list-row:last-child { border-bottom: none; }
+.bsqj-list-row-current {
+  background: var(--surface-2, #f0f4ff);
+  font-weight: 600;
+}
+.bsqj-list-row-current::after {
+  content: "← current";
+  margin-left: auto;
+  font-size: 0.8em;
+  opacity: 0.8;
+}
+
+/* Filter section (only shown when /sweep page passes referenceSweepId). */
+.bsqj-list-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--border-2, #eee);
+  font-size: 0.88em;
+  color: var(--text-1, #222);
+  background: var(--surface-1, #fff);
+}
+.bsqj-list-filter-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 10px;
+}
+.bsqj-list-filter-lead {
+  color: var(--text-2, #666);
+  font-weight: 600;
+}
+.bsqj-list-filter-btn {
+  background: transparent;
+  border: 1px solid var(--border-1, #ccc);
+  border-radius: 4px;
+  color: var(--text-1, #222);
+  cursor: pointer;
+  font-size: 0.88em;
+  padding: 2px 8px;
+}
+.bsqj-list-filter-btn:hover {
+  background: var(--surface-2, #f5f5f5);
+}
+.bsqj-list-filter-mode {
+  border-color: var(--accent-1, #06c);
+  color: var(--accent-1, #06c);
+}
+.bsqj-list-filter-status {
+  margin-left: auto;
+  color: var(--text-2, #666);
+  font-size: 0.9em;
+}
+.bsqj-list-filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 12px;
+}
+.bsqj-list-filter-grp-title {
+  display: inline-block;
+  min-width: 4em;
+  color: var(--text-2, #666);
+  font-size: 0.85em;
+}
+.bsqj-list-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  user-select: none;
+}
+.bsqj-list-filter-chip[data-disabled="true"] {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+.bsqj-list-filter-chip input[type="checkbox"] {
+  accent-color: var(--accent-1, #06c);
+}
+.bsqj-list-filter-tol,
+.bsqj-list-filter-sel {
+  font-size: 0.85em;
+  padding: 1px 4px;
+  border: 1px solid var(--border-1, #ccc);
+  border-radius: 3px;
+  background: var(--surface-1, #fff);
+  color: var(--text-1, #222);
+}

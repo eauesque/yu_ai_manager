@@ -1,0 +1,39 @@
+#!/bin/sh
+# Tracked pre-push hook. Install once with:
+#   git config core.hooksPath .githooks
+#
+# Runs scripts/pre_push_check.py (ruff F-rules / TS / pyright / async-route /
+# db-write / i18n drift / pytest collect). Skip individual checks via env:
+#   PRE_PUSH_SKIP=ts,pyright git push
+# Bypass entirely (discouraged): git push --no-verify
+
+# Detect Python binary (cross-platform: uv .venv / Windows venv / Unix venv / uv / python3)
+if [ -x .venv/Scripts/python.exe ]; then
+    PYBIN=".venv/Scripts/python"
+elif [ -x .venv/bin/python ]; then
+    PYBIN=".venv/bin/python"
+elif [ -x venv/Scripts/python.exe ]; then
+    PYBIN="venv/Scripts/python"
+elif [ -x venv/bin/python ]; then
+    PYBIN="venv/bin/python"
+elif command -v uv >/dev/null 2>&1; then
+    PYBIN="uv run python"
+else
+    PYBIN="python3"
+fi
+
+SKIP_ARG=""
+if [ -n "$PRE_PUSH_SKIP" ]; then
+    SKIP_ARG="--skip=$PRE_PUSH_SKIP"
+fi
+
+# shellcheck disable=SC2086
+$PYBIN scripts/pre_push_check.py $SKIP_ARG
+status=$?
+if [ $status -ne 0 ]; then
+    echo "" >&2
+    echo "[pre-push] checks failed. Fix the issues or bypass with --no-verify (discouraged)." >&2
+    echo "[pre-push] Skip individual checks: PRE_PUSH_SKIP=ts,pyright git push" >&2
+    exit $status
+fi
+exit 0

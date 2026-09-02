@@ -1,0 +1,28 @@
+[package]
+name = "yu-ai-manager"
+version = "4.689.41"
+description = "YU AI Manager - Desktop App"
+authors = ["you"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+reqwest = { version = "0.12", default-features = false, features = ["blocking"] }
+rfd = "0.15"
+percent-encoding = "2.3"
+getrandom = "0.2"
+anyhow = "1"
+zip = { version = "2", default-features = false }
+
+[target.'cfg(windows)'.dependencies]
+windows = { version = "0.61", features = ["Win32_UI_WindowsAndMessaging"] }
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

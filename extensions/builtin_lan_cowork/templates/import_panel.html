@@ -1,0 +1,72 @@
+<div id="import-panel" class="import-panel" hidden>
+  <h3 data-i18n="import.title">リモートインポート</h3>
+
+  <!-- Peer selector (filled by JS from /api/peer/discover) -->
+  <div class="import-section">
+    <label for="import-peer-select" data-i18n="import.peer">対象ピア</label>
+    <select id="import-peer-select" name="import_peer_id"></select>
+  </div>
+
+  <!-- Mode -->
+  <div class="import-section">
+    <label for="import-mode-select" data-i18n="import.mode">モード</label>
+    <select id="import-mode-select" name="import_mode">
+      <option value="full"      data-i18n="import.mode.full">全件</option>
+      <option value="diff"      data-i18n="import.mode.diff">差分</option>
+      <option value="selective" data-i18n="import.mode.selective">選択</option>
+    </select>
+  </div>
+
+  <!-- Import folder -->
+  <div class="import-section">
+    <label data-i18n="import.folder">インポートフォルダ</label>
+    <span id="import-folder-display" class="import-folder-path">—</span>
+    <button type="button" data-action="import-choose-folder"
+            data-i18n="import.folder.choose">選択...</button>
+  </div>
+
+  <!-- Options -->
+  <div class="import-section">
+    <label>
+      <input type="checkbox" id="import-opt-favorites" name="include_favorites">
+      <span data-i18n="import.opt.favorites">favorites を含める</span>
+    </label>
+    <label>
+      <input type="checkbox" id="import-opt-merge" name="merge_metadata">
+      <span data-i18n="import.opt.merge">メタデータをマージ（ハッシュ一致時）</span>
+    </label>
+  </div>
+
+  <!-- Selective: file grid (shown only in selective mode) -->
+  <div id="import-file-grid-section" class="import-section" hidden>
+    <div class="import-filter-row">
+      <input type="text" id="import-tag-filter" name="tag_filter"
+             placeholder="タグで絞り込み"
+             data-i18n-placeholder="import.filter.placeholder">
+    </div>
+    <div id="import-file-grid" class="import-file-grid"></div>
+    <button type="button" data-action="import-load-index"
+            data-i18n="import.load_index">インデックスを取得</button>
+  </div>
+
+  <!-- Stale cache warning (shown after 30 min) -->
+  <div id="import-stale-warning" class="import-warning" hidden>
+    <span data-i18n="import.stale_warning">インデックスが古い可能性があります。</span>
+    <button type="button" data-action="import-reload-index"
+            data-i18n="import.reload_index">再取得</button>
+  </div>
+
+  <!-- Progress -->
+  <div id="import-progress-section" class="import-section" hidden>
+    <progress id="import-progress-bar" value="0" max="100"></progress>
+    <span id="import-progress-label">0 / 0</span>
+  </div>
+
+  <!-- Actions -->
+  <div class="import-actions">
+    <button type="button" data-action="import-start"
+            data-i18n="import.start">インポート開始</button>
+    <button type="button" data-action="import-close"
+            data-i18n="import.close">閉じる</button>
+  </div>
+</div>

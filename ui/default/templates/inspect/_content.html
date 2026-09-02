@@ -1,0 +1,79 @@
+  <main id="main-content" class="container" style="padding-top:50px;">
+    <header style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;">
+      <h1><span aria-hidden="true">🔬</span> <span data-i18n="page.inspect.title">Metadata Inspect</span></h1>
+      <a href="/ext/prompt-sim/" target="_blank"
+         style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;background:linear-gradient(135deg,rgba(139,92,246,0.18),rgba(109,40,217,0.18));border:1px solid rgba(139,92,246,0.4);color:var(--text,#e0e0e0);text-decoration:none;font-size:13px;white-space:nowrap;"
+         class="inspect-sim-link">
+        <span>🧪</span>
+        <span data-i18n="inspect.open_simulator">Open Prompt Simulator</span>
+      </a>
+    </header>
+
+    <!-- Drop zone -->
+    <div id="dropZone" class="drop-zone" data-action="inspectPageApi.triggerFileInput">
+      <div class="icon">📂</div>
+      <div class="hint">
+        <span data-i18n="inspect.drop_hint">Drag & drop image files here</span>
+        <small data-i18n="inspect.drop_hint_sub">or click to select files</small>
+        <div class="drop-zone-formats" aria-label="Supported formats">
+          <span class="format-tag">PNG</span><span class="format-tag">JPEG</span><span class="format-tag">WebP</span><span class="format-tag">ZIP</span>
+        </div>
+      </div>
+      <input type="file" id="fileInput" accept=".png,.jpg,.jpeg,.webp,.zip" style="display:none" aria-label="Select image file to inspect" data-action="inspectPageApi.handleFileInput" data-action-event="change" data-action-this="1">
+    </div>
+
+    <!-- Result area -->
+    <div id="resultArea" style="display:none;">
+      <div class="preview-area">
+        <div>
+          <div id="inspectPreviewWrap" style="position:relative;display:inline-block;">
+            <img id="previewImg" class="preview-img" alt="Preview">
+            <div id="inspectCharGrid"></div>
+          </div>
+          <div style="margin-top:8px;text-align:center;">
+            <span id="fileInfo" style="font-size:12px;color:var(--muted,#888);"></span>
+          </div>
+        </div>
+        <div class="meta-panel" id="metaPanel"></div>
+      </div>
+
+      <!-- Raw metadata -->
+      <div style="margin-top:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+          <h2 style="margin:0;font-size:14px;" data-i18n="inspect.raw_meta">Raw Metadata</h2>
+          <button class="copy-btn" data-action="inspectPageApi.copyRawMeta" data-i18n="inspect.copy">Copy</button>
+        </div>
+        <pre id="rawMeta" class="raw-meta"></pre>
+      </div>
+
+      <!-- OCR text extraction (only shown when file is in DB) -->
+      <div id="ocrSection" style="display:none;margin-top:16px;">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;flex-wrap:wrap;">
+          <h2 style="margin:0;font-size:14px;" data-i18n="inspect.ocr_title">🔤 Text Extraction (OCR)</h2>
+          <button class="wb-btn" id="ocrRunBtn" data-action="inspectPageApi.runOcr" data-i18n="inspect.ocr_run">Extract Text</button>
+          <select id="ocrTaskSelect" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:rgba(0,0,0,0.2);color:inherit;font-size:12px;">
+            <option value="ocr" data-i18n="inspect.ocr_task_ocr">General OCR</option>
+            <option value="ocr_document" data-i18n="inspect.ocr_task_doc">Document OCR</option>
+            <option value="ocr_manga" data-i18n="inspect.ocr_task_manga">Manga OCR</option>
+          </select>
+        </div>
+        <div id="ocrResult" style="display:none;">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+            <span id="ocrEngineLabel" style="font-size:11px;color:var(--muted,#888);"></span>
+            <button class="copy-btn" id="ocrCopyBtn" data-action="inspectPageApi.copyOcrText" data-i18n="inspect.copy">Copy</button>
+          </div>
+          <pre id="ocrText" class="raw-meta" style="min-height:80px;"></pre>
+        </div>
+        <div id="ocrError" style="display:none;color:#f87171;font-size:13px;"></div>
+        <div id="ocrLoading" style="display:none;text-align:center;padding:12px;">
+          <div class="inspect-spinner"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingArea" style="display:none;text-align:center;padding:40px;">
+      <div class="inspect-spinner"></div>
+      <p style="margin-top:12px;color:var(--muted,#888);" data-i18n="inspect.analyzing">Analyzing...</p>
+    </div>
+  </main>

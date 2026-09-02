@@ -1,0 +1,53 @@
+{
+  "name": "builtin-chatlog",
+  "version": "1.0.0",
+  "description": "Chat log importer and viewer for Claude / ChatGPT",
+  "type": "ui_widget",
+  "category": "library",
+  "entry": "chatlog_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/chatlog",
+  "nav": {
+    "label": "Chat Logs",
+    "icon": "\ud83d\udcac"
+  },
+  "core_shim": "chatlog_core",
+  "config": {
+    "enabled": true,
+    "priority": 270
+  },
+  "config_schema": {
+    "engine_type": {
+      "type": "enum",
+      "default": "ollama",
+      "options": [
+        "ollama",
+        "openai",
+        "openai_compat",
+        "claude_api"
+      ],
+      "label": "AI Engine",
+      "description": "Type of AI engine used for conversation analysis"
+    },
+    "base_url": {
+      "type": "str",
+      "default": "http://localhost:11434",
+      "label": "API Base URL",
+      "description": "API endpoint URL of the AI engine"
+    },
+    "model": {
+      "type": "str",
+      "default": "llama3.2:latest",
+      "label": "Model Name",
+      "description": "Name of the model to use (e.g. llama3.2:latest, gpt-4o-mini)",
+      "model_source": "ollama"
+    },
+    "api_key": {
+      "type": "str",
+      "default": "",
+      "label": "API Key",
+      "description": "Required for OpenAI / Claude API. Leave blank for local Ollama"
+    }
+  }
+}

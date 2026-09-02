@@ -1,0 +1,17 @@
+    <!-- Server shutdown -->
+    <details class="tool-item" id="tool-shutdown">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.shutdown.title">🛑 サーバー停止</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.shutdown.desc">
+        サーバープロセスを安全に終了します。start.vbs などコンソールが無い起動方法を使っているとき用です。
+      </p>
+      <div id="shutdownStatus"></div>
+      <button type="button" class="btn btn-danger" data-action="toolsPageApi.shutdownServer">
+        <span data-i18n="tools.shutdown.button">サーバーを停止</span>
+      </button>
+      </div>
+</details>

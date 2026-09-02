@@ -1,0 +1,874 @@
+<script nonce="{{ csp_nonce }}">
+/* -- ComfyUI Bridge: Model Registry WebUI -- */
+(function () {
+  "use strict";
+
+  var BASE = "/ext/comfyui-bridge";
+
+  // Last fetched data: { registry: [...], available_models: {...} }
+  var _cache = null;
+  // "add" | "edit" | "override"
+  var _modalMode = "add";
+
+  // ---- Fetch helpers -------------------------------------------------------
+
+  function _hdr(extra) {
+    return Object.assign({ "X-Requested-With": "XMLHttpRequest" }, extra || {});
+  }
+
+  function _regGet(path) {
+    return fetch(BASE + path, { headers: _hdr() }).then(function (r) { return r.json(); });
+  }
+
+  function _regPost(path, body) {
+    return fetch(BASE + path, {
+      method: "POST",
+      headers: _hdr({ "Content-Type": "application/json" }),
+      body: JSON.stringify(body),
+    }).then(function (r) { return r.json(); });
+  }
+
+  function _regDel(path) {
+    return fetch(BASE + path, { method: "DELETE", headers: _hdr() })
+      .then(function (r) { return r.json(); });
+  }
+
+  // ---- DOM helpers ---------------------------------------------------------
+
+  function _el(id) { return document.getElementById(id); }
+
+  function _esc(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(String(s == null ? "" : s)));
+    return d.innerHTML;
+  }
+
+  function _escAttr(s) {
+    return String(s == null ? "" : s)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
+  }
+
+  function _trunc(s, n) {
+    s = String(s == null ? "" : s);
+    return s.length > n ? s.slice(0, n) + "…" : s;
+  }
+
+  function _basename(s) {
+    if (!s) return "";
+    return s.replace(/\\/g, "/").split("/").pop() || s;
+  }
+
+  function _setStatus(msg, isErr) {
+    var el = _el("cfbRegStatus");
+    if (!el) return;
+    el.textContent = msg;
+    el.style.color = isErr ? "var(--danger, #f44336)" : "";
+  }
+
+  // ---- Load & render -------------------------------------------------------
+
+  function load() {
+    _setStatus("Loading…");
+    _regGet("/api/model-registry").then(function (d) {
+      if (!d.ok) { _setStatus("Error: " + (d.error || "unknown"), true); return; }
+      _cache = d;
+      _render(d);
+      var warn = d.models_error ? "  ⚠ ComfyUI offline (datalist unavailable)" : "";
+      _setStatus(d.registry.length + " entries" + warn);
+    }).catch(function (e) {
+      _setStatus("Network error: " + e.message, true);
+    });
+  }
+
+  function _render(data) {
+    var wrap = _el("cfbRegTableWrap");
+    if (!wrap) return;
+    var entries = data.registry || [];
+
+    if (!entries.length) {
+      wrap.innerHTML = '<p style="font-size:12px;opacity:0.6;padding:8px 0;">No entries.</p>';
+      return;
+    }
+
+    var html = [
+      '<table style="width:100%;border-collapse:collapse;font-size:12px;">',
+      '<thead>',
+      '<tr style="border-bottom:1px solid rgba(128,128,128,.25);">',
+      _th("Type"), _th("ID"), _th("UNET Patterns"), _th("VAE"), _th("CLIP 1 / CLIP 2"),
+      _th("CLIP Type"), _th("Steps / CFG"), _th("Actions"),
+      "</tr></thead><tbody>",
+    ].join("");
+
+    entries.forEach(function (e) {
+      var isBuiltin = !!e.builtin;
+      var isOverride = !isBuiltin && !!e.shadows_builtin;
+      var badgeLabel, badgeStyle;
+      if (isBuiltin) {
+        badgeLabel = "builtin";
+        badgeStyle = "background:rgba(100,100,160,.3);color:#aab;";
+      } else if (isOverride) {
+        badgeLabel = "override";
+        badgeStyle = "background:rgba(200,150,40,.28);color:#dca;";
+      } else {
+        badgeLabel = "user";
+        badgeStyle = "background:rgba(70,180,100,.22);color:#8da;";
+      }
+      var rowOpacity = isBuiltin ? "opacity:.78;" : "";
+
+      var patterns = (e.unet_patterns || []).join(", ");
+      var clip12 = [_basename(e.clip_1), _basename(e.clip_2)].filter(Boolean).join(" / ");
+      var stepsCfg = [
+        e.default_steps != null ? e.default_steps + "st" : "",
+        e.default_cfg   != null ? e.default_cfg   + "cfg" : "",
+      ].filter(Boolean).join(" / ");
+
+      html += '<tr style="border-bottom:1px solid rgba(128,128,128,.09);' + rowOpacity + '">';
+      var badgeTip = isOverride ? ' title="' + _escAttr("組み込みエントリ '" + e.id + "' をユーザーエントリで上書き中") + '"' : "";
+      html += '<td style="padding:5px 8px;white-space:nowrap;">'
+        + '<span style="font-size:10px;padding:2px 7px;border-radius:4px;cursor:default;' + badgeStyle + '"' + badgeTip + '>'
+        + _esc(badgeLabel) + '</span></td>';
+      html += '<td style="padding:5px 8px;white-space:nowrap;font-family:monospace;font-weight:600;">' + _esc(e.id) + '</td>';
+      html += _td(_trunc(patterns, 52), patterns);
+      html += _td(_trunc(_basename(e.vae || ""), 28), e.vae || "");
+      html += _td(_trunc(clip12, 36), (e.clip_1 || "") + "\n" + (e.clip_2 || ""));
+      html += _td(e.clip_type || "");
+      html += _td(stepsCfg);
+
+      html += '<td style="padding:5px 8px;white-space:nowrap;">';
+      if (!isBuiltin) {
+        html += '<button type="button" class="cfb-btn small" style="margin-right:4px;" '
+          + 'data-reg-action="edit" data-reg-id="' + _escAttr(e.id) + '">Edit</button>';
+        html += '<button type="button" class="cfb-btn small" style="color:var(--danger,#f44336);" '
+          + 'data-reg-action="delete" data-reg-id="' + _escAttr(e.id) + '">Del</button>';
+      } else {
+        html += '<button type="button" class="cfb-btn small" title="ユーザーオーバーライドとして編集" '
+          + 'data-reg-action="override" data-reg-id="' + _escAttr(e.id) + '">Override</button>';
+      }
+      html += '</td></tr>';
+    });
+
+    html += "</tbody></table>";
+    wrap.innerHTML = html;
+    _bindRegActionButtons(wrap);
+  }
+
+  function _bindRegActionButtons(wrap) {
+    wrap.querySelectorAll("[data-reg-id]").forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        var id = btn.getAttribute("data-reg-id") || "";
+        var action = btn.getAttribute("data-reg-action") || "";
+        if (action === "edit") window._cfbRegEdit(id);
+        else if (action === "delete") window._cfbRegDel(id);
+        else if (action === "override") window._cfbRegOverride(id);
+      });
+    });
+  }
+
+  function _th(label) {
+    return '<th style="text-align:left;padding:5px 8px;font-weight:600;opacity:.65;white-space:nowrap;">'
+      + _esc(label) + "</th>";
+  }
+
+  function _td(text, titleText, extraStyle) {
+    var t = titleText != null ? ' title="' + _escAttr(titleText) + '"' : "";
+    var s = "padding:5px 8px;" + (extraStyle || "");
+    return '<td style="' + s + '"' + t + ">" + _esc(text) + "</td>";
+  }
+
+  // ---- Modal ---------------------------------------------------------------
+
+  function _openModal(entry, mode) {
+    // mode: "add" | "edit" | "override"
+    _modalMode = mode;
+
+    var titleMap = { add: "Add Entry", edit: "Edit Entry", override: "Override Builtin" };
+    var titleEl = _el("cfbRegModalTitle");
+    if (titleEl) titleEl.textContent = (entry && mode === "override")
+      ? "Override Builtin: " + entry.id
+      : titleMap[mode] || "Entry";
+
+    var noteEl = _el("cfbRegModalNote");
+    if (noteEl) {
+      if (mode === "override" && entry) {
+        noteEl.style.display = "";
+        noteEl.textContent = "組み込みエントリ「"
+          + entry.id + "」のユーザーオーバーライドを作成します。"
+          + "ID が同じであれば組み込みエントリを上書きします。";
+      } else {
+        noteEl.style.display = "none";
+      }
+    }
+
+    // Populate fields
+    var idEl = _el("cfbRegFldId");
+    idEl.value = entry ? entry.id : "";
+    // ID is readonly when editing an existing user entry (mode=edit).
+    // For override, keep it editable so user can choose a different ID if desired.
+    idEl.readOnly = (mode === "edit");
+    idEl.style.opacity = (mode === "edit") ? "0.6" : "";
+
+    _el("cfbRegFldPatterns").value = entry ? (entry.unet_patterns || []).join("\n") : "";
+    _el("cfbRegFldVae").value      = entry ? (entry.vae  || "") : "";
+    _el("cfbRegFldClip1").value    = entry ? (entry.clip_1 || "") : "";
+    _el("cfbRegFldClip2").value    = entry ? (entry.clip_2 || "") : "";
+    _el("cfbRegFldClipType").value = entry ? (entry.clip_type || "") : "";
+    _el("cfbRegFldLatent").value   = entry ? (entry.latent_node || "") : "";
+    _el("cfbRegFldSampler").value  = entry ? (entry.default_sampler || "") : "";
+    _el("cfbRegFldScheduler").value = entry ? (entry.default_scheduler || "") : "";
+    _el("cfbRegFldCfg").value      = (entry && entry.default_cfg   != null) ? entry.default_cfg   : "";
+    _el("cfbRegFldSteps").value    = (entry && entry.default_steps != null) ? entry.default_steps : "";
+    _el("cfbRegFldUrl").value      = entry ? (entry.source_url || "") : "";
+    _el("cfbRegFldNotes").value    = entry ? (entry.notes || "") : "";
+
+    // Populate datalists from cached available_models
+    if (_cache && _cache.available_models) {
+      var am = _cache.available_models;
+      _fillDl("cfbRegDlVae", am.vaes || []);
+      _fillDl("cfbRegDlEnc", am.text_encoders || []);
+    }
+
+    _el("cfbRegModal").style.display = "";
+    var saveBtn = _el("cfbRegSaveBtn");
+    if (saveBtn) saveBtn.disabled = false;
+
+    // Update the override note whenever ID changes (add mode only)
+    _updateIdOverrideNote();
+
+    if (mode === "add") {
+      setTimeout(function () { idEl.focus(); }, 60);
+    } else {
+      setTimeout(function () { _el("cfbRegFldPatterns").focus(); }, 60);
+    }
+  }
+
+  function _updateIdOverrideNote() {
+    var noteEl = _el("cfbRegModalNote");
+    if (!noteEl || _modalMode !== "add") return;
+    var idVal = (_el("cfbRegFldId").value || "").trim();
+    if (!idVal || !_cache) { noteEl.style.display = "none"; return; }
+    var builtinMatch = (_cache.registry || []).find(function (e) {
+      return e.builtin && e.id === idVal;
+    });
+    if (builtinMatch) {
+      noteEl.style.display = "";
+      noteEl.textContent = "組み込みエントリ「" + idVal + "」と同じ ID です — 保存するとそのエントリを上書きします（Override）。";
+    } else {
+      noteEl.style.display = "none";
+    }
+  }
+
+  function _fillDl(dlId, items) {
+    var dl = _el(dlId);
+    if (!dl) return;
+    dl.innerHTML = items.map(function (v) {
+      return '<option value="' + _escAttr(v) + '">';
+    }).join("");
+  }
+
+  function _closeModal() {
+    _el("cfbRegModal").style.display = "none";
+  }
+
+  function _submitModal() {
+    var idVal = _el("cfbRegFldId").value.trim();
+    if (!idVal) { window.showToast("ID は必須です", true); return; }
+
+    var patternsRaw = _el("cfbRegFldPatterns").value;
+    var patterns = patternsRaw.split("\n")
+      .map(function (s) { return s.trim(); })
+      .filter(Boolean);
+    if (!patterns.length) {
+      window.showToast("UNET Pattern は1つ以上必要です", true);
+      return;
+    }
+
+    var body = {
+      id:               idVal,
+      unet_patterns:    patterns,
+      vae:              _el("cfbRegFldVae").value.trim(),
+      clip_1:           _el("cfbRegFldClip1").value.trim(),
+      clip_2:           _el("cfbRegFldClip2").value.trim(),
+      clip_type:        _el("cfbRegFldClipType").value.trim(),
+      latent_node:      _el("cfbRegFldLatent").value.trim(),
+      default_sampler:  _el("cfbRegFldSampler").value.trim(),
+      default_scheduler: _el("cfbRegFldScheduler").value.trim(),
+      source_url:       _el("cfbRegFldUrl").value.trim(),
+      notes:            _el("cfbRegFldNotes").value.trim(),
+    };
+
+    var cfgStr   = _el("cfbRegFldCfg").value.trim();
+    var stepsStr = _el("cfbRegFldSteps").value.trim();
+    if (cfgStr   !== "") body.default_cfg   = parseFloat(cfgStr);
+    if (stepsStr !== "") body.default_steps = parseInt(stepsStr, 10);
+
+    var saveBtn = _el("cfbRegSaveBtn");
+    if (saveBtn) saveBtn.disabled = true;
+
+    _regPost("/api/model-registry", body).then(function (d) {
+      if (saveBtn) saveBtn.disabled = false;
+      if (!d.ok) { window.showToast("Error: " + (d.error || "unknown"), true); return; }
+      window.showToast(d.created
+        ? "エントリを追加しました"    // 追加
+        : "エントリを更新しました");  // 更新
+      _closeModal();
+      load();
+    }).catch(function (e) {
+      if (saveBtn) saveBtn.disabled = false;
+      window.showToast("Network error: " + e.message, true);
+    });
+  }
+
+  // ---- Public entry-point functions (called by registry action buttons) ----
+
+  window._cfbRegEdit = function (id) {
+    if (!_cache) return;
+    var entry = (_cache.registry || []).find(function (e) { return e.id === id; });
+    if (entry) _openModal(entry, "edit");
+  };
+
+  window._cfbRegOverride = function (id) {
+    if (!_cache) return;
+    var entry = (_cache.registry || []).find(function (e) { return e.id === id; });
+    if (entry) _openModal(entry, "override");
+  };
+
+  window._cfbRegDel = function (id) {
+    window.customConfirm(
+      "ユーザーエントリ「" + id + "」を削除しますか？"
+      // 「ユーザーエントリ "id" を削除しますか？」
+    ).then(function (ok) {
+      if (!ok) return;
+      _regDel("/api/model-registry/" + encodeURIComponent(id)).then(function (d) {
+        if (!d.ok) { window.showToast("Error: " + (d.error || "unknown"), true); return; }
+        window.showToast("削除しました"); // 削除しました
+        load();
+      }).catch(function (e) {
+        window.showToast("Network error: " + e.message, true);
+      });
+    });
+  };
+
+  // ---- JSON Editor ---------------------------------------------------------
+
+  // Snapshot of user entry IDs when the editor was last opened (for diff-delete)
+  var _editorBaseIds = [];
+
+  function _openEditor() {
+    // Close other panels
+    _closePanels();
+
+    // Extract only user entries from cache
+    var userEntries = _cache
+      ? (_cache.registry || []).filter(function (e) { return !e.builtin; })
+      : [];
+
+    _editorBaseIds = userEntries.map(function (e) { return e.id; });
+
+    // Build clean objects (same fields as export, same order)
+    var clean = userEntries.map(function (e) {
+      var out = {};
+      _EXPORT_FIELDS.forEach(function (f) {
+        var v = e[f];
+        if (v !== null && v !== undefined) out[f] = v;
+      });
+      return out;
+    });
+
+    var ta = _el("cfbRegEditorText");
+    if (ta) ta.value = JSON.stringify(clean, null, 2);
+
+    var ew = _el("cfbRegEditorWrap");
+    if (ew) {
+      ew.style.display = "";
+      if (ta) setTimeout(function () { ta.focus(); }, 60);
+    }
+    _editorSetStatus("");
+  }
+
+  function _closeEditor() {
+    var ew = _el("cfbRegEditorWrap");
+    if (ew) ew.style.display = "none";
+    _editorSetStatus("");
+  }
+
+  function _editorSetStatus(msg, isErr) {
+    var st = _el("cfbRegEditorStatus");
+    if (!st) return;
+    st.textContent = msg;
+    st.style.color = isErr ? "var(--danger,#f44336)" : "";
+  }
+
+  var _ID_RE_JS = /^[a-zA-Z0-9_\-]{1,64}$/;
+
+  function _saveEditor() {
+    var ta = _el("cfbRegEditorText");
+    if (!ta) return;
+
+    // Parse
+    var parsed;
+    try { parsed = JSON.parse(ta.value.trim()); }
+    catch (e) { _editorSetStatus("JSON パースエラー: " + e.message, true); return; }
+
+    if (!Array.isArray(parsed)) {
+      _editorSetStatus("形式エラー: 配列 [...] にしてください", true);
+      return;
+    }
+
+    // Validate entries (with duplicate ID detection)
+    var valid = [], errors = [], seenIds = {};
+    parsed.forEach(function (e, i) {
+      if (!e || typeof e !== "object") { errors.push("#" + i + ": オブジェクトではありません"); return; }
+      var id = String(e.id || "").trim();
+      if (!id) { errors.push("#" + i + ": id がありません"); return; }
+      if (!_ID_RE_JS.test(id)) { errors.push("\"" + id + "\": id は英数字・_・- のみ 1〜64 文字"); return; }
+      if (seenIds[id]) { errors.push("\"" + id + "\": ID が重複しています"); return; }
+      seenIds[id] = true;
+      var patterns = e.unet_patterns;
+      var ok = Array.isArray(patterns)
+        ? patterns.some(function (p) { return typeof p === "string" && p.trim(); })
+        : Boolean(String(e.unet_pattern || "").trim());
+      if (!ok) { errors.push("\"" + id + "\": unet_patterns がありません"); return; }
+      valid.push(e);
+    });
+
+    if (errors.length) {
+      _editorSetStatus("検証エラー: " + errors.slice(0, 3).join(" / "), true);
+      return;
+    }
+
+    // Compute entries to delete (present before but absent now)
+    var newIds = valid.map(function (e) { return String(e.id).trim(); });
+    var toDelete = _editorBaseIds.filter(function (id) {
+      return newIds.indexOf(id) === -1;
+    });
+
+    var saveBtn = _el("cfbRegEditorSaveBtn");
+    if (saveBtn) saveBtn.disabled = true;
+
+    var total = toDelete.length + valid.length;
+    var done = 0, failed = 0;
+
+    _editorSetStatus("保存中… 0/" + total);
+
+    function onStep(ok) {
+      done++;
+      if (!ok) failed++;
+      _editorSetStatus("保存中… " + done + "/" + total);
+      if (done === total) _editorFinish(total, failed, saveBtn);
+    }
+
+    // If nothing to do, finish immediately
+    if (!total) { _editorFinish(0, 0, saveBtn); return; }
+
+    // 1. Delete removed entries
+    toDelete.forEach(function (id) {
+      _regDel("/api/model-registry/" + encodeURIComponent(id))
+        .then(function (d) { onStep(d.ok); })
+        .catch(function () { onStep(false); });
+    });
+
+    // 2. Upsert all entries from editor
+    valid.forEach(function (entry) {
+      _regPost("/api/model-registry", entry)
+        .then(function (d) { onStep(d.ok); })
+        .catch(function () { onStep(false); });
+    });
+  }
+
+  function _editorFinish(total, failed, saveBtn) {
+    if (saveBtn) saveBtn.disabled = false;
+    if (failed) {
+      _editorSetStatus("完了 (失敗 " + failed + "/" + total + " 件)", true);
+      window.showToast("保存完了（失敗 " + failed + " 件）", true);
+    } else {
+      _editorSetStatus("保存しました (" + total + " 件)");
+      window.showToast("保存しました");
+      _closeEditor();
+    }
+    load();
+  }
+
+  // ---- Panel helpers -------------------------------------------------------
+
+  function _closePanels() {
+    ["cfbRegExportWrap", "cfbRegImportWrap", "cfbRegEditorWrap"].forEach(function (id) {
+      var el = _el(id);
+      if (el) el.style.display = "none";
+    });
+  }
+
+  // ---- Export --------------------------------------------------------------
+
+  // Fields included in the export (same as API schema, minus runtime flags)
+  var _EXPORT_FIELDS = [
+    "id", "unet_patterns", "vae", "clip_1", "clip_2", "clip_type",
+    "latent_node", "default_sampler", "default_scheduler",
+    "default_cfg", "default_steps", "source_url", "notes",
+  ];
+
+  function _openExport() {
+    _closePanels();
+
+    var entries = _cache ? (_cache.registry || []) : [];
+    // Strip runtime-only fields; keep field order consistent for readability
+    var clean = entries.map(function (e) {
+      var out = {};
+      _EXPORT_FIELDS.forEach(function (f) {
+        var v = e[f];
+        // Omit null/undefined (keep empty strings and arrays)
+        if (v !== null && v !== undefined) out[f] = v;
+      });
+      return out;
+    });
+
+    var payload = {
+      _instructions: [
+        "以下は ComfyUI Bridge のモデルレジストリです。",
+        "空文字列や不明なフィールドをウェブ検索で調べて埋めてください。",
+        "unet_patterns: UNETLoader モデルファイル名に含まれる部分文字列（複数可）。",
+        "vae: VAELoader で指定するファイル名。",
+        "clip_1 / clip_2: CLIPLoader / DualCLIPLoader で指定するファイル名。",
+        "clip_type: wan / qwen_image / flux など（DualCLIPLoader の clip_type 引数）。",
+        "修正後は entries 配列のみを返してください。",
+        "（このフィールド自体は Import 時に無視されます）",
+      ].join(" "),
+      entries: clean,
+    };
+
+    var text = JSON.stringify(payload, null, 2);
+    var ta = _el("cfbRegExportText");
+    if (ta) ta.value = text;
+    var ew = _el("cfbRegExportWrap");
+    if (ew) {
+      ew.style.display = "";
+      if (ta) setTimeout(function () { ta.focus(); ta.select(); }, 60);
+    }
+  }
+
+  function _closeExport() {
+    var ew = _el("cfbRegExportWrap");
+    if (ew) ew.style.display = "none";
+  }
+
+  function _copyExport() {
+    var ta = _el("cfbRegExportText");
+    if (!ta) return;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(ta.value).then(function () {
+        window.showToast("クリップボードにコピーしました");
+      }).catch(function () { _copyExportFallback(ta); });
+    } else {
+      _copyExportFallback(ta);
+    }
+  }
+
+  function _copyExportFallback(ta) {
+    ta.select();
+    try { document.execCommand("copy"); window.showToast("コピーしました"); }
+    catch (_) { window.showToast("コピーに失敗しました", true); }
+  }
+
+  function _downloadExport() {
+    var ta = _el("cfbRegExportText");
+    if (!ta || !ta.value) return;
+    var blob = new Blob([ta.value], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "comfyui_model_registry.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ---- Import --------------------------------------------------------------
+
+  // Cached parsed entries from the import textarea (set after preview)
+  var _importParsed = null;
+
+  function _openImport() {
+    _closePanels();
+
+    var iw = _el("cfbRegImportWrap");
+    if (iw) {
+      iw.style.display = "";
+      var ta = _el("cfbRegImportText");
+      if (ta) setTimeout(function () { ta.focus(); }, 60);
+    }
+    _resetImportPreview();
+  }
+
+  function _closeImport() {
+    var iw = _el("cfbRegImportWrap");
+    if (iw) iw.style.display = "none";
+    _resetImportPreview();
+  }
+
+  function _resetImportPreview() {
+    _importParsed = null;
+    var pw = _el("cfbRegImportPreviewWrap");
+    if (pw) pw.innerHTML = "";
+    var ab = _el("cfbRegImportApplyBtn");
+    if (ab) ab.disabled = true;
+    var st = _el("cfbRegImportStatus");
+    if (st) { st.textContent = ""; st.style.color = ""; }
+  }
+
+  function _importSetStatus(msg, isErr) {
+    var st = _el("cfbRegImportStatus");
+    if (!st) return;
+    st.textContent = msg;
+    st.style.color = isErr ? "var(--danger,#f44336)" : "";
+  }
+
+  var _IMPORT_MAX_CHARS = 2 * 1024 * 1024;  // ~2 MiB of characters
+  var _IMPORT_MAX_ENTRIES = 500;
+
+  function _parseImportText(text) {
+    // Accept:  [{...}, ...]  or  {"entries":[...]}  or  {"_instructions":"...","entries":[...]}
+    if (text.length > _IMPORT_MAX_CHARS) {
+      return { error: "入力が大きすぎます（上限 " + (_IMPORT_MAX_CHARS / 1024 / 1024) + " MiB 相当）" };
+    }
+
+    var parsed;
+    try { parsed = JSON.parse(text.trim()); }
+    catch (e) { return { error: "JSON パースエラー: " + e.message }; }
+
+    var entries;
+    if (Array.isArray(parsed)) {
+      entries = parsed;
+    } else if (parsed && Array.isArray(parsed.entries)) {
+      entries = parsed.entries;
+    } else {
+      return { error: "形式エラー: 配列 [...] か {\"entries\":[...]} を入力してください" };
+    }
+
+    if (entries.length > _IMPORT_MAX_ENTRIES) {
+      return { error: "エントリ数が上限（" + _IMPORT_MAX_ENTRIES + " 件）を超えています" };
+    }
+
+    // Validation with duplicate ID detection
+    var valid = [], invalid = [], seen = {};
+    entries.forEach(function (e, i) {
+      if (!e || typeof e !== "object") { invalid.push("#" + i + ": オブジェクトではありません"); return; }
+      var id = typeof e.id === "string" ? e.id.trim() : String(e.id || "").trim();
+      if (!id) { invalid.push("#" + i + ": id がありません"); return; }
+      if (!_ID_RE_JS.test(id)) { invalid.push("\"" + id + "\": id は英数字・_・- のみ 1〜64 文字"); return; }
+      if (seen[id]) { invalid.push("\"" + id + "\": ID が重複しています"); return; }
+      seen[id] = true;
+      var patterns = e.unet_patterns;
+      var hasPatterns = Array.isArray(patterns)
+        ? patterns.some(function (p) { return typeof p === "string" && p.trim(); })
+        : false;
+      if (!hasPatterns) { invalid.push("\"" + id + "\": unet_patterns は空でない文字列配列が必要です"); return; }
+      valid.push(e);
+    });
+
+    return { valid: valid, invalid: invalid };
+  }
+
+  function _previewImport() {
+    var ta = _el("cfbRegImportText");
+    if (!ta) return;
+    if (ta.value.length > _IMPORT_MAX_CHARS) {
+      _importSetStatus("テキストが大きすぎます（上限 " + (_IMPORT_MAX_CHARS / 1024 / 1024) + " MiB 相当）", true);
+      _resetImportPreview();
+      return;
+    }
+    var result = _parseImportText(ta.value);
+    if (result.error) { _importSetStatus(result.error, true); _resetImportPreview(); return; }
+
+    _importParsed = result.valid;
+
+    var pw = _el("cfbRegImportPreviewWrap");
+    if (!pw) return;
+
+    if (!result.valid.length && !result.invalid.length) {
+      pw.innerHTML = '<p style="font-size:12px;opacity:.6;">エントリが見つかりません。</p>';
+      _importSetStatus("エントリ 0 件", true);
+      return;
+    }
+
+    var html = "";
+
+    if (result.invalid.length) {
+      html += '<div style="font-size:11px;color:var(--danger,#f44336);margin-bottom:8px;background:rgba(244,67,54,.08);border:1px solid rgba(244,67,54,.25);border-radius:6px;padding:8px 10px;">';
+      html += '<strong>スキップ ' + result.invalid.length + ' 件:</strong><br>';
+      html += result.invalid.map(_esc).join("<br>");
+      html += '</div>';
+    }
+
+    if (result.valid.length) {
+      html += '<p style="font-size:11px;opacity:.7;margin-bottom:6px;">登録予定: ' + result.valid.length + ' 件</p>';
+      html += '<table style="width:100%;border-collapse:collapse;font-size:11px;">';
+      html += '<thead><tr style="border-bottom:1px solid rgba(128,128,128,.2);">';
+      html += _th("ID") + _th("Patterns") + _th("VAE") + _th("CLIP 1") + _th("CLIP 2") + _th("CLIP Type");
+      html += '</tr></thead><tbody>';
+      result.valid.forEach(function (e) {
+        var pats = Array.isArray(e.unet_patterns) ? e.unet_patterns.join(", ") : String(e.unet_pattern || "");
+        html += '<tr style="border-bottom:1px solid rgba(128,128,128,.08);">';
+        html += _td(e.id, null, "font-family:monospace;font-weight:600;");
+        html += _td(_trunc(pats, 40), pats);
+        html += _td(_trunc(_basename(e.vae || ""), 24), e.vae || "");
+        html += _td(_trunc(_basename(e.clip_1 || ""), 24), e.clip_1 || "");
+        html += _td(_trunc(_basename(e.clip_2 || ""), 24), e.clip_2 || "");
+        html += _td(e.clip_type || "");
+        html += '</tr>';
+      });
+      html += '</tbody></table>';
+    }
+
+    pw.innerHTML = html;
+
+    var ab = _el("cfbRegImportApplyBtn");
+    if (ab) ab.disabled = !result.valid.length;
+    _importSetStatus(
+      result.valid.length + " 件を登録予定" + (result.invalid.length ? "、" + result.invalid.length + " 件スキップ" : ""),
+      false
+    );
+  }
+
+  function _applyImport() {
+    if (!_importParsed || !_importParsed.length) return;
+    var ab = _el("cfbRegImportApplyBtn");
+    if (ab) ab.disabled = true;
+
+    var entries = _importParsed.slice();
+    var ok = 0, ng = 0, total = entries.length;
+
+    function next() {
+      if (!entries.length) {
+        _importSetStatus("完了: " + ok + " 件登録 / " + ng + " 件失敗", ng > 0);
+        window.showToast("Import 完了: " + ok + "/" + total + " 件登録");
+        _closeImport();
+        load();
+        return;
+      }
+      var entry = entries.shift();
+      _regPost("/api/model-registry", entry).then(function (d) {
+        if (d.ok) ok++; else ng++;
+        next();
+      }).catch(function () { ng++; next(); });
+    }
+
+    _importSetStatus("登録中… 0/" + total);
+    next();
+  }
+
+  var _IMPORT_MAX_FILE_BYTES = 2 * 1024 * 1024;  // 2 MiB
+
+  function _handleImportFile(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    // Reject oversized files before reading
+    if (file.size > _IMPORT_MAX_FILE_BYTES) {
+      _importSetStatus(
+        "ファイルが大きすぎます（上限 " + (_IMPORT_MAX_FILE_BYTES / 1024 / 1024) + " MiB）", true
+      );
+      e.target.value = "";
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function (ev) {
+      var ta = _el("cfbRegImportText");
+      if (ta) {
+        ta.value = ev.target.result || "";
+        _previewImport();
+      }
+    };
+    reader.readAsText(file, "utf-8");
+    // Reset so the same file can be re-selected
+    e.target.value = "";
+  }
+
+  // ---- Init ----------------------------------------------------------------
+
+  document.addEventListener("DOMContentLoaded", function () {
+    var addBtn     = _el("cfbRegAddBtn");
+    var refreshBtn = _el("cfbRegRefreshBtn");
+    var saveBtn    = _el("cfbRegSaveBtn");
+    var cancelBtn  = _el("cfbRegCancelBtn");
+    var closeBtn   = _el("cfbRegModalClose");
+    var modal      = _el("cfbRegModal");
+    var panel      = _el("cfbRegistryPanel");
+
+    if (addBtn)     addBtn.addEventListener("click",    function () { _openModal(null, "add"); });
+    if (refreshBtn) refreshBtn.addEventListener("click", load);
+    if (saveBtn)    saveBtn.addEventListener("click",   _submitModal);
+    if (cancelBtn)  cancelBtn.addEventListener("click", _closeModal);
+    if (closeBtn)   closeBtn.addEventListener("click",  _closeModal);
+
+    // ID field: live override hint when adding
+    var idFld = _el("cfbRegFldId");
+    if (idFld) idFld.addEventListener("input", _updateIdOverrideNote);
+
+    // JSON Editor buttons
+    var editorBtn    = _el("cfbRegEditorBtn");
+    var editorSave   = _el("cfbRegEditorSaveBtn");
+    var editorCancel = _el("cfbRegEditorCancelBtn");
+    var editorClose  = _el("cfbRegEditorCloseBtn");
+    if (editorBtn)    editorBtn.addEventListener("click",    _openEditor);
+    if (editorSave)   editorSave.addEventListener("click",   _saveEditor);
+    if (editorCancel) editorCancel.addEventListener("click", _closeEditor);
+    if (editorClose)  editorClose.addEventListener("click",  _closeEditor);
+
+    // Export buttons
+    var expBtn  = _el("cfbRegExportBtn");
+    var expCopy = _el("cfbRegExportCopyBtn");
+    var expDl   = _el("cfbRegExportDownloadBtn");
+    var expCls  = _el("cfbRegExportCloseBtn");
+    if (expBtn)  expBtn.addEventListener("click",  _openExport);
+    if (expCopy) expCopy.addEventListener("click", _copyExport);
+    if (expDl)   expDl.addEventListener("click",   _downloadExport);
+    if (expCls)  expCls.addEventListener("click",  _closeExport);
+
+    // Import buttons
+    var impBtn     = _el("cfbRegImportBtn");
+    var impFileTrg = _el("cfbRegImportFileBtn");
+    var impFileIn  = _el("cfbRegImportFileInput");
+    var impPrevBtn = _el("cfbRegImportPreviewBtn");
+    var impAppBtn  = _el("cfbRegImportApplyBtn");
+    var impCls     = _el("cfbRegImportCloseBtn");
+    if (impBtn)     impBtn.addEventListener("click",    _openImport);
+    if (impFileTrg) impFileTrg.addEventListener("click", function () {
+      if (impFileIn) impFileIn.click();
+    });
+    if (impFileIn)  impFileIn.addEventListener("change", _handleImportFile);
+    if (impPrevBtn) impPrevBtn.addEventListener("click", _previewImport);
+    if (impAppBtn)  impAppBtn.addEventListener("click",  _applyImport);
+    if (impCls)     impCls.addEventListener("click",    _closeImport);
+
+    // Import text area: auto-preview on paste
+    var impTa = _el("cfbRegImportText");
+    if (impTa) impTa.addEventListener("paste", function () {
+      setTimeout(_previewImport, 50);
+    });
+
+    // Close modal on backdrop click
+    if (modal) modal.addEventListener("click", function (e) {
+      if (e.target === modal) _closeModal();
+    });
+
+    // Close modal on Escape key
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && _el("cfbRegModal").style.display !== "none") {
+        _closeModal();
+      }
+    });
+
+    // Auto-load when the details panel is first opened
+    if (panel) panel.addEventListener("toggle", function () {
+      if (panel.open && !_cache) load();
+    });
+
+    // Expose for external callers (e.g. other scripts, MCP tool callbacks)
+    window.cfbRegLoad = load;
+  });
+
+})();
+</script>

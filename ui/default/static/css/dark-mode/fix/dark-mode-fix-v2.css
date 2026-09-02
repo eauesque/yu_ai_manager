@@ -1,0 +1,185 @@
+/* Dark Mode contrast fix v2 — consolidated
+ * Merged from: character, modal, keyboard sub-files.
+ * Prompts sub-file removed (fully superseded by tags-enhanced).
+ * Colors are driven by CSS custom properties defined in base-theme.css (body.dark).
+ */
+
+/* ── Character prompts ── */
+body.dark .novelai-character-section {
+  background: var(--char-section-bg);
+  border-color: var(--char-section-border);
+}
+body.dark .base-caption-box {
+  background: var(--caption-bg);
+  border-left-color: var(--caption-border);
+  color: var(--caption-text);
+}
+body.dark .character-prompt-card {
+  background: var(--char-card-bg);
+  border-color: var(--char-card-border);
+}
+body.dark .character-prompt-card:hover {
+  border-color: var(--char-card-hover-border);
+  box-shadow: var(--char-card-hover-shadow);
+}
+body.dark .char-number {
+  background: var(--char-number-bg);
+  color: var(--char-number-text);
+}
+body.dark .char-position {
+  background: var(--char-position-bg);
+  color: var(--char-position-text);
+}
+body.dark .char-prompt-text {
+  color: var(--char-prompt-text);
+}
+body.dark .negative-caption-box {
+  background: var(--neg-caption-bg);
+  border-left-color: var(--neg-caption-border);
+  color: var(--neg-caption-text);
+}
+
+/* Modal nav arrows → consolidated into search-results-modal-nav.css */
+
+/* ── Keyboard hint overlay ── */
+.keyboard-hint {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.8);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 13px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  z-index: 10000;
+}
+body.dark .keyboard-hint {
+  background: rgba(255, 255, 255, 0.1);
+  color: #e0e0e0;
+  /* backdrop-filter removed for GPU performance */
+}
+.modal.active .keyboard-hint {
+  opacity: 1;
+}
+
+/* === UX audit: dark mode form/badge contrast (added 2026-04-29) === */
+body.dark input[type="text"],
+body.dark input[type="search"],
+body.dark input[type="number"],
+body.dark input[type="email"],
+body.dark input[type="password"],
+body.dark input[type="url"],
+body.dark textarea,
+body.dark select {
+  background: var(--input-bg, #1e293b) !important;
+  color: var(--input-fg, #e5e7eb) !important;
+  border-color: var(--border, #475569) !important;
+}
+body.dark input::placeholder,
+body.dark textarea::placeholder {
+  /* WCAG AA: #b0b8c8 on #1e293b = 7.34:1. */
+  color: var(--muted-accessible, #b0b8c8);
+  opacity: 1;
+}
+body.dark select option {
+  background: #1e293b;
+  color: #e5e7eb;
+}
+/* Conditions toolbar small badges (e.g. "1件の条件") */
+body.dark .cb-count-badge,
+body.dark .badge-condition-count,
+body.dark .cb-conditions-count {
+  background: rgba(96, 165, 250, 0.18);
+  color: #bfdbfe;
+}
+/* Generic small chips inside dark-themed cards */
+body.dark .chip-muted,
+body.dark .badge-muted {
+  background: rgba(148, 163, 184, 0.18);
+  color: #e2e8f0;
+}
+/* Wildcard manager left list — boost contrast on light theme */
+body:not(.dark) .wcm-list-item,
+body:not(.dark) .wcm-tree-leaf {
+  color: #374151;
+}
+body:not(.dark) .wcm-list-item.active,
+body:not(.dark) .wcm-tree-leaf.active {
+  background: rgba(59, 130, 246, 0.12);
+  color: #1e3a8a;
+}
+
+/* === SafeSearch (NSFW thumbnail blur) — added 2026-04-30 ===
+   Toggled via #safeSearchToggleNav. Sets body.safe-search and body.safe-search-revealed.
+   Thumbnails / preview images blur until hovered or globally revealed.
+
+   Selector strategy: target every element that loads file thumbnails so
+   the blur applies regardless of which page is showing them. The base set:
+     - .result-image    — main search results grid
+     - .fm-card img     — favorites manager grid
+     - .thumb / .card-thumb img — generic helpers used in some panels
+     - img[src*="/api/thumbnail/"] / img[src*="/api/thumb"] — defence in
+       depth: any <img> served from the thumbnail endpoint, even if a
+       future component forgets to add a class. blob: URLs (used by
+       /api/thumbnails/batch) need an additional [data-thumb-id] hint.
+*/
+body.safe-search img.result-image,
+body.safe-search img.thumb,
+body.safe-search .thumb img,
+body.safe-search .card-thumb img,
+body.safe-search .preview-image,
+body.safe-search [data-thumb] img,
+body.safe-search .gallery-thumb,
+body.safe-search .gallery-thumb img,
+body.safe-search .grid-cell img,
+body.safe-search .file-card img,
+body.safe-search .fm-card img,
+body.safe-search .modal-image,
+body.safe-search img.lazy-thumb,
+body.safe-search img[data-thumb-id],
+body.safe-search img[src*="/api/thumbnail/"],
+body.safe-search img[src*="/api/thumb"] {
+  filter: blur(22px) saturate(0.7);
+  transition: filter 0.18s ease;
+}
+body.safe-search.safe-search-revealed img.result-image,
+body.safe-search.safe-search-revealed img.thumb,
+body.safe-search.safe-search-revealed .thumb img,
+body.safe-search.safe-search-revealed .card-thumb img,
+body.safe-search.safe-search-revealed .preview-image,
+body.safe-search.safe-search-revealed [data-thumb] img,
+body.safe-search.safe-search-revealed .gallery-thumb,
+body.safe-search.safe-search-revealed .gallery-thumb img,
+body.safe-search.safe-search-revealed .grid-cell img,
+body.safe-search.safe-search-revealed .file-card img,
+body.safe-search.safe-search-revealed .fm-card img,
+body.safe-search.safe-search-revealed .modal-image,
+body.safe-search.safe-search-revealed img.lazy-thumb,
+body.safe-search.safe-search-revealed img[data-thumb-id],
+body.safe-search.safe-search-revealed img[src*="/api/thumbnail/"],
+body.safe-search.safe-search-revealed img[src*="/api/thumb"] {
+  filter: none;
+}
+/* Hover fully reveals the thumbnail (peek-to-confirm).
+   Previously this applied filter: blur(2px) which left hovered images
+   visibly soft even in revealed mode (specificity of :hover beat the
+   revealed-mode unblur rule). */
+body.safe-search img.result-image:hover,
+body.safe-search .fm-card:hover img,
+body.safe-search img.thumb:hover,
+body.safe-search .thumb:hover img,
+body.safe-search .card-thumb:hover img,
+body.safe-search .gallery-thumb:hover,
+body.safe-search .gallery-thumb:hover img,
+body.safe-search .grid-cell:hover img,
+body.safe-search .file-card:hover img {
+  filter: none;
+}
+button#safeSearchToggleNav[aria-pressed="true"] {
+  background: rgba(244, 114, 182, 0.18);
+  border-color: rgba(244, 114, 182, 0.45);
+}

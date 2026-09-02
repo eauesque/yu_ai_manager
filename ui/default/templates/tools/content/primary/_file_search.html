@@ -1,0 +1,29 @@
+    <!-- File search -->
+    <details class="tool-item" id="tool-file-search">
+      <summary class="tool-item-header">
+        <span class="tool-item-header__title" data-i18n="tools.file_search">🔎 File Search</span>
+        <span class="tool-item-header__desc" data-i18n="tools.file_search_desc">Search files by path or filename.</span>
+        <span class="tool-item-header__chevron">▼</span>
+      </summary>
+      <div class="tool-item-body">
+        <div class="tool-form-grid">
+          <div class="tool-field">
+            <label class="tool-label" for="fileSearchQuery" data-i18n="tools.file_search">File Search</label>
+            <input class="tool-input" type="text" id="fileSearchQuery" aria-label="File search query" data-i18n-placeholder="tools.file_search_placeholder" placeholder="Filename or path fragment (e.g. TA-2026, test.png, \\wsl)" data-action-enter="toolsPageApi.searchFiles">
+          </div>
+          <div class="tool-field">
+            <label class="tool-label" for="fileSearchMeta" data-i18n="tools.filter_all">Metadata filter</label>
+            <select class="tool-select" id="fileSearchMeta" aria-label="Metadata filter">
+              <option value="all" data-i18n="tools.filter_all">All</option>
+              <option value="has_meta" data-i18n="tools.filter_has_meta">Has metadata</option>
+              <option value="no_meta" data-i18n="tools.filter_no_meta">No metadata</option>
+              <option value="unknown" data-i18n="tools.filter_unknown">Unknown only</option>
+            </select>
+          </div>
+        </div>
+        <div class="tool-actions">
+          <button type="button" data-action="toolsPageApi.searchFiles" class="btn btn-primary"><span aria-hidden="true">🔎</span> <span data-i18n="tools.search_btn">Search</span></button>
+        </div>
+        <div class="tool-result" id="fileSearchResults"></div>
+      </div>
+    </details>

@@ -1,0 +1,9 @@
+{
+  "parser": "a1111",
+  "fixture": "fixtures/inspect_parity/a1111.png",
+  "python_format_raw": "sd",
+  "positive": "1girl",
+  "negative": "bad",
+  "raw_meta": null,
+  "format_rust": "a1111"
+}

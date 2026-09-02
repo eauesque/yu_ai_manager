@@ -1,0 +1,46 @@
+{
+  "name": "builtin-ocr",
+  "version": "1.0.0",
+  "description": "VLM OCR - text extraction, structured document analysis, translation, and export",
+  "type": "general",
+  "category": "ai",
+  "entry": "ocr_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "ocr_core",
+  "config_schema": {
+    "default_task": {
+      "type": "enum",
+      "default": "ocr",
+      "options": ["ocr", "ocr_document", "ocr_manga"],
+      "label": "Default OCR Task"
+    },
+    "manga_ocr_enabled": {
+      "type": "bool",
+      "default": true,
+      "label": "Prefer manga-ocr (for the ocr_manga task)"
+    },
+    "default_target_lang": {
+      "type": "enum",
+      "default": "en",
+      "options": ["en", "ja", "zh", "ko", "fr", "de", "es", "pt", "ru", "ar"],
+      "label": "Default Translation Target Language"
+    },
+    "batch_output_dir": {
+      "type": "text",
+      "default": "",
+      "label": "Batch Output Directory (blank = download)",
+      "description": "Server-side save location for batch export. If blank, downloads as a ZIP"
+    },
+    "batch_export_format": {
+      "type": "select",
+      "default": "md",
+      "options": ["txt", "md", "json", "overlay"],
+      "label": "Batch Export Format"
+    }
+  },
+  "config": {
+    "enabled": true,
+    "priority": 160
+  }
+}

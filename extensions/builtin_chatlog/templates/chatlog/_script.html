@@ -1,0 +1,559 @@
+<script nonce="{{ csp_nonce }}" type="module" src="/static/dist/md-viewer-vendor.js"></script>
+<script nonce="{{ csp_nonce }}">
+(function() {
+  'use strict';
+
+  var API_BASE = '/ext/chatlog';
+  var searchTimer = null;
+  var currentConvId = null;
+  var currentSource = '';
+  var currentMode = 'conversations'; // 'conversations' | 'textsearch'
+  var importPollTimer = null;
+
+  // ── DOM refs ───────────────────────────────────────────
+  var elSearch, elConvList, elConvCount;
+  var elHeader, elTitle, elMeta, elDeleteBtn, elMessages;
+  var elImportBtn, elImportModal, elImportSource, elImportFile;
+  var elImportStart, elImportCancel, elImportProgress, elImportMsg, elImportFill;
+  var filterBtns, modeTabs, elFilterRow, elTargetRow;
+  var elSidebar, elBackdrop, elDrawerToggle;
+  var elAiBtn, elAiPanel, elAiPanelClose, elAiLoading, elAiContent;
+  var elAiSummary, elAiSummaryBody, elAiTopics, elAiTopicsBody;
+  var elAiDecisions, elAiDecisionsBody, elAiEntities, elAiEntitiesBody;
+
+  function init() {
+    elSearch = document.getElementById('ctlSearch');
+    elConvList = document.getElementById('ctlConvList');
+    elConvCount = document.getElementById('ctlConvCount');
+    elHeader = document.getElementById('ctlHeader');
+    elTitle = document.getElementById('ctlTitle');
+    elMeta = document.getElementById('ctlMeta');
+    elDeleteBtn = document.getElementById('ctlDeleteBtn');
+    elMessages = document.getElementById('ctlMessages');
+    elImportBtn = document.getElementById('ctlImportBtn');
+    elImportModal = document.getElementById('ctlImportModal');
+    elImportSource = document.getElementById('ctlImportSource');
+    elImportFile = document.getElementById('ctlImportFile');
+    elImportStart = document.getElementById('ctlImportStart');
+    elImportCancel = document.getElementById('ctlImportCancel');
+    elImportProgress = document.getElementById('ctlImportProgress');
+    elImportMsg = document.getElementById('ctlImportMsg');
+    elImportFill = document.getElementById('ctlImportFill');
+    elFilterRow = document.getElementById('ctlFilterRow');
+    elTargetRow = document.getElementById('ctlTargetRow');
+    elSidebar = document.querySelector('.ctl-sidebar');
+    elBackdrop = document.getElementById('ctlBackdrop');
+    elDrawerToggle = document.getElementById('ctlDrawerToggle');
+
+    filterBtns = document.querySelectorAll('.ctl-filter-btn');
+    modeTabs = document.querySelectorAll('.ctl-mode-tab');
+
+        // Mode switching
+    modeTabs.forEach(function(tab) {
+      tab.addEventListener('click', function() {
+        var mode = tab.getAttribute('data-mode');
+        setMode(mode);
+      });
+    });
+
+        // Search input
+    elSearch.addEventListener('input', function() {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function() {
+        if (currentMode === 'textsearch') {
+          runTextSearch();
+        } else {
+          loadConversations();
+        }
+      }, 300);
+    });
+
+    filterBtns.forEach(function(btn) {
+      btn.addEventListener('click', function() {
+        filterBtns.forEach(function(b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        currentSource = btn.getAttribute('data-source') || '';
+        loadConversations();
+      });
+    });
+
+        // Cross-search checkbox
+    var targetChks = document.querySelectorAll('.ctl-target-chk input');
+    targetChks.forEach(function(chk) {
+      chk.addEventListener('change', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(runTextSearch, 300);
+      });
+    });
+
+    elImportBtn.addEventListener('click', openImportModal);
+    elImportCancel.addEventListener('click', closeImportModal);
+    elImportStart.addEventListener('click', startImport);
+    elDeleteBtn.addEventListener('click', deleteCurrentConversation);
+
+    // AI Analysis panel refs + events
+    elAiBtn = document.getElementById('ctlAiBtn');
+    elAiPanel = document.getElementById('ctlAiPanel');
+    elAiPanelClose = document.getElementById('ctlAiPanelClose');
+    elAiLoading = document.getElementById('ctlAiLoading');
+    elAiContent = document.getElementById('ctlAiContent');
+    elAiSummary = document.getElementById('ctlAiSummary');
+    elAiSummaryBody = document.getElementById('ctlAiSummaryBody');
+    elAiTopics = document.getElementById('ctlAiTopics');
+    elAiTopicsBody = document.getElementById('ctlAiTopicsBody');
+    elAiDecisions = document.getElementById('ctlAiDecisions');
+    elAiDecisionsBody = document.getElementById('ctlAiDecisionsBody');
+    elAiEntities = document.getElementById('ctlAiEntities');
+    elAiEntitiesBody = document.getElementById('ctlAiEntitiesBody');
+
+    elAiBtn.addEventListener('click', loadAiAnalysis);
+    elAiPanelClose.addEventListener('click', function() { elAiPanel.style.display = 'none'; });
+
+    elImportModal.addEventListener('click', function(e) {
+      if (e.target === elImportModal) closeImportModal();
+    });
+
+        // Mobile drawer events
+    if (elDrawerToggle) {
+      elDrawerToggle.addEventListener('click', toggleDrawer);
+    }
+    if (elBackdrop) {
+      elBackdrop.addEventListener('click', closeDrawer);
+    }
+
+    loadConversations();
+
+        // Open conversation directly via URL parameter (?conv=123)
+    var urlParams = new URLSearchParams(window.location.search);
+    var convParam = urlParams.get('conv');
+    if (convParam) {
+      var convId = parseInt(convParam, 10);
+      if (convId) loadConversationDetail(convId);
+    }
+  }
+
+    // ── Mode switching ──────────────────────────────────────────
+  function setMode(mode) {
+    currentMode = mode;
+    modeTabs.forEach(function(t) {
+      t.classList.toggle('active', t.getAttribute('data-mode') === mode);
+    });
+
+    if (mode === 'textsearch') {
+      elFilterRow.style.display = 'none';
+      elTargetRow.style.display = '';
+      elSearch.placeholder = '横断検索...';
+      elImportBtn.style.display = 'none';
+      var q = elSearch.value.trim();
+      if (q) {
+        runTextSearch();
+      } else {
+        elConvList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--fg-muted,#888)">検索クエリを入力してください</div>';
+        elConvCount.textContent = '0 件';
+      }
+    } else {
+      elFilterRow.style.display = '';
+      elTargetRow.style.display = 'none';
+      elSearch.placeholder = '会話を検索...';
+      elImportBtn.style.display = '';
+      loadConversations();
+    }
+  }
+
+    // ── Conversation list ────────────────────────────────────────────
+  function loadConversations() {
+    var query = elSearch.value.trim();
+    var params = new URLSearchParams();
+    if (query) params.set('query', query);
+    if (currentSource) params.set('source', currentSource);
+    params.set('limit', '200');
+
+    fetch(API_BASE + '/api/conversations?' + params.toString())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        renderConvList(data.conversations || []);
+        elConvCount.textContent = (data.total || 0) + ' 件';
+      })
+      .catch(function(e) {
+        console.error('Chatlog: load conversations error', e);
+      });
+  }
+
+  function renderConvList(convs) {
+    if (!convs.length) {
+      elConvList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--fg-muted,#888)">'
+        + 'チャットログがありません。<br>インポートボタンからJSON をインポートしてください。</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < convs.length; i++) {
+      var c = convs[i];
+      var cls = 'ctl-conv-item' + (c.id === currentConvId ? ' active' : '');
+      var dateStr = c.updated_at ? formatDate(c.updated_at) : '';
+      html += '<div class="' + cls + '" data-id="' + c.id + '">'
+        + '<div class="ctl-conv-title">' + escapeHtml(c.title || '(untitled)') + '</div>'
+        + '<div class="ctl-conv-meta">'
+        + '<span class="ctl-source-badge ' + escapeHtml(c.source || '') + '">' + escapeHtml(c.source || '') + '</span>'
+        + (c.model ? '<span>' + escapeHtml(c.model) + '</span>' : '')
+        + '<span>' + c.message_count + ' msgs</span>'
+        + '<span>' + dateStr + '</span>'
+        + '</div></div>';
+    }
+    elConvList.innerHTML = html;
+
+    var items = elConvList.querySelectorAll('.ctl-conv-item');
+    for (var j = 0; j < items.length; j++) {
+      items[j].addEventListener('click', onConvClick);
+    }
+  }
+
+  function onConvClick(e) {
+    var el = e.currentTarget;
+    var convId = parseInt(el.getAttribute('data-id'), 10);
+    if (convId === currentConvId) return;
+
+    var prev = elConvList.querySelector('.ctl-conv-item.active');
+    if (prev) prev.classList.remove('active');
+    el.classList.add('active');
+
+    closeDrawer();
+    loadConversationDetail(convId);
+  }
+
+    // ── Cross-text search ───────────────────────────────────
+  function runTextSearch() {
+    var query = elSearch.value.trim();
+    if (!query) {
+      elConvList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--fg-muted,#888)">検索クエリを入力してください</div>';
+      elConvCount.textContent = '0 件';
+      return;
+    }
+
+    var targets = [];
+    var chks = document.querySelectorAll('.ctl-target-chk input:checked');
+    chks.forEach(function(c) { targets.push(c.value); });
+    if (!targets.length) targets = ['md', 'chat', 'prompt'];
+
+    var params = new URLSearchParams();
+    params.set('q', query);
+    params.set('target', targets.join(','));
+    params.set('limit', '100');
+
+    fetch(API_BASE + '/api/text-search?' + params.toString())
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          elConvList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--fg-muted,#888)">Error: ' + escapeHtml(data.error) + '</div>';
+          return;
+        }
+        renderTextSearchResults(data.results || []);
+        elConvCount.textContent = (data.total || 0) + ' 件';
+      })
+      .catch(function(e) {
+        console.error('Chatlog: text search error', e);
+      });
+  }
+
+  function renderTextSearchResults(results) {
+    if (!results.length) {
+      elConvList.innerHTML = '<div style="padding:20px;text-align:center;color:var(--fg-muted,#888)">結果なし</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < results.length; i++) {
+      var r = results[i];
+      var type = r.type || 'unknown';
+      var title = r.title || r.path || '(untitled)';
+      html += '<div class="ctl-ts-item" data-type="' + escapeHtml(type) + '" data-id="' + (r.id || 0) + '"'
+        + (r.conversation_id ? ' data-conv-id="' + r.conversation_id + '"' : '')
+        + '>'
+        + '<div class="ctl-ts-title">'
+        + '<span class="ctl-ts-type ' + escapeHtml(type) + '">' + escapeHtml(type) + '</span>'
+        + escapeHtml(title)
+        + '</div>'
+        + '<div class="ctl-ts-snippet">' + sanitizeSnippet(r.snippet || '') + '</div>'
+        + '</div>';
+    }
+    elConvList.innerHTML = html;
+
+    var items = elConvList.querySelectorAll('.ctl-ts-item');
+    for (var j = 0; j < items.length; j++) {
+      items[j].addEventListener('click', onTextSearchClick);
+    }
+  }
+
+  function onTextSearchClick(e) {
+    var el = e.currentTarget;
+    var type = el.getAttribute('data-type');
+
+        // Highlight active state
+    var prev = elConvList.querySelector('.ctl-ts-item.active');
+    if (prev) prev.classList.remove('active');
+    el.classList.add('active');
+
+    closeDrawer();
+
+    if (type === 'chat') {
+      var convId = parseInt(el.getAttribute('data-conv-id') || '0', 10);
+      if (convId) loadConversationDetail(convId);
+    } else if (type === 'md') {
+      var fileId = parseInt(el.getAttribute('data-id') || '0', 10);
+      if (fileId) {
+        window.location.href = '/ext/md-viewer?file=' + fileId;
+      }
+    } else if (type === 'prompt') {
+      window.location.href = '/ext/prompt-library';
+    }
+  }
+
+    // ── Conversation detail ────────────────────────────────────────────
+  function loadConversationDetail(convId) {
+    currentConvId = convId;
+    if (elAiPanel) elAiPanel.style.display = 'none';
+    fetch(API_BASE + '/api/conversations/' + convId)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          elMessages.innerHTML = '<div class="ctl-placeholder">Not found</div>';
+          return;
+        }
+        elHeader.style.display = '';
+        elTitle.textContent = data.title || '(untitled)';
+        var metaParts = [];
+        if (data.source) metaParts.push(data.source);
+        if (data.model) metaParts.push(data.model);
+        if (data.message_count) metaParts.push(data.message_count + ' messages');
+        if (data.created_at) metaParts.push(formatDate(data.created_at));
+        elMeta.textContent = metaParts.join(' / ');
+
+        renderMessages(data.messages || []);
+      })
+      .catch(function(e) {
+        console.error('Chatlog: load detail error', e);
+      });
+  }
+
+  function renderMessages(messages) {
+    if (!messages.length) {
+      elMessages.innerHTML = '<div class="ctl-placeholder">メッセージなし</div>';
+      return;
+    }
+
+    var html = '';
+    var marked = window._mdvMarked;
+
+    for (var i = 0; i < messages.length; i++) {
+      var m = messages[i];
+      var role = m.role || 'user';
+      var timeStr = m.created_at ? formatTime(m.created_at) : '';
+
+      html += '<div class="ctl-msg ' + escapeHtml(role) + '">';
+      html += '<div class="ctl-msg-role">' + escapeHtml(role) + '</div>';
+
+      if (role === 'assistant' && marked) {
+        try {
+          var rendered = typeof marked === 'function'
+            ? marked(m.content || '')
+            : marked.parse(m.content || '');
+          html += '<div class="ctl-md-body">' + sanitizeHtml(rendered) + '</div>';
+        } catch (e) {
+          html += '<div>' + escapeHtml(m.content || '') + '</div>';
+        }
+      } else {
+        html += '<div>' + escapeHtml(m.content || '').replace(/\n/g, '<br>') + '</div>';
+      }
+
+      if (timeStr) html += '<div class="ctl-msg-time">' + timeStr + '</div>';
+      html += '</div>';
+    }
+    elMessages.innerHTML = html;
+    elMessages.scrollTop = 0;
+  }
+
+    // ── Conversation deletion ────────────────────────────────────────────
+  function deleteCurrentConversation() {
+    if (!currentConvId) return;
+    if (!confirm('この会話を削除しますか?')) return;
+
+    fetch(API_BASE + '/api/conversations/' + currentConvId, {
+      method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          alert(data.error);
+          return;
+        }
+        currentConvId = null;
+        elHeader.style.display = 'none';
+        elMessages.innerHTML = '<div class="ctl-placeholder">左の一覧から会話を選択してください</div>';
+        loadConversations();
+      })
+      .catch(function(e) {
+        console.error('Chatlog: delete error', e);
+      });
+  }
+
+    // ── Import modal ──────────────────────────────────
+  function openImportModal() {
+    elImportModal.classList.add('active');
+    elImportProgress.classList.remove('active');
+    elImportFile.value = '';
+    elImportStart.disabled = false;
+  }
+
+  function closeImportModal() {
+    elImportModal.classList.remove('active');
+    clearInterval(importPollTimer);
+  }
+
+  function startImport() {
+    var file = elImportFile.files[0];
+    if (!file) {
+      alert('JSON または ZIP ファイルを選択してください');
+      return;
+    }
+
+    var formData = new FormData();
+    formData.append('source', elImportSource.value);
+    formData.append('file', file);
+
+    elImportStart.disabled = true;
+    elImportProgress.classList.add('active');
+    elImportMsg.textContent = 'アップロード中...';
+    elImportFill.style.width = '0%';
+
+    fetch(API_BASE + '/api/import', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: formData,
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          elImportMsg.textContent = 'Error: ' + data.error;
+          elImportStart.disabled = false;
+          return;
+        }
+        pollImportStatus();
+      })
+      .catch(function(e) {
+        elImportMsg.textContent = 'Error: ' + e.message;
+        elImportStart.disabled = false;
+      });
+  }
+
+  function pollImportStatus() {
+    clearInterval(importPollTimer);
+    importPollTimer = setInterval(function() {
+      fetch(API_BASE + '/api/import/status')
+        .then(function(r) { return r.json(); })
+        .then(function(data) {
+          elImportMsg.textContent = data.message || data.phase || 'processing...';
+          elImportFill.style.width = (data.percent || 0) + '%';
+
+          if (!data.running) {
+            clearInterval(importPollTimer);
+            elImportStart.disabled = false;
+            if (data.result) {
+              elImportMsg.textContent = data.result.added + ' 件追加, '
+                + data.result.skipped + ' 件スキップ';
+            }
+            loadConversations();
+          }
+        })
+        .catch(function() {
+          clearInterval(importPollTimer);
+          elImportStart.disabled = false;
+        });
+    }, 500);
+  }
+
+    // ── Mobile drawer ──────────────────────────────────
+  function toggleDrawer() {
+    if (elSidebar.classList.contains('drawer-open')) {
+      closeDrawer();
+    } else {
+      elSidebar.classList.add('drawer-open');
+      elBackdrop.classList.add('active');
+    }
+  }
+
+  function closeDrawer() {
+    elSidebar.classList.remove('drawer-open');
+    elBackdrop.classList.remove('active');
+  }
+
+    // ── AI analysis ───────────────────────────────────────────────
+  function loadAiAnalysis() {
+    if (!currentConvId) return;
+    elAiPanel.style.display = '';
+    elAiLoading.style.display = '';
+    elAiContent.style.display = 'none';
+    hideAiSections();
+
+        // Fetch summary + entities in parallel
+    var summaryUrl = API_BASE + '/api/conversations/' + currentConvId + '/summary?generate=1';
+    var entitiesUrl = API_BASE + '/api/conversations/' + currentConvId + '/entities';
+
+    Promise.all([
+      fetch(summaryUrl).then(function(r) { return r.json(); }).catch(function() { return {}; }),
+      fetch(entitiesUrl).then(function(r) { return r.json(); }).catch(function() { return {}; })
+    ]).then(function(results) {
+      var ai = results[0];
+      var ent = results[1];
+      elAiLoading.style.display = 'none';
+      elAiContent.style.display = '';
+
+            // Summary
+      if (ai.summary) {
+        elAiSummary.style.display = '';
+        elAiSummaryBody.textContent = ai.summary;
+      }
+            // Topics
+      if (ai.topics && ai.topics.length) {
+        elAiTopics.style.display = '';
+        elAiTopicsBody.innerHTML = ai.topics.map(function(t) {
+          return '<span class="ctl-ai-tag">' + escapeHtml(t) + '</span>';
+        }).join('');
+      }
+            // Decisions
+      if (ai.decisions && ai.decisions.length) {
+        elAiDecisions.style.display = '';
+        elAiDecisionsBody.innerHTML = ai.decisions.map(function(d) {
+          return '<div class="ctl-ai-decision">' + escapeHtml(d) + '</div>';
+        }).join('');
+      }
+            // Entities
+      var entities = ent.entities || [];
+      if (entities.length) {
+        elAiEntities.style.display = '';
+        elAiEntitiesBody.innerHTML = entities.map(function(e) {
+          return '<span class="ctl-ai-entity" title="' + escapeHtml(e.type || '') + '">' + escapeHtml(e.value || '') + '</span>';
+        }).join('');
+      }
+
+            // When nothing was found
+      if (!ai.summary && !(ai.topics && ai.topics.length) && !(ai.decisions && ai.decisions.length) && !entities.length) {
+        elAiSummary.style.display = '';
+        elAiSummaryBody.textContent = 'AI分析結果がありません。AI エンジンが設定されていない可能性があります。';
+      }
+    });
+  }
+
+  function hideAiSections() {
+    elAiSummary.style.display = 'none';
+    elAiTopics.style.display = 'none';
+    elAiDecisions.style.display = 'none';
+    elAiEntities.style.display = 'none';
+  }
+
+    // ── Initialization ──────────────────────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>

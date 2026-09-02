@@ -1,0 +1,40 @@
+/* Character Position Grid Overlay (NAI-style 5x5) */
+
+.char-position-grid {
+  pointer-events: none;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.char-grid-cell {
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  flex-wrap: wrap;
+  position: relative;
+}
+
+.char-grid-marker {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--marker-color, #4a90d9);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+  border: 2px solid var(--marker-color, #4a90d9);
+}
+
+/* Dark mode adjustments (default is dark) */
+@media (prefers-color-scheme: light) {
+  .char-grid-cell {
+    border-color: rgba(0, 0, 0, 0.12);
+  }
+}

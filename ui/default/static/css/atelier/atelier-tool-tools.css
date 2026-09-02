@@ -1,0 +1,298 @@
+/*
+ * Atelier Tool Variant — tools page scoped overrides
+ *
+ * Phase 1a scope: tabs nav + _database_backup.html panel.
+ * Other Maintenance panels reach atelier-tool styles via descendant
+ * selectors in atelier-tool-components.css and need no scoped rules here.
+ */
+
+/* ----- Tabs (.tools-tabs from tools/_content.html) ----- */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tools-tabs {
+  display: flex;
+  gap: var(--space-2);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: var(--space-section);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tools-tab {
+  height: var(--control-h-lg);
+  padding: 0 var(--space-3);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  cursor: pointer;
+  margin-bottom: -1px; /* pull underline onto border */
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tools-tab:hover {
+  color: var(--text);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tools-tab.active,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tools-tab[aria-selected="true"] {
+  color: var(--text);
+  border-bottom-color: var(--accent-tool);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tools-tab:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: -2px;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tool-section.collapsed > h2 + p {
+  color: var(--text);
+  opacity: 1;
+}
+
+/* ----- Database backup panel (Phase 1a pilot) ----- */
+
+/* JS-injected backup list table — promote it visually to atelier-table.
+ * The JS in tools-page renders <table> inside #backupListContainer; we
+ * style it via descendant selector without requiring class addition. */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #backupListContainer table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body);
+  background: var(--surface);
+  color: var(--text);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #backupListContainer thead th {
+  background: var(--surface-raised);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: var(--space-2) var(--table-cell-padding-x);
+  border-bottom: 1px solid var(--table-border);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #backupListContainer tbody td {
+  height: var(--table-row-height);
+  padding: 0 var(--table-cell-padding-x);
+  border-bottom: 1px solid var(--table-border);
+  vertical-align: middle;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #backupListContainer tbody tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+/* ── tools page layout (atelier-tool redesign) ── */
+
+.tools-layout {
+  display: flex;
+  min-height: 0;
+}
+
+.tools-sidebar {
+  width: 160px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--border);
+  padding: 12px 0;
+  position: sticky;
+  top: var(--nav-height, 60px);
+  height: calc(100vh - var(--nav-height, 60px));
+  overflow-y: auto;
+}
+
+.tools-sidebar-nav {
+  display: flex;
+  flex-direction: column;
+}
+
+.tools-sidebar-label {
+  font-size: 9px;
+  color: var(--text-muted);
+  padding: 0 12px 8px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.tools-sidebar-item {
+  display: block;
+  padding: 6px 12px;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  text-decoration: none;
+  color: inherit;
+}
+
+.tools-sidebar-item:hover {
+  background: var(--surface-hover, rgba(255,255,255,.04));
+}
+
+.tools-sidebar-item--active {
+  background: var(--accent-subtle, rgba(88,166,255,.10));
+  border-left-color: var(--accent-tool, var(--accent, #58a6ff));
+}
+
+.tools-sidebar-item__label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+/* Both the label and the sub sit on the active item's accent tint, so both
+ * read --accent-muted rather than the plain accent: in the dark theme
+ * --accent-tool measures 4.46:1 against that tint, just under AA. */
+.tools-sidebar-item--active .tools-sidebar-item__label {
+  color: var(--accent-muted, var(--accent-tool, var(--accent, #58a6ff)));
+}
+
+.tools-sidebar-item__sub {
+  font-size: 9px;
+  color: var(--text-muted);
+  margin-top: 1px;
+}
+
+.tools-sidebar-item--active .tools-sidebar-item__sub {
+  color: var(--accent-muted, var(--accent-tool, #2f5c8a));
+}
+
+.tools-main {
+  flex: 1;
+  padding: 14px;
+  overflow: auto;
+  min-width: 0;
+}
+
+.tools-category-panel {
+  scroll-margin-top: calc(var(--nav-height, 60px) + 8px);
+}
+
+.tools-category-panel + .tools-category-panel {
+  margin-top: 28px;
+}
+
+.tools-category-heading {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-weight: 600;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  margin: 0 0 10px;
+}
+
+.tools-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tool-item {
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.tool-item > summary.tool-item-header {
+  padding: 8px 12px;
+  background: var(--surface-raised, #161b22);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.tool-item > summary.tool-item-header::-webkit-details-marker {
+  display: none;
+}
+
+.tool-item[open] > summary.tool-item-header {
+  border-bottom: 1px solid var(--border-subtle, var(--border));
+}
+
+.tool-item-header__title {
+  font-size: 10px;
+  font-weight: 500;
+  flex: 1;
+  color: var(--text);
+}
+
+.tool-item-header__desc {
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.tool-item-header__chevron {
+  font-size: 10px;
+  color: var(--text-muted);
+  transition: transform .15s;
+  flex-shrink: 0;
+}
+
+.tool-item[open] .tool-item-header__chevron {
+  transform: rotate(180deg);
+}
+
+.tool-item-body {
+  padding: 10px 12px;
+  background: var(--surface);
+}
+
+.tool-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tool-field--full {
+  grid-column: 1 / -1;
+}
+
+.tool-label {
+  display: block;
+  font-size: 9px;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 3px;
+}
+
+.tool-input,
+.tool-select,
+.tool-textarea {
+  width: 100%;
+  font-size: 9px;
+  padding: 3px 6px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 3px;
+  box-sizing: border-box;
+}
+
+.tool-textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.tool-hint {
+  font-size: 8px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+.tool-actions {
+  display: flex;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border-subtle, var(--border));
+  margin-top: 4px;
+  flex-wrap: wrap;
+}
+
+.tool-result {
+  margin-top: 8px;
+  font-size: 9px;
+  color: var(--text-muted);
+}

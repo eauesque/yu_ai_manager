@@ -1,0 +1,23 @@
+[package]
+name = "tagdb-core"
+version = "0.1.0"
+edition = "2021"
+
+[lints]
+workspace = true
+
+[dependencies]
+libsqlite3-sys = { workspace = true }
+log = { workspace = true }
+sqlx = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+serde_json.workspace = true
+fancy-regex.workspace = true
+meta-extract = { path = "../meta-extract" }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+tokio = { workspace = true, features = ["macros", "rt-multi-thread"] }
+

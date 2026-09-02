@@ -1,0 +1,28 @@
+<div class="ctl-sidebar">
+  <div class="ctl-sidebar-header">
+    <div class="ctl-mode-tabs">
+      <button class="ctl-mode-tab active" data-mode="conversations" data-i18n="chatlog.conversations">会話</button>
+      <button class="ctl-mode-tab" data-mode="textsearch" data-i18n="chatlog.cross_search">横断検索</button>
+    </div>
+    <input type="text" class="ctl-search-input" id="ctlSearch"
+           placeholder="会話を検索..." data-i18n-placeholder="chatlog.search_placeholder" autocomplete="off" aria-label="会話を検索" data-i18n-aria-label="chatlog.search_aria">
+    <div class="ctl-filter-row" id="ctlFilterRow">
+      <button class="ctl-filter-btn active" data-source="" data-i18n="chatlog.filter_all">All</button>
+      <button class="ctl-filter-btn" data-source="claude">Claude</button>
+      <button class="ctl-filter-btn" data-source="chatgpt">ChatGPT</button>
+      <button class="ctl-filter-btn" data-source="openwebui">Open WebUI</button>
+    </div>
+    <div class="ctl-target-row" id="ctlTargetRow" style="display:none">
+      <label class="ctl-target-chk"><input type="checkbox" value="md" checked aria-label="Search MD files"> MD</label>
+      <label class="ctl-target-chk"><input type="checkbox" value="chat" checked aria-label="Search Chat logs"> Chat</label>
+      <label class="ctl-target-chk"><input type="checkbox" value="prompt" checked aria-label="Search Prompts"> Prompt</label>
+    </div>
+  </div>
+  <div class="ctl-sidebar-actions">
+    <button class="ctl-btn ctl-btn-primary" id="ctlImportBtn" data-i18n="chatlog.import">インポート</button>
+    <span class="ctl-conv-count" id="ctlConvCount" data-i18n="chatlog.conversation_count">0 件</span>
+  </div>
+  <div class="ctl-conv-list" id="ctlConvList">
+    <!-- Conversation list / search results (rendered by JS) -->
+  </div>
+</div>

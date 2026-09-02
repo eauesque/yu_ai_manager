@@ -1,0 +1,1673 @@
+{
+  "a11y": {
+    "condition_added": "Условие \"{label}\" добавлено",
+    "condition_menu_opened": "Меню условий открыто",
+    "condition_removed": "Условие \"{label}\" удалено",
+    "focus_search": "Фокус на поле поиска",
+    "result_focus": "Элемент {index} из {total}: {label}",
+    "results_list_label": "Результаты поиска"
+  },
+  "agent_journal": {
+    "scope_delete": "Удалить",
+    "scopes_empty_with_default": "(нет областей — применяется по умолчанию)"
+  },
+  "analysis": {
+    "analyzed_at": "Проанализировано: {date}",
+    "btn_reanalyze": "Повторный анализ",
+    "done_label": "Проанализировано",
+    "label": {
+      "ai_tags": "Теги ИИ:",
+      "color": "Цвет:",
+      "composition": "Композиция:",
+      "engine": "Движок:",
+      "mood": "Настроение:",
+      "quality": "Качество:",
+      "style": "Стиль:",
+      "suggestion": "Предложение промпта:"
+    },
+    "status_done": "✅ Готово",
+    "status_done_engine": "✅ Готово ({engine})",
+    "status_error": "❌ {error}",
+    "status_running": "Анализ...",
+    "status_running_engine": "Анализ с {engine}...",
+    "status_saved": "✅ {engine}"
+  },
+  "analysis.engine": "AI Engine",
+  "analysis.engine_default": "Auto",
+  "analysis.mode": "Analysis Mode",
+  "analysis.mode_full": "Full Analysis",
+  "analysis.mode_simple": "Color + Composition",
+  "analysis.model": "AI Model",
+  "api_error": {
+    "bad_zip_file": "Повреждённый файл архива",
+    "batch_empty": "Пакет пуст",
+    "batch_too_large": "Размер пакета превышает лимит",
+    "collection_not_found": "Коллекция не найдена",
+    "container_not_found": "Контейнер не найден для этого файла",
+    "convert_failed": "Конвертация формата не удалась",
+    "debug_disabled": "Режим отладки не включён",
+    "empty_sql": "SQL-запрос пуст",
+    "extract_register_failed": "Не удалось зарегистрировать извлечённый файл",
+    "file_missing": "Файл не найден на диске",
+    "file_not_found": "Файл не найден",
+    "gateway_no_db": "База данных недоступна (режим шлюза)",
+    "internal_error": "Внутренняя ошибка сервера",
+    "invalid_content_type": "Неверный тип содержимого",
+    "invalid_index": "Некорректный индекс",
+    "invalid_json": "Некорректный JSON",
+    "invalid_json_object": "Ожидается JSON-объект",
+    "invalid_mode": "Некорректный режим",
+    "invalid_request": "Некорректный запрос",
+    "invalid_value": "Некорректное значение",
+    "job_running": "Пакетное задание уже выполняется",
+    "keyframe_error": "Не удалось извлечь ключевые кадры",
+    "missing_dependency": "Отсутствует необходимая библиотека",
+    "missing_file_id": "Требуется ID файла",
+    "model_not_available": "Модель ещё не загружена",
+    "multi_stmt_rejected": "Несколько SQL-выражений не допускаются",
+    "no_data": "Данные не предоставлены",
+    "not_found": "Ресурс не найден",
+    "not_select": "Допускаются только SELECT-выражения",
+    "not_zip_member": "Не является членом архива",
+    "path_required": "Путь обязателен",
+    "purge_failed": "Операция очистки не удалась",
+    "roots_summary_failed": "Не удалось составить сводку корневых папок сканирования",
+    "scan_roots_config_failed": "Настройка корневых папок сканирования не удалась",
+    "sql_error": "Ошибка выполнения SQL",
+    "unsupported_type": "Этот тип файла не поддерживается",
+    "write_rejected": "Операции записи не допускаются",
+    "zip_entry_not_found": "Запись не найдена в архиве",
+    "zip_not_found": "Файл архива не найден",
+    "zip_path_traversal": "Обход пути заблокирован"
+  },
+  "boss_mode": {
+    "back": "Назад",
+    "brand": "Деловой Вестник",
+    "esc_hint": "Нажмите Esc для возврата",
+    "headline": "Мировые рынки стабильны на фоне замедления инфляции в ключевых регионах",
+    "story1": "Центральные банки намекают на замедление ужесточения политики в следующем квартале",
+    "story2": "Стоимость доставки снижается по мере нормализации транстихоокеанских маршрутов",
+    "story3": "Прибыль технологических компаний превзошла ожидания благодаря корпоративному спросу",
+    "story4": "Энергетический сектор отступает после двухнедельного ралли на сырьевых рынках",
+    "subhead": "Аналитики отметили широкую стабильность основных индексов во вторник, при этом инвесторы взвешивают данные о занятости, политические сигналы и цены на энергоносители.",
+    "top_stories": "Главные новости",
+    "watchlist": "Список наблюдения"
+  },
+  "bridge": {
+    "toolbar_legend": {
+      "title": "Легенда / Символы"
+    }
+  },
+  "bridge.syntax_warning.converting": "Converting...",
+  "bridge.syntax_warning.error": "Conversion failed",
+  "character": {
+    "negative_label": "Исключить:",
+    "section_title": "Промпты персонажей NovelAI V4"
+  },
+  "checkpoint": {
+    "option_count": "{name} ({count})"
+  },
+  "collections": {
+    "created": "Коллекция создана",
+    "deleted": "Коллекция удалена",
+    "renamed": "Коллекция переименована"
+  },
+  "common": {
+    "clear": "Очистить",
+    "enabled": "Включено",
+    "error_prefix": "Ошибка:",
+    "loading": "Загрузка...",
+    "range_sep": "–",
+    "reset": "Сброс"
+  },
+  "common.saved": "Saved",
+  "common.saving": "Saving...",
+  "conditions": {
+    "aiAnalyzed": {
+      "label": "🧠 Проанализировано ИИ"
+    },
+    "artist": {
+      "label": "🎨 Художник",
+      "placeholder": "имя художника"
+    },
+    "checkpoint": {
+      "label": "🎯 Checkpoint",
+      "placeholder": "напр. animagine, pony"
+    },
+    "clear_all": "Очистить все",
+    "collection": {
+      "all": "Все избранные",
+      "label": "⭐ Коллекция"
+    },
+    "csvLimit": {
+      "label": "📥 Лимит экспорта CSV"
+    },
+    "disabled_in_grouped": "Недоступно в режиме папок/ZIP",
+    "favOnly": {
+      "label": "⭐ Только избранное"
+    },
+    "format": {
+      "ext_filter_hint": "Фильтр по расширению (необязательно)",
+      "ext_group_audio": "Аудио",
+      "ext_group_container": "Контейнер",
+      "ext_group_image": "Изображение",
+      "ext_group_video": "Видео",
+      "label": "📄 Формат"
+    },
+    "hasTags": {
+      "label": "🏷️ С тегами"
+    },
+    "hint": {
+      "count_many": "{count} условий",
+      "count_one": "1 условие"
+    },
+    "inCharNeg": {
+      "label": "🚫 В негативном персонажа",
+      "placeholder": "поиск негативного персонажа"
+    },
+    "inCharPos": {
+      "label": "✨ В позитивном персонажа",
+      "placeholder": "поиск позитивного персонажа"
+    },
+    "inFolder": {
+      "label": "📂 Папка",
+      "placeholder": "часть пути, напр. o:\\test"
+    },
+    "inNegative": {
+      "label": "🚫 В негативном",
+      "placeholder": "ключевое слово в негативном"
+    },
+    "inPrompt": {
+      "label": "🔤 В промпте",
+      "placeholder": "ключевое слово в промпте"
+    },
+    "limit": {
+      "label": "#️⃣ Количество",
+      "short_label": "Кол-во"
+    },
+    "model": {
+      "label": "🤖 Модель"
+    },
+    "orTags": {
+      "label": "🔀 ИЛИ теги",
+      "placeholder": "содержит любой из (через запятую)"
+    },
+    "period": {
+      "label": "📅 Период"
+    },
+    "remove": "Удалить условие",
+    "resolution": {
+      "label": "📐 Разрешение"
+    },
+    "sort": {
+      "label": "↕️ Сортировка"
+    },
+    "tagCase": {
+      "label": "Aa С учётом регистра"
+    },
+    "toggle": {
+      "close": "▲ Свернуть",
+      "more": "▼ Ещё"
+    }
+  },
+  "container": {
+    "folder_items": "{count} изображений в папке",
+    "no_members": "В контейнере нет индексированных элементов.",
+    "preload_done": "Вид категорий папок / ZIP готов",
+    "preloading_thumbs": "Генерация миниатюр... ({done}/{total})",
+    "zip_items": "{count} изображений в ZIP"
+  },
+  "convert": {
+    "btn_expand_dynamic": "Dynamic Prompts",
+    "btn_restore": "Восстановить",
+    "failed": "Конвертация не удалась",
+    "failed_with_error": "Конвертация не удалась: {error}",
+    "label": {
+      "nai": "Формат NAI ",
+      "sd": "Формат SD "
+    }
+  },
+  "ctx.ai_analyze": "AI Analysis",
+  "ctx.clear_rating": "Clear",
+  "ctx.copied": "Copied",
+  "ctx.copied_nai": "Copied as NAI",
+  "ctx.copied_sd": "Copied as SD",
+  "ctx.copy_nai": "Copy as NAI",
+  "ctx.copy_negative": "Copy negative",
+  "ctx.copy_path": "Copy file path",
+  "ctx.copy_prompt": "Copy prompt",
+  "ctx.copy_sd": "Copy as SD",
+  "ctx.favorite": "Favorite ☆",
+  "ctx.find_similar": "Find similar",
+  "ctx.path_copied": "Path copied",
+  "ctx.qr_share": "Share via QR",
+  "ctx.rating": "Rating",
+  "ctx.save_pl": "Save to PL",
+  "ctx.send_bridge": "Send to Bridge",
+  "ctx.show_detail": "Show detail",
+  "detail": {
+    "audio_unsupported": "Ваш браузер не поддерживает воспроизведение аудио.",
+    "image_alt": "Изображение",
+    "load_failed": "Не удалось загрузить подробности",
+    "modal": {
+      "analysis_mode": "Переключить режим анализа",
+      "audio_playback": "Воспроизведение аудио",
+      "autoplay": "Автовоспроизведение (P)",
+      "autoplay_interval": "Интервал (секунды)",
+      "bar_collapse": "Свернуть панель",
+      "bar_expand": "Развернуть панель",
+      "close": "Закрыть",
+      "container_items": "{count} элементов",
+      "container_view": "Просмотр контейнера",
+      "display": "Отображение:",
+      "favorite": "Избранное",
+      "fullscreen": "Полный экран",
+      "info_toggle": "Показать/скрыть панель информации",
+      "mode_fit": "Вписать",
+      "mode_fit_custom": "Пользовательский",
+      "mode_fit_height": "По высоте",
+      "mode_fit_width": "По ширине",
+      "mode_original": "Оригинал",
+      "mute": "Выключить звук (M)",
+      "next": "Следующее изображение",
+      "prev": "Предыдущее изображение",
+      "repeat_off": "Повтор: ВЫКЛ (R)",
+      "repeat_on": "Повтор: ВКЛ (R)",
+      "resume_off": "Продолжить Выкл",
+      "resume_on": "Продолжить Вкл",
+      "spread_direction": "Направление чтения (D)",
+      "spread_view": "Разворот (B)",
+      "toast_repeat_off": "Повтор: ВЫКЛ",
+      "toast_repeat_on": "Повтор: ВКЛ",
+      "toast_resume_off": "Продолжить: ВЫКЛ",
+      "toast_resume_on": "Продолжить: ВКЛ",
+      "toast_speed": "Скорость: {rate}x",
+      "toast_spread_ltr": "Чтение: Л→П",
+      "toast_spread_nav_rtl": "← Далее / Назад →",
+      "toast_spread_off": "Разворот: ВЫКЛ",
+      "toast_spread_on": "Разворот: ВКЛ",
+      "toast_spread_rtl": "Чтение: П→Л",
+      "toolbar_aria": "Элементы управления отображением",
+      "toolbar_hide": "Скрыть панель инструментов",
+      "toolbar_overflow_menu": "Ещё",
+      "toolbar_show": "Показать панель инструментов",
+      "unmute": "Включить звук (M)",
+      "video_playback": "Воспроизведение видео",
+      "viewing_mode": "Режим просмотра (V)",
+      "zoom_in": "Увеличить",
+      "zoom_out": "Уменьшить",
+      "zoom_reset": "Сбросить масштаб"
+    },
+    "save_failed": "Сохранение не удалось",
+    "saved_to_library": "Сохранено в Библиотеку промптов",
+    "video_unsupported": "Ваш браузер не поддерживает тег video."
+  },
+  "detail.ann_add_label": "Add note",
+  "detail.ann_delete_confirm": "Delete this annotation?",
+  "detail.ann_empty": "No annotations yet.",
+  "detail.ann_load_failed": "Failed to load annotations.",
+  "detail.ann_placeholder": "Add a personal note for this file...",
+  "detail.ann_save_failed": "Save failed",
+  "detail.ann_source_user": "Your notes",
+  "detail.s2t_copied": "Copied to clipboard",
+  "detail.s2t_done": "Transcription complete",
+  "detail.s2t_error": "Transcription failed",
+  "detail.s2t_no_transcript": "No transcript yet. Click \"Transcribe\" to start.",
+  "detail.s2t_processing": "Processing...",
+  "detail.s2t_segments": "Segments",
+  "detail.s2t_transcribe": "Transcribe",
+  "detail.search_by_prompt": "Search by Prompt",
+  "detail.tab_ai": "AI Analysis",
+  "detail.tab_analysis_trace": "Trace",
+  "detail.tab_annotations": "Notes",
+  "detail.tab_info": "Info",
+  "detail.tab_ocr": "OCR",
+  "detail.tab_s2t": "S2T",
+  "detail.trace_date": "Analyzed",
+  "detail.trace_error": "Failed to load analysis trace",
+  "detail.trace_loading": "Loading...",
+  "detail.trace_meta_source": "Metadata Source",
+  "detail.trace_model": "Model",
+  "detail.trace_none": "No analysis trace",
+  "detail.trace_quality": "Quality Analysis",
+  "detail.trace_quality_score": "Quality",
+  "detail.trace_s2t": "Speech Recognition",
+  "detail.trace_source": "Source",
+  "detail.trace_tags": "tags",
+  "ext": {
+    "builtin-a1111": {
+      "config": {
+        "parse_negative": {
+          "description": "Отделять и извлекать секцию Negative prompt:",
+          "label": "Также извлекать негативный промпт"
+        },
+        "parse_params": {
+          "description": "Извлекать параметры: Steps, Sampler, CFG Scale, Model и др.",
+          "label": "Также извлекать параметры генерации"
+        }
+      }
+    },
+    "builtin-chatlog": {
+      "config": {
+        "api_key": {
+          "description": "Требуется для OpenAI / Claude API. Оставьте пустым для локального Ollama",
+          "label": "API-ключ"
+        },
+        "base_url": {
+          "description": "URL эндпоинта API для движка ИИ",
+          "label": "Базовый URL API"
+        },
+        "engine_type": {
+          "description": "Тип движка ИИ для анализа разговоров",
+          "label": "Движок ИИ"
+        },
+        "model": {
+          "description": "Имя модели (напр. llama3.2:latest, gpt-4o-mini)",
+          "label": "Имя модели"
+        }
+      }
+    },
+    "builtin-comfyui": {
+      "config": {
+        "extract_workflow": {
+          "description": "Сохранять JSON workflow ComfyUI в raw_meta_json",
+          "label": "Также извлекать информацию о workflow"
+        }
+      }
+    },
+    "builtin-comfyui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Пропустить диалог подтверждения"
+        },
+        "default_sampler": {
+          "label": "Сэмплер по умолчанию"
+        },
+        "default_scheduler": {
+          "label": "Планировщик по умолчанию"
+        }
+      }
+    },
+    "builtin-nai-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Пропустить диалог подтверждения"
+        },
+        "default_model": {
+          "label": "Модель по умолчанию"
+        },
+        "default_noise_schedule": {
+          "label": "Расписание шума по умолчанию"
+        },
+        "default_sampler": {
+          "label": "Сэмплер по умолчанию"
+        }
+      }
+    },
+    "builtin-novelai-v4": {
+      "config": {
+        "extract_vibe_transfer": {
+          "description": "Извлекать силу/описание Vibe Transfer",
+          "label": "Также извлекать информацию Vibe Transfer"
+        },
+        "merge_character_prompts": {
+          "description": "Склеить base_caption + char_captions через запятые",
+          "label": "Объединить промпты персонажей в базовый"
+        }
+      }
+    },
+    "builtin-ocr": {
+      "config": {
+        "batch_export_format": {
+          "label": "Формат пакетного экспорта"
+        },
+        "batch_output_dir": {
+          "description": "Место сохранения на сервере для пакетного экспорта. Если пусто, скачивается как ZIP",
+          "label": "Каталог пакетного вывода (пусто = скачать)"
+        },
+        "default_target_lang": {
+          "label": "Язык перевода по умолчанию"
+        },
+        "default_task": {
+          "label": "Задача OCR по умолчанию"
+        },
+        "manga_ocr_enabled": {
+          "label": "Предпочитать manga-ocr (для задачи ocr_manga)"
+        }
+      }
+    },
+    "builtin-prompt-syntax": {
+      "config": {
+        "auto_detect": {
+          "description": "Автоматически определять синтаксис NAI/SD/DP во входном тексте",
+          "label": "Автоопределение синтаксиса"
+        },
+        "show_errors": {
+          "description": "Показывать предупреждения о несовпадении скобок и аномальных значениях весов",
+          "label": "Показывать ошибки"
+        }
+      }
+    },
+    "builtin-sd-nai-convert": {
+      "config": {
+        "convert_emphasis": {
+          "description": "Конвертировать синтаксис выделения между SD ((tag)) и NAI {tag}",
+          "label": "Также конвертировать синтаксис выделения"
+        },
+        "strip_embedding": {
+          "description": "Автоматически удалять теги embedding:... при конвертации SD → NAI",
+          "label": "Удалять теги Embedding при конвертации в NAI"
+        },
+        "strip_lora": {
+          "description": "Автоматически удалять теги <lora:...> при конвертации SD → NAI",
+          "label": "Удалять теги LoRA при конвертации в NAI"
+        }
+      }
+    },
+    "builtin-sd-webui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Пропустить диалог подтверждения"
+        },
+        "default_sampler": {
+          "label": "Сэмплер по умолчанию"
+        }
+      }
+    }
+  },
+  "fleet.button.back_to_cowork": "← Back to LAN Cowork",
+  "fleet.button.refresh": "Refresh",
+  "fleet.button.restart_node": "Перезапустить этот узел",
+  "fleet.consent.banner.approve_once": "Approve once",
+  "fleet.consent.banner.approve_permanent": "Approve permanently",
+  "fleet.consent.banner.countdown": "{sec} seconds remaining",
+  "fleet.consent.banner.deny": "Deny",
+  "fleet.consent.banner.title": "Remote update request from {peer}",
+  "fleet.consent.chief.cancel": "Cancel",
+  "fleet.consent.chief.re_request": "Re-request",
+  "fleet.consent.chief.send_request": "Send consent request",
+  "fleet.consent.chief.send_request_for": "Remote update disabled for {peer}. Send consent request?",
+  "fleet.consent.chief.timeout": "Consent timed out. Re-request?",
+  "fleet.consent.chief.waiting": "Waiting for consent ⏱ ({sec}s remaining)",
+  "fleet.error.branch_not_allowed": "Branch not allowed",
+  "fleet.error.cannot_dispatch_self": "Cannot dispatch to chief itself",
+  "fleet.error.consent_denied": "Consent was denied.",
+  "fleet.error.consent_token_invalid": "Consent invalidated. Please re-request.",
+  "fleet.error.deny_cooldown": "Deny cooldown active ({sec}s remaining)",
+  "fleet.error.git_not_available": "git is not available",
+  "fleet.error.invalid_source": "Invalid source",
+  "fleet.error.local_path_not_allowed": "Local path not allowed",
+  "fleet.error.not_in_allowlist": "Not in allowlist",
+  "fleet.error.other_chief_pending": "Another chief is awaiting consent ({sec}s remaining)",
+  "fleet.error.remote_update_disabled": "Remote update is disabled",
+  "fleet.error.update_failed_token_consumed": "Update failed — consent consumed. Re-request?",
+  "fleet.error.update_in_progress": "Update already in progress",
+  "fleet.logs.autoscroll": "Auto-scroll",
+  "fleet.logs.clear": "Очистить",
+  "fleet.logs.copied": "Скопировано",
+  "fleet.logs.copy": "Копировать",
+  "fleet.logs.copy_failed": "Ошибка копирования",
+  "fleet.logs.download": "Скачать",
+  "fleet.logs.pause": "Pause",
+  "fleet.logs.peer_select": "Select Peer",
+  "fleet.logs.placeholder": "Logs — select a peer to start streaming",
+  "fleet.logs.resume": "Resume",
+  "fleet.node.status.degraded": "Info Unavailable",
+  "fleet.node.status.offline": "Offline",
+  "fleet.node.status.online": "Online",
+  "fleet.node.status.restarting": "Restarting",
+  "fleet.settings.col.action": "Action",
+  "fleet.settings.col.log_stream": "Log stream",
+  "fleet.settings.col.peer": "Peer",
+  "fleet.settings.col.status": "Status",
+  "fleet.settings.col.update": "Update",
+  "fleet.settings.local.allow_remote_update": "Enable remote updates (master switch)",
+  "fleet.settings.local.desc": "Configure whether this node allows other peers to stream logs or perform remote updates. Toggle checkboxes per peer.",
+  "fleet.settings.local.save": "Save",
+  "fleet.settings.local.title": "This node's settings",
+  "fleet.settings.remote.already_granted": "Already granted",
+  "fleet.settings.remote.desc": "Use the pairing token to add the chief's peer_id to the target peer's allowlist. You don't need to log in on the peer, but a pairing token is required.",
+  "fleet.settings.remote.done": "Done",
+  "fleet.settings.remote.failed": "Failed",
+  "fleet.settings.remote.grant": "Grant on this peer",
+  "fleet.settings.remote.not_granted": "Not granted",
+  "fleet.settings.remote.revoke": "Revoke on this peer",
+  "fleet.settings.remote.status_unreachable": "Cannot check",
+  "fleet.settings.remote.title": "Remote grant (chief only)",
+  "fleet.settings.save_failed": "Save failed",
+  "fleet.settings.saved": "Saved",
+  "fleet.tab.logs": "Logs",
+  "fleet.tab.overview": "Overview",
+  "fleet.tab.settings": "Settings",
+  "fleet.tab.update": "Update",
+  "fleet.title": "Fleet Admin",
+  "fleet.update.branch": "Branch:",
+  "fleet.update.button.dispatch": "Update Selected Nodes",
+  "fleet.update.button.pull_restart": "Pull & Restart",
+  "fleet.update.button.restart_only": "Restart only",
+  "fleet.update.button.restart_only_dispatch": "Restart selected nodes",
+  "fleet.update.col.action": "Action",
+  "fleet.update.col.branch": "Branch",
+  "fleet.update.col.commit": "Commit",
+  "fleet.update.col.node": "Node",
+  "fleet.update.col.progress": "Progress",
+  "fleet.update.col.version": "Version",
+  "fleet.update.confirm.chief": "Updating this node will temporarily disconnect the admin UI. Continue?",
+  "fleet.update.confirm.restart": "Restart the selected nodes?",
+  "fleet.update.confirm.update": "Update the selected nodes? They will git pull and restart. Continue?",
+  "fleet.update.no_selection": "Please select at least one node",
+  "fleet.update.placeholder": "Update tab will be implemented in Phase 4.",
+  "fleet.update.source": "Source:",
+  "fleet.warning.multi_chief": "Multiple chiefs detected. Please restart the conflicting chief node.",
+  "genai.chat_delete_confirm": "Delete this conversation?",
+  "genai.chat_image_only": "Image-only messages are not supported",
+  "genai.chat_no_conversations": "No conversations",
+  "genai.chat_rename_prompt": "Enter a conversation name",
+  "genai.chat_search_sources": "Search sources",
+  "grid": {
+    "auto": "Авто",
+    "col_fixed": "столбцов (фиксир.)",
+    "col_unit": "столбцов",
+    "count_prefix": "Показано: ",
+    "count_unit": " элементов / ",
+    "image_only": " / только изображения",
+    "size_hint": " / размер применяется в авто-режиме"
+  },
+  "grouping": {
+    "btn_archive": "Архив",
+    "btn_files": "Файлы",
+    "btn_folders": "Папки",
+    "btn_zip": "ZIP",
+    "count_folders": "Найдено {count} папок",
+    "count_zips": "Найдено {count} ZIP-архивов",
+    "rebuild": "Пересобрать группы",
+    "rebuilt": "Группы пересобраны: {folders} папок, {zips} ZIP",
+    "summary": "Сгруппировано: {visible} / {total}",
+    "summary_folders": "Папки: {visible} ({total} файлов)",
+    "summary_zips": "ZIP: {visible} ({total} файлов)"
+  },
+  "input_hint": {
+    "artist": "Esc: Снять фокус | Alt+0/$: Начало/конец строки | Ctrl+W: Удалить слово | ?: Помощь",
+    "condition": "Esc: Снять фокус | /: К поиску | ?: Список горячих клавиш",
+    "default": "/: Поиск | Esc: Закрыть | ?: Клавиатурная справка",
+    "inPrompt": "Esc: Снять фокус | Alt+W/B: Слово | Ctrl+U: Очистить всё | ?: Помощь",
+    "tagQuery": "Esc: Снять фокус | /: К поиску | Alt+W/B: Слово | Ctrl+K: Удалить до конца | ?: Помощь"
+  },
+  "inspect": {
+    "conv_expand": "Результат раскрытия Dynamic Prompt",
+    "conv_nai_sd": "Результат NAI → SD",
+    "conv_sd_nai": "Результат SD → NAI",
+    "conv_warn_already_nai": "Входные данные, похоже, уже в формате NAI",
+    "conv_warn_already_sd": "Входные данные, похоже, уже в формате SD",
+    "conv_warn_mixed": "Во входных данных смешаны синтаксисы NAI и SD",
+    "copied": "Скопировано",
+    "copy": "Копировать",
+    "error": "Ошибка",
+    "fmt_a1111": "Формат: A1111 (Stable Diffusion)",
+    "fmt_json": "Формат: JSON",
+    "fmt_plain": "Формат: Простой текст",
+    "negative": "Негативный",
+    "network_error": "Ошибка сети",
+    "open_in_sim": "Открыть в Симуляторе промптов",
+    "output": "Вывод",
+    "parse_error": "Ошибка разбора",
+    "positive": "Позитивный",
+    "resolution": "Разрешение",
+    "sim_choices": "вариантов",
+    "sim_combinations": "{count} комбинаций",
+    "sim_depth": "Глубина",
+    "sim_dp_analyze": "Анализ вероятностей DP",
+    "sim_link": "Открыть Симулятор промптов",
+    "sim_link_text": "Открыть Симулятор промптов",
+    "sim_pick_n": "Выбрать {n} из {total}",
+    "sim_probability": "Вероятность",
+    "sim_syntax": "Синтаксис",
+    "sim_token": "Токен",
+    "sim_weight": "Вес",
+    "sim_weight_calc": "Калькулятор весов",
+    "tag_count": "Количество тегов",
+    "wh_not_found": "Размер: паттерн ШxВ или ширина/высота не найден",
+    "wh_swap_result": "Результат обмена Ш/В",
+    "zip_select": "Изображение в ZIP"
+  },
+  "kb_help": {
+    "basic": {
+      "close_or_blur": "Закрыть / снять фокус",
+      "focus_search": "Фокус на поле поиска (откуда угодно)",
+      "run_search": "Выполнить поиск",
+      "screen_lock": "Блокировка экрана (при установленном PIN)",
+      "title": "Основные",
+      "toggle_help": "Показать/скрыть справку"
+    },
+    "edit": {
+      "delete_prev_word": "Удалить предыдущее слово",
+      "kill_line": "Удалить всю строку",
+      "kill_to_end": "Удалить от курсора до конца строки",
+      "title": "Редактирование текста (стиль Emacs)"
+    },
+    "existing": {
+      "open_condition_menu": "Открыть меню добавления условий",
+      "regex_cheatsheet": "Открыть шпаргалку regex",
+      "title": "Существующие сочетания",
+      "toggle_regex": "Включить/выключить regex"
+    },
+    "footer": {
+      "close": "для закрытия",
+      "hint_line": "Подсказка: при фокусе на поле внизу отображается справка",
+      "or": "или",
+      "regex_intro_link": "Что такое regex? (Введение для начинающих)"
+    },
+    "move": {
+      "delete_char": "Удалить символ",
+      "line_end": "В конец строки",
+      "line_start": "В начало строки",
+      "next_word": "К следующему слову",
+      "prev_word": "К предыдущему слову",
+      "title": "Перемещение курсора (стиль Vim)"
+    },
+    "regex_intro": {
+      "desc": "Всего три примера могут значительно упростить поиск",
+      "open": "Открыть введение",
+      "title": "Новичок в regex?"
+    },
+    "title": "Горячие клавиши"
+  },
+  "keyboard": {
+    "close": "Закрыть",
+    "guide": {
+      "autoplay": "автовоспроизведение",
+      "close": "закрыть",
+      "copy": "копировать",
+      "dismiss": "Скрыть клавиатурную справку",
+      "dismiss_toast": "Нажмите H для повторного показа",
+      "filmstrip_nav": "пред./след. файл (работает в медиа)",
+      "filmstrip_toggle": "кинолента",
+      "focus_move": "перемещение фокуса",
+      "media_controls": "Медиа",
+      "modal_label": "Модальное окно",
+      "move": "перемещение",
+      "open": "открыть",
+      "prev_next": "пред./след.",
+      "prev_next_or_seek": "пред./след. (или перемотка 5с в медиа)",
+      "results_label": "Результаты",
+      "scroll": "Прокрутка",
+      "speed": "Скорость",
+      "spread_toggle": "разворот",
+      "to_search": "к поиску",
+      "toggle_btn": "Клавиатурная справка (H)",
+      "volume": "Громк."
+    },
+    "help": "Помощь",
+    "prev_next": "Пред./след. изображение"
+  },
+  "lan_cowork.import.done": "Импорт завершён",
+  "lan_cowork.import.partial": "Импорт завершён частично",
+  "lan_cowork.import.err.no_folder": "Укажите папку для импорта",
+  "lan_cowork.import.err.no_peer": "Выберите узел для импорта",
+  "lan_cowork.import.error": "Ошибка импорта",
+  "lan_cowork.import.folder": "Папка для импорта",
+  "lan_cowork.import.folder.pick_failed": "Failed to choose folder",
+  "lan_cowork.import.mode": "Режим",
+  "lan_cowork.import.mode.diff": "Разница",
+  "lan_cowork.import.mode.full": "Полный",
+  "lan_cowork.import.opt.favorites": "Включить избранное",
+  "lan_cowork.import.opt.merge": "Слияние метаданных (при совпадении хеша)",
+  "lan_cowork.import.peer": "Узел-источник",
+  "lan_cowork.import.running": "Импортирую...",
+  "lan_cowork.import.start": "Начать импорт",
+  "lan_cowork.import.timeout": "Время ожидания импорта истекло",
+  "lan_cowork.import.title": "Удалённый импорт",
+  "lan_cowork.peers.discover_error": "Не удалось найти узлы",
+  "lan_cowork.peers.empty": "Нет подключённых узлов",
+  "lan_cowork.peers.extension_disabled": "Расширение LAN Cowork отключено. Включите его в управлении расширениями и перезапустите сервер.",
+  "lan_cowork.peers.offline": "Не в сети",
+  "lan_cowork.peers.online": "В сети",
+  "lan_cowork.peers.pair_btn": "Pair request",
+  "lan_cowork.peers.pair_pin_prompt": "Enter the PIN shown on the other side.",
+  "lan_cowork.peers.pair_request_error": "Failed to request pairing",
+  "lan_cowork.peers.pair_request_sent": "Approve on the other side, then enter the displayed PIN.",
+  "lan_cowork.peers.pair_requesting": "Requesting...",
+  "lan_cowork.peers.pair_success": "Pairing completed",
+  "lan_cowork.peers.pair_verify_error": "PIN verification failed",
+  "lan_cowork.peers.paired": "Paired",
+  "lan_cowork.peers.refresh": "Обновить",
+  "lan_cowork.peers.remove_btn": "Remove",
+  "lan_cowork.peers.remove_confirm": "Remove this peer?",
+  "lan_cowork.peers.remove_error": "Failed to remove peer",
+  "lan_cowork.peers.remove_success": "Removed",
+  "lan_cowork.peers.title": "Подключённые узлы",
+  "lan_cowork.peers.unpaired": "Unpaired",
+  "lan_cowork.pin_modal.error.empty": "Please enter PIN",
+  "lan_cowork.title": "LAN Cowork",
+  "lc_peers": {
+    "pair_modal": {
+      "close": "Закрыть"
+    },
+    "sse": {
+      "paired": "Устройства сопряжены",
+      "pairing_request": "Получен запрос на сопряжение"
+    }
+  },
+  "lc_peers.fleet.enable_notifications": "Enable notifications",
+  "lc_peers.nav.back": "← LAN Cowork",
+  "lc_peers.page_title": "Управление пирами - LAN Cowork",
+  "lc_peers.pair_modal.cancel": "Отмена",
+  "lc_peers.pair_modal.confirm": "Подтвердить",
+  "lc_peers.pair_modal.done": "Закрыть",
+  "lc_peers.pair_modal.error.generic": "Произошла ошибка",
+  "lc_peers.pair_modal.error.unknown": "Не удалось подтвердить состояние удалённого узла.",
+  "lc_peers.pair_modal.paired_toast": "Сопряжение завершено",
+  "lc_peers.pair_modal.pin.error.empty": "Пожалуйста, введите PIN",
+  "lc_peers.pair_modal.pin.error.invalid": "Неверный PIN",
+  "lc_peers.pair_modal.pin.error.retryable": "Неверный PIN. Осталось попыток: {attempts}.",
+  "lc_peers.pair_modal.pin.error.attempts_exhausted": "Достигнуто максимальное число попыток ввода PIN.",
+  "lc_peers.pair_modal.repair_steps": "Начните сопряжение заново и попросите администратора другого узла подтвердить новый запрос.",
+  "lc_peers.pair_modal.pin.label": "PIN",
+  "lc_peers.pair_modal.pin.placeholder": "••••••",
+  "lc_peers.pair_modal.step1.msg": "Отправка запроса на сопряжение...",
+  "lc_peers.pair_modal.step2.msg": "Подтвердите PIN на удалённом хосте, затем введите отображённый PIN.",
+  "lc_peers.pair_modal.step3.msg": "Сопряжение завершено.",
+  "lc_peers.pair_modal.title": "Сопряжение",
+  "lc_peers.peers.col.actions": "Действия",
+  "lc_peers.peers.col.address": "Адрес",
+  "lc_peers.peers.col.name": "Имя пира",
+  "lc_peers.peers.col.status": "Статус",
+  "lc_peers.peers.col.token_expires": "Срок действия токена",
+  "lc_peers.peers.empty": "Нет подключённых пиров",
+  "lc_peers.peers.load_error": "Не удалось загрузить список токенов",
+  "lc_peers.peers.pair_request_error": "Ошибка запроса сопряжения",
+  "lc_peers.peers.refresh": "Обновить",
+  "lc_peers.peers.revoke": "Отозвать",
+  "lc_peers.peers.revoke_confirm": "Отозвать токен этого пира?",
+  "lc_peers.peers.revoke_error": "Ошибка при отзыве",
+  "lc_peers.peers.revoked": "Токен отозван",
+  "lc_peers.peers.status.auth_lost": "Требуется повторное сопряжение",
+  "lc_peers.peers.status.paired": "Сопряжён",
+  "lc_peers.peers.title": "Подключённые пиры",
+  "lc_peers.requests.approve_error": "Ошибка одобрения",
+  "lc_peers.requests.col.actions": "Действия",
+  "lc_peers.requests.col.peer_name": "Имя пира",
+  "lc_peers.requests.col.requester": "Инициатор",
+  "lc_peers.requests.col.time": "Получено в",
+  "lc_peers.requests.empty": "Нет ожидающих запросов на сопряжение",
+  "lc_peers.requests.load_error": "Не удалось загрузить список запросов",
+  "lc_peers.requests.refresh": "Обновить",
+  "lc_peers.requests.reject_error": "Ошибка при отклонении",
+  "lc_peers.requests.rejected": "Отклонено",
+  "lc_peers.requests.title": "Ожидающие запросы на сопряжение",
+  "lc_peers.title": "Управление пирами",
+  "llm_router": {
+    "aliases_section": "Алиасы маршрутизации",
+    "backends_section": "Бэкенды",
+    "col": {
+      "actions": "Действия",
+      "alias": "Алиас",
+      "alias_name": "Алиас",
+      "base_url": "Базовый URL",
+      "last_seen": "Последнее обнаружение",
+      "models": "Модели",
+      "physical": "Физическая модель",
+      "slo": "SLO",
+      "status": "Статус"
+    },
+    "disable": "Отключить",
+    "disabled_badge": "[ОТКЛЮЧЁН]",
+    "enable": "Включить",
+    "loading": "Загрузка...",
+    "no_aliases": "Нет настроенных алиасов маршрутизации",
+    "no_backends": "Нет зарегистрированных бэкендов",
+    "refresh": "Обновить",
+    "refresh_all": "Обновить все",
+    "refresh_failed": "Обновление не удалось",
+    "refreshed": "Обновлено",
+    "source": {
+      "mdns": "mDNS",
+      "static": "Статический"
+    },
+    "status": {
+      "error": "ошибка",
+      "ok": "ok",
+      "unknown": "неизвестно",
+      "unreachable": "недоступен"
+    },
+    "summary": {
+      "aliases": "Алиасы маршрутизации",
+      "backends": "Бэкенды",
+      "enabled": "Включены",
+      "models": "Модели"
+    },
+    "title": "LLM Router",
+    "toggle_failed": "Не удалось переключить бэкенд"
+  },
+  "mesh_inference": {
+    "action": {
+      "local_only": "Только локальный режим",
+      "local_only_tooltip": "Локальный пир не имеет эффективных типов вывода",
+      "refresh": "Обновить"
+    },
+    "col": {
+      "peer": "Пир"
+    },
+    "empty": "Нет подключённых пиров.",
+    "subtitle": "Переключение распределённого вывода по пирам и типам вывода.",
+    "title": "Матрица Mesh Inference",
+    "toast": {
+      "load_failed": "Загрузка не удалась",
+      "refreshed": "Обновлено",
+      "save_failed": "Сохранение не удалось",
+      "saved": "Сохранено"
+    },
+    "type": {
+      "clip": "clip",
+      "tagger": "tagger",
+      "whisper": "whisper",
+      "yolo": "yolo"
+    }
+  },
+  "meta": {
+    "checkpoint_search": "Поиск по checkpoint",
+    "click_open_dir": "Нажмите для открытия каталога",
+    "click_to_copy": "Нажмите для копирования",
+    "copy_original": "Копировать",
+    "download_json": "Скачать",
+    "negative_label": "Негативный",
+    "no_metadata": "Нет метаданных",
+    "parameters_title": "Параметры",
+    "parse_success": "Разбор успешен",
+    "positive_label": "Позитивный",
+    "seed_copy": "Копировать Seed"
+  },
+  "nav": {
+    "back_title": "Вернуться к предыдущей позиции",
+    "bottom_aria": "Вниз",
+    "bottom_title": "Вниз (End)",
+    "llm_router": "LLM Router",
+    "mesh_inference": "Mesh Inference",
+    "top_aria": "Наверх",
+    "top_title": "Наверх (Home)"
+  },
+  "nav.lan_cowork": "LAN Cowork",
+  "path": {
+    "copy_label": "Путь ",
+    "copy_label_filename": "Имя файла ",
+    "copy_label_zip": "Путь ZIP ",
+    "copy_title": "Копировать путь",
+    "copy_title_filename": "Копировать имя файла",
+    "copy_title_zip": "Копировать путь ZIP",
+    "label": "Путь:"
+  },
+  "period": {
+    "12h": "12ч",
+    "24h": "24ч",
+    "3h": "3ч",
+    "8h": "8ч",
+    "custom": "Произвольный",
+    "days3": "3 дня",
+    "days5": "5 дней",
+    "half_year": "6 месяцев",
+    "last_month": "Прошлый месяц",
+    "month1": "1 месяц",
+    "month2": "2 месяца",
+    "month3": "3 месяца",
+    "month9": "9 месяцев",
+    "week1": "1 неделя",
+    "week2": "2 недели",
+    "year1": "1 год",
+    "yesterday": "До вчера"
+  },
+  "presets": {
+    "deleted": "Пресет удалён: {name}",
+    "empty": "Нет сохранённых пресетов",
+    "loaded": "Пресет загружен: {name}",
+    "nothing_to_save": "Нет состояния поиска для сохранения",
+    "rename_prompt": "Новое имя пресета:",
+    "renamed": "Пресет переименован: {name}",
+    "save_prompt": "Имя пресета:",
+    "saved": "Пресет сохранён: {name}"
+  },
+  "prompt": {
+    "badge": {
+      "embedding": "Textual Inversion (Embedding)",
+      "lora_weight": "Вес LoRA: {weight}",
+      "novelai_weight": "Вес NovelAI: {weight}",
+      "paren_weight": "Вес: {weight} ({count} скобок)",
+      "random_choice": "Случайный выбор",
+      "weight": "Вес: {weight}"
+    }
+  },
+  "prompt_library.insert_as_is": "Insert as-is",
+  "prompt_library.insert_cancel": "Cancel",
+  "prompt_library.insert_convert_and_insert": "Convert and insert",
+  "prompt_library.insert_syntax_mismatch_body": "The selected prompt appears to use a different syntax from the current bridge. What do you want to do?",
+  "prompt_library.insert_syntax_mismatch_title": "Syntax mismatch detected",
+  "qr": {
+    "content_label": "Содержимое QR:",
+    "copy_text": "Копировать текст",
+    "info": {
+      "compressing": "⚠️ Слишком длинный, сжимаю текст",
+      "meta_len": "📦 {count} символов",
+      "negative_len": "🚫 {count} символов",
+      "positive_len": "📝 {count} символов",
+      "too_long": "⚠️ Текст слишком длинный для QR. Используйте копирование текста.",
+      "url": "🔗 URL для публикации"
+    },
+    "load_failed": "Не удалось загрузить библиотеку QR",
+    "mode": {
+      "meta": "Все метаданные (JSON)",
+      "negative": "Негативный промпт",
+      "positive": "Позитивный промпт",
+      "url": "URL для публикации",
+      "url_local_disabled": "🚫 URL (localhost)"
+    },
+    "no_content": "Нет содержимого",
+    "save_image": "Сохранить QR-изображение",
+    "text_too_long": "Текст слишком длинный",
+    "use_text_copy": "Используйте копирование текста"
+  },
+  "random": {
+    "empty": "Нет результатов поиска для случайного отображения",
+    "opened_one": "Открыт один случайный результат"
+  },
+  "resolution": {
+    "landscape": "Альбомная Ш>=1024 В<=768",
+    "portrait": "Портретная Ш<=768 В>=1024",
+    "square": "Квадрат",
+    "square_1024": "1024x1024",
+    "w1024": "Ш>=1024",
+    "w512": "Ш>=512",
+    "w768": "Ш>=768"
+  },
+  "result": {
+    "ai_analysis": "Анализ ИИ",
+    "copy_id_title": "Копировать ID файла",
+    "copy_prompt_title": "Копировать промпт",
+    "detail_label": "Подробности",
+    "negative_label": "Негативный:",
+    "positive_label": "Позитивный:",
+    "qr_share": "QR-код",
+    "save_to_library": "Сохранить в библиотеку",
+    "show_detail_aria": "Показать подробности"
+  },
+  "scan": {
+    "banner": {
+      "dismiss": "Закрыть",
+      "interrupted": "Предыдущее сканирование было прервано",
+      "resume": "Возобновить",
+      "resume_failed": "Не удалось возобновить",
+      "resuming": "Возобновление сканирования...",
+      "scroll_top": "Наверх",
+      "stop": "Стоп"
+    },
+    "complete_confirm_refresh": "Сканирование завершено. Обновить результаты сейчас?",
+    "complete_label": "✓ Сканирование завершено!",
+    "complete_toast": "Сканирование завершено: {count} файлов обработано",
+    "details": {
+      "processed": "{total} файлов обработано",
+      "progress": "{current} / {total} файлов"
+    },
+    "failed_label": "✗ Сканирование не удалось",
+    "failed_toast": "Сканирование не удалось: {error}",
+    "phase": {
+      "counting": "Подсчёт файлов...",
+      "initializing": "Инициализация...",
+      "scanning": "Сканирование изображений..."
+    },
+    "start_failed": "Не удалось запустить сканирование",
+    "time": {
+      "minutes": "{m}м{s}с",
+      "seconds": "{n}с"
+    },
+    "unknown_error": "Неизвестная ошибка"
+  },
+  "scheduler": {
+    "action_failed": "Действие не удалось",
+    "actions": "Действия",
+    "active": "Активна",
+    "add_dialog_title": "Добавить запланированную задачу",
+    "add_job": "Добавить задачу",
+    "added_msg": "Задача добавлена",
+    "cancel": "Отмена",
+    "delete": "Удалить",
+    "delete_confirm": "Удалить задачу \"{id}\"?",
+    "deleted_msg": "Задача удалена",
+    "duration": "Длительность",
+    "error": "Ошибка",
+    "failed": "Ошибка",
+    "field_day": "День",
+    "field_day_of_week": "День недели",
+    "field_func": "Функция",
+    "field_hour": "Час",
+    "field_job_id": "ID задачи",
+    "field_minute": "Минута",
+    "field_trigger_type": "Тип триггера",
+    "hint_day": "1-31, запятая, или *",
+    "hint_dow": "пн-вс, 0-6, или *",
+    "hint_hour": "0-23, запятая, или *",
+    "hint_minute": "0-59, запятая, или *",
+    "history": "История выполнения",
+    "job_desc_bsky_notification_poll": "Опрос уведомлений Bluesky",
+    "job_desc_db_backup": "Резервное копирование базы данных",
+    "job_desc_db_integrity_check": "Проверка целостности БД",
+    "job_desc_db_vacuum": "SQLite VACUUM (освобождение места)",
+    "job_desc_github_issue_poll": "Опрос issue на GitHub",
+    "job_desc_prune_unused_tags": "Удаление неиспользуемых тегов",
+    "job_desc_rebuild_groups_index": "Перестроение индекса групп",
+    "job_desc_refresh_monthly_stats": "Обновление кеша месячной статистики",
+    "job_desc_thumbnail_cleanup": "Очистка кеша миниатюр",
+    "job_id": "ID задачи",
+    "jobs": "Задачи",
+    "loading": "Загрузка...",
+    "next_run": "Следующий запуск",
+    "no_history": "Нет истории выполнения",
+    "no_jobs": "Нет зарегистрированных задач",
+    "pause": "Пауза",
+    "paused": "Приостановлена",
+    "paused_msg": "Задача приостановлена",
+    "refresh": "Обновить",
+    "result": "Результат",
+    "resume": "Возобновить",
+    "resumed_msg": "Задача возобновлена",
+    "running": "Работает",
+    "status": "Статус планировщика",
+    "status_label": "Статус",
+    "stopped": "Остановлен",
+    "submit": "Добавить",
+    "success": "Успех",
+    "time": "Время",
+    "title": "Планировщик задач",
+    "trigger": "Триггер",
+    "trigger_now": "Запустить сейчас",
+    "triggered": "Задача поставлена в очередь на немедленное выполнение",
+    "job_desc_thumbnail_integrity_check": "Проверка целостности миниатюр (удалить устаревшие/несогласованные)"
+  },
+  "sd_bridge": {
+    "inserted": "Вставлено"
+  },
+  "sd_nai_convert": {
+    "copied": "Скопировано"
+  },
+  "search": {
+    "count": {
+      "normal": "Найдено {count} результатов",
+      "partial": "{shown} / {total} элементов",
+      "prompt_match": "{count} результатов (совпадение промпта)",
+      "suffix_results": "результатов",
+      "unit": "{count}",
+      "zero": "0 результатов"
+    },
+    "error": {
+      "failed": "Поиск не удался: {message}",
+      "generic": "Произошла ошибка при поиске",
+      "network": "Не удаётся подключиться к серверу. Убедитесь, что сервер запущен.",
+      "regex": "Ошибка regex: {error}"
+    },
+    "export_csv_hint": "Экспорт {count} результатов в CSV (изменить лимит в меню \"+Добавить условие\")",
+    "live": {
+      "title": "Живой поиск (авто)",
+      "toast_off": "Живой поиск: ВЫКЛ",
+      "toast_on": "Живой поиск: ВКЛ"
+    },
+    "loading_more": "Загрузка...",
+    "partial_warning": "Достигнут лимит отображения ({limit}). Сузьте условия или увеличьте количество для показа всех результатов.",
+    "path_tip": {
+      "message": "Поиск по именам тегов и именам файлов/папок. Для точных результатов введите теги в строку поиска и укажите имена файлов/папок через \"Добавить условие\" → \"Папка\".",
+      "move_btn": "📂 Перейти к поиску по папкам"
+    },
+    "placeholder": {
+      "plain": "Пример: 1girl, blonde_hair, -nsfw",
+      "regex": "Пример: 1girl, blue_(hair|eyes)  поиск тегов regex"
+    },
+    "regex_note": " (отфильтровано regex)",
+    "regex_warn_confirm": "⚠️ Поиск regex может быть медленным на больших наборах данных.\nПродолжить поиск?",
+    "state": {
+      "empty_db_hint1": "Перейдите на страницу Настроек и зарегистрируйте папки с изображениями",
+      "empty_db_hint2": "Нажмите \"Начать сканирование\" для импорта метаданных изображений",
+      "empty_db_hint3": "После сканирования изображения появятся в результатах поиска",
+      "empty_db_message": "Добавьте папки с изображениями в Настройках",
+      "empty_db_settings_link": "Открыть Настройки",
+      "empty_db_title": "В базе данных пока нет изображений",
+      "collection_empty_title": "В этой коллекции пока ничего нет",
+      "collection_empty_message": "Нажмите на звёздочку в правом нижнем углу изображения, чтобы добавить его в эту коллекцию.",
+      "collection_empty_filtered_message": "Ни одно изображение в этой коллекции не соответствует условиям поиска. Попробуйте убрать часть фильтров.",
+      "empty_title": "Ни одно изображение не соответствует вашим условиям",
+      "error_title": "Произошла ошибка",
+      "example1": "Поиск тегов: 1girl, blue eyes (И через запятые)",
+      "example2": "Исключение: -bad quality (префикс минус)",
+      "example3": "Используйте +Добавить условие для фильтров модели/даты",
+      "example4": "Regex: girl.*hair (сопоставление шаблонов)",
+      "examples_label": "Примеры:",
+      "first_message": "Введите теги или условия для поиска изображений",
+      "first_title": "Попробуйте поиск",
+      "hint1": "Проверьте написание тегов (пример: 1girl, blue_eyes)",
+      "hint2": "Попробуйте расширить диапазон дат",
+      "hint3": "В режиме regex используйте .*ключевое_слово.* для частичных совпадений",
+      "hint4": "Уменьшите количество условий для расширения поиска",
+      "hint_label": "Подсказки:",
+      "start_prompt": "Нажмите кнопку Поиск или Enter",
+      "unknown_error": "Неизвестная ошибка"
+    }
+  },
+  "semantic_search.elapsed": "elapsed",
+  "semantic_search.elapsed_suffix": "elapsed",
+  "server_info": {
+    "files": "файлов",
+    "load_failed": "Не удалось загрузить информацию о сервере",
+    "startup_initializing": "Инициализация сервера",
+    "startup_migration": "Обновление БД при запуске",
+    "startup_stage_backfill": "Обновление столбцов поиска для существующих записей.",
+    "startup_stage_backup": "Создание резервной копии перед обновлением.",
+    "startup_stage_backup_reused": "Повторное использование существующей резервной копии.",
+    "startup_stage_backup_skipped": "Резервная копия пропущена для большой базы данных.",
+    "startup_stage_file_cache": "Построение кэша метаданных файлов. Скоро будет готово.",
+    "startup_stage_finalizing": "Обновление завершено. Завершение запуска…",
+    "startup_stage_migrate": "Применение обновлений схемы базы данных.",
+    "startup_stage_prepare": "Подготовка проверок обновления.",
+    "startup_stage_rebuild_fts": "Перестройка поисковых индексов для новой схемы.",
+    "startup_upgrade_in_progress": "Обновление базы данных",
+    "startup_upgrade_wait": "На больших базах данных это может занять несколько минут.",
+    "tags": "тегов"
+  },
+  "settings": {
+    "apikeys_created": "Создан:",
+    "apikeys_empty": "API-ключи ещё не созданы.",
+    "apikeys_full_access": "полный доступ",
+    "apikeys_last_used": "Последнее использование:",
+    "apikeys_revoke": "Отозвать этот ключ",
+    "apikeys_toast_copied": "API-ключ скопирован",
+    "apikeys_toast_create_failed": "Не удалось создать API-ключ",
+    "apikeys_toast_created": "API-ключ создан",
+    "apikeys_toast_mcp_copied": "Сниппет MCP скопирован",
+    "apikeys_toast_revoke_failed": "Не удалось отозвать API-ключ",
+    "apikeys_toast_revoked": "API-ключ отозван",
+    "blocker_local_only": "Эта операция разрешена только с локальной машины",
+    "blocker_pin_not_active": "PIN-авторизация не активна (требуется перезапуск)",
+    "blocker_pin_session": "Требуется сессия с PIN-авторизацией",
+    "blocker_restart_disabled": "API перезапуска отключён (--allow-restart или TAGDB_ALLOW_RESTART=1)",
+    "blocker_token_missing": "Токен удалённого перезапуска не установлен",
+    "conditions_not_met": "условия не выполнены",
+    "container_nav_continuous": "Продолжить к следующей папке/ZIP",
+    "container_nav_continuous_hint": "Переход к соседней папке/ZIP при достижении конца в просмотрщике",
+    "container_nav_order": "Порядок навигации по группам",
+    "container_nav_order_hint": "Порядок навигации между папками/ZIP",
+    "container_nav_order_name": "По имени",
+    "container_nav_order_result": "По результатам поиска",
+    "database": "База данных",
+    "delete": "Удалить",
+    "disabled": "Отключено",
+    "enabled": "Включено",
+    "env_var": "Переменная среды",
+    "error": "Ошибка",
+    "ext_disable": "Отключить",
+    "ext_disabled": "Отключено",
+    "ext_disabled_msg": "Расширение отключено.",
+    "ext_enable": "Включить",
+    "ext_enabled": "Включено",
+    "ext_enabled_msg": "Расширение включено.",
+    "ext_restart_required": "Требуется перезапуск для применения.",
+    "ext_toggle_failed": "Не удалось переключить расширение",
+    "failed": "Ошибка",
+    "files_tags": "Файлы / Теги",
+    "json_saved": "✅ JSON сохранён",
+    "lan_public": "LAN публичный",
+    "load_failed": "Загрузка не удалась",
+    "local_only": "Только локальный",
+    "lock_failed": "Блокировка не удалась",
+    "meta_breakdown": "Разбивка метаданных",
+    "modal_kb_guide": "Показывать клавиатурную справку в просмотрщике",
+    "modal_kb_guide_hint": "Отображать подсказки горячих клавиш внизу модального просмотрщика",
+    "network": "Сеть",
+    "no_extensions": "Нет установленных расширений.",
+    "no_roots": "Нет зарегистрированных папок.",
+    "none_detected": "Не обнаружено",
+    "not_set": "Не установлено",
+    "path_updated": "Путь обновлён",
+    "pin_active": "PIN активен",
+    "pin_disabled": "PIN отключён",
+    "pin_pending": "PIN установлен (требуется перезапуск)",
+    "pin_source": "Источник PIN",
+    "profile_active_badge": "Активен",
+    "profile_ago": "назад",
+    "profile_create": "Создать профиль",
+    "profile_create_failed": "Создание не удалось",
+    "profile_days": "д",
+    "profile_delete": "Удалить",
+    "profile_delete_confirm": "Удалить профиль \"{label}\"? Это действие необратимо.",
+    "profile_delete_failed": "Удаление не удалось",
+    "profile_desc_prompt": "Описание (необязательно):",
+    "profile_dup_failed": "Дублирование не удалось",
+    "profile_dup_label_prompt": "Новое отображаемое имя:",
+    "profile_dup_name_prompt": "Новое имя профиля:",
+    "profile_duplicate": "Дублировать",
+    "profile_empty": "Нет настроенных профилей.",
+    "profile_export_failed": "Экспорт не удался",
+    "profile_import_exists": "Профиль \"{name}\" уже существует. {count} поле(й) отличаются.\nРежим импорта: полный (перезапись) или diff (объединить изменения)?",
+    "profile_import_failed": "Импорт не удался",
+    "profile_import_prompt": "Вставьте данные QR профиля (JSON):",
+    "profile_import_success": "Профиль успешно импортирован.",
+    "profile_just_now": "только что",
+    "profile_label_prompt": "Отображаемое имя:",
+    "profile_last_used": "Последнее использование",
+    "profile_name_prompt": "Имя профиля (буквы, цифры, дефисы, подчёркивания):",
+    "profile_never_used": "Никогда не использовался",
+    "profile_no_desc": "Нет описания",
+    "profile_no_pin": "Управление профилями требует PIN-авторизации. Установите PIN и перезапустите.",
+    "profile_qr_hint": "Скопируйте данные ниже или отсканируйте QR-код для импорта на другом экземпляре.",
+    "profile_qr_import": "Импорт QR",
+    "profile_qr_title": "Экспорт профиля",
+    "profile_rename": "Переименовать",
+    "profile_rename_failed": "Переименование не удалось",
+    "profile_rename_prompt": "Новое имя:",
+    "profile_switch_back": "Сервер вернулся с новым профилем. Перезагрузка...",
+    "profile_switch_btn": "Переключить",
+    "profile_switch_confirm": "Переключиться на профиль \"{label}\"? Сервер будет перезапущен.",
+    "profile_switch_failed": "Переключение профиля не удалось",
+    "profile_switch_sending": "Отправка запроса на переключение профиля...",
+    "profile_switch_timeout": "Запрос на переключение профиля отправлен, но сервер не ответил в течение 90 секунд.",
+    "profile_switch_waiting": "Переключение профиля принято. Ожидание возврата сервера...",
+    "profile_toggle_fav": "Избранное",
+    "recursive_scan": "Рекурсивное сканирование",
+    "remote_restart_off": "Удалённый перезапуск: ВЫКЛ",
+    "remote_restart_on": "Удалённый перезапуск: ВКЛ",
+    "remove_root_confirm": "Удалить регистрацию этой папки?",
+    "restart_api": "Перезапустить API",
+    "restart_back": "Сервер вернулся. Перезагрузка...",
+    "restart_confirm": "Перезапустить сервер? (недоступен несколько секунд)",
+    "restart_failed": "Перезапуск не удался",
+    "restart_sending": "Отправка запроса на перезапуск...",
+    "restart_server": "Перезапустить сервер",
+    "restart_timeout": "Запрос на перезапуск отправлен, но сервер не ответил в течение 90 секунд.",
+    "restart_waiting": "Перезапуск принят. Ожидание возврата сервера...",
+    "rfs_enum_max": "Макс. перечисление",
+    "rfs_probe_max": "Макс. зондирование",
+    "rfs_total_max": "Макс. всего",
+    "save_failed": "Сохранение не удалось",
+    "save_path": "Сохранить путь",
+    "saved": "✅ Сохранено",
+    "saved_cli_override": "⚠ Сохранено (CLI --pin имеет приоритет. Проверьте параметры запуска)",
+    "saved_restart_needed": "✅ Сохранено (требуется перезапуск)",
+    "saving": "Сохранение...",
+    "screen_lock": "Блокировка экрана",
+    "security": "Безопасность",
+    "source": "источник",
+    "toggle_root": "Включить/Отключить",
+    "token_not_set": "Токен: не установлен",
+    "token_set": "Токен: установлен",
+    "tsr_desc": "Управление распределёнными серверами вывода тегов (Hailo Remote, ONNX Local и др.). Поддержка параллельного пакетного тегирования с перехватом работы.",
+    "tsr_mesh_redirect": "Переключатели mesh inference для каждого пира управляются на",
+    "tsr_mesh_redirect_link": "Матрице Mesh Inference",
+    "tsr_mesh_redirect_suffix": "странице.",
+    "tsr_title": "Реестр серверов тегирования",
+    "unit_hours": "ч",
+    "unit_min": "мин",
+    "unit_minutes": "м",
+    "unit_sec": "с",
+    "unknown": "Неизвестно",
+    "uptime": "Время работы",
+    "version": "Версия"
+  },
+  "settings.bitwarden_desc": "Связать секреты с Bitwarden для динамического получения через bw CLI. Требуется установленный и разблокированный Bitwarden CLI.",
+  "settings.bitwarden_title": "Bitwarden CLI",
+  "settings.bsky_auto_dismiss_follow": "Автоматически игнорировать подписки",
+  "settings.bsky_auto_dismiss_like": "Автоматически игнорировать лайки",
+  "settings.bsky_auto_dismiss_repost": "Автоматически игнорировать репосты",
+  "settings.bsky_auto_respond": "Включить автоответ",
+  "settings.bsky_monitor_desc": "Мониторинг упоминаний, ответов и других уведомлений Bluesky. Настройка критериев сортировки и шаблонов автоответов.",
+  "settings.bsky_monitor_title": "Монитор Bluesky",
+  "settings.bsky_notify_connect": "Уведомлять при подключении MCP",
+  "settings.bsky_poll_interval": "Интервал опроса (минуты)",
+  "settings.bsky_poll_now": "Опросить сейчас",
+  "settings.bsky_polling": "Опрос...",
+  "settings.bsky_response_mention": "Ответ на упоминание",
+  "settings.bsky_response_reply": "Ответ на ответ",
+  "settings.bsky_response_title": "Шаблоны автоответов",
+  "settings.bsky_save_failed": "Не удалось сохранить настройки монитора",
+  "settings.bsky_save_monitor": "Сохранить настройки монитора",
+  "settings.bsky_saved": "Настройки монитора сохранены",
+  "settings.bsky_triage_mention": "Упоминания",
+  "settings.bsky_triage_quote": "Цитаты",
+  "settings.bsky_triage_reply": "Ответы",
+  "settings.bsky_triage_title": "Промпты сортировки",
+  "settings.sns_bluesky_title": "Bluesky",
+  "settings.theme_applied": "Theme applied:",
+  "settings.theme_click_to_apply": "Click to apply",
+  "settings.theme_hint": "Click a theme to apply it instantly.",
+  "settings_schema.agent_safety_budget_preset": "Пресет бюджета",
+  "settings_schema.agent_safety_circuit_breaker_cooldown_seconds": "Время охлаждения Circuit Breaker (секунды)",
+  "settings_schema.agent_safety_circuit_breaker_enabled": "Circuit Breaker включён",
+  "settings_schema.agent_safety_circuit_breaker_error_rate_threshold": "Порог частоты ошибок (0.0-1.0)",
+  "settings_schema.agent_safety_circuit_breaker_max_actions_per_minute": "Макс. действий в минуту",
+  "settings_schema.agent_safety_circuit_breaker_max_consecutive_errors": "Макс. последовательных ошибок",
+  "settings_schema.agent_safety_circuit_breaker_max_identical_consecutive": "Макс. идентичных последовательных вызовов",
+  "settings_schema.agent_safety_circuit_breaker_max_same_tool_per_minute": "Макс. одинаковых инструментов в минуту",
+  "settings_schema.ai_analysis_api_key": "API-ключ Anthropic (Claude)",
+  "settings_schema.ai_analysis_openai_api_key": "API-ключ OpenAI",
+  "settings_schema.ai_analysis_openai_compat_api_key": "API-ключ совместимый с OpenAI",
+  "settings_schema.archive_cleanup_llm_api_key": "API-ключ Anthropic для очистки архивов",
+  "settings_schema.archive_cleanup_llm_openai_api_key": "API-ключ OpenAI для очистки архивов",
+  "settings_schema.archive_cleanup_llm_openai_compat_api_key": "API-ключ совместимый с OpenAI для очистки архивов",
+  "settings_schema.archive_throttle_ms": "Дросселирование архивов (мс)",
+  "settings_schema.backup_backup_dir": "Каталог резервных копий",
+  "settings_schema.backup_backup_on_scan_complete": "Резервное копирование после завершения сканирования",
+  "settings_schema.backup_cooldown_minutes": "Время охлаждения (минуты)",
+  "settings_schema.backup_enabled": "Автоматическое резервное копирование включено",
+  "settings_schema.backup_max_generations": "Макс. поколений резервных копий",
+  "settings_schema.backup_periodic_interval_hours": "Интервал периодического копирования (часы)",
+  "settings_schema.brace_choice": "Выбор скобок",
+  "settings_schema.compute_hash": "Вычисление pHash",
+  "settings_schema.direct_prompt_convert": "Прямая конвертация промптов",
+  "settings_schema.enable_fts": "Полнотекстовый поиск (FTS5) включён",
+  "settings_schema.extensions_builtin-nai-bridge_api_token": "API-токен NovelAI",
+  "settings_schema.extract_a1111": "Извлечение метаданных A1111",
+  "settings_schema.extract_comfyui": "Извлечение метаданных ComfyUI",
+  "settings_schema.lowercase_tags": "Теги в нижнем регистре",
+  "settings_schema.preserve_templates": "Сохранять шаблоны",
+  "settings_schema.server_allow_remote_restart": "API удалённого перезапуска включён",
+  "settings_schema.server_allow_restart": "API перезапуска включён",
+  "settings_schema.server_host": "Хост привязки",
+  "settings_schema.server_lan": "Доступ по LAN включён",
+  "settings_schema.server_pin": "Код PIN-аутентификации",
+  "settings_schema.server_pin_boss_login_ui": "UI входа босс-режима",
+  "settings_schema.server_port": "Номер порта",
+  "settings_schema.server_quick_lock_enabled": "Быстрая блокировка включена",
+  "settings_schema.server_restart_token": "Токен удалённого перезапуска",
+  "settings_schema.sns_bluesky_app_password": "Пароль приложения Bluesky",
+  "settings_schema.sns_bluesky_handle": "Handle Bluesky",
+  "settings_schema.sns_post_template": "Шаблон поста",
+  "settings_schema.timezone": "Часовой пояс",
+  "settings_schema.ui": "Тема UI (стандартная/пользовательская)",
+  "settings_schema.video_analysis_enabled": "Анализ видео включён",
+  "settings_schema.video_analysis_keyframe_count": "Количество ключевых кадров",
+  "settings_schema.video_analysis_scene_threshold": "Порог сцены",
+  "settings_schema.video_analysis_strategy": "Стратегия ключевых кадров",
+  "settings_schema.webhook_secret": "Секрет подписи вебхука",
+  "similar.error": "An error occurred",
+  "similar.none_found": "No similar images were found. Run hash calculation first.",
+  "similar.searching": "Searching...",
+  "similar.title": "Similar Images",
+  "stats": {
+    "load_failed": "Не удалось загрузить статистику",
+    "no_model_data": "Нет данных о модели",
+    "no_resolution_data": "Нет данных о разрешении",
+    "period": {
+      "dawn": "Рассвет (03-09)",
+      "day": "День (09-15)",
+      "evening": "Вечер (15-21)",
+      "night": "Ночь (21-03)"
+    },
+    "personality": {
+      "balanced": {
+        "advice": "У вас гибкий стиль работы!",
+        "description": "Свободный творец, не привязанный ко времени",
+        "type": "Сбалансированный"
+      },
+      "daytime": {
+        "advice": "Вы поддерживаете здоровый ритм!",
+        "description": "Творец с регулярным распорядком",
+        "type": "Дневной тип"
+      },
+      "early_bird": {
+        "advice": "Отличные жизненные привычки!",
+        "description": "Творец, использующий утреннюю концентрацию",
+        "type": "Жаворонок"
+      },
+      "evening": {
+        "advice": "Максимально используете золотые часы!",
+        "description": "Творец, достигающий пика вечером",
+        "type": "Вечерний тип"
+      },
+      "night_owl": {
+        "advice": "Берегите здоровье!",
+        "description": "Творец, любящий тишину ночи",
+        "type": "Сова"
+      },
+      "unknown": {
+        "advice": "",
+        "description": "Недостаточно данных",
+        "type": "Неизвестно"
+      }
+    }
+  },
+  "story": {
+    "event": {
+      "first_month": {
+        "desc": "Старт с {count} изображений",
+        "title": "Начало творческого пути"
+      },
+      "milestone_100": {
+        "desc": "Всего: {total}",
+        "title": "100 изображений!"
+      },
+      "milestone_100k": {
+        "desc": "Всего: {total}",
+        "title": "100 000 изображений!"
+      },
+      "milestone_10k": {
+        "desc": "Всего: {total}",
+        "title": "10 000 изображений!"
+      },
+      "milestone_1k": {
+        "desc": "Всего: {total}",
+        "title": "1 000 изображений!"
+      },
+      "milestone_2k": {
+        "desc": "Всего: {total}",
+        "title": "2 000 изображений!"
+      },
+      "milestone_500": {
+        "desc": "Всего: {total}",
+        "title": "500 изображений!"
+      },
+      "milestone_50k": {
+        "desc": "Всего: {total}",
+        "title": "50 000 изображений!"
+      },
+      "milestone_5k": {
+        "desc": "Всего: {total}",
+        "title": "5 000 изображений!"
+      },
+      "new_source": {
+        "desc": "Начали использовать {source}",
+        "title": "Новый инструмент: {source}"
+      },
+      "peak_month": {
+        "desc": "Создано {count} изображений",
+        "title": "Самый продуктивный месяц"
+      },
+      "productivity_down": {
+        "desc": "-{percent}% по сравнению с прошлым месяцем",
+        "title": "Спокойный период"
+      },
+      "productivity_up": {
+        "desc": "+{percent}% по сравнению с прошлым месяцем",
+        "title": "Всплеск продуктивности"
+      },
+      "quiet_month": {
+        "desc": "Только {count} изображений в этом месяце",
+        "title": "Спокойный месяц"
+      },
+      "tag_diversity": {
+        "desc": "{count} уникальных тегов в этом месяце",
+        "title": "Рекорд творческого разнообразия"
+      }
+    },
+    "load_failed": "Не удалось загрузить историю",
+    "no_data": "Недостаточно данных для создания вашей истории",
+    "on_this_day": "1 год назад сегодня ({date}): создано {count} изображений"
+  },
+  "sweep.card_loading": "Загрузка…",
+  "sweep.card_no_axis": "нет информации об оси",
+  "sweep.card_open_view_btn": "🔎 Открыть представление Sweep",
+  "sweep.card_others_btn": "🖼️ Показать другие изображения этого sweep",
+  "sweep.card_others_empty": "Подходящие изображения в этой папке не найдены.",
+  "sweep.card_others_error": "Ошибка: ",
+  "sweep.card_rerun_btn": "🔁 Перезапустить этот sweep",
+  "sweep.card_rerun_no_seed_btn": "🎲 Перезапустить (новый seed)",
+  "sweep.card_rerun_other_bridge_btn": "Перезапустить на другой bridge",
+  "sweep.card_rerun_with_seed_btn": "🔁 Перезапустить (тот же seed)",
+  "sweep.card_title": "Sweep",
+  "sweep.resume_not_found": "Метаданные sweep не найдены в этом файле.",
+  "sweep.resume_populated": "Sweep восстановлен. Нажмите Generate для перезапуска.",
+  "sweep.resume_unknown_param": "Sweep: параметр не поддерживается на этом bridge: ",
+  "sweep.resume_wrong_bridge": "Sweep выполнен на другом bridge: ",
+  "tags.add_tag": "Add tag",
+  "toast": {
+    "checkpoint_search": "Поиск по checkpoint: {model}",
+    "conditions_cleared": "Все условия поиска очищены",
+    "copy_done": "Скопировано",
+    "copy_done_strong": "Скопировано!",
+    "copy_failed": "Копирование не удалось",
+    "copy_failed_short": "Ошибка копирования",
+    "copy_with_label": "{label} скопировано",
+    "dir_open_failed": "Не удалось открыть каталог",
+    "dir_opened": "Каталог открыт",
+    "error_occurred": "Произошла ошибка"
+  },
+  "tools": {
+    "ai_analyzing": "ИИ анализирует...",
+    "analyzing": "Анализ...",
+    "analyzing_trends": "Анализ трендов промптов...",
+    "api_key_set": "API-ключ установлен",
+    "bulk_register_failed": "Массовая регистрация не удалась",
+    "cache_clear_failed": "Очистка кеша не удалась",
+    "cache_cleared": "кеш файлов очищен",
+    "cancel": "Отмена",
+    "checking_roots": "Проверка зарегистрированных папок...",
+    "clear_cache_confirm": "Очистить все кеши миниатюр?\nОни будут сгенерированы заново при следующем отображении.",
+    "click_copy_path": "Нажмите для копирования пути",
+    "click_preview": "Нажмите для предпросмотра",
+    "compute_hash_confirm": "Вычислить хеши {type}.\nЭто может занять время при большом количестве файлов.",
+    "computing_hashes": "Вычисление хешей...",
+    "confirm_db_delete": "Удалить {count} файлов из базы данных.\n(Фактические файлы останутся на диске)",
+    "confirm_hard_delete": "Внимание: Безвозвратное удаление {count} файлов.\nЭто действие необратимо!\n\nВы уверены?",
+    "counting_files": "Подсчёт файлов...",
+    "db_path": "Путь к базе данных:",
+    "db_size": "Размер базы данных:",
+    "delete": "Удалить",
+    "delete_failed": "Удаление не удалось",
+    "deleted": "Удалено",
+    "deleting": "Удаление...",
+    "disable": "Отключить",
+    "drag_to_move": "Перетащите для перемещения",
+    "dup_groups_found": "Найдены группы дубликатов",
+    "duplicate": "Дубликат",
+    "enable": "Включить",
+    "enter_folder_path": "Введите путь к папке",
+    "enter_search_query": "Введите поисковый запрос",
+    "error": "Ошибка",
+    "exact_match": "Точное совпадение",
+    "ext_enabled": "включено",
+    "fetch_failed": "Получение не удалось",
+    "file": "Файл",
+    "file_and_perceptual": "Файл + Перцептуальный",
+    "file_count": "Количество файлов:",
+    "file_hash_computed": "Хеши файлов вычислены",
+    "files": "файлов",
+    "files_deleted": "{count} файлов удалено",
+    "folder_dialog_failed": "Не удалось открыть диалог выбора папки.\nВведите путь вручную.",
+    "force_rescan": "Принудительное повторное сканирование (повторный анализ всех файлов)",
+    "frequent_tags": "Частые теги:",
+    "group": "Группа",
+    "hash_not_computed": "Хеши не вычислены. Сначала выполните \"Вычислить хеши\".",
+    "hash_stats_total": "Всего файлов",
+    "include_subfolders": "Включить подпапки",
+    "items": "элементов",
+    "keep": "Оставить",
+    "load_failed": "Загрузка не удалась",
+    "loading": "Загрузка...",
+    "no_analysis_yet": "Файлы ещё не проанализированы",
+    "no_duplicates": "Дубликаты не найдены",
+    "no_extensions": "Нет расширений",
+    "no_files_in_db": "Нет файлов в базе данных",
+    "no_normalize_needed": "Теги не нуждаются в нормализации",
+    "no_registered_roots": "Нет зарегистрированных папок",
+    "no_results": "Нет результатов",
+    "no_subdirs": "Нет подпапок",
+    "normalize_confirm": "Нормализовать теги? Это действие необратимо.",
+    "normalize_items": "Элементы для нормализации",
+    "normalizing": "Нормализация...",
+    "normalizing_tags": "Нормализация тегов...",
+    "open_detail_tab": "Открыть подробности в новой вкладке",
+    "perceptual": "Перцептуальный",
+    "phash_computed": "Перцептуальные хеши вычислены",
+    "phash_not_computed": "Перцептуальные хеши не вычислены. Сначала выполните \"Вычислить хеши\".",
+    "preparing": "Подготовка...",
+    "processed_files": "Обработано файлов:",
+    "prompt_trends": "Анализ трендов промптов",
+    "recommendations": "Рекомендации:",
+    "register_all": "Зарегистрировать все в config.json",
+    "register_failed": "Регистрация не удалась",
+    "register_to_config": "Зарегистрировать в config.json",
+    "remove_root_confirm": "Удалить регистрацию этой папки? (фактические файлы не будут удалены)",
+    "rescan": "Пересканировать",
+    "rescan_all": "Пересканировать все",
+    "rescanning_all": "Пересканирование всех папок...",
+    "roots_drag_hint": "Перетащите для сортировки | Shift+↑↓ для перемещения | Порядок влияет на сортировку папок",
+    "same_size": "Одинаковый размер",
+    "save_failed": "Сохранение не удалось",
+    "saved": "Сохранено",
+    "scan_all_complete": "Сканирование всех папок завершено",
+    "scan_complete": "Сканирование завершено",
+    "scanning": "Сканирование...",
+    "schema_version": "Версия схемы:",
+    "search_zips": "Искать внутри ZIP-файлов",
+    "searching": "Поиск...",
+    "select": "Выбрать",
+    "select_all_dupes": "Выбрать все дубликаты",
+    "select_files_to_delete": "Выберите файлы для удаления",
+    "showing_first": "показаны первые",
+    "similar_images": "Похожие изображения",
+    "start_scan": "Начать сканирование",
+    "starting": "Запуск...",
+    "strengths": "Сильные стороны:",
+    "style": "Стиль",
+    "style_tendency": "Стилевая тенденция:",
+    "tag_count": "Количество тегов:",
+    "th_deleted": "Удалён",
+    "th_format": "Формат",
+    "th_path": "Путь",
+    "th_prompt": "Промпт",
+    "th_size": "Размер",
+    "th_source": "Источник",
+    "toggle_failed": "Переключение не удалось",
+    "unexplored_themes": "Неисследованные темы:",
+    "unit_hours": "ч",
+    "unit_minutes": "м",
+    "uptime": "Время работы:",
+    "weaknesses": "Области для улучшения:",
+    "wt_batch_failed": "Запуск пакета не удался",
+    "wt_close": "Закрыть",
+    "wt_complete": "Завершено",
+    "wt_config_failed": "Не удалось сохранить конфигурацию",
+    "wt_config_saved": "Конфигурация WD-Tagger сохранена",
+    "wt_download_failed": "Загрузка не удалась",
+    "wt_downloading": "Загрузка модели...",
+    "wt_model_check_failed": "Проверка статуса модели не удалась",
+    "wt_model_not_downloaded": "Модель не загружена",
+    "wt_model_ready": "Модель готова",
+    "wt_no_tags": "Нет тегов",
+    "wt_processing": "Обработка...",
+    "wt_sec_elapsed": "с прошло",
+    "wt_tagged_files": "Теги файлов",
+    "wt_total_tags": "Всего тегов",
+    "wt_unique": "Уникальных",
+    "wt_untagged": "Без тегов неизвестных",
+    "wt_xmp_dc_subject": "Теги dc:subject:",
+    "wt_xmp_load_failed": "Не удалось загрузить данные XMP",
+    "wt_xmp_not_found": "Данные XMP не найдены",
+    "wt_xmp_raw_xml": "Необработанный XML",
+    "wt_xmp_title": "Метаданные XMP",
+    "wt_xmp_wdtag_info": "Информация wdtag:"
+  },
+  "yolo_stream.detect_error": "Detection failed",
+  "yolo_stream.register": "Register",
+  "sd_bridge.api_key_set": "(Ключ задан)",
+  "comfyui_bridge.api_key_set": "(Ключ задан)",
+  "bridge.pl.load_tooltip": "Загрузить PL",
+  "bridge.pl.save_tooltip": "Сохранить PL",
+  "common.delete": "Удалить",
+  "common.save": "Сохранить",
+  "conditions.hasAnnotation.desc": "Показывать только файлы с аннотациями (заметки)",
+  "conditions.hasAnnotation.label": "📝 Есть заметка",
+  "settings.apikeys_mcp_jump": "Просмотреть фрагмент",
+  "settings.apikeys_mcp_updated": "↓ Фрагмент MCP обновлен этим ключом"
+}

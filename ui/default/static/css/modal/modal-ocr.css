@@ -1,0 +1,224 @@
+/* modal-ocr.css — OCR tab styles */
+
+/* ── Actions bar ── */
+.ocr-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+/* ── Buttons ── */
+.ocr-btn-run {
+  background: #2563eb;
+  color: white;
+  padding: 5px 12px;
+  font-weight: 600;
+}
+.ocr-btn-translate {
+  background: #059669;
+  color: white;
+  padding: 5px 12px;
+  font-weight: 600;
+}
+.ocr-btn-overlay {
+  background: #7c3aed;
+  color: white;
+  padding: 4px 10px;
+}
+.ocr-btn-export {
+  background: rgba(128,128,128,0.12);
+  color: var(--text);
+  padding: 3px 8px;
+  font-size: 11px;
+  border: 1px solid var(--border, rgba(128,128,128,0.2));
+}
+.ocr-btn-export:hover {
+  background: rgba(128,128,128,0.25);
+}
+
+/* ── Result panel ── */
+.ocr-result-panel {
+  margin-top: 8px;
+}
+
+/* ── Result header ── */
+.ocr-result-header {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.ocr-engine-badge {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(139,92,246,0.15);
+  color: #a78bfa;
+  font-weight: 600;
+}
+.ocr-task-badge {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(37,99,235,0.15);
+  color: #60a5fa;
+}
+.ocr-lang-badge {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 10px;
+  background: rgba(5,150,105,0.15);
+  color: #34d399;
+}
+.ocr-region-count {
+  font-size: 11px;
+  color: var(--muted, #888);
+}
+
+/* ── Region list ── */
+.ocr-regions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ocr-region {
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(128,128,128,0.06);
+  border-left: 3px solid var(--border, #555);
+  font-size: 13px;
+}
+.ocr-region--speech_bubble { border-left-color: #60a5fa; }
+.ocr-region--thought_bubble { border-left-color: #93c5fd; }
+.ocr-region--sfx { border-left-color: #f59e0b; }
+.ocr-region--narration { border-left-color: #a78bfa; }
+.ocr-region--caption { border-left-color: #c084fc; }
+.ocr-region--title { border-left-color: #f472b6; }
+.ocr-region--sign { border-left-color: #34d399; }
+.ocr-region--heading { border-left-color: #f472b6; }
+.ocr-region--table { border-left-color: #34d399; }
+.ocr-region--other { border-left-color: #9ca3af; }
+
+.ocr-region-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--muted, #888);
+  margin-right: 6px;
+}
+.ocr-region-dir {
+  font-size: 10px;
+  color: var(--muted, #999);
+  margin-right: 4px;
+}
+.ocr-region-text {
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+.ocr-confidence {
+  font-size: 10px;
+  color: var(--muted, #666);
+  float: right;
+}
+
+/* ── Full text ── */
+.ocr-full-text {
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  color: var(--text);
+  background: rgba(128,128,128,0.05);
+  padding: 8px 10px;
+  border-radius: 6px;
+  margin: 0;
+}
+
+/* ── Translate section ── */
+.ocr-translate-section {
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border, rgba(128,128,128,0.2));
+}
+
+.ocr-translation-header {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+/* ── Parallel view (original / translated side by side) ── */
+.ocr-parallel-view {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.ocr-parallel-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: start;
+  padding: 6px 8px;
+  border-radius: 6px;
+  background: rgba(128,128,128,0.04);
+}
+.ocr-parallel-original {
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+}
+.ocr-parallel-arrow {
+  font-size: 14px;
+  color: var(--muted, #888);
+  align-self: center;
+}
+.ocr-parallel-translated {
+  font-size: 13px;
+  line-height: 1.5;
+  color: #60a5fa;
+  font-weight: 500;
+}
+
+/* ── Export actions ── */
+.ocr-export-actions {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border, rgba(128,128,128,0.15));
+}
+.ocr-export-label {
+  font-size: 11px;
+  color: var(--muted, #888);
+  margin-right: 4px;
+}
+
+/* ── Tab badge ── */
+.mi-tab-badge-ocr {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2563eb;
+  display: inline-block;
+  margin-left: 6px;
+  vertical-align: middle;
+}
+
+/* ── Responsive ── */
+@media (max-width: 600px) {
+  .ocr-parallel-row {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+  .ocr-parallel-arrow {
+    display: none;
+  }
+}

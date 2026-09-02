@@ -1,0 +1,117 @@
+[workspace]
+members = [
+    "auth-core",
+    "scan-core",
+    "tagdb-core",
+    "meta-extract",
+    "yu-infer",
+    "yu-server",
+    "xmp-core",
+]
+resolver = "2"
+
+[workspace.dependencies]
+# LAN Cowork, split out to eauesque/yu-lan-cowork (public) on 2026-08-11.
+# Same reasoning as the Hailo entries below: we point at the PUBLIC repo so a
+# fresh clone or a CI runner builds with no credentials. Development happens in
+# a private repository and is mirrored there, so a fix must reach the
+# public repo before it can be pinned here.
+# The crate's own tests carry the wire-format vectors; the generators under
+# scripts/gen_*_vectors.py write into the lan-cowork checkout (YU_LAN_COWORK).
+lan-cowork         = { git = "https://github.com/eauesque/yu-lan-cowork", rev = "acee2b19c2f487d15965ae71405704cbd06ffcce" }
+# Hailo inference stack, split out to eauesque/yu-hailo-infer (public).
+# We point at the PUBLIC repo on purpose: it needs no credentials, so a fresh
+# clone or a CI runner can build without any registry/SSH setup. Development
+# happens in a private repository and is mirrored here, so a fix
+# must reach the public repo before it can be pinned below.
+# The keys stay at the historical names so `infer_core::` / `yu_infer::` in our
+# own sources keep resolving despite the upstream yu-hailo-* rename.
+# Both entries MUST share one rev: a split would build ort/ONNX Runtime twice
+# and break feature unification across yu-server and the yu-infer shim.
+infer-core         = { package = "yu-hailo-infer-core", git = "https://github.com/eauesque/yu-hailo-infer", rev = "b5db884621c9ee20210fa5b760dbc09ee9c8ca0d" }
+yu-infer           = { package = "yu-hailo-infer", git = "https://github.com/eauesque/yu-hailo-infer", rev = "b5db884621c9ee20210fa5b760dbc09ee9c8ca0d" }
+sqlx               = { version = "0.8", features = ["sqlite", "runtime-tokio", "macros"] }
+log                = "0.4"
+libsqlite3-sys     = { version = "0.30", features = ["bundled-sqlcipher-vendored-openssl"] }
+serde              = { version = "1", features = ["derive"] }
+serde_json         = "1"
+serde_yml          = "0.0"
+tokio              = { version = "1", features = ["full", "test-util"] }
+uuid               = { version = "1", features = ["v7", "fast-rng"] }
+thiserror          = "2"
+fastembed          = { version = "5", default-features = false, features = ["ort-download-binaries", "hf-hub"] }
+bytemuck           = "1"
+image              = "0.25"
+avif-rust          = "0.0.6"
+resvg              = "0.48.1"
+anyhow             = "1"
+tracing            = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+clap               = { version = "4", features = ["derive", "env"] }
+insta              = "1"
+tempfile           = "3"
+libc               = "0.2"
+chrono             = { version = "0.4", features = ["serde"] }
+axum               = { version = "0.8", features = ["macros", "multipart"] }
+tower              = "0.5"
+tower-sessions     = { version = "0.15", features = ["memory-store"] }
+reqwest            = { version = "0.12", default-features = false, features = ["json", "cookies", "stream", "rustls-tls"] }
+url                = "2"
+futures-util       = "0.3"
+# Already in the tree as axum's multipart backend; declared directly so the
+# VLM upload path can parse an in-memory body without axum's 2 MiB default
+# body limit, whose marker extension is pub(crate) and cannot be set by hand.
+multer             = "3.1"
+regex              = "1"
+fancy-regex = "0.13"
+ignore             = "0.4"
+notify             = "6"
+toml               = "0.8"
+subtle             = "2"
+sha2               = "0.10"
+hex                = "0.4"
+openssl            = "0.10"
+pbkdf2             = { version = "0.12", features = ["hmac"] }
+scrypt             = { version = "0.11", default-features = false }
+hmac               = "0.12"
+rand               = { version = "0.9", features = ["os_rng"] }
+urlencoding        = "2"
+kamadak-exif       = "0.5"
+base64             = "0.22"
+indexmap           = { version = "2", features = ["serde"] }
+tower-http         = { version = "0.6", features = ["fs"] }
+minijinja          = { version = "2", features = ["loader", "json"] }
+dotenvy            = "0.15"
+tokio-cron-scheduler = "0.13"
+quick-xml          = "0.39.4"
+
+# Workspace-wide clippy policy. Each member opts in with `[lints] workspace = true`.
+#
+# Only lints that are ALREADY at zero across `cargo clippy --workspace
+# --all-targets` are denied here, so this section can never be the reason a
+# push is blocked by pre-existing debt. Measured 2026-08-29: todo 0,
+# unimplemented 0, dbg_macro 0, mem_forget 0.
+#
+# Lints with a real backlog are NOT listed here — they are frozen by count in
+# `scripts/internal/clippy_ratchet.py`, which fails only when the count grows.
+# Moving one of those here is the last step of paying its backlog down, not the
+# first step of starting to.
+[workspace.lints.clippy]
+# `todo!()` / `unimplemented!()` reaching a release is the 501-stub failure mode:
+# a handler that compiles, is reachable, and panics or lies at runtime.
+todo = "deny"
+unimplemented = "deny"
+# Debug leftovers. `dbg!` writes to stderr unconditionally.
+dbg_macro = "deny"
+# `mem::forget` on a guard silently disables the thing the guard protects.
+mem_forget = "deny"
+# NOTE (2026-09-02): six lints reached zero in production this day --
+# print_stdout, panic, exit, float_cmp, unreachable, match_same_arms -- and the
+# ratchet's docstring says a zero belongs here as a `deny`. They are NOT here,
+# deliberately. This table applies to every target, and `println!` in an
+# integration test, `panic!` on a bad fixture and an exact float assertion are
+# idiomatic; denying them here failed 79 test sites across six crates and would
+# have needed a `cfg_attr` in every crate root AND every `tests/*.rs` file.
+# They are denied production-only instead, by `DENY_LINTS` in
+# `scripts/internal/clippy_ratchet.py`, which is the invocation that already
+# omits `--all-targets` for exactly this reason.

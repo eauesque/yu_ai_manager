@@ -1,0 +1,65 @@
+/*
+ * atelier-fleet.css — Atelier theme override for the Fleet admin UI.
+ *
+ * Additive: every rule is scoped to
+ *   body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool
+ * so non-atelier themes (light / dark / retro / glow) are untouched.
+ *
+ * Mode-specific fixes (e.g. the log viewer below) intentionally use a
+ * single-mode selector; everything else uses the shared :is() form,
+ * whose specificity (0,3,1) already beats fleet.css `body.dark .X` (0,2,1).
+ *
+ * Semantic colors (status dots, bar-fill, warning banner, update-step) are
+ * deliberately NOT redeclared — they stay on their existing values.
+ */
+
+/* Navbar chrome mirrors atelier-index.css nav rules without importing the
+   index-only sidebar/grid/search rules into Fleet. */
+body.theme-atelier-light.atelier-tool #fixedNav,
+body.theme-atelier-dark.atelier-tool #fixedNav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light.atelier-tool .nav-link,
+body.theme-atelier-dark.atelier-tool .nav-link {
+  font-family: var(--font-ui);
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+}
+
+body.theme-atelier-light.atelier-tool .nav-link.active,
+body.theme-atelier-dark.atelier-tool .nav-link.active {
+  color: var(--text);
+  border-bottom: 2px solid var(--accent-tool);
+}
+
+/* Log viewer must stay terminal-dark even in atelier-light.
+   (atelier-dark already gets the runtime `.dark` class, so it is dark.)
+   Value matches the atelier-dark / default path (#1e1e1e) for consistency. */
+body.theme-atelier-light.atelier-tool .fleet-logs-output {
+  background: #1e1e1e;
+  color: #d4d4d4;
+}
+
+/* Headings: atelier-tool-components.css only styles `.tool-section > h2`,
+   which does not match Fleet's own headings, so set the display font here. */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .fleet-header h1,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .fleet-settings-block h2 {
+  font-family: var(--font-display);
+}
+
+/* Neutralize the generic `.btn` primary-ization for non-primary buttons.
+   `.btn-danger` is excluded as future-proofing (none exist in Fleet today).
+   `.fleet-node-restart-btn` is not a `.btn`, so its emphasis is unaffected. */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .btn:not(.btn-primary):not(.btn-danger) {
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .btn:not(.btn-primary):not(.btn-danger):disabled {
+  opacity: .5;
+  cursor: not-allowed;
+  filter: none;
+}

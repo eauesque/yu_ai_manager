@@ -1,0 +1,937 @@
+<div class="cfb-container brp-container" data-1p-ignore data-lpignore="true">
+  <h1><span class="icon" aria-hidden="true">&#x1F517;</span> <span data-i18n="comfyui_bridge.heading">ComfyUI Bridge</span></h1>
+
+  <!-- Connection status -->
+  <div class="cfb-conn" id="cfbConn">
+    <span class="cfb-conn-dot" id="cfbConnDot"></span>
+    <span class="cfb-conn-text" id="cfbConnText" data-i18n="comfyui_bridge.not_connected">Not connected</span>
+    <button class="cfb-btn small" data-action="cfbTestConnection" data-i18n="comfyui_bridge.test_connection">Test Connection</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="cfb-tabs">
+    <button class="cfb-tab active" data-tab="simple" data-action="cfbSwitchTab" data-action-arg="simple" data-i18n="comfyui_bridge.tab_simple">Simple</button>
+    <button class="cfb-tab" data-tab="json" data-action="cfbSwitchTab" data-action-arg="json" data-i18n="comfyui_bridge.tab_json">JSON</button>
+  </div>
+
+  <!-- Editor toolbar -->
+  <div class="bridge-editor-toolbar">
+    <button class="cfb-btn small" data-action="_cfbToggleSed" title="sed (stream editor)" data-i18n-title="comfyui_bridge.sed_tooltip" aria-label="sed stream editor">Sed</button>
+    <button class="cfb-btn small" data-action="_cfbToggleDedup" title="重複タグを削除" data-i18n-title="comfyui_bridge.dedup_tooltip" aria-label="Dedup tags">Dedup</button>
+    <button class="cfb-btn small on" id="cfbAcToggle" data-action="_cfbToggleAc" title="Danbooru tag autocomplete" data-i18n-title="comfyui_bridge.tags_tooltip">Tags</button>
+    <button class="cfb-btn small" id="cfbWcToggle" data-action="_cfbToggleWc" title="Wildcard / Dynamic Prompt 展開 (server-side)" data-i18n-title="comfyui_bridge.wc_tooltip" aria-label="Wildcard browser">Wildcard</button>
+    <div class="cfb-convert-dropdown-wrap">
+      <button class="cfb-convert-dropdown-btn" data-action="cfb-convert-toggle"
+              aria-haspopup="true" aria-label="Convert A1111 Comfy">Convert A1111 Comfy</button>
+      <ul class="cfb-convert-dropdown-menu" id="cfbConvertMenu" hidden role="menu">
+        <li>
+          <button role="menuitem" data-action="cfb-convert-a1111-to-nai"
+                  data-i18n="comfyui_bridge.convert_a1111_to_nai">A1111 → NAI に変換</button>
+        </li>
+        <li>
+          <button role="menuitem" data-action="cfb-convert-nai-to-a1111"
+                  data-i18n="comfyui_bridge.convert_nai_to_a1111">NAI → A1111 に変換</button>
+        </li>
+      </ul>
+    </div>
+    <span class="bridge-toolbar-hint" data-i18n="comfyui_bridge.toolbar_hint">Ctrl+Enter: Generate / Esc: Cancel / Alt+W: Vim word</span>
+  </div>
+
+  <!-- Sed bar (hidden by default) -->
+  <div class="bridge-sed-bar" id="cfbSedBar" style="display:none;">
+    <label for="cfbSedInput">sed:</label>
+    <input id="cfbSedInput" type="text" placeholder="s/old/new/g" spellcheck="false" data-i18n-placeholder="comfyui_bridge.sed_placeholder">
+    <span class="bridge-sed-toast" id="cfbSedToast" style="display:none;"></span>
+  </div>
+
+  <!-- Dedup bar (hidden by default) -->
+  <div class="bridge-sed-bar" id="cfbDedupBar" style="display:none;">
+    <label data-i18n="comfyui_bridge.dedup_label">Dedup:</label>
+    <button class="cfb-btn small" data-action="_cfbDedupFirst" data-i18n="comfyui_bridge.dedup_keep_first">最初を残す</button>
+    <button class="cfb-btn small" data-action="_cfbDedupLast" data-i18n="comfyui_bridge.dedup_keep_last">最後を残す</button>
+    <span class="bridge-sed-toast" id="cfbDedupToast" style="display:none;"></span>
+  </div>
+
+  <!-- Simple tab -->
+  <div class="cfb-tab-panel active" id="cfbPanelSimple">
+
+    <!-- Checkpoint -->
+    <div class="cfb-field">
+      <label class="cfb-section-label" for="cfbModel" data-i18n="comfyui_bridge.checkpoint">Checkpoint</label>
+      <div class="cfb-params" style="margin-bottom:0;">
+        <div class="cfb-param" style="grid-column: 1 / -1;">
+          <select id="cfbModel" style="width:100%;">
+            <option value="" data-i18n="comfyui_bridge.connect_to_load_models">(Connect to load models)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Diffusion Model (separate load) -->
+    <div class="cfb-field">
+      <label class="cfb-section-label" for="cfbDiffusionModel" data-i18n="comfyui_bridge.diffusion_model">Diffusion Model (optional — overrides Checkpoint)</label>
+      <div class="cfb-params" style="margin-bottom:0;">
+        <div class="cfb-param" style="grid-column: 1 / -1;">
+          <select id="cfbDiffusionModel" style="width:100%;">
+            <option value="" data-i18n="comfyui_bridge.diffusion_model_none">(Use Checkpoint instead)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Text Encoders (visible only in separate load mode) -->
+    <div id="cfbTextEncoderSection" class="cfb-field" style="display:none;">
+      <label class="cfb-section-label" data-i18n="comfyui_bridge.text_encoders">Text Encoders</label>
+      <div class="cfb-params" style="margin-bottom:0;">
+        <div class="cfb-param" style="grid-column: 1 / -1;">
+          <label for="cfbTextEncoder1" data-i18n="comfyui_bridge.text_encoder_1">Text Encoder 1</label>
+          <select id="cfbTextEncoder1" style="width:100%;">
+            <option value="" data-i18n="comfyui_bridge.select_text_encoder">(Select text encoder)</option>
+          </select>
+        </div>
+        <div class="cfb-param" style="grid-column: 1 / -1;">
+          <label for="cfbTextEncoder2" data-i18n="comfyui_bridge.text_encoder_2">Text Encoder 2 (optional)</label>
+          <select id="cfbTextEncoder2" style="width:100%;">
+            <option value="" data-i18n="comfyui_bridge.text_encoder_2_none">(Single CLIP — leave empty)</option>
+          </select>
+        </div>
+        <div class="cfb-param" style="grid-column: 1 / -1;">
+          <label for="cfbClipType" data-i18n="comfyui_bridge.clip_type">CLIP Type</label>
+          <select id="cfbClipType" style="width:100%;">
+            <option value="" data-i18n="comfyui_bridge.clip_type_auto">(Auto-detect)</option>
+          </select>
+        </div>
+        <div class="cfb-param" style="grid-column: 1 / -1;">
+          <label for="cfbWeightDtype" data-i18n="comfyui_bridge.weight_dtype">Weight dtype (UNETLoader)</label>
+          <select id="cfbWeightDtype" style="width:100%;">
+            <option value="default" data-i18n="comfyui_bridge.weight_dtype_default">default</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- VAE -->
+    <div class="cfb-field">
+      <label class="cfb-section-label" for="cfbVae" id="cfbVaeLabel" data-i18n="comfyui_bridge.vae">VAE (optional)</label>
+      <div class="cfb-params" style="margin-bottom:0;">
+        <div class="cfb-param" style="grid-column: 1 / -1;">
+          <select id="cfbVae" style="width:100%;">
+            <option value="" data-i18n="comfyui_bridge.vae_default">(Use checkpoint VAE)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Optional: ControlNet / Upscale (collapsible) -->
+    <details class="cfb-options-section" id="cfbOptionsSection">
+      <summary data-i18n="comfyui_bridge.options">Options (ControlNet / Upscale)</summary>
+      <div style="margin-top:10px;">
+        <!-- ControlNet -->
+        <div class="cfb-field">
+          <label class="cfb-section-label" for="cfbControlnetModel" data-i18n="comfyui_bridge.controlnet">ControlNet</label>
+          <div class="cfb-params" style="margin-bottom:0;">
+            <div class="cfb-param" style="grid-column: 1 / -1;">
+              <select id="cfbControlnetModel" style="width:100%;">
+                <option value="" data-i18n="comfyui_bridge.controlnet_none">(None)</option>
+              </select>
+            </div>
+            <div class="cfb-param">
+              <label for="cfbControlnetStrength" data-i18n="comfyui_bridge.controlnet_strength">Strength</label>
+              <input id="cfbControlnetStrength" type="number" value="1.0" min="0" max="2" step="0.05">
+            </div>
+            <div class="cfb-param" style="grid-column: 1 / -1;">
+              <label for="cfbControlnetImage" data-i18n="comfyui_bridge.controlnet_image">Image</label>
+              <input id="cfbControlnetImage" type="file" accept="image/*">
+              <span id="cfbControlnetImageName" style="font-size:11px;color:var(--text-secondary,#aaa);"></span>
+            </div>
+          </div>
+        </div>
+        <!-- Upscale -->
+        <div class="cfb-field">
+          <label class="cfb-section-label" for="cfbUpscaleModel" data-i18n="comfyui_bridge.upscale_model">Upscale Model</label>
+          <div class="cfb-params" style="margin-bottom:0;">
+            <div class="cfb-param" style="grid-column: 1 / -1;">
+              <select id="cfbUpscaleModel" style="width:100%;">
+                <option value="" data-i18n="comfyui_bridge.upscale_none">(None)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </details>
+
+    <!-- Positive prompt -->
+    <div class="cfb-field">
+      <label class="cfb-section-label" for="cfbPrompt" data-i18n="comfyui_bridge.positive_prompt">Positive Prompt</label>
+      <div class="cfb-prompt-with-wc">
+        <div id="cfbPromptWrap" class="cfb-editor-wrap" style="flex:1;min-width:0;">
+          <textarea id="cfbPrompt" rows="4" placeholder="1girl, masterpiece, best quality" data-i18n-placeholder="comfyui_bridge.positive_prompt_placeholder" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other"></textarea>
+        </div>
+        <div id="cfbWcBrowser" class="bwc-panel" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- Negative prompt -->
+    <div class="cfb-field">
+      <label class="cfb-section-label" for="cfbNegative" data-i18n="comfyui_bridge.negative_prompt">Negative Prompt</label>
+      <div id="cfbNegativeWrap" class="cfb-editor-wrap">
+        <textarea id="cfbNegative" rows="2" placeholder="lowres, bad anatomy, worst quality" data-i18n-placeholder="comfyui_bridge.negative_prompt_placeholder" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other"></textarea>
+      </div>
+    </div>
+
+    <!-- Prompt weighting compatibility -->
+    <div class="cfb-field">
+      <label style="display:flex; align-items:center; gap:6px; font-size:13px;">
+        <input type="checkbox" id="cfbA1111Mode" name="cfbA1111Mode">
+        <span data-i18n="comfyui_bridge.a1111_mode_label">AUTOMATIC1111 互換モード</span>
+      </label>
+      <small class="cfb-hint" style="display:block; margin-top:4px;"
+             data-i18n="comfyui_bridge.a1111_mode_hint">
+        ComfyUI のデフォルトは A1111 より「(word:1.3)」等の重みが強く効きます。A1111/NAI で書いたプロンプトをそのまま使う場合は ON 推奨。要カスタムノード「ComfyUI_ADV_CLIP_emb」（BNK_CLIPTextEncodeAdvanced）。
+      </small>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="cfb-actions">
+      <button class="cfb-btn primary" id="cfbGenBtn" data-action="cfbGenerate" data-i18n="comfyui_bridge.send_to_comfyui">ComfyUI に送信</button>
+      <button class="cfb-btn small" id="cfbRestoreBtn" data-action="cfbRestoreLast" title="前回のパラメータを復元（ブラウザ保存のため、キャッシュクリアで消去されます）" data-i18n="comfyui_bridge.restore_last" data-i18n-title="comfyui_bridge.restore_last_tooltip">🔄 前回</button>
+      <button class="cfb-btn small" data-action="cfbClearPrompts" data-i18n="comfyui_bridge.clear_prompts" data-i18n-title="comfyui_bridge.clear_prompts_title" title="プロンプトをクリア（Ctrl+Z で元に戻せます）" aria-label="Clear prompts">🗑️</button>
+      <button class="cfb-btn small" data-action="cfbSendToBridge" data-action-arg="nai" title="NAI Bridge に送る (自動変換)" data-i18n-title="comfyui_bridge.send_to_nai_tooltip" data-i18n="comfyui_bridge.send_to_nai">→NAI</button>
+      <button class="cfb-btn small" data-action="cfbSendToBridge" data-action-arg="sd" title="SD Bridge に送る" data-i18n-title="comfyui_bridge.send_to_sd_tooltip" data-i18n="comfyui_bridge.send_to_sd">→SD</button>
+      <button class="cfb-btn small" id="cfbCancelBtn" data-action="cfbCancel" style="display:none;" data-i18n="bridge.action.stop_immediate">Cancel</button>
+      <button class="cfb-btn small" id="cfbStopAfterCurrentBtn" type="button"
+              style="display:none;margin-left:8px;"
+              data-action="cfbStopAfterCurrent"
+              data-i18n="bridge.action.stop_after_current">Stop after current</button>
+      <label class="bridge-forever-label" id="cfbForeverLabel"
+             title="ローカル: 無制限 / クラウド: 50 回まで" data-i18n-title="comfyui_bridge.forever_tooltip">
+        <input type="checkbox" id="cfbForever" aria-label="Loop generation"> <span>Loop</span>
+      </label>
+      <span class="bridge-loop-count" id="cfbLoopCount" style="display:none;"></span>
+    </div>
+
+    <!-- Progress bar -->
+    <div class="cfb-progress" id="cfbProgress">
+      <div class="cfb-progress-bar">
+        <div class="cfb-progress-fill" id="cfbProgressFill"></div>
+      </div>
+      <div class="cfb-progress-text" id="cfbProgressText">0%</div>
+    </div>
+
+    <!-- Parameters -->
+    <div class="cfb-params">
+      <div class="cfb-param">
+        <label for="cfbSteps" data-i18n="comfyui_bridge.steps">Steps</label>
+        <input id="cfbSteps" type="number" value="20" min="1" max="150">
+      </div>
+      <div class="cfb-param">
+        <label for="cfbSampler" data-i18n="comfyui_bridge.sampler">Sampler</label>
+        <select id="cfbSampler">
+          <option>euler</option>
+          <option>euler_cfg_pp</option>
+          <option>euler_ancestral</option>
+          <option>euler_ancestral_cfg_pp</option>
+          <option>heun</option>
+          <option>heun_sde</option>
+          <option>dpm_2</option>
+          <option>dpm_2_ancestral</option>
+          <option>lms</option>
+          <option>dpm_fast</option>
+          <option>dpm_adaptive</option>
+          <option>dpmpp_2s_ancestral</option>
+          <option>dpmpp_sde</option>
+          <option>dpmpp_sde_gpu</option>
+          <option>dpmpp_2m</option>
+          <option>dpmpp_2m_sde</option>
+          <option>dpmpp_2m_sde_gpu</option>
+          <option>dpmpp_3m_sde</option>
+          <option>dpmpp_3m_sde_gpu</option>
+          <option>ddpm</option>
+          <option>lcm</option>
+          <option>ipndm</option>
+          <option>ipndm_v</option>
+          <option>deis</option>
+          <option>er_sde</option>
+          <option>res_multistep</option>
+          <option>res_multistep_gpu</option>
+          <option>ddim</option>
+          <option>plms</option>
+          <option>uni_pc</option>
+          <option>uni_pc_bh2</option>
+        </select>
+      </div>
+      <div class="cfb-param">
+        <label for="cfbScheduler" data-i18n="comfyui_bridge.scheduler">Scheduler</label>
+        <select id="cfbScheduler">
+          <option>normal</option>
+          <option>karras</option>
+          <option>exponential</option>
+          <option>sgm_uniform</option>
+          <option>simple</option>
+          <option>ddim_uniform</option>
+          <option>beta</option>
+          <option>linear_quadratic</option>
+          <option>kl_optimal</option>
+          <option>align_your_steps</option>
+        </select>
+      </div>
+      <div class="cfb-param">
+        <label for="cfbCfg" data-i18n="comfyui_bridge.cfg_scale">CFG Scale</label>
+        <input id="cfbCfg" type="number" value="8" min="1" max="30" step="0.5">
+      </div>
+      <div class="cfb-param" style="grid-column: 1 / -1;">
+        <label for="cfbResolutionPreset" data-i18n="comfyui_bridge.resolution_preset">Resolution Preset</label>
+        <div style="display:flex; gap:6px; align-items:stretch;">
+          <select id="cfbResolutionPreset" style="flex:1; min-width:0;"></select>
+          <button id="cfbSwapWH" type="button" class="cfb-btn small"
+                  style="min-width:36px;" data-i18n-title="comfyui_bridge.swap_dimensions"
+                  data-i18n-aria-label="comfyui_bridge.swap_dimensions" title="Swap W/H"
+                  aria-label="Swap W/H">⇄</button>
+        </div>
+      </div>
+      <div class="cfb-param">
+        <label for="cfbWidth" data-i18n="comfyui_bridge.width">Width</label>
+        <input id="cfbWidth" type="number" value="512" min="64" max="2048" step="8">
+      </div>
+      <div class="cfb-param">
+        <label for="cfbAspectRatio" data-i18n="bridge.aspect_lock_label">Aspect</label>
+        <div class="bridge-aspect-cell">
+          <button id="cfbAspectLock" type="button" class="cfb-btn small bridge-aspect-lock-btn"
+                  aria-pressed="false" title="Lock aspect ratio" aria-label="Lock aspect ratio">🔗</button>
+          <input id="cfbAspectRatio" type="text" class="bridge-aspect-ratio-input"
+                 placeholder="W:H" aria-label="Aspect ratio">
+        </div>
+      </div>
+      <div class="cfb-param">
+        <label for="cfbHeight" data-i18n="comfyui_bridge.height">Height</label>
+        <input id="cfbHeight" type="number" value="768" min="64" max="2048" step="8">
+      </div>
+      <div class="cfb-param">
+        <label for="cfbSeed" data-i18n="comfyui_bridge.seed">Seed (-1 = random)</label>
+        <div style="display:flex;gap:4px;align-items:center;">
+          <input id="cfbSeed" type="number" value="-1" style="flex:1;">
+          <button class="cfb-btn small" data-action="cfbResetSeed" title="Seed をランダムに戻す" data-i18n-title="comfyui_bridge.seed_random_tooltip" aria-label="Random seed">🎲</button>
+        </div>
+        <label style="display:flex;align-items:center;gap:4px;font-size:11px;margin-top:2px;cursor:pointer;" title="生成後に Seed を -1 (ランダム) に戻します" data-i18n-title="comfyui_bridge.seed_auto_reset_tooltip">
+          <input id="cfbSeedAutoReset" type="checkbox">
+          <span data-i18n="comfyui_bridge.seed_auto_reset_label">生成後にランダム (-1) に戻す</span>
+        </label>
+      </div>
+      <!-- Batch controls -->
+      <div class="cfb-param cfb-batch-row" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;grid-column:1 / -1;">
+        <label for="cfbBatchCount" data-i18n="bridge.batch_count">Batch count</label>
+        <input id="cfbBatchCount" name="cfbBatchCount" type="number" value="1" min="1" max="100" style="width:60px;">
+        <span style="opacity:0.5;">×</span>
+        <label for="cfbBatchSize" data-i18n="bridge.batch_size">Batch size</label>
+        <input id="cfbBatchSize" name="cfbBatchSize" type="number" value="1" min="1" max="8" style="width:60px;">
+        <span class="cfb-batch-total" id="cfbBatchTotal" style="margin-left:8px;font-size:11px;opacity:0.7;">Total: 1</span>
+      </div>
+      <div class="cfb-param">
+        <label for="cfbImageFormat" data-i18n="comfyui_bridge.image_format">Image Format</label>
+        <select id="cfbImageFormat">
+          <option value="png">PNG</option>
+          <option value="webp">WebP</option>
+          <option value="jpg">JPEG</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- img2img section -->
+    <details id="cfbImg2ImgSection" class="cfb-img2img-section">
+      <summary data-i18n="comfyui_bridge.img2img_section_label">img2img（画像から画像）</summary>
+      <div class="cfb-img2img-grid">
+        <div id="cfbImg2ImgDrop" class="cfb-img2img-drop">
+          <input type="file" id="cfbImg2ImgFile" name="cfbImg2ImgFile" accept="image/*">
+          <div id="cfbImg2ImgPlaceholder" class="cfb-img2img-placeholder"
+               data-i18n="comfyui_bridge.img2img_drop_hint">画像をドロップまたは選択</div>
+          <div id="cfbImg2ImgPreview" class="cfb-img2img-preview" style="display:none;">
+            <img id="cfbImg2ImgImg" alt="img2img source">
+            <button type="button" class="cfb-btn small" data-action="cfbClearImg2Img"
+                    data-i18n="comfyui_bridge.img2img_clear_btn">クリア</button>
+          </div>
+        </div>
+        <div class="cfb-img2img-params">
+          <label for="cfbDenoise" data-i18n="comfyui_bridge.img2img_denoise_label">変化強度（denoise）</label>
+          <div style="display:flex;gap:6px;align-items:center;">
+            <input type="range" id="cfbDenoise" name="cfbDenoise"
+                   min="0" max="1" step="0.01" value="0.75" style="flex:1;">
+            <input type="number" id="cfbDenoiseNum" name="cfbDenoiseNum"
+                   min="0" max="1" step="0.01" value="0.75" style="width:5em;">
+          </div>
+          <small id="cfbImg2ImgStatus"></small>
+          <small class="cfb-img2img-hint" data-i18n="comfyui_bridge.img2img_size_hint">
+            出力サイズは元画像と同じになります（Width/Height は無視されます）
+          </small>
+        </div>
+      </div>
+    </details>
+
+  </div>
+
+  <!-- JSON tab -->
+  <div class="cfb-tab-panel" id="cfbPanelJson">
+    <div class="cfb-hint" data-i18n="comfyui_bridge.json_hint">
+      ComfyUI の Save (API Format) で書き出した JSON を貼り付けてください。
+    </div>
+    <div class="cfb-field">
+      <label class="cfb-section-label" for="cfbWorkflowJson" data-i18n="comfyui_bridge.workflow_json">Workflow JSON</label>
+      <textarea id="cfbWorkflowJson" class="json-area" rows="12" placeholder='{ "3": { "class_type": "KSampler", ... } }' data-i18n-placeholder="comfyui_bridge.workflow_json_placeholder" data-json-enhance></textarea>
+    </div>
+    <div class="cfb-actions">
+      <button class="cfb-btn primary" id="cfbJsonGenBtn" data-action="cfbGenerateJson" data-i18n="comfyui_bridge.execute_workflow">Execute Workflow</button>
+      <button class="cfb-btn small" id="cfbJsonCancelBtn" data-action="cfbCancel" style="display:none;" data-i18n="bridge.action.stop_immediate">Cancel</button>
+      <button class="cfb-btn small" id="cfbJsonStopAfterCurrentBtn" type="button"
+              style="display:none;margin-left:8px;"
+              data-action="cfbStopAfterCurrent"
+              data-i18n="bridge.action.stop_after_current">Stop after current</button>
+    </div>
+  </div>
+
+  <!-- Resource discovery browser (LoRA / Embeddings / Models / Custom Nodes) -->
+  <details class="cfb-discovery-section" id="cfbDiscoveryPanel">
+    <summary><span data-i18n="comfyui_bridge.resources">Resources</span> <span class="cfb-discovery-badge" id="cfbDiscoveryBadge"></span></summary>
+    <div class="cfb-discovery-category-row">
+      <label for="cfbDiscCategory" data-i18n="comfyui_bridge.category">Category</label>
+      <select id="cfbDiscCategory" data-action="cfbSwitchDiscCategory" data-action-event="change">
+        <option value="lora" data-i18n="comfyui_bridge.loras">LoRA</option>
+        <option value="emb" data-i18n="comfyui_bridge.embeddings">Embeddings</option>
+        <option value="checkpoints" data-i18n="comfyui_bridge.checkpoints">Checkpoints</option>
+        <option value="diffusion_models" data-i18n="comfyui_bridge.diffusion_models">Diffusion Models</option>
+        <option value="text_encoders" data-i18n="comfyui_bridge.text_encoders">Text Encoders</option>
+        <option value="vae" data-i18n="comfyui_bridge.vae_category">VAE</option>
+        <option value="controlnet" data-i18n="comfyui_bridge.controlnets">ControlNet</option>
+        <option value="upscale_models" data-i18n="comfyui_bridge.upscale_models">Upscale Models</option>
+        <option value="clip_vision" data-i18n="comfyui_bridge.clip_vision">CLIP Vision</option>
+        <option value="hypernetworks" data-i18n="comfyui_bridge.hypernetworks">Hypernetworks</option>
+        <option value="style_models" data-i18n="comfyui_bridge.style_models">Style Models</option>
+        <option value="gligen" data-i18n="comfyui_bridge.gligen">GLIGEN</option>
+        <option value="nodes" data-i18n="comfyui_bridge.custom_nodes">Custom Nodes</option>
+      </select>
+    </div>
+    <div class="cfb-discovery-search">
+      <input id="cfbDiscSearch" type="text" data-i18n-placeholder="comfyui_bridge.search_placeholder" placeholder="Search..." aria-label="Search resources" data-action="cfbFilterDiscovery" data-action-event="input" spellcheck="false">
+    </div>
+    <div id="cfbDiscContent" class="cfb-disc-content">
+      <div class="cfb-disc-empty" data-i18n="comfyui_bridge.disc_connect_first">Connect to load resources</div>
+    </div>
+  </details>
+
+  <!-- Sweep (1-axis or 2-axis parameter sweep) -->
+  <details class="cfb-sweep-section" id="cfbSweepSection">
+    <summary>
+      <span data-i18n="comfyui_bridge.sweep_summary">Sweep（1軸 / 2軸パラメータ振り）</span>
+      <span id="cfbSweepStatus" style="font-size:12px;opacity:0.7;"></span>
+    </summary>
+    <div class="cfb-sweep-grid" style="display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin-top:8px;">
+      <label for="cfbSweepEnabled" data-i18n="comfyui_bridge.sweep_enable_label">有効化</label>
+      <input id="cfbSweepEnabled" type="checkbox" aria-label="Enable sweep">
+
+      <!-- X axis -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:4px;" data-i18n="comfyui_bridge.sweep_x_axis_heading">X 軸</div>
+
+      <label for="cfbSweepParam" data-i18n="comfyui_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="cfbSweepParam" aria-label="Sweep X-axis parameter">
+        <option value="cfg" data-i18n="comfyui_bridge.sweep_param_cfg">CFG Scale</option>
+        <option value="steps" data-i18n="comfyui_bridge.sweep_param_steps">Steps</option>
+        <option value="denoise" data-i18n="comfyui_bridge.sweep_param_denoise">img2img Denoise</option>
+        <option value="controlnet_strength" data-i18n="comfyui_bridge.sweep_param_controlnet_strength">ControlNet Strength</option>
+        <option value="_macros" data-i18n="comfyui_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <div id="cfbSweepMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <strong style="font-size:12px;" data-i18n="comfyui_bridge.sweep_macros_title">マクロ slot</strong>
+          <span style="font-size:11px;opacity:0.7;" data-i18n="comfyui_bridge.sweep_macros_help">プロンプトに <code>$x1</code>, <code>$x2</code>, ... を書くと置換される (Y/Z 軸は <code>$y1</code>/<code>$z1</code>)。<code>$1</code> は <code>$x1</code> のエイリアス。テキスト slot に <code>__name__</code> を書くと軸ファイルの全行に展開。</span>
+          <span style="flex:1;"></span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="font-size:11px;text-decoration:none;opacity:0.85;" data-i18n="comfyui_bridge.sweep_axes_manager_link">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="cfbSweepMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="cfbSweepMacrosSharedCount" style="font-size:12px;" data-i18n="comfyui_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="cfbSweepMacrosSharedCount" type="number" value="6" min="2" max="500" style="width:80px;">
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <input id="cfbSweepMacrosPadShort" type="checkbox">
+            <span data-i18n="comfyui_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="cfbSweepMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="cfbSweepMacroAddBtn" class="cfb-btn small" style="margin-top:6px;" data-i18n="comfyui_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="cfbSweepMin" data-i18n="comfyui_bridge.sweep_min_label">下限</label>
+      <input id="cfbSweepMin" type="number" value="3" step="0.1" aria-label="Sweep X min">
+
+      <label for="cfbSweepMax" data-i18n="comfyui_bridge.sweep_max_label">上限</label>
+      <input id="cfbSweepMax" type="number" value="8" step="0.1" aria-label="Sweep X max">
+
+      <label for="cfbSweepMode" data-i18n="comfyui_bridge.sweep_mode_label">分割方法</label>
+      <select id="cfbSweepMode" aria-label="Sweep X mode">
+        <option value="count" data-i18n="comfyui_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="comfyui_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="cfbSweepCount" data-i18n="comfyui_bridge.sweep_count_label">枚数</label>
+      <input id="cfbSweepCount" type="number" value="6" min="2" max="500" aria-label="Sweep X count" title="ローカル接続時のみ 50 を超える値が有効。リモート時は 50 で頭打ちになる。">
+
+      <label for="cfbSweepStep" data-i18n="comfyui_bridge.sweep_step_label">間隔</label>
+      <input id="cfbSweepStep" type="number" value="0.5" step="0.1" min="0.0001" aria-label="Sweep X step">
+
+      <!-- Y axis (opt-in 2nd axis) -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:8px;display:flex;align-items:center;gap:8px;">
+        <input id="cfbSweepYEnabled" type="checkbox" aria-label="Enable Y axis">
+        <label for="cfbSweepYEnabled" data-i18n="comfyui_bridge.sweep_y_axis_heading" style="cursor:pointer;">Y 軸を追加（2軸 sweep）</label>
+      </div>
+
+      <label for="cfbSweepYParam" data-i18n="comfyui_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="cfbSweepYParam" aria-label="Sweep Y-axis parameter" disabled>
+        <option value="cfg" data-i18n="comfyui_bridge.sweep_param_cfg">CFG Scale</option>
+        <option value="steps" data-i18n="comfyui_bridge.sweep_param_steps">Steps</option>
+        <option value="denoise" data-i18n="comfyui_bridge.sweep_param_denoise">img2img Denoise</option>
+        <option value="controlnet_strength" data-i18n="comfyui_bridge.sweep_param_controlnet_strength">ControlNet Strength</option>
+        <option value="_macros" data-i18n="comfyui_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <div id="cfbSweepYMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="font-size:11px;opacity:0.8;margin-bottom:6px;">
+          <span data-i18n="comfyui_bridge.sweep_macros_y_hint">Y 軸: 置換子は <code>$y1</code>, <code>$y2</code>, ...</span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="margin-left:8px;text-decoration:none;font-size:11px;opacity:0.85;"
+             data-i18n="comfyui_bridge.sweep_axes_manager_link">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="cfbSweepYMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="cfbSweepYMacrosSharedCount" style="font-size:12px;" data-i18n="comfyui_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="cfbSweepYMacrosSharedCount" type="number" value="3" min="2" max="500" style="width:80px;">
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;opacity:0.8;cursor:pointer;">
+            <input id="cfbSweepYMacrosPadShort" type="checkbox">
+            <span data-i18n="comfyui_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="cfbSweepYMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="cfbSweepYMacroAddBtn" class="cfb-btn small" style="margin-top:6px;" data-i18n="comfyui_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="cfbSweepYMin" data-i18n="comfyui_bridge.sweep_min_label">下限</label>
+      <input id="cfbSweepYMin" type="number" value="0.4" step="0.1" aria-label="Sweep Y min" disabled>
+
+      <label for="cfbSweepYMax" data-i18n="comfyui_bridge.sweep_max_label">上限</label>
+      <input id="cfbSweepYMax" type="number" value="1" step="0.1" aria-label="Sweep Y max" disabled>
+
+      <label for="cfbSweepYMode" data-i18n="comfyui_bridge.sweep_mode_label">分割方法</label>
+      <select id="cfbSweepYMode" aria-label="Sweep Y mode" disabled>
+        <option value="count" data-i18n="comfyui_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="comfyui_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="cfbSweepYCount" data-i18n="comfyui_bridge.sweep_count_label">枚数</label>
+      <input id="cfbSweepYCount" type="number" value="3" min="2" max="500" aria-label="Sweep Y count" disabled title="ローカル接続時のみ 50 を超える値が有効。">
+
+      <label for="cfbSweepYStep" data-i18n="comfyui_bridge.sweep_step_label">間隔</label>
+      <input id="cfbSweepYStep" type="number" value="0.1" step="0.1" min="0.0001" aria-label="Sweep Y step" disabled>
+
+      <!-- Z axis (opt-in 3rd axis, requires Y). Renders one X*Y grid per Z value, switched by a tab strip. -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:8px;display:flex;align-items:center;gap:8px;">
+        <input id="cfbSweepZEnabled" type="checkbox" aria-label="Enable Z axis">
+        <label for="cfbSweepZEnabled" data-i18n="comfyui_bridge.sweep_z_axis_heading" style="cursor:pointer;">Z 軸を追加（3軸 sweep、Z はタブ切替）</label>
+      </div>
+
+      <label for="cfbSweepZParam" data-i18n="comfyui_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="cfbSweepZParam" aria-label="Sweep Z-axis parameter" disabled>
+        <option value="cfg" data-i18n="comfyui_bridge.sweep_param_cfg">CFG Scale</option>
+        <option value="steps" data-i18n="comfyui_bridge.sweep_param_steps">Steps</option>
+        <option value="denoise" data-i18n="comfyui_bridge.sweep_param_denoise">img2img Denoise</option>
+        <option value="controlnet_strength" data-i18n="comfyui_bridge.sweep_param_controlnet_strength">ControlNet Strength</option>
+        <option value="_macros" data-i18n="comfyui_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <div id="cfbSweepZMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="font-size:11px;opacity:0.8;margin-bottom:6px;">
+          <span data-i18n="comfyui_bridge.sweep_macros_z_hint">Z 軸: 置換子は <code>$z1</code>, <code>$z2</code>, ...</span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="margin-left:8px;text-decoration:none;font-size:11px;opacity:0.85;"
+             data-i18n="comfyui_bridge.sweep_axes_manager_link">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="cfbSweepZMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="cfbSweepZMacrosSharedCount" style="font-size:12px;" data-i18n="comfyui_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="cfbSweepZMacrosSharedCount" type="number" value="3" min="2" max="500" style="width:80px;">
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;opacity:0.8;cursor:pointer;">
+            <input id="cfbSweepZMacrosPadShort" type="checkbox">
+            <span data-i18n="comfyui_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="cfbSweepZMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="cfbSweepZMacroAddBtn" class="cfb-btn small" style="margin-top:6px;" data-i18n="comfyui_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="cfbSweepZMin" data-i18n="comfyui_bridge.sweep_min_label">下限</label>
+      <input id="cfbSweepZMin" type="number" value="0.4" step="0.1" aria-label="Sweep Z min" disabled>
+
+      <label for="cfbSweepZMax" data-i18n="comfyui_bridge.sweep_max_label">上限</label>
+      <input id="cfbSweepZMax" type="number" value="1" step="0.1" aria-label="Sweep Z max" disabled>
+
+      <label for="cfbSweepZMode" data-i18n="comfyui_bridge.sweep_mode_label">分割方法</label>
+      <select id="cfbSweepZMode" aria-label="Sweep Z mode" disabled>
+        <option value="count" data-i18n="comfyui_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="comfyui_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="cfbSweepZCount" data-i18n="comfyui_bridge.sweep_count_label">枚数</label>
+      <input id="cfbSweepZCount" type="number" value="3" min="2" max="500" aria-label="Sweep Z count" disabled title="ローカル接続時のみ 50 を超える値が有効。">
+
+      <label for="cfbSweepZStep" data-i18n="comfyui_bridge.sweep_step_label">間隔</label>
+      <input id="cfbSweepZStep" type="number" value="0.1" step="0.1" min="0.0001" aria-label="Sweep Z step" disabled>
+
+      <div id="cfbSweepEstimateRow" style="grid-column:1 / span 2;margin-top:6px;font-size:12px;">
+        <span data-i18n="comfyui_bridge.sweep_total_estimate_label">合計</span>:
+        <span id="cfbSweepTotalEstimate" style="font-weight:600;">—</span>
+      </div>
+
+      <label for="cfbSweepDeferSave" data-i18n="comfyui_bridge.sweep_defer_save_label">一括保存</label>
+      <span style="display:flex;align-items:center;gap:6px;">
+        <input id="cfbSweepDeferSave" type="checkbox" checked aria-label="Defer save until sweep ends">
+        <span style="font-size:11px;opacity:0.7;" data-i18n="comfyui_bridge.sweep_defer_save_hint">完了/停止時にまとめて保存（DB 連鎖負荷を回避）</span>
+      </span>
+    </div>
+    <div id="cfbSweepCancelRow" style="display:none;margin-top:10px;gap:8px;">
+      <button class="cfb-btn small" data-action="cfbStopSweepGraceful"
+              data-i18n="comfyui_bridge.sweep_stop_graceful_btn"
+              data-i18n-title="comfyui_bridge.sweep_stop_graceful_title"
+              title="現在の生成が終わったら停止（途中の画像は捨てない）">現在の画像で停止</button>
+      <button class="cfb-btn small" data-action="cfbStopSweepImmediate"
+              style="background:#c33;color:#fff;"
+              data-i18n="comfyui_bridge.sweep_stop_immediate_btn"
+              data-i18n-title="comfyui_bridge.sweep_stop_immediate_title"
+              title="進行中のリクエストを即座に中断（途中画像は破棄、ComfyUI 側もキャンセル）">即時停止</button>
+      <button type="button" id="cfb-sweep-open" class="cfb-btn small" disabled
+              title="Sweep ページで結果を開く（最初の画像が保存されると有効化）" aria-label="Open sweep page">📊 Sweep ページを開く</button>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+      <button type="button" id="cfb-sweep-history" class="cfb-btn small"
+              title="最近の Sweep 履歴" aria-label="Sweep 履歴">🕘 Sweep 履歴</button>
+    </div>
+    <div id="cfbSweepGrid" class="cfb-sweep-grid" style="display:none;margin-top:10px;overflow-x:auto;"></div>
+    <p style="font-size:11px;opacity:0.7;margin:8px 0 0;" data-i18n="comfyui_bridge.sweep_hint">
+      seed は固定（-1 の場合は1つ生成して全枚数で再利用）。1枚ずつ順次生成し履歴に追記します。安全装置として最大 50 枚に制限されます。Simple モードのみ対応。
+    </p>
+  </details>
+
+  <!-- Result area -->
+  <div class="cfb-result" id="cfbResult"></div>
+
+  <!-- Settings -->
+  <details class="cfb-config">
+    <summary data-i18n="comfyui_bridge.settings">Settings</summary>
+    <div style="margin-top: 10px;">
+      <div class="cfb-config-row">
+        <label for="cfbCfgUrl" data-i18n="comfyui_bridge.api_url">API URL</label>
+        <input id="cfbCfgUrl" type="text" value="http://127.0.0.1:8188">
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgGatewayUrl" data-i18n="comfyui_bridge.gateway_url">Gateway URL</label>
+        <input id="cfbCfgGatewayUrl" type="text" data-i18n-placeholder="comfyui_bridge.gateway_url_placeholder" placeholder="http://host:5000/comfy  (省略時は API URL を直接使用)">
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgApiKey" data-i18n="comfyui_bridge.api_key">API Key</label>
+        <input id="cfbCfgApiKey" type="password" autocomplete="new-password" data-i18n-placeholder="comfyui_bridge.api_key_placeholder" placeholder="">
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgSampler" data-i18n="comfyui_bridge.default_sampler">Default Sampler</label>
+        <select id="cfbCfgSampler">
+          <option>euler</option>
+          <option>euler_cfg_pp</option>
+          <option>euler_ancestral</option>
+          <option>euler_ancestral_cfg_pp</option>
+          <option>heun</option>
+          <option>heun_sde</option>
+          <option>dpm_2</option>
+          <option>dpm_2_ancestral</option>
+          <option>lms</option>
+          <option>dpm_fast</option>
+          <option>dpm_adaptive</option>
+          <option>dpmpp_2s_ancestral</option>
+          <option>dpmpp_sde</option>
+          <option>dpmpp_sde_gpu</option>
+          <option>dpmpp_2m</option>
+          <option>dpmpp_2m_sde</option>
+          <option>dpmpp_2m_sde_gpu</option>
+          <option>dpmpp_3m_sde</option>
+          <option>dpmpp_3m_sde_gpu</option>
+          <option>ddpm</option>
+          <option>lcm</option>
+          <option>ipndm</option>
+          <option>ipndm_v</option>
+          <option>deis</option>
+          <option>er_sde</option>
+          <option>res_multistep</option>
+          <option>res_multistep_gpu</option>
+          <option>ddim</option>
+          <option>plms</option>
+          <option>uni_pc</option>
+          <option>uni_pc_bh2</option>
+        </select>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgScheduler" data-i18n="comfyui_bridge.default_scheduler">Default Scheduler</label>
+        <select id="cfbCfgScheduler">
+          <option>normal</option>
+          <option>karras</option>
+          <option>exponential</option>
+          <option>sgm_uniform</option>
+          <option>simple</option>
+          <option>ddim_uniform</option>
+          <option>beta</option>
+          <option>linear_quadratic</option>
+          <option>kl_optimal</option>
+          <option>align_your_steps</option>
+        </select>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgModelsRoot" data-i18n="comfyui_bridge.models_root">Models Root</label>
+        <input id="cfbCfgModelsRoot" type="text" placeholder="C:\ComfyUI\models" style="flex:1;" data-i18n-placeholder="comfyui_bridge.models_root_placeholder">
+        <span style="font-size:12px;" data-i18n="comfyui_bridge.models_root_desc">SDXL/SD1.5 自動判定用 (同一マシン時)</span>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgAutoSend" data-i18n="comfyui_bridge.auto_send">Auto-send</label>
+        <input id="cfbCfgAutoSend" type="checkbox">
+        <span style="font-size:12px;" data-i18n="comfyui_bridge.auto_send_desc">確認ダイアログ省略</span>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgSaveFolder" data-i18n="comfyui_bridge.save_folder">Save Folder</label>
+        <div style="flex:1; display:flex; gap:4px; align-items:center;">
+          <input id="cfbCfgSaveFolder" type="text" placeholder="/path/to/save" style="flex:1;" data-i18n-placeholder="comfyui_bridge.save_folder_placeholder">
+          <button class="cfb-btn small" data-action="cfbBrowseSaveFolder" data-i18n="comfyui_bridge.browse">Browse</button>
+        </div>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgAutoSave" data-i18n="comfyui_bridge.auto_save">Auto-save</label>
+        <input id="cfbCfgAutoSave" type="checkbox">
+        <span style="font-size:12px;" data-i18n="comfyui_bridge.auto_save_desc">生成後に自動保存</span>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgBridgeManagedSave" data-i18n="comfyui_bridge.bridge_managed_save">Sweep XMP を ComfyUI 出力に直接埋め込む</label>
+        <input id="cfbCfgBridgeManagedSave" type="checkbox">
+        <span style="font-size:12px;" data-i18n="comfyui_bridge.bridge_managed_save_desc">Sweep 実行時に ComfyUI 側の保存ファイルに直接 XMP を書く（save_folder への重複保存を回避）。下の埋め込み先パス必須</span>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgComfyOutputRoot" data-i18n="comfyui_bridge.comfy_output_root">Sweep XMP 埋め込み先パス</label>
+        <div style="flex:1; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+          <input id="cfbCfgComfyOutputRoot" type="text" placeholder="/path/to/ComfyUI/output" style="flex:1; min-width:200px;" data-i18n-placeholder="comfyui_bridge.comfy_output_root_placeholder">
+          <button id="cfbCfgComfyOutputRootBrowse" class="cfb-btn small" data-action="cfbBrowseComfyOutputRoot" data-i18n="comfyui_bridge.browse">Browse</button>
+          <label style="display:flex; gap:4px; align-items:center; font-size:12px; white-space:nowrap;">
+            <input id="cfbCfgComfyOutputSameAsSaveFolder" type="checkbox" checked>
+            <span data-i18n="comfyui_bridge.comfy_output_same_as_save_folder">save_folder と同じ</span>
+          </label>
+        </div>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgAutoImport" data-i18n="comfyui_bridge.auto_import">Auto-import</label>
+        <input id="cfbCfgAutoImport" type="checkbox" checked>
+        <span style="font-size:12px;" data-i18n="comfyui_bridge.auto_import_desc">保存時にDBに自動登録</span>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgImageFormat" data-i18n="comfyui_bridge.default_image_format">Default Image Format</label>
+        <select id="cfbCfgImageFormat">
+          <option value="png">PNG</option>
+          <option value="webp">WebP</option>
+          <option value="jpg">JPEG</option>
+        </select>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgSaveNaming" data-i18n="comfyui_bridge.save_naming">Save Naming</label>
+        <select id="cfbCfgSaveNaming">
+          <option value="daily_folder" data-i18n="comfyui_bridge.naming_daily_folder">Daily Folder (2026-02-25/seed_0.png)</option>
+          <option value="date_prefix" data-i18n="comfyui_bridge.naming_date_prefix">Date Prefix (2026-02-25_143022_seed_0.png)</option>
+          <option value="timestamp" data-i18n="comfyui_bridge.naming_timestamp">Timestamp (seed_unix_0.png)</option>
+        </select>
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgPromptOpen" data-i18n="comfyui_bridge.prompt_open_label">プロンプトを展開して表示</label>
+        <input id="cfbCfgPromptOpen" type="checkbox" checked aria-label="Show prompt expanded">
+      </div>
+      <div class="cfb-config-row">
+        <label for="cfbCfgMaxBatchSize" data-i18n="bridge.max_batch_size_label">Max Batch Size</label>
+        <input id="cfbCfgMaxBatchSize" type="number" min="1" max="64" value="8" style="width:80px;">
+        <span style="font-size:11px;opacity:0.7;" data-i18n="bridge.max_batch_size_help">Upper limit for the Batch size input. Increase if you have ample VRAM (default 8).</span>
+      </div>
+      <div class="cfb-config-row">
+        <button class="cfb-btn small" data-action="cfbSaveConfig" data-i18n="comfyui_bridge.save_settings">Save Settings</button>
+        <button class="cfb-btn small" data-action="cfbLoadSamplers" data-i18n="comfyui_bridge.refresh_samplers">Refresh Samplers</button>
+        <button class="cfb-btn small" data-action="cfbLoadSchedulers" data-i18n="comfyui_bridge.refresh_schedulers">Refresh Schedulers</button>
+        <button class="cfb-btn small" data-action="cfbLoadModels" data-i18n="comfyui_bridge.refresh_models">Refresh Models</button>
+        <button class="cfb-btn small" data-action="cfbRefreshAssets" data-i18n="comfyui_bridge.refresh_assets" title="ComfyUI に checkpoints / LoRAs / VAE などをディスクから再スキャンさせる">Refresh Assets (ComfyUI)</button>
+      </div>
+    </div>
+  </details>
+
+  <!-- Model Registry -->
+  <details class="cfb-config" id="cfbRegistryPanel">
+    <summary data-i18n="comfyui_bridge.model_registry">Model Registry</summary>
+    <div style="margin-top:10px;">
+      <p style="font-size:11px;opacity:0.7;margin-bottom:10px;" data-i18n="comfyui_bridge.model_registry_desc">
+        UNETLoader モデル名 → VAE / CLIP / clip_type の対応表。組み込みエントリは読み取り専用です。ユーザーエントリで上書き可能。
+      </p>
+      <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap;">
+        <button class="cfb-btn small" id="cfbRegAddBtn" data-i18n="comfyui_bridge.reg_add_entry">＋ Add Entry</button>
+        <button class="cfb-btn small" id="cfbRegRefreshBtn" data-i18n="comfyui_bridge.reg_refresh">↻ Refresh</button>
+        <button class="cfb-btn small" id="cfbRegExportBtn" data-i18n="comfyui_bridge.reg_export">📤 Export JSON</button>
+        <button class="cfb-btn small" id="cfbRegImportBtn" data-i18n="comfyui_bridge.reg_import">📥 Import JSON</button>
+        <button class="cfb-btn small" id="cfbRegEditorBtn" data-i18n="comfyui_bridge.reg_editor">📝 JSON Edit</button>
+        <span id="cfbRegStatus" style="font-size:11px;opacity:0.7;"></span>
+      </div>
+
+      <!-- Export panel (toggle) -->
+      <div id="cfbRegExportWrap" style="display:none;margin-bottom:12px;">
+        <div style="border-top:1px solid rgba(128,128,128,.15);padding-top:10px;">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+            <span style="font-size:12px;font-weight:600;flex:1;" data-i18n="comfyui_bridge.reg_export_title">Export JSON</span>
+            <button class="cfb-btn small" id="cfbRegExportCopyBtn">📋 Copy</button>
+            <button class="cfb-btn small" id="cfbRegExportDownloadBtn">💾 Download</button>
+            <button class="cfb-btn small" id="cfbRegExportCloseBtn">✕</button>
+          </div>
+          <p style="font-size:11px;opacity:0.65;margin-bottom:6px;" data-i18n="comfyui_bridge.reg_export_hint">
+            このJSONをデスクトップLLMに渡してください。空フィールドをウェブ検索で埋めてもらい、返ってきたJSONを Import JSON から登録できます。
+          </p>
+          <textarea id="cfbRegExportText" rows="14" readonly
+            style="width:100%;font-family:monospace;font-size:11px;background:rgba(15,15,30,.95);color:var(--text,#e0e0e0);border:1px solid rgba(128,128,128,.2);border-radius:6px;padding:10px;resize:vertical;white-space:pre;overflow-wrap:normal;overflow-x:auto;"></textarea>
+        </div>
+      </div>
+
+      <!-- Import panel (toggle) -->
+      <div id="cfbRegImportWrap" style="display:none;margin-bottom:12px;">
+        <div style="border-top:1px solid rgba(128,128,128,.15);padding-top:10px;">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+            <span style="font-size:12px;font-weight:600;flex:1;" data-i18n="comfyui_bridge.reg_import_title">Import JSON</span>
+            <button class="cfb-btn small" id="cfbRegImportFileBtn" data-i18n="comfyui_bridge.reg_import_file">📂 File...</button>
+            <input type="file" id="cfbRegImportFileInput" accept=".json,application/json" style="display:none;">
+            <button class="cfb-btn small" id="cfbRegImportCloseBtn">✕</button>
+          </div>
+          <p style="font-size:11px;opacity:0.65;margin-bottom:6px;" data-i18n="comfyui_bridge.reg_import_hint">
+            エントリ配列の JSON を貼り付けるか、JSON ファイルをアップロードしてください。<br>
+            各エントリには <code>id</code> と <code>unet_patterns</code> が必須です（既存のエントリは上書き）。
+          </p>
+          <textarea id="cfbRegImportText" rows="10" spellcheck="false"
+            placeholder='[{"id":"wan22","unet_patterns":["wan2.2","wan2_2"],"vae":"","clip_1":"","clip_2":"","clip_type":"wan"}]'
+            data-json-enhance
+            style="width:100%;font-family:monospace;font-size:11px;background:rgba(15,15,30,.95);color:var(--text,#e0e0e0);border:1px solid rgba(128,128,128,.2);border-radius:6px;padding:10px;resize:vertical;white-space:pre;overflow-wrap:normal;overflow-x:auto;"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+            <button class="cfb-btn small" id="cfbRegImportPreviewBtn" data-i18n="comfyui_bridge.reg_import_preview">Preview</button>
+            <button class="cfb-btn" id="cfbRegImportApplyBtn" disabled data-i18n="comfyui_bridge.reg_import_apply">Import All</button>
+            <span id="cfbRegImportStatus" style="font-size:11px;opacity:0.7;"></span>
+          </div>
+          <div id="cfbRegImportPreviewWrap" style="margin-top:10px;overflow-x:auto;"></div>
+        </div>
+      </div>
+
+      <!-- JSON Editor panel (toggle) -->
+      <div id="cfbRegEditorWrap" style="display:none;margin-bottom:12px;">
+        <div style="border-top:1px solid rgba(128,128,128,.15);padding-top:10px;">
+          <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+            <span style="font-size:12px;font-weight:600;flex:1;" data-i18n="comfyui_bridge.reg_editor_title">JSON Editor <span style="font-size:10px;font-weight:normal;opacity:0.6;">(ユーザーエントリのみ)</span></span>
+            <button class="cfb-btn small" id="cfbRegEditorCloseBtn">✕</button>
+          </div>
+          <p style="font-size:11px;opacity:0.65;margin-bottom:6px;" data-i18n="comfyui_bridge.reg_editor_hint">
+            ユーザーエントリを JSON で直接編集できます。行を削除するとそのエントリが削除されます（組み込みエントリは影響を受けません）。
+          </p>
+          <textarea id="cfbRegEditorText" rows="20" spellcheck="false"
+            data-json-enhance
+            style="width:100%;font-family:monospace;font-size:12px;background:rgba(15,15,30,.95);color:var(--text,#e0e0e0);border:1px solid rgba(128,128,128,.2);border-radius:6px;padding:10px;resize:vertical;white-space:pre;overflow-wrap:normal;overflow-x:auto;line-height:1.5;"></textarea>
+          <div style="display:flex;gap:8px;align-items:center;margin-top:8px;flex-wrap:wrap;">
+            <button class="cfb-btn" id="cfbRegEditorSaveBtn" data-i18n="comfyui_bridge.reg_editor_save">💾 Save Changes</button>
+            <button class="cfb-btn small" id="cfbRegEditorCancelBtn" data-i18n="comfyui_bridge.cancel">Cancel</button>
+            <span id="cfbRegEditorStatus" style="font-size:11px;opacity:0.7;"></span>
+          </div>
+        </div>
+      </div>
+
+      <div id="cfbRegTableWrap" style="overflow-x:auto;"></div>
+    </div>
+  </details>
+
+  <!-- Model Registry edit modal -->
+  <div id="cfbRegModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.78);z-index:3000;overflow-y:auto;padding:20px 12px;">
+    <div style="max-width:660px;margin:0 auto;background:var(--bg,#0f0f1a);border:1px solid rgba(128,128,128,.25);border-radius:10px;padding:20px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px;">
+        <strong id="cfbRegModalTitle" style="flex:1;font-size:14px;">Add Entry</strong>
+        <button class="cfb-btn small" id="cfbRegModalClose">✕</button>
+      </div>
+      <div id="cfbRegModalNote" style="display:none;font-size:11px;background:rgba(80,120,200,.15);border:1px solid rgba(80,120,200,.3);border-radius:6px;padding:8px 10px;margin-bottom:12px;"></div>
+
+      <!-- ID -->
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_id">ID <span style="opacity:0.5;font-size:10px;font-weight:normal;">letters/digits/-/_</span></label>
+        <input id="cfbRegFldId" type="text" maxlength="64" placeholder="e.g. wan22" style="flex:1;">
+      </div>
+      <!-- UNET Patterns -->
+      <div class="cfb-config-row" style="align-items:flex-start;">
+        <label style="min-width:130px;padding-top:6px;" data-i18n="comfyui_bridge.reg_field_patterns">UNET Patterns <span style="opacity:0.5;font-size:10px;font-weight:normal;display:block;">1行1パターン</span></label>
+        <textarea id="cfbRegFldPatterns" rows="3" style="flex:1;font-family:monospace;font-size:12px;background:rgba(30,30,50,.8);color:var(--text,#e0e0e0);border:1px solid rgba(128,128,128,.2);border-radius:6px;padding:8px;resize:vertical;" placeholder="wan2.2&#10;wan2_2"></textarea>
+      </div>
+      <!-- VAE -->
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_vae">VAE</label>
+        <input id="cfbRegFldVae" type="text" list="cfbRegDlVae" maxlength="256" style="flex:1;" placeholder="">
+        <datalist id="cfbRegDlVae"></datalist>
+      </div>
+      <!-- CLIP 1 / 2 share one datalist -->
+      <datalist id="cfbRegDlEnc"></datalist>
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_clip1">CLIP 1</label>
+        <input id="cfbRegFldClip1" type="text" list="cfbRegDlEnc" maxlength="256" style="flex:1;" placeholder="">
+      </div>
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_clip2">CLIP 2</label>
+        <input id="cfbRegFldClip2" type="text" list="cfbRegDlEnc" maxlength="256" style="flex:1;" placeholder="">
+      </div>
+      <!-- CLIP Type -->
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_clip_type">CLIP Type</label>
+        <input id="cfbRegFldClipType" type="text" maxlength="256" style="flex:1;" placeholder="e.g. wan, qwen_image">
+      </div>
+      <!-- Latent Node -->
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_latent">Latent Node</label>
+        <input id="cfbRegFldLatent" type="text" maxlength="256" style="flex:1;" placeholder="">
+      </div>
+      <!-- Default Sampler / Scheduler -->
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_sampler">Default Sampler</label>
+        <input id="cfbRegFldSampler" type="text" maxlength="256" style="flex:1;" placeholder="(bridge default)">
+      </div>
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_scheduler">Default Scheduler</label>
+        <input id="cfbRegFldScheduler" type="text" maxlength="256" style="flex:1;" placeholder="(bridge default)">
+      </div>
+      <!-- CFG / Steps -->
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_cfg_steps">CFG / Steps</label>
+        <input id="cfbRegFldCfg" type="number" step="0.1" min="0" max="100" style="width:80px;" placeholder="CFG">
+        <span style="margin:0 6px;opacity:0.5;">/</span>
+        <input id="cfbRegFldSteps" type="number" step="1" min="1" max="10000" style="width:80px;" placeholder="Steps">
+      </div>
+      <!-- Source URL -->
+      <div class="cfb-config-row">
+        <label style="min-width:130px;" data-i18n="comfyui_bridge.reg_field_url">Source URL</label>
+        <input id="cfbRegFldUrl" type="text" maxlength="256" style="flex:1;" placeholder="">
+      </div>
+      <!-- Notes -->
+      <div class="cfb-config-row" style="align-items:flex-start;">
+        <label style="min-width:130px;padding-top:6px;" data-i18n="comfyui_bridge.reg_field_notes">Notes</label>
+        <textarea id="cfbRegFldNotes" rows="3" maxlength="2000" style="flex:1;background:rgba(30,30,50,.8);color:var(--text,#e0e0e0);border:1px solid rgba(128,128,128,.2);border-radius:6px;padding:8px;resize:vertical;"></textarea>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:16px;justify-content:flex-end;">
+        <button class="cfb-btn small" id="cfbRegCancelBtn" data-i18n="comfyui_bridge.cancel">Cancel</button>
+        <button class="cfb-btn" id="cfbRegSaveBtn" data-i18n="comfyui_bridge.save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Workflow drop overlay -->
+  <div id="cfbDropOverlay" class="cfb-drop-overlay" style="display:none;">
+    <div class="cfb-drop-overlay-text" data-i18n="comfyui_bridge.drop_workflow">Drop workflow file here (JSON or image)</div>
+  </div>
+
+  <!-- Import notification bar -->
+  <div id="cfbImportBar" class="cfb-import-bar" style="display:none;">
+    <span id="cfbImportBarText" data-i18n="comfyui_bridge.workflow_imported">Workflow imported to JSON tab</span>
+    <button class="cfb-btn small" id="cfbImportApplyBtn" data-action="cfbApplyImportToSimple" data-i18n="comfyui_bridge.apply_to_simple" style="display:none;">Simple モードに反映</button>
+    <button class="cfb-btn small" data-action="cfbDismissImportBar">✕</button>
+  </div>
+</div>
+<div id="bridge-server-management" class="bridge-server-mgmt-root"></div>

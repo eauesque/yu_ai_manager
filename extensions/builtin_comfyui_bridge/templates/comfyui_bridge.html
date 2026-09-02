@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="comfyui_bridge.page_title">ComfyUI Bridge</title>
+  <link rel="stylesheet" href="/static/css/base/base-theme.css">
+  <link rel="stylesheet" href="/static/css/widgets/widgets-json-enhance.css">
+  {% include "comfyui_bridge_parts/_style.html" %}
+  <link rel="stylesheet" href="/ext/syntax/style.css">
+  <link rel="stylesheet" href="/static/css/bridge-sweep-quick-jump.css?v=20260508">
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+  {% include "comfyui_bridge_parts/_body.html" %}
+  </main>
+  <script nonce="{{ csp_nonce }}" src="/ext/syntax/engine.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/syntax/widget.js"></script>
+  <link rel="stylesheet" href="/static/css/prompt-linter.css">
+  <script nonce="{{ csp_nonce }}" src="/static/dist/linter.js"></script>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/power-vim-edit.js"></script>
+  <link rel="stylesheet" href="/static/css/bridge-prompt-library.css">
+  <link rel="stylesheet" href="/static/css/bridge-server-management.css">
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/bridge-app.js?v=20260503b"></script>
+  <script nonce="{{ csp_nonce }}" src="/static/tauri_shell/cross_tab.js"></script>
+  {% include "comfyui_bridge_parts/_script.html" %}
+  {% include "comfyui_bridge_parts/_script_discovery.html" %}
+  {% include "comfyui_bridge_parts/_script_editor.html" %}
+  {% include "comfyui_bridge_parts/_script_clipboard.html" %}
+  {% include "comfyui_bridge_parts/_script_img2img.html" %}
+  <script nonce="{{ csp_nonce }}" src="/static/bridge-fetch.js?v=20260508"></script>
+  <script nonce="{{ csp_nonce }}" src="/static/bridge-leave-guard.js?v=20260509"></script>
+  <script nonce="{{ csp_nonce }}" src="/static/sweep-buffer.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/static/sweep-resume.js?v=20260507e"></script>
+  <script nonce="{{ csp_nonce }}" src="/static/bridge-sweep-quick-jump.js?v=20260508"></script>
+  {% include "comfyui_bridge_parts/_script_sweep.html" %}
+  {% include "comfyui_bridge_parts/_script_sweep_runner.html" %}
+  {% include "comfyui_bridge_parts/_script_tauri_bridge.html" %}
+  {% include "comfyui_bridge_parts/_script_model_registry.html" %}
+</body>
+</html>

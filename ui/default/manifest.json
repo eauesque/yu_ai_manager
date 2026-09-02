@@ -1,0 +1,9 @@
+{
+  "name": "default",
+  "version": "2.90.0",
+  "description": "YU AI Manager built-in default UI",
+  "author": "YU AI Manager Team",
+  "api_version": "1",
+  "label": "デフォルト",
+  "is_sample": false
+}

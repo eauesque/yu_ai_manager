@@ -1,0 +1,461 @@
+<script nonce="{{ csp_nonce }}">
+/* GitHub Integration — Settings tab */
+
+function ghubLoadSettings() {
+  var el = ghubEl('ghubSettingsContent');
+  var html = '';
+
+  // Add account form
+  html += '<div class="ghub-section-header">' + _t('add_account') + '</div>';
+  html += '<div class="ghub-card">';
+  html += '<div class="ghub-form-group">';
+  html += '<label for="ghubNewLabel">' + _t('label_field') + '</label>';
+  html += '<input type="text" id="ghubNewLabel" placeholder="' + _t('label_ph') + '">';
+  html += '</div>';
+  html += '<div class="ghub-form-group">';
+  html += '<label for="ghubNewToken">' + _t('token_field') + '</label>';
+  html += '<input type="password" id="ghubNewToken" placeholder="' + _t('token_ph') + '">';
+  html += '</div>';
+  html += '<div class="ghub-form-group">';
+  html += '<label for="ghubNewRepos">' + _t('repos_field') + '</label>';
+  html += '<textarea id="ghubNewRepos" placeholder="' + _t('repos_ph') + '" style="min-height:70px"></textarea>';
+  html += '</div>';
+  html += '<button class="ghub-btn ghub-btn-primary" data-action="ghubAddAccount">' + _t('add_account') + '</button>';
+  html += '</div>';
+
+  // Existing accounts
+  html += '<div class="ghub-section-header">' + _t('accounts_header') + ' (' + ghubAccounts.length + ')</div>';
+
+  if (!ghubAccounts.length) {
+    html += '<div class="ghub-empty">' + _t('no_accounts') + '</div>';
+  } else {
+    ghubAccounts.forEach(function(acc) {
+      var esc = ghubEsc(acc.label);
+      html += '<div class="ghub-card" id="ghubAccCard_' + esc + '">';
+      html += '<div class="ghub-acc-header">';
+      html += '<span>';
+      html += (acc.enabled ? '&#x1F7E2;' : '&#x1F534;') + ' ';
+      html += '<strong>' + esc + '</strong>';
+      html += ' <span style="font-size:0.8rem;color:var(--muted);font-weight:normal">' + ghubEsc(acc.token_masked) + '</span>';
+      html += '</span>';
+      html += '<span class="ghub-acc-actions">';
+      html += '<button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubToggleAccount" data-action-arg="' + esc + ',' + !acc.enabled + '">';
+      html += acc.enabled ? _t('disable') : _t('enable');
+      html += '</button>';
+      html += '<button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubEditAccount" data-action-arg="' + esc + '">' + _t('edit') + '</button>';
+      html += '<button class="ghub-btn ghub-btn-danger ghub-btn-small" data-action="ghubDeleteAccount" data-action-arg="' + esc + '">' + _t('delete_btn') + '</button>';
+      html += '</span></div>';
+
+      html += '<div class="ghub-card-meta" style="margin-top:6px">';
+      html += '<span>' + _t('repos_label') + ((acc.repos || []).join(', ') || '<em>' + _t('none') + '</em>') + '</span>';
+      html += '</div>';
+
+      // Edit form (hidden)
+      var tokId = 'ghubEditToken_' + esc;
+      var repoId = 'ghubEditRepos_' + esc;
+      html += '<div id="ghubEdit_' + esc + '" style="display:none;margin-top:12px">';
+      html += '<div class="ghub-form-group">';
+      html += '<label for="' + tokId + '">' + _t('edit_token_label') + '</label>';
+      html += '<input type="password" id="' + tokId + '" aria-label="' + _t('edit_token_label') + '" placeholder="' + _t('edit_token_ph') + '">';
+      html += '</div>';
+      html += '<div class="ghub-form-group">';
+      html += '<label for="' + repoId + '">' + _t('edit_repos_label') + '</label>';
+      html += '<textarea id="' + repoId + '" aria-label="' + _t('edit_repos_label') + '" style="min-height:60px">' + (acc.repos || []).join('\n') + '</textarea>';
+      html += '</div>';
+      html += '<div style="display:flex;gap:8px">';
+      html += '<button class="ghub-btn ghub-btn-primary ghub-btn-small" data-action="ghubSaveAccount" data-action-arg="' + esc + '">' + _t('save') + '</button>';
+      html += '<button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubCancelEdit" data-action-arg="' + esc + '">' + _t('cancel') + '</button>';
+      html += '</div></div>';
+
+      html += '</div>';
+    });
+  }
+
+  // Triage Prompts
+  html += '<div class="ghub-section-header">' + _t('triage_prompts');
+  html += ' <a href="/help/github-triage-examples" target="_blank" style="font-size:0.8rem;font-weight:normal;margin-left:8px">' + _t('triage_examples') + '</a>';
+  html += '</div>';
+  html += '<div class="ghub-card" id="ghubTriagePrompts">';
+
+  // Repo selector
+  html += '<div class="ghub-form-group">';
+  html += '<label for="ghubTriageRepo">' + _t('triage_repo') + '</label>';
+  html += '<select id="ghubTriageRepo" aria-label="' + _t('triage_repo') + '" data-action="ghubOnTriageRepoChange" data-action-event="change">';
+  html += '<option value="">' + _t('triage_global') + '</option>';
+  // Add repos from all accounts
+  var _allRepos = [];
+  ghubAccounts.forEach(function(a) {
+    (a.repos || []).forEach(function(r) {
+      if (_allRepos.indexOf(r) < 0) _allRepos.push(r);
+    });
+  });
+  _allRepos.forEach(function(r) {
+    html += '<option value="' + ghubEsc(r) + '">' + ghubEsc(r) + '</option>';
+  });
+  html += '</select>';
+  html += '</div>';
+
+  // Per-field: issue
+  html += '<div class="ghub-form-group">';
+  html += '<label for="ghubTriageIssue">' + _t('triage_issue') + '</label>';
+  html += '<label class="ghub-use-global"><input type="checkbox" id="ghubTriageIssueGlobal" data-action="ghubToggleTriageGlobal" data-action-arg="issue" data-action-event="change"> ' + _t('triage_use_global') + '</label>';
+  html += '<textarea id="ghubTriageIssue" aria-label="' + _t('triage_issue') + '" style="min-height:120px;font-family:monospace;font-size:0.85rem"></textarea>';
+  html += '<button class="ghub-btn ghub-btn-secondary ghub-btn-small" style="margin-top:4px" data-action="ghubResetTriagePrompt" data-action-arg="issue">' + _t('reset_default') + '</button>';
+  html += '</div>';
+
+  // Per-field: PR
+  html += '<div class="ghub-form-group">';
+  html += '<label for="ghubTriagePR">' + _t('triage_pr') + '</label>';
+  html += '<label class="ghub-use-global"><input type="checkbox" id="ghubTriagePRGlobal" data-action="ghubToggleTriageGlobal" data-action-arg="pr" data-action-event="change"> ' + _t('triage_use_global') + '</label>';
+  html += '<textarea id="ghubTriagePR" aria-label="' + _t('triage_pr') + '" style="min-height:60px;font-family:monospace;font-size:0.85rem"></textarea>';
+  html += '<button class="ghub-btn ghub-btn-secondary ghub-btn-small" style="margin-top:4px" data-action="ghubResetTriagePrompt" data-action-arg="pr">' + _t('reset_default') + '</button>';
+  html += '</div>';
+
+  // Per-field: Discussion
+  html += '<div class="ghub-form-group">';
+  html += '<label for="ghubTriageDisc">' + _t('triage_disc') + '</label>';
+  html += '<label class="ghub-use-global"><input type="checkbox" id="ghubTriageDiscGlobal" data-action="ghubToggleTriageGlobal" data-action-arg="discussion" data-action-event="change"> ' + _t('triage_use_global') + '</label>';
+  html += '<textarea id="ghubTriageDisc" aria-label="' + _t('triage_disc') + '" style="min-height:60px;font-family:monospace;font-size:0.85rem"></textarea>';
+  html += '<button class="ghub-btn ghub-btn-secondary ghub-btn-small" style="margin-top:4px" data-action="ghubResetTriagePrompt" data-action-arg="discussion">' + _t('reset_default') + '</button>';
+  html += '</div>';
+
+  html += '<button class="ghub-btn ghub-btn-primary" data-action="ghubSaveTriagePrompts">' + _t('save_triage') + '</button>';
+  html += '</div>';
+
+  // Issue Queue Settings
+  html += '<div class="ghub-section-header">' + _t('queue_header') + '</div>';
+  html += '<div class="ghub-card" id="ghubQueueSettings">';
+  html += '<div class="ghub-form-group">';
+  html += '<label for="ghubPollInterval">' + _t('poll_interval') + '</label>';
+  html += '<select id="ghubPollInterval" aria-label="' + _t('poll_interval') + '">';
+  [15, 30, 60, 120, 360].forEach(function(m) {
+    html += '<option value="' + m + '">' + m + ' min</option>';
+  });
+  html += '</select>';
+  html += '</div>';
+  html += '<div class="ghub-form-group">';
+  html += '<label>';
+  html += '<input type="checkbox" id="ghubAutoClose"> ' + _t('auto_close');
+  html += '</label>';
+  html += '</div>';
+  html += '<div class="ghub-form-group">';
+  html += '<label>';
+  html += '<input type="checkbox" id="ghubNotifyConnect" checked> ' + _t('notify_connect');
+  html += '</label>';
+  html += '</div>';
+  html += '<div style="display:flex;gap:8px;align-items:center">';
+  html += '<button class="ghub-btn ghub-btn-primary ghub-btn-small" data-action="ghubSaveQueueSettings">' + _t('save') + '</button>';
+  html += '<button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubTriggerPoll">' + _t('poll_now') + '</button>';
+  html += '<span id="ghubQueueStats" style="font-size:0.85rem;color:var(--muted)"></span>';
+  html += '</div>';
+  html += '</div>';
+
+  // Rate limit
+  if (ghubCurrentLabel) {
+    html += '<div class="ghub-section-header">' + _t('rate_limit') + '</div>';
+    html += '<div id="ghubRateLimit"><div class="ghub-loading">Loading</div></div>';
+    ghubLoadRateLimit();
+  }
+
+  el.innerHTML = html;
+
+  // Load queue config, stats, and triage prompts
+  ghubLoadQueueConfig();
+  ghubLoadTriagePrompts();
+}
+
+async function ghubAddAccount() {
+  var label = ghubEl('ghubNewLabel').value.trim();
+  var token = ghubEl('ghubNewToken').value.trim();
+  var reposText = ghubEl('ghubNewRepos').value.trim();
+  var repos = reposText ? reposText.split('\n').map(function(r) { return r.trim(); }).filter(Boolean) : [];
+
+  if (!label) { ghubShowToast(_t('label_required')); return; }
+  if (!token) { ghubShowToast(_t('token_required')); return; }
+
+  try {
+    await ghubFetch('/api/github/accounts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ label: label, token: token, repos: repos }),
+    });
+    ghubShowToast(_t('account_added') + label);
+    ghubEl('ghubNewLabel').value = '';
+    ghubEl('ghubNewToken').value = '';
+    ghubEl('ghubNewRepos').value = '';
+    await ghubLoadAccounts();
+    ghubLoadSettings();
+  } catch (e) {
+    ghubShowToast('Error: ' + e.message);
+  }
+}
+
+async function ghubToggleAccount(label, enabled) {
+  try {
+    await ghubFetch('/api/github/accounts/' + encodeURIComponent(label), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ enabled: enabled }),
+    });
+    ghubShowToast(label + (enabled ? _t('enabled_msg') : _t('disabled_msg')));
+    await ghubLoadAccounts();
+    ghubLoadSettings();
+  } catch (e) { ghubShowToast('Error: ' + e.message); }
+}
+
+function ghubEditAccount(label) {
+  var el = ghubEl('ghubEdit_' + label);
+  if (el) el.style.display = el.style.display === 'none' ? 'block' : 'none';
+}
+
+function ghubCancelEdit(label) {
+  var el = ghubEl('ghubEdit_' + label);
+  if (el) el.style.display = 'none';
+}
+
+async function ghubSaveAccount(label) {
+  var token = ghubEl('ghubEditToken_' + label).value.trim();
+  var reposText = ghubEl('ghubEditRepos_' + label).value.trim();
+  var repos = reposText ? reposText.split('\n').map(function(r) { return r.trim(); }).filter(Boolean) : [];
+
+  var payload = { repos: repos };
+  if (token) payload.token = token;
+
+  try {
+    await ghubFetch('/api/github/accounts/' + encodeURIComponent(label), {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    ghubShowToast(_t('account_updated') + label);
+    await ghubLoadAccounts();
+    ghubLoadSettings();
+  } catch (e) { ghubShowToast('Error: ' + e.message); }
+}
+
+async function ghubDeleteAccount(label) {
+  if (!confirm(_t('delete_confirm') + label + '"?')) return;
+  try {
+    await ghubFetch('/api/github/accounts/' + encodeURIComponent(label), { method: 'DELETE' });
+    ghubShowToast(_t('account_deleted') + label);
+    if (ghubCurrentLabel === label) {
+      ghubCurrentLabel = '';
+      ghubEl('ghubAccountSelect').value = '';
+    }
+    await ghubLoadAccounts();
+    ghubLoadSettings();
+  } catch (e) { ghubShowToast('Error: ' + e.message); }
+}
+
+async function ghubLoadRateLimit() {
+  if (!ghubCurrentLabel) return;
+  try {
+    var data = await ghubFetch('/api/github/rate-limit/' + encodeURIComponent(ghubCurrentLabel));
+    var rl = data.data || data;
+    var el = ghubEl('ghubRateLimit');
+    if (!el) return;
+    var pct = rl.limit ? Math.round((rl.remaining / rl.limit) * 100) : 0;
+    var color = pct > 50 ? 'var(--success, #2e7d32)' : pct > 20 ? '#e77c00' : 'var(--error, #d32f2f)';
+    el.innerHTML = '<div class="ghub-card">' +
+      '<div class="ghub-card-meta">' +
+      '<span style="font-weight:600">' + rl.remaining + ' / ' + rl.limit + _t('remaining') + '</span>' +
+      '<span>' + _t('resets') + (rl.reset_at || 'N/A') + '</span>' +
+      '</div>' +
+      '<div style="margin-top:8px;height:8px;background:var(--bg-tertiary);border-radius:4px;overflow:hidden">' +
+      '<div style="height:100%;width:' + pct + '%;background:' + color + ';border-radius:4px;transition:width 0.3s"></div>' +
+      '</div></div>';
+  } catch (_) {
+    var el2 = ghubEl('ghubRateLimit');
+    if (el2) el2.innerHTML = '<div class="ghub-empty">' + _t('rate_fail') + '</div>';
+  }
+}
+
+/* -- Triage prompts (per-repo) ------------------------------ */
+
+var _ghubTriageDefaults = {};
+var _ghubTriageGlobal = {};
+var _ghubTriagePerRepo = {};
+
+async function ghubLoadTriagePrompts() {
+  var repo = (ghubEl('ghubTriageRepo') || {}).value || '';
+  var url = '/api/github/triage-prompts';
+  if (repo) url += '?repo=' + encodeURIComponent(repo);
+  try {
+    var data = await ghubFetch(url);
+    var d = data.data || data;
+    var prompts = d.prompts || {};
+    _ghubTriageDefaults = d.defaults || {};
+    _ghubTriageGlobal = d.global || {};
+    _ghubTriagePerRepo = d.per_repo || {};
+
+    var repoOverrides = repo ? (_ghubTriagePerRepo[repo] || {}) : {};
+
+    // Fill textareas with resolved values
+    var issueEl = ghubEl('ghubTriageIssue');
+    if (issueEl) issueEl.value = prompts.issue || '';
+    var prEl = ghubEl('ghubTriagePR');
+    if (prEl) prEl.value = prompts.pr || '';
+    var discEl = ghubEl('ghubTriageDisc');
+    if (discEl) discEl.value = prompts.discussion || '';
+
+    // "Use global" checkboxes — only visible when a repo is selected
+    var isRepo = !!repo;
+    ['issue', 'pr', 'discussion'].forEach(function(key) {
+      var cbId = key === 'issue' ? 'ghubTriageIssueGlobal' :
+                 key === 'pr' ? 'ghubTriagePRGlobal' : 'ghubTriageDiscGlobal';
+      var cb = ghubEl(cbId);
+      if (!cb) return;
+      var label = cb.parentElement;
+      // Hide "use global" when editing global prompts
+      if (label) label.style.display = isRepo ? '' : 'none';
+      if (isRepo) {
+        var hasOverride = key in repoOverrides && repoOverrides[key];
+        cb.checked = !hasOverride;
+        ghubToggleTriageGlobal(key);
+      } else {
+        cb.checked = false;
+      }
+    });
+  } catch (_) {}
+}
+
+function ghubOnTriageRepoChange() {
+  ghubLoadTriagePrompts();
+}
+
+function ghubToggleTriageGlobal(kind) {
+  var cbId = kind === 'issue' ? 'ghubTriageIssueGlobal' :
+             kind === 'pr' ? 'ghubTriagePRGlobal' : 'ghubTriageDiscGlobal';
+  var taId = kind === 'issue' ? 'ghubTriageIssue' :
+             kind === 'pr' ? 'ghubTriagePR' : 'ghubTriageDisc';
+  var cb = ghubEl(cbId);
+  var ta = ghubEl(taId);
+  if (!cb || !ta) return;
+  ta.disabled = cb.checked;
+  ta.style.opacity = cb.checked ? '0.5' : '1';
+  if (cb.checked) {
+    // Show global value as preview
+    ta.value = _ghubTriageGlobal[kind] || _ghubTriageDefaults[kind] || '';
+  }
+}
+
+function ghubResetTriagePrompt(kind) {
+  var repo = (ghubEl('ghubTriageRepo') || {}).value || '';
+  var val = repo ? (_ghubTriageGlobal[kind] || _ghubTriageDefaults[kind] || '')
+                 : (_ghubTriageDefaults[kind] || '');
+  if (kind === 'issue') {
+    var el = ghubEl('ghubTriageIssue');
+    if (el) { el.value = val; el.disabled = false; el.style.opacity = '1'; }
+    var cb = ghubEl('ghubTriageIssueGlobal');
+    if (cb) cb.checked = false;
+  } else if (kind === 'pr') {
+    var el2 = ghubEl('ghubTriagePR');
+    if (el2) { el2.value = val; el2.disabled = false; el2.style.opacity = '1'; }
+    var cb2 = ghubEl('ghubTriagePRGlobal');
+    if (cb2) cb2.checked = false;
+  } else if (kind === 'discussion') {
+    var el3 = ghubEl('ghubTriageDisc');
+    if (el3) { el3.value = val; el3.disabled = false; el3.style.opacity = '1'; }
+    var cb3 = ghubEl('ghubTriageDiscGlobal');
+    if (cb3) cb3.checked = false;
+  }
+}
+
+async function ghubSaveTriagePrompts() {
+  var repo = (ghubEl('ghubTriageRepo') || {}).value || '';
+  var payload = {};
+  if (repo) payload.repo = repo;
+
+  ['issue', 'pr', 'discussion'].forEach(function(key) {
+    var cbId = key === 'issue' ? 'ghubTriageIssueGlobal' :
+               key === 'pr' ? 'ghubTriagePRGlobal' : 'ghubTriageDiscGlobal';
+    var taId = key === 'issue' ? 'ghubTriageIssue' :
+               key === 'pr' ? 'ghubTriagePR' : 'ghubTriageDisc';
+    var cb = ghubEl(cbId);
+    var ta = ghubEl(taId);
+    if (repo && cb && cb.checked) {
+      // "Use global" checked -> clear per-repo override
+      payload[key] = '';
+    } else if (ta) {
+      payload[key] = ta.value;
+    }
+  });
+
+  try {
+    await ghubFetch('/api/github/triage-prompts', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    ghubShowToast(_t('triage_saved'));
+  } catch (e) {
+    ghubShowToast('Error: ' + e.message);
+  }
+}
+
+/* -- Queue config ------------------------------------------- */
+
+async function ghubLoadQueueConfig() {
+  // Load config values
+  try {
+    var cfgData = await ghubFetch('/api/github/queue/config');
+    var cfg = (cfgData.data || cfgData);
+    var intervalEl = ghubEl('ghubPollInterval');
+    if (intervalEl) intervalEl.value = String(cfg.poll_interval_minutes || 60);
+    var autoEl = ghubEl('ghubAutoClose');
+    if (autoEl) autoEl.checked = !!cfg.auto_close_invalid;
+    var notifEl = ghubEl('ghubNotifyConnect');
+    if (notifEl) notifEl.checked = cfg.notify_on_connect !== false;
+  } catch (_) {}
+  // Load stats
+  try {
+    var data = await ghubFetch('/api/github/queue');
+    var stats = (data.data || data).stats || {};
+    var statsEl = ghubEl('ghubQueueStats');
+    if (statsEl) {
+      statsEl.textContent = _t('pending') + (stats.pending || 0) +
+        ' | ' + _t('notified') + (stats.notified || 0) +
+        ' | ' + _t('dismissed') + (stats.dismissed || 0);
+    }
+  } catch (_) {}
+}
+
+async function ghubSaveQueueSettings() {
+  var interval = parseInt(ghubEl('ghubPollInterval').value) || 60;
+  var autoClose = ghubEl('ghubAutoClose').checked;
+  var notify = ghubEl('ghubNotifyConnect').checked;
+  try {
+    await ghubFetch('/api/github/queue/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        poll_interval_minutes: interval,
+        auto_close_invalid: autoClose,
+        notify_on_connect: notify,
+      }),
+    });
+    ghubShowToast(_t('queue_saved'));
+  } catch (e) {
+    ghubShowToast('Error: ' + e.message);
+  }
+}
+
+async function ghubTriggerPoll() {
+  try {
+    ghubShowToast(_t('polling'));
+    var data = await ghubFetch('/api/github/queue/poll', { method: 'POST' });
+    var msg = (data.data || data).message || _t('poll_complete');
+    ghubShowToast(msg);
+    ghubLoadQueueConfig();
+  } catch (e) {
+    ghubShowToast(_t('poll_error') + e.message);
+  }
+}
+
+/* Auto-load settings when tab switches */
+var _origSwitchTab = ghubSwitchTab;
+ghubSwitchTab = function(name) {
+  _origSwitchTab(name);
+  if (name === 'settings') ghubLoadSettings();
+};
+</script>

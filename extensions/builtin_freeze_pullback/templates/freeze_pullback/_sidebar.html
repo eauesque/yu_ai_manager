@@ -1,0 +1,119 @@
+<div class="fpb-sidebar">
+  <!-- ffmpeg warning -->
+  <div class="fpb-warning" id="fpbWarning">
+    <span data-i18n="fpb.ffmpeg_warning">ffmpeg が見つかりません。動画生成にはffmpeg のインストールが必要です。</span>
+  </div>
+
+  <!-- Image selection -->
+  <div class="fpb-sidebar-section">
+    <h2 style="font-size:14px;" data-i18n="fpb.source_image">Source Image</h2>
+    <div class="fpb-input-row">
+      <label for="fpbFileId" data-i18n="fpb.file_id_label">File ID</label>
+      <input type="number" class="fpb-input" id="fpbFileId" min="1" placeholder="DB file ID" data-i18n-placeholder="fpb.file_id_placeholder" style="min-width:0">
+      <button class="fpb-btn fpb-btn-sm fpb-btn-load" id="fpbLoadBtn" data-i18n="fpb.load">Load</button>
+    </div>
+  </div>
+
+  <!-- Timing -->
+  <div class="fpb-sidebar-section">
+    <h2 style="font-size:14px;" data-i18n="fpb.timing">Timing</h2>
+    <!-- Simple mode only: Hold/Pull (hidden in Waypoint mode) -->
+    <div id="fpbTimingSimple">
+      <div class="fpb-input-row">
+        <label for="fpbHold" data-i18n="fpb.hold_seconds">Hold (s)</label>
+        <input type="number" class="fpb-input" id="fpbHold" min="1" max="10" step="0.5" value="2.0">
+      </div>
+      <div class="fpb-input-row">
+        <label for="fpbPull" data-i18n="fpb.pullback_seconds">Pull-back (s)</label>
+        <input type="number" class="fpb-input" id="fpbPull" min="1" max="20" step="0.5" value="5.0">
+      </div>
+    </div>
+    <div class="fpb-input-row">
+      <label for="fpbFps" data-i18n="fpb.fps_label">FPS</label>
+      <input type="number" class="fpb-input" id="fpbFps" min="15" max="60" step="1" value="30">
+    </div>
+  </div>
+
+  <!-- Camera -->
+  <div class="fpb-sidebar-section">
+    <h2 style="font-size:14px;" data-i18n="fpb.camera">Camera</h2>
+    <div class="fpb-input-row">
+      <label for="fpbMode">Mode</label>
+      <select class="fpb-select" id="fpbMode">
+        <option value="simple" selected>Simple (1 point)</option>
+        <option value="waypoint">Waypoint Tour</option>
+      </select>
+    </div>
+    <!-- Simple mode controls -->
+    <div id="fpbSimplePanel">
+      <div class="fpb-input-row">
+        <label for="fpbDirection" data-i18n="fpb.direction">Direction</label>
+        <select class="fpb-select" id="fpbDirection">
+          <option value="zoom_out" selected>Zoom Out (Pull-back)</option>
+          <option value="zoom_in">Zoom In</option>
+        </select>
+      </div>
+      <div class="fpb-input-row">
+        <label for="fpbScaleStart" data-i18n="fpb.zoom_start">Zoom Start</label>
+        <input type="number" class="fpb-input" id="fpbScaleStart" min="1.2" max="5.0" step="0.1" value="2.0">
+      </div>
+      <div class="fpb-input-row">
+        <label for="fpbScaleEnd" data-i18n="fpb.zoom_end">Zoom End</label>
+        <input type="number" class="fpb-input" id="fpbScaleEnd" min="1.0" max="4.9" step="0.1" value="1.0">
+      </div>
+    </div>
+    <!-- Waypoint mode panel -->
+    <div id="fpbWaypointPanel" style="display:none">
+      <div class="fpb-waypoint-hint">画像をクリックしてウェイポイントを追加</div>
+      <div id="fpbWaypointList" class="fpb-waypoint-list"></div>
+      <div class="fpb-wp-total-time" id="fpbWpTotalTime"></div>
+      <div class="fpb-wp-time-warning" id="fpbWpTimeWarning" style="display:none">合計時間が30秒を超えています</div>
+      <div class="fpb-input-row">
+        <button class="fpb-btn fpb-btn-sm" id="fpbWpClearAll">全削除</button>
+      </div>
+    </div>
+    <div class="fpb-input-row">
+      <label for="fpbEasing" data-i18n="fpb.easing">Easing</label>
+      <select class="fpb-select" id="fpbEasing">
+        <option value="ease_in_out_cubic" selected>Ease In-Out Cubic</option>
+        <option value="linear">Linear</option>
+        <option value="ease_out_quad">Ease Out Quad</option>
+        <option value="ease_in_quad">Ease In Quad</option>
+        <option value="ease_out_expo">Ease Out Expo</option>
+      </select>
+    </div>
+    <div class="fpb-checkbox-row">
+      <input type="checkbox" id="fpbVignette">
+      <label for="fpbVignette" data-i18n="fpb.vignette_effect">Vignette effect</label>
+    </div>
+  </div>
+
+  <!-- Output -->
+  <div class="fpb-sidebar-section">
+    <h2 style="font-size:14px;" data-i18n="fpb.output">Output</h2>
+    <div class="fpb-input-row">
+      <label for="fpbFormat" data-i18n="fpb.format">Format</label>
+      <select class="fpb-select" id="fpbFormat">
+        <option value="mp4" selected>MP4 (H.264)</option>
+        <option value="gif">GIF</option>
+        <option value="apng">APNG</option>
+        <option value="webp">WebP</option>
+        <option value="webm">WebM (VP9)</option>
+      </select>
+    </div>
+    <div class="fpb-input-row">
+      <label for="fpbOutW" data-i18n="fpb.width">Width</label>
+      <input type="number" class="fpb-input" id="fpbOutW" min="256" max="3840" step="2" value="1280">
+    </div>
+    <div class="fpb-input-row">
+      <label for="fpbOutH" data-i18n="fpb.height">Height</label>
+      <input type="number" class="fpb-input" id="fpbOutH" min="256" max="2160" step="2" value="720">
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="fpb-action-row">
+    <button class="fpb-btn fpb-btn-primary" id="fpbGenerateBtn" disabled data-i18n="fpb.generate">Generate</button>
+    <button class="fpb-btn fpb-btn-danger" id="fpbCancelBtn" style="display:none" data-i18n="fpb.cancel">Cancel</button>
+  </div>
+</div>

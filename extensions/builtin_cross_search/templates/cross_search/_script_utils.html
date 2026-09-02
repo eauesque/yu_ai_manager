@@ -1,0 +1,121 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Cross Search: shared utility functions (pure, no closure state) ── */
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function shortenPath(p) {
+  if (!p || p.length <= 60) return p;
+  var parts = p.split('/');
+  if (parts.length <= 3) return p;
+  return parts[0] + '/.../' + parts.slice(-2).join('/');
+}
+
+// ── FTS5 snippet sanitization ─────────────────────────────
+// Keep only <mark> tags, remove all other tags
+function sanitizeSnippet(snippet) {
+  if (!snippet) return '';
+  // Escape text parts then restore only mark tags
+  var escaped = snippet
+    .replace(/<mark>/gi, '\x00MARK_OPEN\x00')
+    .replace(/<\/mark>/gi, '\x00MARK_CLOSE\x00');
+  escaped = escapeHtml(escaped);
+  return escaped
+    .replace(/\x00MARK_OPEN\x00/g, '<mark>')
+    .replace(/\x00MARK_CLOSE\x00/g, '</mark>');
+}
+
+// ── Markdown sanitization ────────────────────────────────
+// Sanitize marked.js output to prevent XSS
+function sanitizeHtml(html) {
+  var ALLOWED_TAGS = /^(p|br|strong|b|em|i|u|a|code|pre|blockquote|ul|ol|li|h[1-6]|table|thead|tbody|tr|th|td|hr|div|span|del|s|sub|sup|img|mark|dl|dt|dd)$/i;
+  var ALLOWED_ATTRS = /^(href|title|class|id|alt|src|width|height|colspan|rowspan|align)$/i;
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  _sanitizeNode(tmp, ALLOWED_TAGS, ALLOWED_ATTRS);
+  return tmp.innerHTML;
+}
+
+function isSafeHrefUrl(url) {
+  if (!url) return false;
+  var trimmed = url.trim();
+  if (!trimmed) return false;
+  if (trimmed.charAt(0) === '#') return true;
+  if (/^(https?:)?\/\//i.test(trimmed)) return true;
+  if (/^[A-Za-z][A-Za-z0-9+.-]*:/i.test(trimmed)) return false;
+  return true;
+}
+
+function isSafeImageUrl(url) {
+  if (!url) return false;
+  var trimmed = url.trim();
+  if (!trimmed) return false;
+  if (/^(https?:)?\/\//i.test(trimmed)) return false;
+  if (/^[A-Za-z][A-Za-z0-9+.-]*:/i.test(trimmed)) return false;
+  return true;
+}
+
+function _sanitizeNode(node, allowedTags, allowedAttrs) {
+  var children = Array.prototype.slice.call(node.childNodes);
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
+    if (child.nodeType === 1) {
+      var tag = child.tagName;
+      if (!allowedTags.test(tag)) {
+        // Convert disallowed tags to text
+        var text = document.createTextNode(child.textContent || '');
+        node.replaceChild(text, child);
+        continue;
+      }
+      // Allow only anchors, relative URLs, and http(s) links.
+      if (child.hasAttribute('href')) {
+        var href = child.getAttribute('href') || '';
+        if (!isSafeHrefUrl(href)) {
+          child.removeAttribute('href');
+        }
+      }
+      // Keep images local to avoid external beaconing from markdown.
+      if (child.hasAttribute('src')) {
+        var src = child.getAttribute('src') || '';
+        if (!isSafeImageUrl(src)) {
+          child.removeAttribute('src');
+        }
+      }
+      // Remove disallowed attributes
+      var attrs = Array.prototype.slice.call(child.attributes);
+      for (var j = 0; j < attrs.length; j++) {
+        if (!allowedAttrs.test(attrs[j].name)) {
+          child.removeAttribute(attrs[j].name);
+        }
+      }
+      // Remove event handler attributes
+      var allAttrs = Array.prototype.slice.call(child.attributes);
+      for (var k = 0; k < allAttrs.length; k++) {
+        if (allAttrs[k].name.indexOf('on') === 0) {
+          child.removeAttribute(allAttrs[k].name);
+        }
+      }
+      _sanitizeNode(child, allowedTags, allowedAttrs);
+    }
+  }
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+function formatElapsed(sec) {
+  if (sec < 60) return Math.round(sec) + '秒';
+  var m = Math.floor(sec / 60);
+  var s = Math.round(sec % 60);
+  return m + '分' + (s > 0 ? s + '秒' : '');
+}
+</script>

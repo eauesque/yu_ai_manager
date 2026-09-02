@@ -1,0 +1,114 @@
+<script nonce="{{ csp_nonce }}">
+(function(){
+  var re = document.getElementById('results');
+  var ctrl = document.getElementById('floatingGridCtrl');
+  var ss = document.getElementById('gridSizeSlider');
+  var cs = document.getElementById('gridColSlider');
+  var sizeVal = document.getElementById('gridSizeVal');
+  var colVal = document.getElementById('gridColVal');
+  var liveInfo = document.getElementById('gridLiveInfo');
+
+  function getResultCount(){
+    return re ? re.querySelectorAll('.result-card').length : 0;
+  }
+
+  var toggle = document.getElementById('fgcToggle');
+  var body = document.getElementById('fgcBody');
+
+  function setCtrlVisible(){
+    if (!re || !ctrl) return;
+    ctrl.style.display = getResultCount() > 0 ? 'flex' : 'none';
+  }
+
+  function isPanelOpen(){
+    return !!(body && body.style.display !== 'none');
+  }
+
+  function openPanel(){
+    if (!body || !toggle) return;
+    body.style.display = '';
+    toggle.classList.add('active');
+  }
+
+  function closePanel(){
+    if (!body || !toggle) return;
+    body.style.display = 'none';
+    toggle.classList.remove('active');
+  }
+
+  function togglePanel(){
+    if (isPanelOpen()) closePanel();
+    else openPanel();
+  }
+
+  if (toggle) {
+    toggle.addEventListener('click', function(e){
+      e.stopPropagation();
+      togglePanel();
+    });
+  }
+
+  // Close panel on outside click
+  document.addEventListener('click', function(e){
+    if (!isPanelOpen()) return;
+    if (ctrl && !ctrl.contains(e.target)) closePanel();
+  });
+
+  function getCurrentMinSize(){
+    return parseInt((ss && ss.value) || localStorage.getItem('gridMinSize') || '300', 10) || 300;
+  }
+
+  function getCurrentCols(){
+    return parseInt((cs && cs.value) || localStorage.getItem('gridColumns') || '0', 10) || 0;
+  }
+
+  function estimateAutoCols(minSize){
+    if (!re) return 0;
+    var w = re.clientWidth || 0;
+    if (!w || !minSize) return 0;
+    return Math.max(1, Math.floor(w / minSize));
+  }
+
+  function isCompactMode(){
+    if (!re) return false;
+    var cols = getCurrentCols();
+    if (cols >= 5) return true;
+    var minSize = getCurrentMinSize();
+    var cardWidth = cols > 0
+      ? Math.floor((re.clientWidth || 0) / Math.max(cols, 1))
+      : minSize;
+    return cardWidth > 0 && cardWidth < 220;
+  }
+
+  function updateLiveInfo(){
+    if (!liveInfo) return;
+    var count = getResultCount();
+    var cols = getCurrentCols();
+    var minSize = getCurrentMinSize();
+    var _t = typeof tr === 'function' ? tr : function(k,f){return f||'';};
+    var colUnit = _t('grid.col_unit','列');
+    var colText = cols > 0 ? (cols + _t('grid.col_fixed','列（固定）')) : (_t('grid.auto','自動') + '(' + estimateAutoCols(minSize) + colUnit + ')');
+    var sizeHint = cols > 0 ? _t('grid.size_hint',' / サイズは自動時に反映') : '';
+    var compact = isCompactMode();
+    liveInfo.textContent = _t('grid.count_prefix','表示: ') + count + _t('grid.count_unit','件 / ') + colText + sizeHint + (compact ? _t('grid.image_only',' / 画像のみ') : '');
+  }
+
+  function updateCompactMode(){
+    if (!re) return;
+    re.classList.toggle('compact-grid', isCompactMode());
+  }
+
+  window.floatingGridApiCore = {
+    closePanel: closePanel,
+    colVal: colVal,
+    cs: cs,
+    getCurrentCols: getCurrentCols,
+    getCurrentMinSize: getCurrentMinSize,
+    isPanelOpen: isPanelOpen,
+    re: re,
+    setCtrlVisible: setCtrlVisible,
+    sizeVal: sizeVal,
+    ss: ss,
+    updateCompactMode: updateCompactMode,
+    updateLiveInfo: updateLiveInfo,
+  };

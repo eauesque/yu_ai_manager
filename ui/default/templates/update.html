@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YU AI Manager - Update</title>
+  <link rel="stylesheet" href="static/css/main.css?v=20260215">
+  <link rel="stylesheet" href="static/css/pages/diagnostics.css?v=20260518">
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_nav.html" %}
+  <main id="main-content" class="diagnostics-page">
+    <section class="diagnostics-panel diagnostics-update">
+      <h1>アップデートを適用</h1>
+      <div class="diagnostics-actions">
+        <input id="diagnosticsUpdateFile" type="file" accept=".zip,application/zip" />
+        <button id="diagnosticsVerifyUpdate" type="button" class="secondary-btn">検証</button>
+        <button id="diagnosticsApplyUpdate" type="button" class="primary-btn" disabled>適用</button>
+        <button id="diagnosticsRollbackUpdate" type="button" class="secondary-btn">ロールバック</button>
+      </div>
+      <pre id="diagnosticsUpdateResult" class="diagnostics-result" aria-live="polite"></pre>
+    </section>
+  </main>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/js/update.js?v=20260518"></script>
+</body>
+</html>

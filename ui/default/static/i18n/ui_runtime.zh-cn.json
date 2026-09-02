@@ -1,0 +1,1673 @@
+{
+  "a11y": {
+    "condition_added": "条件“{label}”已添加",
+    "condition_menu_opened": "条件菜单已打开",
+    "condition_removed": "条件“{label}”已移除",
+    "focus_search": "已聚焦搜索输入",
+    "result_focus": "第 {index} 项，共 {total} 项：{label}",
+    "results_list_label": "搜索结果"
+  },
+  "agent_journal": {
+    "scope_delete": "删除",
+    "scopes_empty_with_default": "（无范围 — 应用默认值）"
+  },
+  "analysis": {
+    "analyzed_at": "分析时间：{date}",
+    "btn_reanalyze": "重新分析",
+    "done_label": "已分析",
+    "label": {
+      "ai_tags": "AI 标签：",
+      "color": "色彩：",
+      "composition": "构图：",
+      "engine": "引擎：",
+      "mood": "氛围：",
+      "quality": "质量：",
+      "style": "风格：",
+      "suggestion": "提示词建议："
+    },
+    "status_done": "✅ 完成",
+    "status_done_engine": "✅ 完成（{engine}）",
+    "status_error": "❌ {error}",
+    "status_running": "分析中...",
+    "status_running_engine": "使用 {engine} 分析中...",
+    "status_saved": "✅ {engine}"
+  },
+  "analysis.engine": "AI Engine",
+  "analysis.engine_default": "Auto",
+  "analysis.mode": "Analysis Mode",
+  "analysis.mode_full": "Full Analysis",
+  "analysis.mode_simple": "Color + Composition",
+  "analysis.model": "AI Model",
+  "api_error": {
+    "bad_zip_file": "归档文件已损坏",
+    "batch_empty": "批处理为空",
+    "batch_too_large": "批处理大小超出限制",
+    "collection_not_found": "找不到收藏集",
+    "container_not_found": "找不到此文件的容器",
+    "convert_failed": "格式转换失败",
+    "debug_disabled": "调试模式未启用",
+    "empty_sql": "SQL 查询为空",
+    "extract_register_failed": "提取文件注册失败",
+    "file_missing": "磁盘上不存在该文件",
+    "file_not_found": "找不到文件",
+    "gateway_no_db": "数据库不可用（网关模式）",
+    "internal_error": "内部服务器错误",
+    "invalid_content_type": "内容类型不正确",
+    "invalid_index": "无效的索引",
+    "invalid_json": "JSON 格式不正确",
+    "invalid_json_object": "需要 JSON 对象",
+    "invalid_mode": "无效的模式",
+    "invalid_request": "无效的请求",
+    "invalid_value": "无效的值",
+    "job_running": "批处理任务正在运行中",
+    "keyframe_error": "关键帧提取失败",
+    "missing_dependency": "缺少必要的库",
+    "missing_file_id": "需要文件ID",
+    "model_not_available": "模型尚未下载",
+    "multi_stmt_rejected": "不允许多条 SQL 语句",
+    "no_data": "未提供数据",
+    "not_found": "找不到资源",
+    "not_select": "只能使用 SELECT 语句",
+    "not_zip_member": "不是归档成员",
+    "path_required": "需要指定路径",
+    "purge_failed": "彻底删除失败",
+    "roots_summary_failed": "扫描根目录汇总失败",
+    "scan_roots_config_failed": "扫描根目录配置失败",
+    "sql_error": "SQL 执行错误",
+    "unsupported_type": "不支持此文件类型",
+    "write_rejected": "不允许写入操作",
+    "zip_entry_not_found": "归档中找不到该条目",
+    "zip_not_found": "找不到归档文件",
+    "zip_path_traversal": "路径遍历已被阻止"
+  },
+  "boss_mode": {
+    "back": "返回",
+    "brand": "每日财报",
+    "esc_hint": "按 Esc 返回",
+    "headline": "主要经济体通胀降温，全球市场保持平稳",
+    "story1": "各央行暗示下一季度将放缓政策收紧步伐",
+    "story2": "跨太平洋航线恢复正常，运输成本回落",
+    "story3": "企业需求推动科技股盈利超预期",
+    "story4": "大宗商品两周连涨后能源板块回调",
+    "subhead": "分析人士指出，周二各主要指数普遍稳定，投资者在劳动力数据、政策信号和能源价格之间保持平衡。",
+    "top_stories": "头条新闻",
+    "watchlist": "关注列表"
+  },
+  "bridge": {
+    "toolbar_legend": {
+      "title": "图例 / 符号"
+    }
+  },
+  "bridge.syntax_warning.converting": "Converting...",
+  "bridge.syntax_warning.error": "Conversion failed",
+  "character": {
+    "negative_label": "排除：",
+    "section_title": "NovelAI V4 角色提示词"
+  },
+  "checkpoint": {
+    "option_count": "{name}（{count}）"
+  },
+  "collections": {
+    "created": "收藏集已创建",
+    "deleted": "收藏集已删除",
+    "renamed": "收藏集已重命名"
+  },
+  "common": {
+    "clear": "清除",
+    "enabled": "已启用",
+    "error_prefix": "错误：",
+    "loading": "加载中...",
+    "range_sep": "–",
+    "reset": "重置"
+  },
+  "common.saved": "Saved",
+  "common.saving": "Saving...",
+  "conditions": {
+    "aiAnalyzed": {
+      "label": "🧠 AI 已分析"
+    },
+    "artist": {
+      "label": "🎨 画师",
+      "placeholder": "画师名称"
+    },
+    "checkpoint": {
+      "label": "🎯 Checkpoint",
+      "placeholder": "例如 animagine, pony"
+    },
+    "clear_all": "清除全部",
+    "collection": {
+      "all": "所有收藏",
+      "label": "⭐ 收藏集"
+    },
+    "csvLimit": {
+      "label": "📥 CSV 导出上限"
+    },
+    "disabled_in_grouped": "文件夹/ZIP 视图中不可用",
+    "favOnly": {
+      "label": "⭐ 仅收藏"
+    },
+    "format": {
+      "ext_filter_hint": "按扩展名筛选（可选）",
+      "ext_group_audio": "音频",
+      "ext_group_container": "容器",
+      "ext_group_image": "图片",
+      "ext_group_video": "视频",
+      "label": "📄 格式"
+    },
+    "hasTags": {
+      "label": "🏷️ 已标签"
+    },
+    "hint": {
+      "count_many": "{count} 个条件",
+      "count_one": "1 个条件"
+    },
+    "inCharNeg": {
+      "label": "🚫 角色负面",
+      "placeholder": "角色负面搜索"
+    },
+    "inCharPos": {
+      "label": "✨ 角色正面",
+      "placeholder": "角色正面搜索"
+    },
+    "inFolder": {
+      "label": "📂 文件夹",
+      "placeholder": "路径片段 例如 o:\\test"
+    },
+    "inNegative": {
+      "label": "🚫 负面提示词内",
+      "placeholder": "负面提示词中的关键词"
+    },
+    "inPrompt": {
+      "label": "🔤 提示词内",
+      "placeholder": "提示词中的关键词"
+    },
+    "limit": {
+      "label": "#️⃣ 数量",
+      "short_label": "数量"
+    },
+    "model": {
+      "label": "🤖 模型"
+    },
+    "orTags": {
+      "label": "🔀 OR 标签",
+      "placeholder": "包含任一（逗号分隔）"
+    },
+    "period": {
+      "label": "📅 时间段"
+    },
+    "remove": "移除条件",
+    "resolution": {
+      "label": "📐 分辨率"
+    },
+    "sort": {
+      "label": "↕️ 排序"
+    },
+    "tagCase": {
+      "label": "Aa 区分大小写"
+    },
+    "toggle": {
+      "close": "▲ 收起",
+      "more": "▼ 更多"
+    }
+  },
+  "container": {
+    "folder_items": "文件夹中 {count} 张图片",
+    "no_members": "容器中没有已索引的成员。",
+    "preload_done": "文件夹 / ZIP 分类视图已就绪",
+    "preloading_thumbs": "正在生成缩略图...（{done}/{total}）",
+    "zip_items": "ZIP 中 {count} 张图片"
+  },
+  "convert": {
+    "btn_expand_dynamic": "动态提示词",
+    "btn_restore": "恢复",
+    "failed": "转换失败",
+    "failed_with_error": "转换失败：{error}",
+    "label": {
+      "nai": "NAI 格式 ",
+      "sd": "SD 格式 "
+    }
+  },
+  "ctx.ai_analyze": "AI Analysis",
+  "ctx.clear_rating": "Clear",
+  "ctx.copied": "Copied",
+  "ctx.copied_nai": "Copied as NAI",
+  "ctx.copied_sd": "Copied as SD",
+  "ctx.copy_nai": "Copy as NAI",
+  "ctx.copy_negative": "Copy negative",
+  "ctx.copy_path": "Copy file path",
+  "ctx.copy_prompt": "Copy prompt",
+  "ctx.copy_sd": "Copy as SD",
+  "ctx.favorite": "Favorite ☆",
+  "ctx.find_similar": "Find similar",
+  "ctx.path_copied": "Path copied",
+  "ctx.qr_share": "Share via QR",
+  "ctx.rating": "Rating",
+  "ctx.save_pl": "Save to PL",
+  "ctx.send_bridge": "Send to Bridge",
+  "ctx.show_detail": "Show detail",
+  "detail": {
+    "audio_unsupported": "您的浏览器不支持音频播放。",
+    "image_alt": "图片",
+    "load_failed": "详情加载失败",
+    "modal": {
+      "analysis_mode": "切换分析模式",
+      "audio_playback": "音频播放",
+      "autoplay": "自动播放 (P)",
+      "autoplay_interval": "间隔（秒）",
+      "bar_collapse": "折叠栏",
+      "bar_expand": "展开栏",
+      "close": "关闭",
+      "container_items": "{count} 个项目",
+      "container_view": "容器视图",
+      "display": "显示：",
+      "favorite": "切换收藏",
+      "fullscreen": "全屏",
+      "info_toggle": "切换信息面板",
+      "mode_fit": "适应",
+      "mode_fit_custom": "自定义",
+      "mode_fit_height": "适应高度",
+      "mode_fit_width": "适应宽度",
+      "mode_original": "原始大小",
+      "mute": "静音 (M)",
+      "next": "下一张图片",
+      "prev": "上一张图片",
+      "repeat_off": "循环：关 (R)",
+      "repeat_on": "循环：开 (R)",
+      "resume_off": "续播 关",
+      "resume_on": "续播 开",
+      "spread_direction": "阅读方向 (D)",
+      "spread_view": "双页视图 (B)",
+      "toast_repeat_off": "循环：已关闭",
+      "toast_repeat_on": "循环：已开启",
+      "toast_resume_off": "续播：已关闭",
+      "toast_resume_on": "续播：已开启",
+      "toast_speed": "速度：{rate}x",
+      "toast_spread_ltr": "阅读：左→右",
+      "toast_spread_nav_rtl": "← 下一张 / 上一张 →",
+      "toast_spread_off": "双页：已关闭",
+      "toast_spread_on": "双页：已开启",
+      "toast_spread_rtl": "阅读：右→左",
+      "toolbar_aria": "图片显示控件",
+      "toolbar_hide": "隐藏工具栏",
+      "toolbar_overflow_menu": "更多",
+      "toolbar_show": "显示工具栏",
+      "unmute": "取消静音 (M)",
+      "video_playback": "视频播放",
+      "viewing_mode": "鉴赏模式 (V)",
+      "zoom_in": "放大",
+      "zoom_out": "缩小",
+      "zoom_reset": "重置缩放"
+    },
+    "save_failed": "保存失败",
+    "saved_to_library": "已保存到提示词库",
+    "video_unsupported": "您的浏览器不支持视频标签。"
+  },
+  "detail.ann_add_label": "Add note",
+  "detail.ann_delete_confirm": "Delete this annotation?",
+  "detail.ann_empty": "No annotations yet.",
+  "detail.ann_load_failed": "Failed to load annotations.",
+  "detail.ann_placeholder": "Add a personal note for this file...",
+  "detail.ann_save_failed": "Save failed",
+  "detail.ann_source_user": "Your notes",
+  "detail.s2t_copied": "Copied to clipboard",
+  "detail.s2t_done": "Transcription complete",
+  "detail.s2t_error": "Transcription failed",
+  "detail.s2t_no_transcript": "No transcript yet. Click \"Transcribe\" to start.",
+  "detail.s2t_processing": "Processing...",
+  "detail.s2t_segments": "Segments",
+  "detail.s2t_transcribe": "Transcribe",
+  "detail.search_by_prompt": "Search by Prompt",
+  "detail.tab_ai": "AI Analysis",
+  "detail.tab_analysis_trace": "Trace",
+  "detail.tab_annotations": "Notes",
+  "detail.tab_info": "Info",
+  "detail.tab_ocr": "OCR",
+  "detail.tab_s2t": "S2T",
+  "detail.trace_date": "Analyzed",
+  "detail.trace_error": "Failed to load analysis trace",
+  "detail.trace_loading": "Loading...",
+  "detail.trace_meta_source": "Metadata Source",
+  "detail.trace_model": "Model",
+  "detail.trace_none": "No analysis trace",
+  "detail.trace_quality": "Quality Analysis",
+  "detail.trace_quality_score": "Quality",
+  "detail.trace_s2t": "Speech Recognition",
+  "detail.trace_source": "Source",
+  "detail.trace_tags": "tags",
+  "ext": {
+    "builtin-a1111": {
+      "config": {
+        "parse_negative": {
+          "description": "分离并提取 Negative prompt: 部分",
+          "label": "同时提取 Negative Prompt"
+        },
+        "parse_params": {
+          "description": "提取 Steps、Sampler、CFG Scale、Model 等参数",
+          "label": "同时提取生成参数"
+        }
+      }
+    },
+    "builtin-chatlog": {
+      "config": {
+        "api_key": {
+          "description": "使用 OpenAI / Claude API 时需要。本地 Ollama 留空",
+          "label": "API 密钥"
+        },
+        "base_url": {
+          "description": "AI 引擎的 API 端点 URL",
+          "label": "API 基础 URL"
+        },
+        "engine_type": {
+          "description": "用于会话分析的 AI 引擎类型",
+          "label": "AI 引擎"
+        },
+        "model": {
+          "description": "要使用的模型名称（例如：llama3.2:latest、gpt-4o-mini）",
+          "label": "模型名称"
+        }
+      }
+    },
+    "builtin-comfyui": {
+      "config": {
+        "extract_workflow": {
+          "description": "将 ComfyUI 工作流 JSON 存储到 raw_meta_json",
+          "label": "同时提取工作流信息"
+        }
+      }
+    },
+    "builtin-comfyui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "跳过确认对话框"
+        },
+        "default_sampler": {
+          "label": "默认采样器"
+        },
+        "default_scheduler": {
+          "label": "默认调度器"
+        }
+      }
+    },
+    "builtin-nai-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "跳过确认对话框"
+        },
+        "default_model": {
+          "label": "默认模型"
+        },
+        "default_noise_schedule": {
+          "label": "默认噪声调度"
+        },
+        "default_sampler": {
+          "label": "默认采样器"
+        }
+      }
+    },
+    "builtin-novelai-v4": {
+      "config": {
+        "extract_vibe_transfer": {
+          "description": "提取 Vibe Transfer 的 strength/description",
+          "label": "同时提取 Vibe Transfer 信息"
+        },
+        "merge_character_prompts": {
+          "description": "将 base_caption + char_captions 以逗号分隔合并",
+          "label": "将角色提示词合并到基础提示词"
+        }
+      }
+    },
+    "builtin-ocr": {
+      "config": {
+        "batch_export_format": {
+          "label": "批量导出格式"
+        },
+        "batch_output_dir": {
+          "description": "批量导出时的服务器端保存路径。为空时以 ZIP 下载",
+          "label": "批量输出目录（空=下载）"
+        },
+        "default_target_lang": {
+          "label": "默认翻译目标语言"
+        },
+        "default_task": {
+          "label": "默认 OCR 任务"
+        },
+        "manga_ocr_enabled": {
+          "label": "优先使用 manga-ocr（ocr_manga 任务时）"
+        }
+      }
+    },
+    "builtin-prompt-syntax": {
+      "config": {
+        "auto_detect": {
+          "description": "自动识别输入文本的 NAI/SD/DP 语法",
+          "label": "自动识别语法"
+        },
+        "show_errors": {
+          "description": "对括号不匹配和异常权重值显示警告",
+          "label": "显示错误"
+        }
+      }
+    },
+    "builtin-sd-nai-convert": {
+      "config": {
+        "convert_emphasis": {
+          "description": "同时转换 SD ((tag)) 与 NAI {tag} 之间的强调语法",
+          "label": "同时转换强调语法"
+        },
+        "strip_embedding": {
+          "description": "SD→NAI 转换时自动移除 embedding:... 标签",
+          "label": "NAI 转换时移除 Embedding 标签"
+        },
+        "strip_lora": {
+          "description": "SD→NAI 转换时自动移除 <lora:...> 标签",
+          "label": "NAI 转换时移除 LoRA 标签"
+        }
+      }
+    },
+    "builtin-sd-webui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "跳过确认对话框"
+        },
+        "default_sampler": {
+          "label": "默认采样器"
+        }
+      }
+    }
+  },
+  "fleet.button.back_to_cowork": "← 返回 LAN Cowork",
+  "fleet.button.refresh": "刷新",
+  "fleet.button.restart_node": "重新启动此节点",
+  "fleet.consent.banner.approve_once": "仅本次批准",
+  "fleet.consent.banner.approve_permanent": "永久批准",
+  "fleet.consent.banner.countdown": "剩余 {sec} 秒",
+  "fleet.consent.banner.deny": "拒绝",
+  "fleet.consent.banner.title": "来自 {peer} 的远程更新请求",
+  "fleet.consent.chief.cancel": "取消",
+  "fleet.consent.chief.re_request": "重新请求",
+  "fleet.consent.chief.send_request": "发送同意请求",
+  "fleet.consent.chief.send_request_for": "{peer} 的远程更新已禁用。发送同意请求？",
+  "fleet.consent.chief.timeout": "同意超时。请重新请求。",
+  "fleet.consent.chief.waiting": "等待同意 ⏱ (剩余 {sec} 秒)",
+  "fleet.error.branch_not_allowed": "分支不允许",
+  "fleet.error.cannot_dispatch_self": "不能向主节点本身派送任务",
+  "fleet.error.consent_denied": "同意被拒绝。",
+  "fleet.error.consent_token_invalid": "同意已失效。请重新请求。",
+  "fleet.error.deny_cooldown": "拒绝冷却中（剩余 {sec} 秒）",
+  "fleet.error.git_not_available": "git 不可用",
+  "fleet.error.invalid_source": "来源无效",
+  "fleet.error.local_path_not_allowed": "本地路径不允许",
+  "fleet.error.not_in_allowlist": "不在允许列表中",
+  "fleet.error.other_chief_pending": "另一个主节点正在等待同意（剩余 {sec} 秒）",
+  "fleet.error.remote_update_disabled": "远程更新已禁用",
+  "fleet.error.update_failed_token_consumed": "更新失败 — 同意已消费。重新请求？",
+  "fleet.error.update_in_progress": "更新已在进行中",
+  "fleet.logs.autoscroll": "自动滚动",
+  "fleet.logs.clear": "清除",
+  "fleet.logs.copied": "已复制",
+  "fleet.logs.copy": "复制",
+  "fleet.logs.copy_failed": "复制失败",
+  "fleet.logs.download": "下载",
+  "fleet.logs.pause": "暂停",
+  "fleet.logs.peer_select": "选择节点",
+  "fleet.logs.placeholder": "日志 — 选择节点开始流式传输",
+  "fleet.logs.resume": "继续",
+  "fleet.node.status.degraded": "信息获取失败",
+  "fleet.node.status.offline": "离线",
+  "fleet.node.status.online": "在线",
+  "fleet.node.status.restarting": "重启中",
+  "fleet.settings.col.action": "Action",
+  "fleet.settings.col.log_stream": "Log stream",
+  "fleet.settings.col.peer": "Peer",
+  "fleet.settings.col.status": "Status",
+  "fleet.settings.col.update": "Update",
+  "fleet.settings.local.allow_remote_update": "Enable remote updates (master switch)",
+  "fleet.settings.local.desc": "Configure whether this node allows other peers to stream logs or perform remote updates. Toggle checkboxes per peer.",
+  "fleet.settings.local.save": "Save",
+  "fleet.settings.local.title": "This node's settings",
+  "fleet.settings.remote.already_granted": "Already granted",
+  "fleet.settings.remote.desc": "Use the pairing token to add the chief's peer_id to the target peer's allowlist. You don't need to log in on the peer, but a pairing token is required.",
+  "fleet.settings.remote.done": "Done",
+  "fleet.settings.remote.failed": "Failed",
+  "fleet.settings.remote.grant": "Grant on this peer",
+  "fleet.settings.remote.not_granted": "Not granted",
+  "fleet.settings.remote.revoke": "Revoke on this peer",
+  "fleet.settings.remote.status_unreachable": "Cannot check",
+  "fleet.settings.remote.title": "Remote grant (chief only)",
+  "fleet.settings.save_failed": "Save failed",
+  "fleet.settings.saved": "Saved",
+  "fleet.tab.logs": "日志",
+  "fleet.tab.overview": "概览",
+  "fleet.tab.settings": "Settings",
+  "fleet.tab.update": "更新",
+  "fleet.title": "Fleet 管理",
+  "fleet.update.branch": "分支：",
+  "fleet.update.button.dispatch": "批量更新所选节点",
+  "fleet.update.button.pull_restart": "Pull & Restart",
+  "fleet.update.button.restart_only": "仅重启",
+  "fleet.update.button.restart_only_dispatch": "重启所选节点",
+  "fleet.update.col.action": "操作",
+  "fleet.update.col.branch": "分支",
+  "fleet.update.col.commit": "提交",
+  "fleet.update.col.node": "节点",
+  "fleet.update.col.progress": "进度",
+  "fleet.update.col.version": "版本",
+  "fleet.update.confirm.chief": "更新本机将临时断开管理界面。确认继续？",
+  "fleet.update.confirm.restart": "将重启所选节点。是否继续？",
+  "fleet.update.confirm.update": "将更新所选节点。执行 git pull 后重启。是否继续？",
+  "fleet.update.no_selection": "请至少选择一个节点",
+  "fleet.update.placeholder": "更新标签将于 Phase 4 实现。",
+  "fleet.update.source": "来源：",
+  "fleet.warning.multi_chief": "检测到多个主节点，请重启冲突的主节点。",
+  "genai.chat_delete_confirm": "Delete this conversation?",
+  "genai.chat_image_only": "Image-only messages are not supported",
+  "genai.chat_no_conversations": "No conversations",
+  "genai.chat_rename_prompt": "Enter a conversation name",
+  "genai.chat_search_sources": "Search sources",
+  "grid": {
+    "auto": "自动",
+    "col_fixed": "列（固定）",
+    "col_unit": "列",
+    "count_prefix": "显示：",
+    "count_unit": " 项 / ",
+    "image_only": " / 仅图片",
+    "size_hint": " / 大小在自动模式下生效"
+  },
+  "grouping": {
+    "btn_archive": "归档",
+    "btn_files": "文件",
+    "btn_folders": "文件夹",
+    "btn_zip": "ZIP",
+    "count_folders": "发现 {count} 个文件夹",
+    "count_zips": "发现 {count} 个 ZIP 归档",
+    "rebuild": "重建分组",
+    "rebuilt": "分组已重建：{folders} 个文件夹，{zips} 个 ZIP",
+    "summary": "已分组：{visible} / {total}",
+    "summary_folders": "文件夹：{visible}（{total} 个文件）",
+    "summary_zips": "ZIP：{visible}（{total} 个文件）"
+  },
+  "input_hint": {
+    "artist": "Esc：取消焦点 | Alt+0/$：行首/行尾 | Ctrl+W：删除词 | ?：帮助",
+    "condition": "Esc：取消焦点 | /：跳转搜索 | ?：快捷键列表",
+    "default": "/：搜索 | Esc：关闭 | ?：快捷键帮助",
+    "inPrompt": "Esc：取消焦点 | Alt+W/B：按词移动 | Ctrl+U：全部清除 | ?：帮助",
+    "tagQuery": "Esc：取消焦点 | /：返回搜索 | Alt+W/B：按词移动 | Ctrl+K：删除到行尾 | ?：帮助"
+  },
+  "inspect": {
+    "conv_expand": "动态提示词展开结果",
+    "conv_nai_sd": "NAI → SD 结果",
+    "conv_sd_nai": "SD → NAI 结果",
+    "conv_warn_already_nai": "输入似乎已经是 NAI 格式",
+    "conv_warn_already_sd": "输入似乎已经是 SD 格式",
+    "conv_warn_mixed": "输入中混合了 NAI 和 SD 语法",
+    "copied": "已复制",
+    "copy": "复制",
+    "error": "错误",
+    "fmt_a1111": "格式：A1111 (Stable Diffusion)",
+    "fmt_json": "格式：JSON",
+    "fmt_plain": "格式：纯文本",
+    "negative": "负面提示词",
+    "network_error": "网络错误",
+    "open_in_sim": "在提示词模拟器中打开",
+    "output": "输出",
+    "parse_error": "解析错误",
+    "positive": "正面提示词",
+    "resolution": "分辨率",
+    "sim_choices": "选项",
+    "sim_combinations": "{count} 种组合",
+    "sim_depth": "深度",
+    "sim_dp_analyze": "DP 概率分析",
+    "sim_link": "打开提示词模拟器",
+    "sim_link_text": "打开提示词模拟器",
+    "sim_pick_n": "从 {total} 个中选 {n} 个",
+    "sim_probability": "概率",
+    "sim_syntax": "语法",
+    "sim_token": "标记",
+    "sim_weight": "权重",
+    "sim_weight_calc": "权重计算器",
+    "tag_count": "标签数量",
+    "wh_not_found": "未找到 Size: WxH 或 width/height 格式",
+    "wh_swap_result": "宽/高交换结果",
+    "zip_select": "ZIP 中的图片"
+  },
+  "kb_help": {
+    "basic": {
+      "close_or_blur": "关闭 / 取消焦点",
+      "focus_search": "聚焦搜索框（从任何位置）",
+      "run_search": "执行搜索",
+      "screen_lock": "屏幕锁定（设置 PIN 后可用）",
+      "title": "基础",
+      "toggle_help": "显示/隐藏此帮助"
+    },
+    "edit": {
+      "delete_prev_word": "删除上一个词",
+      "kill_line": "删除整行",
+      "kill_to_end": "从光标删除到行尾",
+      "title": "文本编辑（Emacs 风格）"
+    },
+    "existing": {
+      "open_condition_menu": "打开添加条件菜单",
+      "regex_cheatsheet": "打开正则速查表",
+      "title": "现有快捷键",
+      "toggle_regex": "切换正则开/关"
+    },
+    "footer": {
+      "close": "关闭",
+      "hint_line": "提示：聚焦输入框时底部会显示帮助",
+      "or": "或",
+      "regex_intro_link": "什么是正则？（入门指南）"
+    },
+    "move": {
+      "delete_char": "删除字符",
+      "line_end": "移至行尾",
+      "line_start": "移至行首",
+      "next_word": "移至下一个词",
+      "prev_word": "移至上一个词",
+      "title": "光标移动（Vim 风格）"
+    },
+    "regex_intro": {
+      "desc": "仅需三个示例就能大幅提升搜索能力",
+      "open": "打开入门指南",
+      "title": "初学正则？"
+    },
+    "title": "键盘快捷键"
+  },
+  "keyboard": {
+    "close": "关闭",
+    "guide": {
+      "autoplay": "自动播放",
+      "close": "关闭",
+      "copy": "复制",
+      "dismiss": "隐藏快捷键指南",
+      "dismiss_toast": "按 H 可重新显示",
+      "filmstrip_nav": "上一个/下一个文件（在媒体中也有效）",
+      "filmstrip_toggle": "胶片条",
+      "focus_move": "焦点移动",
+      "media_controls": "媒体",
+      "modal_label": "查看器",
+      "move": "移动",
+      "open": "打开",
+      "prev_next": "上一个/下一个",
+      "prev_next_or_seek": "上一个/下一个（媒体中快进/快退 5 秒）",
+      "results_label": "结果",
+      "scroll": "滚动",
+      "speed": "速度",
+      "spread_toggle": "双页视图",
+      "to_search": "到搜索",
+      "toggle_btn": "快捷键指南 (H)",
+      "volume": "音量"
+    },
+    "help": "帮助",
+    "prev_next": "上一张/下一张图片"
+  },
+  "lan_cowork.import.done": "导入完成",
+  "lan_cowork.import.partial": "部分文件导入失败",
+  "lan_cowork.import.err.no_folder": "请指定导入文件夹",
+  "lan_cowork.import.err.no_peer": "请选择要导入的节点",
+  "lan_cowork.import.error": "导入失败",
+  "lan_cowork.import.folder": "导入文件夹",
+  "lan_cowork.import.folder.pick_failed": "Failed to choose folder",
+  "lan_cowork.import.mode": "模式",
+  "lan_cowork.import.mode.diff": "差异",
+  "lan_cowork.import.mode.full": "全部",
+  "lan_cowork.import.opt.favorites": "包含收藏",
+  "lan_cowork.import.opt.merge": "合并元数据（哈希匹配时）",
+  "lan_cowork.import.peer": "来源节点",
+  "lan_cowork.import.running": "导入中...",
+  "lan_cowork.import.start": "开始导入",
+  "lan_cowork.import.timeout": "导入超时",
+  "lan_cowork.import.title": "远程导入",
+  "lan_cowork.peers.discover_error": "搜索节点失败",
+  "lan_cowork.peers.empty": "没有已连接的节点",
+  "lan_cowork.peers.extension_disabled": "LAN Cowork 扩展已禁用。请在扩展管理中启用后重新启动服务器。",
+  "lan_cowork.peers.offline": "离线",
+  "lan_cowork.peers.online": "在线",
+  "lan_cowork.peers.pair_btn": "Pair request",
+  "lan_cowork.peers.pair_pin_prompt": "Enter the PIN shown on the other side.",
+  "lan_cowork.peers.pair_request_error": "Failed to request pairing",
+  "lan_cowork.peers.pair_request_sent": "Approve on the other side, then enter the displayed PIN.",
+  "lan_cowork.peers.pair_requesting": "Requesting...",
+  "lan_cowork.peers.pair_success": "Pairing completed",
+  "lan_cowork.peers.pair_verify_error": "PIN verification failed",
+  "lan_cowork.peers.paired": "Paired",
+  "lan_cowork.peers.refresh": "刷新",
+  "lan_cowork.peers.remove_btn": "Remove",
+  "lan_cowork.peers.remove_confirm": "Remove this peer?",
+  "lan_cowork.peers.remove_error": "Failed to remove peer",
+  "lan_cowork.peers.remove_success": "Removed",
+  "lan_cowork.peers.title": "已连接节点",
+  "lan_cowork.peers.unpaired": "Unpaired",
+  "lan_cowork.pin_modal.error.empty": "Please enter PIN",
+  "lan_cowork.title": "LAN Cowork",
+  "lc_peers": {
+    "pair_modal": {
+      "close": "关闭"
+    },
+    "sse": {
+      "paired": "设备已配对",
+      "pairing_request": "已收到配对请求"
+    }
+  },
+  "lc_peers.fleet.enable_notifications": "启用通知",
+  "lc_peers.nav.back": "← LAN Cowork",
+  "lc_peers.page_title": "Peer 管理 - LAN Cowork",
+  "lc_peers.pair_modal.cancel": "取消",
+  "lc_peers.pair_modal.confirm": "确认",
+  "lc_peers.pair_modal.done": "关闭",
+  "lc_peers.pair_modal.error.generic": "发生错误",
+  "lc_peers.pair_modal.error.unknown": "无法确认远程节点的状态。",
+  "lc_peers.pair_modal.paired_toast": "配对完成",
+  "lc_peers.pair_modal.pin.error.empty": "请输入 PIN",
+  "lc_peers.pair_modal.pin.error.invalid": "PIN 不正确",
+  "lc_peers.pair_modal.pin.error.retryable": "PIN 不正确。还可尝试 {attempts} 次。",
+  "lc_peers.pair_modal.pin.error.attempts_exhausted": "PIN 尝试次数已达上限。",
+  "lc_peers.pair_modal.repair_steps": "请重新开始配对，并让另一节点的管理员批准新的请求。",
+  "lc_peers.pair_modal.pin.label": "PIN",
+  "lc_peers.pair_modal.pin.placeholder": "••••••",
+  "lc_peers.pair_modal.step1.msg": "正在发送配对请求...",
+  "lc_peers.pair_modal.step2.msg": "请在对方主机上批准 PIN，然后输入显示的 PIN。",
+  "lc_peers.pair_modal.step3.msg": "配对完成。",
+  "lc_peers.pair_modal.title": "配对",
+  "lc_peers.peers.col.actions": "操作",
+  "lc_peers.peers.col.address": "地址",
+  "lc_peers.peers.col.name": "Peer 名称",
+  "lc_peers.peers.col.status": "状态",
+  "lc_peers.peers.col.token_expires": "Token 有效期",
+  "lc_peers.peers.empty": "没有已连接的 Peer",
+  "lc_peers.peers.load_error": "获取 Token 列表失败",
+  "lc_peers.peers.pair_request_error": "配对请求失败",
+  "lc_peers.peers.refresh": "刷新",
+  "lc_peers.peers.revoke": "撤销",
+  "lc_peers.peers.revoke_confirm": "要撤销此 Peer 的 Token 吗？",
+  "lc_peers.peers.revoke_error": "撤销失败",
+  "lc_peers.peers.revoked": "已撤销 Token",
+  "lc_peers.peers.status.auth_lost": "需要重新配对",
+  "lc_peers.peers.status.paired": "已配对",
+  "lc_peers.peers.title": "已连接 Peer 列表",
+  "lc_peers.requests.approve_error": "批准失败",
+  "lc_peers.requests.col.actions": "操作",
+  "lc_peers.requests.col.peer_name": "Peer 名称",
+  "lc_peers.requests.col.requester": "请求方",
+  "lc_peers.requests.col.time": "接收时间",
+  "lc_peers.requests.empty": "没有待批准的配对请求",
+  "lc_peers.requests.load_error": "获取请求列表失败",
+  "lc_peers.requests.refresh": "刷新",
+  "lc_peers.requests.reject_error": "拒绝失败",
+  "lc_peers.requests.rejected": "已拒绝",
+  "lc_peers.requests.title": "待批准配对请求",
+  "lc_peers.title": "Peer 管理",
+  "llm_router": {
+    "aliases_section": "路由别名",
+    "backends_section": "后端",
+    "col": {
+      "actions": "操作",
+      "alias": "别名",
+      "alias_name": "别名",
+      "base_url": "Base URL",
+      "last_seen": "最后确认",
+      "models": "模型数",
+      "physical": "物理模型",
+      "slo": "SLO",
+      "status": "状态"
+    },
+    "disable": "禁用",
+    "disabled_badge": "[已禁用]",
+    "enable": "启用",
+    "loading": "加载中...",
+    "no_aliases": "尚未设置路由别名",
+    "no_backends": "尚未注册后端",
+    "refresh": "刷新",
+    "refresh_all": "全部刷新",
+    "refresh_failed": "刷新失败",
+    "refreshed": "已刷新",
+    "source": {
+      "mdns": "mDNS",
+      "static": "静态"
+    },
+    "status": {
+      "error": "错误",
+      "ok": "运行中",
+      "unknown": "未知",
+      "unreachable": "无法连接"
+    },
+    "summary": {
+      "aliases": "路由别名",
+      "backends": "后端数量",
+      "enabled": "已启用",
+      "models": "模型总数"
+    },
+    "title": "LLM Router",
+    "toggle_failed": "启用/禁用切换失败"
+  },
+  "mesh_inference": {
+    "action": {
+      "local_only": "仅本机模式",
+      "local_only_tooltip": "本机没有可用的推理类型",
+      "refresh": "刷新"
+    },
+    "col": {
+      "peer": "节点"
+    },
+    "empty": "没有已连接的节点。",
+    "subtitle": "按节点和推理类型切换分布式推理的启用/禁用。",
+    "title": "分布式推理矩阵",
+    "toast": {
+      "load_failed": "加载失败",
+      "refreshed": "已刷新",
+      "save_failed": "保存失败",
+      "saved": "已保存"
+    },
+    "type": {
+      "clip": "clip",
+      "tagger": "tagger",
+      "whisper": "whisper",
+      "yolo": "yolo"
+    }
+  },
+  "meta": {
+    "checkpoint_search": "Checkpoint 搜索",
+    "click_open_dir": "点击打开目录",
+    "click_to_copy": "点击复制",
+    "copy_original": "复制",
+    "download_json": "下载",
+    "negative_label": "负面提示词",
+    "no_metadata": "无元数据",
+    "parameters_title": "参数",
+    "parse_success": "解析成功",
+    "positive_label": "正面提示词",
+    "seed_copy": "复制 Seed"
+  },
+  "nav": {
+    "back_title": "返回上一位置",
+    "bottom_aria": "跳到底部",
+    "bottom_title": "跳到底部 (End)",
+    "llm_router": "LLM Router",
+    "mesh_inference": "分布式推理",
+    "top_aria": "回到顶部",
+    "top_title": "回到顶部 (Home)"
+  },
+  "nav.lan_cowork": "LAN Cowork",
+  "path": {
+    "copy_label": "路径 ",
+    "copy_label_filename": "文件名 ",
+    "copy_label_zip": "ZIP 路径 ",
+    "copy_title": "复制路径",
+    "copy_title_filename": "复制文件名",
+    "copy_title_zip": "复制 ZIP 路径",
+    "label": "路径："
+  },
+  "period": {
+    "12h": "12小时",
+    "24h": "24小时",
+    "3h": "3小时",
+    "8h": "8小时",
+    "custom": "自定义",
+    "days3": "3天",
+    "days5": "5天",
+    "half_year": "6个月",
+    "last_month": "上个月",
+    "month1": "1个月",
+    "month2": "2个月",
+    "month3": "3个月",
+    "month9": "9个月",
+    "week1": "1周",
+    "week2": "2周",
+    "year1": "1年",
+    "yesterday": "截至昨天"
+  },
+  "presets": {
+    "deleted": "预设已删除：{name}",
+    "empty": "没有已保存的预设",
+    "loaded": "预设已加载：{name}",
+    "nothing_to_save": "没有可保存的搜索状态",
+    "rename_prompt": "新的预设名称：",
+    "renamed": "预设已重命名：{name}",
+    "save_prompt": "预设名称：",
+    "saved": "预设已保存：{name}"
+  },
+  "prompt": {
+    "badge": {
+      "embedding": "Textual Inversion（嵌入）",
+      "lora_weight": "LoRA 权重：{weight}",
+      "novelai_weight": "NovelAI 权重：{weight}",
+      "paren_weight": "权重：{weight}（{count} 层括号）",
+      "random_choice": "随机选择",
+      "weight": "权重：{weight}"
+    }
+  },
+  "prompt_library.insert_as_is": "Insert as-is",
+  "prompt_library.insert_cancel": "Cancel",
+  "prompt_library.insert_convert_and_insert": "Convert and insert",
+  "prompt_library.insert_syntax_mismatch_body": "The selected prompt appears to use a different syntax from the current bridge. What do you want to do?",
+  "prompt_library.insert_syntax_mismatch_title": "Syntax mismatch detected",
+  "qr": {
+    "content_label": "二维码内容：",
+    "copy_text": "复制文本",
+    "info": {
+      "compressing": "⚠️ 内容过长，正在压缩文本",
+      "meta_len": "📦 {count} 个字符",
+      "negative_len": "🚫 {count} 个字符",
+      "positive_len": "📝 {count} 个字符",
+      "too_long": "⚠️ 文本过长无法生成二维码，请使用文本复制。",
+      "url": "🔗 分享链接"
+    },
+    "load_failed": "二维码库加载失败",
+    "mode": {
+      "meta": "全部元数据（JSON）",
+      "negative": "负面提示词",
+      "positive": "正面提示词",
+      "url": "分享链接",
+      "url_local_disabled": "🚫 URL（localhost）"
+    },
+    "no_content": "没有内容",
+    "save_image": "保存二维码图片",
+    "text_too_long": "文本过长",
+    "use_text_copy": "请使用文本复制"
+  },
+  "random": {
+    "empty": "没有可用的搜索结果进行随机显示",
+    "opened_one": "已打开一个随机结果"
+  },
+  "resolution": {
+    "landscape": "横向 宽>=1024 高<=768",
+    "portrait": "纵向 宽<=768 高>=1024",
+    "square": "正方形",
+    "square_1024": "1024x1024",
+    "w1024": "宽>=1024",
+    "w512": "宽>=512",
+    "w768": "宽>=768"
+  },
+  "result": {
+    "ai_analysis": "AI 分析",
+    "copy_id_title": "复制文件 ID",
+    "copy_prompt_title": "复制提示词",
+    "detail_label": "详情",
+    "negative_label": "负面提示词：",
+    "positive_label": "正面提示词：",
+    "qr_share": "二维码分享",
+    "save_to_library": "保存到库",
+    "show_detail_aria": "显示详情"
+  },
+  "scan": {
+    "banner": {
+      "dismiss": "关闭",
+      "interrupted": "上次扫描被中断",
+      "resume": "继续",
+      "resume_failed": "恢复失败",
+      "resuming": "正在恢复扫描...",
+      "scroll_top": "回到顶部",
+      "stop": "停止"
+    },
+    "complete_confirm_refresh": "扫描完成。是否立即刷新结果？",
+    "complete_label": "✓ 扫描完成！",
+    "complete_toast": "扫描完成：已处理 {count} 个文件",
+    "details": {
+      "processed": "已处理 {total} 个文件",
+      "progress": "{current} / {total} 个文件"
+    },
+    "failed_label": "✗ 扫描失败",
+    "failed_toast": "扫描失败：{error}",
+    "phase": {
+      "counting": "正在统计文件...",
+      "initializing": "正在初始化...",
+      "scanning": "正在扫描图片..."
+    },
+    "start_failed": "启动扫描失败",
+    "time": {
+      "minutes": "{m}分{s}秒",
+      "seconds": "{n}秒"
+    },
+    "unknown_error": "未知错误"
+  },
+  "scheduler": {
+    "action_failed": "操作失败",
+    "actions": "操作",
+    "active": "活跃",
+    "add_dialog_title": "添加任务",
+    "add_job": "添加任务",
+    "added_msg": "任务已添加",
+    "cancel": "取消",
+    "delete": "删除",
+    "delete_confirm": "确定删除任务「{id}」？",
+    "deleted_msg": "任务已删除",
+    "duration": "耗时",
+    "error": "错误",
+    "failed": "失败",
+    "field_day": "日",
+    "field_day_of_week": "星期",
+    "field_func": "函数",
+    "field_hour": "时",
+    "field_job_id": "任务 ID",
+    "field_minute": "分",
+    "field_trigger_type": "触发器类型",
+    "hint_day": "1-31，逗号分隔，或 *",
+    "hint_dow": "mon-sun、0-6，或 *",
+    "hint_hour": "0-23，逗号分隔，或 *",
+    "hint_minute": "0-59，逗号分隔，或 *",
+    "history": "执行历史",
+    "job_desc_bsky_notification_poll": "Bluesky 通知轮询",
+    "job_desc_db_backup": "数据库备份",
+    "job_desc_db_integrity_check": "数据库完整性检查",
+    "job_desc_db_vacuum": "SQLite VACUUM（回收空间）",
+    "job_desc_github_issue_poll": "GitHub Issue 轮询",
+    "job_desc_prune_unused_tags": "清除未使用标签",
+    "job_desc_rebuild_groups_index": "重建分组索引",
+    "job_desc_refresh_monthly_stats": "更新月度统计缓存",
+    "job_desc_thumbnail_cleanup": "缩略图缓存清理",
+    "job_id": "任务 ID",
+    "jobs": "任务列表",
+    "loading": "加载中...",
+    "next_run": "下次执行",
+    "no_history": "无执行历史",
+    "no_jobs": "未注册任何任务",
+    "pause": "暂停",
+    "paused": "已暂停",
+    "paused_msg": "任务已暂停",
+    "refresh": "刷新",
+    "result": "结果",
+    "resume": "恢复",
+    "resumed_msg": "任务已恢复",
+    "running": "运行中",
+    "status": "调度器状态",
+    "status_label": "状态",
+    "stopped": "已停止",
+    "submit": "添加",
+    "success": "成功",
+    "time": "执行时间",
+    "title": "任务调度器",
+    "trigger": "触发器",
+    "trigger_now": "立即执行",
+    "triggered": "任务已加入即时执行队列",
+    "job_desc_thumbnail_integrity_check": "缩略图完整性检查（移除陈旧/不一致的缩略图）"
+  },
+  "sd_bridge": {
+    "inserted": "已插入"
+  },
+  "sd_nai_convert": {
+    "copied": "已复制"
+  },
+  "search": {
+    "count": {
+      "normal": "找到 {count} 个结果",
+      "partial": "{shown} / {total} 项",
+      "prompt_match": "{count} 个结果（提示词匹配）",
+      "suffix_results": "个结果",
+      "unit": "{count}",
+      "zero": "0 个结果"
+    },
+    "error": {
+      "failed": "搜索失败：{message}",
+      "generic": "搜索过程中发生错误",
+      "network": "无法连接到服务器，请检查服务器是否正在运行。",
+      "regex": "正则错误：{error}"
+    },
+    "export_csv_hint": "将 {count} 个结果导出为 CSV（可从“+添加条件”菜单更改上限）",
+    "live": {
+      "title": "实时搜索（自动）",
+      "toast_off": "实时搜索：已关闭",
+      "toast_on": "实时搜索：已开启"
+    },
+    "loading_more": "加载中...",
+    "partial_warning": "已达显示上限（{limit}）。缩小条件或增加显示数量以查看全部结果。",
+    "path_tip": {
+      "message": "同时搜索标签名和文件/文件夹名。如需精确结果，请在搜索栏输入标签，并通过“添加条件” → “文件夹”指定文件/文件夹名。",
+      "move_btn": "📂 移至文件夹搜索"
+    },
+    "placeholder": {
+      "plain": "示例：1girl, blonde_hair, -nsfw",
+      "regex": "示例：1girl, blue_(hair|eyes)  正则标签搜索"
+    },
+    "regex_note": "（正则筛选）",
+    "regex_warn_confirm": "⚠️ 正则搜索在大数据集上可能较慢。\n是否继续搜索？",
+    "state": {
+      "empty_db_hint1": "前往设置页面并注册图片文件夹",
+      "empty_db_hint2": "点击“开始扫描”以导入图片元数据",
+      "empty_db_hint3": "扫描完成后，图片将出现在搜索结果中",
+      "empty_db_message": "在设置中添加图片文件夹即可开始",
+      "empty_db_settings_link": "打开设置",
+      "empty_db_title": "数据库中还没有图片",
+      "collection_empty_title": "此收藏夹还没有任何项目",
+      "collection_empty_message": "点击图片右下角的星星即可加入此收藏夹。",
+      "collection_empty_filtered_message": "此收藏夹中没有符合搜索条件的图片，请尝试减少筛选条件。",
+      "empty_title": "没有匹配条件的图片",
+      "error_title": "发生错误",
+      "example1": "标签搜索：1girl, blue eyes（逗号分隔为 AND）",
+      "example2": "排除：-bad quality（减号前缀）",
+      "example3": "使用 +添加条件 进行模型/日期筛选",
+      "example4": "正则：girl.*hair（模式匹配）",
+      "examples_label": "示例：",
+      "first_message": "输入标签或条件来搜索图片",
+      "first_title": "尝试搜索",
+      "hint1": "检查标签拼写（示例：1girl, blue_eyes）",
+      "hint2": "尝试扩大日期范围",
+      "hint3": "在正则模式下，使用 .*关键词.* 进行部分匹配",
+      "hint4": "减少条件以扩大搜索范围",
+      "hint_label": "提示：",
+      "start_prompt": "按搜索按钮或回车",
+      "unknown_error": "未知错误"
+    }
+  },
+  "semantic_search.elapsed": "elapsed",
+  "semantic_search.elapsed_suffix": "elapsed",
+  "server_info": {
+    "files": "文件",
+    "load_failed": "服务器信息加载失败",
+    "startup_initializing": "服务器初始化中",
+    "startup_migration": "启动时数据库升级",
+    "startup_stage_backfill": "正在更新现有记录的搜索列。",
+    "startup_stage_backup": "正在创建升级前的安全备份。",
+    "startup_stage_backup_reused": "正在复用未更改的现有备份。",
+    "startup_stage_backup_skipped": "大型数据库跳过备份以缩短启动时间。",
+    "startup_stage_file_cache": "正在构建文件元数据缓存，即将就绪。",
+    "startup_stage_finalizing": "升级完成，正在完成启动…",
+    "startup_stage_migrate": "正在应用数据库架构更新。",
+    "startup_stage_prepare": "正在准备升级检查。",
+    "startup_stage_rebuild_fts": "正在为新架构重建搜索索引。",
+    "startup_upgrade_in_progress": "数据库升级中",
+    "startup_upgrade_wait": "大型数据库可能需要几分钟。",
+    "tags": "标签"
+  },
+  "settings": {
+    "apikeys_created": "创建时间：",
+    "apikeys_empty": "还没有创建 API 密钥。",
+    "apikeys_full_access": "完全访问",
+    "apikeys_last_used": "上次使用：",
+    "apikeys_revoke": "撤销此密钥",
+    "apikeys_toast_copied": "API 密钥已复制",
+    "apikeys_toast_create_failed": "创建 API 密钥失败",
+    "apikeys_toast_created": "API 密钥已创建",
+    "apikeys_toast_mcp_copied": "MCP 代码片段已复制",
+    "apikeys_toast_revoke_failed": "撤销 API 密钥失败",
+    "apikeys_toast_revoked": "API 密钥已撤销",
+    "blocker_local_only": "此操作仅允许在本地机器上执行",
+    "blocker_pin_not_active": "PIN 认证未激活（需要重启）",
+    "blocker_pin_session": "需要 PIN 认证会话",
+    "blocker_restart_disabled": "重启 API 已禁用（--allow-restart 或 TAGDB_ALLOW_RESTART=1）",
+    "blocker_token_missing": "未设置远程重启令牌",
+    "conditions_not_met": "条件未满足",
+    "container_nav_continuous": "继续到下一个文件夹/ZIP",
+    "container_nav_continuous_hint": "在查看器中到达末尾时导航到相邻的文件夹/ZIP",
+    "container_nav_order": "分组导航顺序",
+    "container_nav_order_hint": "在文件夹/ZIP 之间导航的顺序",
+    "container_nav_order_name": "名称顺序",
+    "container_nav_order_result": "搜索结果顺序",
+    "database": "数据库",
+    "delete": "删除",
+    "disabled": "已禁用",
+    "enabled": "已启用",
+    "env_var": "环境变量",
+    "error": "错误",
+    "ext_disable": "禁用",
+    "ext_disabled": "已禁用",
+    "ext_disabled_msg": "扩展已禁用。",
+    "ext_enable": "启用",
+    "ext_enabled": "已启用",
+    "ext_enabled_msg": "扩展已启用。",
+    "ext_restart_required": "需要重启才能生效。",
+    "ext_toggle_failed": "扩展切换失败",
+    "failed": "失败",
+    "files_tags": "文件 / 标签",
+    "json_saved": "✅ JSON 已保存",
+    "lan_public": "局域网公开",
+    "load_failed": "加载失败",
+    "local_only": "仅本地",
+    "lock_failed": "锁定失败",
+    "meta_breakdown": "元数据分布",
+    "modal_kb_guide": "在查看器中显示快捷键指南",
+    "modal_kb_guide_hint": "在模态查看器底部显示键盘快捷键提示",
+    "network": "网络",
+    "no_extensions": "没有已安装的扩展。",
+    "no_roots": "没有已注册的文件夹。",
+    "none_detected": "未检测到",
+    "not_set": "未设置",
+    "path_updated": "路径已更新",
+    "pin_active": "PIN 已激活",
+    "pin_disabled": "PIN 已禁用",
+    "pin_pending": "PIN 已设置（需要重启）",
+    "pin_source": "PIN 来源",
+    "profile_active_badge": "活动",
+    "profile_ago": "前",
+    "profile_create": "创建配置文件",
+    "profile_create_failed": "创建失败",
+    "profile_days": "天",
+    "profile_delete": "删除",
+    "profile_delete_confirm": "删除配置文件“{label}”？此操作无法撤销。",
+    "profile_delete_failed": "删除失败",
+    "profile_desc_prompt": "描述（可选）：",
+    "profile_dup_failed": "复制失败",
+    "profile_dup_label_prompt": "新显示标签：",
+    "profile_dup_name_prompt": "新配置文件名称：",
+    "profile_duplicate": "复制",
+    "profile_empty": "没有已配置的配置文件。",
+    "profile_export_failed": "导出失败",
+    "profile_import_exists": "配置文件“{name}”已存在。{count} 个字段不同。\n导入模式：完整（覆盖）还是差异（合并变更）？",
+    "profile_import_failed": "导入失败",
+    "profile_import_prompt": "粘贴二维码配置文件数据（JSON）：",
+    "profile_import_success": "配置文件导入成功。",
+    "profile_just_now": "刚刚",
+    "profile_label_prompt": "显示标签：",
+    "profile_last_used": "上次使用",
+    "profile_name_prompt": "配置文件名称（字母数字、连字符、下划线）：",
+    "profile_never_used": "从未使用",
+    "profile_no_desc": "无描述",
+    "profile_no_pin": "配置文件管理需要 PIN 认证。请设置 PIN 并重启。",
+    "profile_qr_hint": "复制下方数据或扫描二维码以在其他实例上导入。",
+    "profile_qr_import": "二维码导入",
+    "profile_qr_title": "配置文件导出",
+    "profile_rename": "重命名",
+    "profile_rename_failed": "重命名失败",
+    "profile_rename_prompt": "新名称：",
+    "profile_switch_back": "服务器已使用新配置文件恢复。正在重新加载...",
+    "profile_switch_btn": "切换",
+    "profile_switch_confirm": "切换到配置文件“{label}”？服务器将重启。",
+    "profile_switch_failed": "配置文件切换失败",
+    "profile_switch_sending": "正在发送配置文件切换请求...",
+    "profile_switch_timeout": "配置文件切换请求已发送，但服务器在 90 秒内未响应。",
+    "profile_switch_waiting": "配置文件切换已接受。等待服务器恢复...",
+    "profile_toggle_fav": "切换收藏",
+    "recursive_scan": "递归扫描",
+    "remote_restart_off": "远程重启：已关闭",
+    "remote_restart_on": "远程重启：已开启",
+    "remove_root_confirm": "取消注册此文件夹？",
+    "restart_api": "重启 API",
+    "restart_back": "服务器已恢复。正在重新加载...",
+    "restart_confirm": "是否重启服务器？（将有几秒钟无法访问）",
+    "restart_failed": "重启失败",
+    "restart_sending": "正在发送重启请求...",
+    "restart_server": "重启服务器",
+    "restart_timeout": "已发送重启请求，但服务器在 90 秒内未响应。",
+    "restart_waiting": "重启已接受。等待服务器恢复...",
+    "rfs_enum_max": "枚举上限",
+    "rfs_probe_max": "探测上限",
+    "rfs_total_max": "总上限",
+    "save_failed": "保存失败",
+    "save_path": "保存路径",
+    "saved": "✅ 已保存",
+    "saved_cli_override": "⚠ 已保存（CLI --pin 优先。请检查启动选项以应用）",
+    "saved_restart_needed": "✅ 已保存（需要重启才能生效）",
+    "saving": "保存中...",
+    "screen_lock": "屏幕锁定",
+    "security": "安全",
+    "source": "来源",
+    "toggle_root": "启用/禁用",
+    "token_not_set": "令牌：未设置",
+    "token_set": "令牌：已设置",
+    "unit_hours": "小时",
+    "unit_min": "分钟",
+    "unit_minutes": "分",
+    "unit_sec": "秒",
+    "unknown": "未知",
+    "uptime": "运行时间",
+    "version": "版本"
+  },
+  "settings.bitwarden_desc": "通过 bw CLI 连接密钥至 Bitwarden 以动态获取。需要安装并解锁 Bitwarden CLI。",
+  "settings.bitwarden_title": "Bitwarden CLI",
+  "settings.bsky_auto_dismiss_follow": "自动隐藏关注",
+  "settings.bsky_auto_dismiss_like": "自动隐藏点赞",
+  "settings.bsky_auto_dismiss_repost": "自动隐藏转发",
+  "settings.bsky_auto_respond": "启用自动回复",
+  "settings.bsky_monitor_desc": "监控 Bluesky 的提及、回复及其他通知。设置分类条件和自动回复模板。",
+  "settings.bsky_monitor_title": "Bluesky 监控",
+  "settings.bsky_notify_connect": "MCP 连接时通知",
+  "settings.bsky_poll_interval": "轮询间隔 (分钟)",
+  "settings.bsky_poll_now": "立即轮询",
+  "settings.bsky_polling": "轮询中...",
+  "settings.bsky_response_mention": "提及回复",
+  "settings.bsky_response_reply": "回复回应",
+  "settings.bsky_response_title": "自动回复模板",
+  "settings.bsky_save_failed": "保存监控设置失败",
+  "settings.bsky_save_monitor": "保存监控设置",
+  "settings.bsky_saved": "监控设置已保存",
+  "settings.bsky_triage_mention": "提及",
+  "settings.bsky_triage_quote": "引用",
+  "settings.bsky_triage_reply": "回复",
+  "settings.bsky_triage_title": "分类提示词",
+  "settings.sns_bluesky_title": "Bluesky",
+  "settings.theme_applied": "Theme applied:",
+  "settings.theme_click_to_apply": "Click to apply",
+  "settings.theme_hint": "Click a theme to apply it instantly.",
+  "settings_schema.agent_safety_budget_preset": "Budget 预设",
+  "settings_schema.agent_safety_circuit_breaker_cooldown_seconds": "Circuit Breaker 冷却 (秒)",
+  "settings_schema.agent_safety_circuit_breaker_enabled": "启用 Circuit Breaker",
+  "settings_schema.agent_safety_circuit_breaker_error_rate_threshold": "错误率阈值 (0.0-1.0)",
+  "settings_schema.agent_safety_circuit_breaker_max_actions_per_minute": "每分钟最大操作数",
+  "settings_schema.agent_safety_circuit_breaker_max_consecutive_errors": "最大连续错误次数",
+  "settings_schema.agent_safety_circuit_breaker_max_identical_consecutive": "相同调用最大连续次数",
+  "settings_schema.agent_safety_circuit_breaker_max_same_tool_per_minute": "同一工具每分钟最大次数",
+  "settings_schema.ai_analysis_api_key": "Anthropic (Claude) API 密钥",
+  "settings_schema.ai_analysis_openai_api_key": "OpenAI API 密钥",
+  "settings_schema.ai_analysis_openai_compat_api_key": "OpenAI Compatible API 密钥",
+  "settings_schema.archive_cleanup_llm_api_key": "Archive Cleanup Anthropic API 密钥",
+  "settings_schema.archive_cleanup_llm_openai_api_key": "Archive Cleanup OpenAI API 密钥",
+  "settings_schema.archive_cleanup_llm_openai_compat_api_key": "Archive Cleanup OpenAI Compat API 密钥",
+  "settings_schema.archive_throttle_ms": "归档节流 (ms)",
+  "settings_schema.backup_backup_dir": "备份目录",
+  "settings_schema.backup_backup_on_scan_complete": "扫描完成时备份",
+  "settings_schema.backup_cooldown_minutes": "冷却时间 (分钟)",
+  "settings_schema.backup_enabled": "启用自动备份",
+  "settings_schema.backup_max_generations": "最大备份代数",
+  "settings_schema.backup_periodic_interval_hours": "定期备份间隔 (小时)",
+  "settings_schema.brace_choice": "大括号选择",
+  "settings_schema.compute_hash": "pHash 计算",
+  "settings_schema.direct_prompt_convert": "直接提示词转换",
+  "settings_schema.enable_fts": "启用全文搜索 (FTS5)",
+  "settings_schema.extensions_builtin-nai-bridge_api_token": "NovelAI API 令牌",
+  "settings_schema.extract_a1111": "A1111 元数据提取",
+  "settings_schema.extract_comfyui": "ComfyUI 元数据提取",
+  "settings_schema.lowercase_tags": "标签小写化",
+  "settings_schema.preserve_templates": "保留模板",
+  "settings_schema.server_allow_remote_restart": "启用远程重启 API",
+  "settings_schema.server_allow_restart": "启用重启 API",
+  "settings_schema.server_host": "绑定主机",
+  "settings_schema.server_lan": "启用 LAN 访问",
+  "settings_schema.server_pin": "PIN 认证码",
+  "settings_schema.server_pin_boss_login_ui": "Boss 登录 UI",
+  "settings_schema.server_port": "端口号",
+  "settings_schema.server_quick_lock_enabled": "启用快速锁定",
+  "settings_schema.server_restart_token": "远程重启令牌",
+  "settings_schema.sns_bluesky_app_password": "Bluesky 应用密码",
+  "settings_schema.sns_bluesky_handle": "Bluesky 账号",
+  "settings_schema.sns_post_template": "发帖模板",
+  "settings_schema.timezone": "时区",
+  "settings_schema.ui": "UI 主题 (default/custom)",
+  "settings_schema.video_analysis_enabled": "启用视频分析",
+  "settings_schema.video_analysis_keyframe_count": "关键帧数量",
+  "settings_schema.video_analysis_scene_threshold": "场景阈值",
+  "settings_schema.video_analysis_strategy": "关键帧策略",
+  "settings_schema.webhook_secret": "Webhook 签名密钥",
+  "similar.error": "An error occurred",
+  "similar.none_found": "No similar images were found. Run hash calculation first.",
+  "similar.searching": "Searching...",
+  "similar.title": "Similar Images",
+  "stats": {
+    "load_failed": "统计信息加载失败",
+    "no_model_data": "没有可用的模型数据",
+    "no_resolution_data": "没有可用的分辨率数据",
+    "period": {
+      "dawn": "清晨 (03-09时)",
+      "day": "白天 (09-15时)",
+      "evening": "傍晚 (15-21时)",
+      "night": "深夜 (21-03时)"
+    },
+    "personality": {
+      "balanced": {
+        "advice": "拥有灵活的工作方式！",
+        "description": "不受时间束缚的自由创作者",
+        "type": "均衡型"
+      },
+      "daytime": {
+        "advice": "保持着健康的节奏！",
+        "description": "作息规律的创作者",
+        "type": "日间型"
+      },
+      "early_bird": {
+        "advice": "非常好的生活习惯！",
+        "description": "善于利用清晨专注力的创作者",
+        "type": "早起型"
+      },
+      "evening": {
+        "advice": "充分利用了黄金时段！",
+        "description": "傍晚开始发挥实力的创作者",
+        "type": "傍晚集中型"
+      },
+      "night_owl": {
+        "advice": "注意身体健康哦！",
+        "description": "热爱深夜宁静的创作者",
+        "type": "夜猫子型"
+      },
+      "unknown": {
+        "advice": "",
+        "description": "数据不足",
+        "type": "未知"
+      }
+    }
+  },
+  "story": {
+    "event": {
+      "first_month": {
+        "desc": "从 {count} 张图片起步",
+        "title": "创作之旅开始"
+      },
+      "milestone_100": {
+        "desc": "累计总数：{total}",
+        "title": "100 张图片！"
+      },
+      "milestone_100k": {
+        "desc": "累计总数：{total}",
+        "title": "100,000 张图片！"
+      },
+      "milestone_10k": {
+        "desc": "累计总数：{total}",
+        "title": "10,000 张图片！"
+      },
+      "milestone_1k": {
+        "desc": "累计总数：{total}",
+        "title": "1,000 张图片！"
+      },
+      "milestone_2k": {
+        "desc": "累计总数：{total}",
+        "title": "2,000 张图片！"
+      },
+      "milestone_500": {
+        "desc": "累计总数：{total}",
+        "title": "500 张图片！"
+      },
+      "milestone_50k": {
+        "desc": "累计总数：{total}",
+        "title": "50,000 张图片！"
+      },
+      "milestone_5k": {
+        "desc": "累计总数：{total}",
+        "title": "5,000 张图片！"
+      },
+      "new_source": {
+        "desc": "开始使用 {source}",
+        "title": "新工具：{source}"
+      },
+      "peak_month": {
+        "desc": "创建了 {count} 张图片",
+        "title": "最高产月份"
+      },
+      "productivity_down": {
+        "desc": "比上月减少 -{percent}%",
+        "title": "安静期"
+      },
+      "productivity_up": {
+        "desc": "比上月增长 +{percent}%",
+        "title": "生产力激增"
+      },
+      "quiet_month": {
+        "desc": "本月仅 {count} 张图片",
+        "title": "平静月份"
+      },
+      "tag_diversity": {
+        "desc": "本月 {count} 个独特标签",
+        "title": "创作多样性纪录"
+      }
+    },
+    "load_failed": "故事加载失败",
+    "no_data": "数据不足，无法创建您的故事",
+    "on_this_day": "一年前的今天（{date}）：创建了 {count} 张图片"
+  },
+  "sweep.card_loading": "加载中…",
+  "sweep.card_no_axis": "无轴信息",
+  "sweep.card_open_view_btn": "🔎 打开 Sweep 视图",
+  "sweep.card_others_btn": "🖼️ 显示此 Sweep 的其他图像",
+  "sweep.card_others_empty": "此文件夹中未找到匹配图像。",
+  "sweep.card_others_error": "失败: ",
+  "sweep.card_rerun_btn": "🔁 重新运行此 Sweep",
+  "sweep.card_rerun_no_seed_btn": "🎲 以新种子重跑",
+  "sweep.card_rerun_other_bridge_btn": "在其他 Bridge 上重跑",
+  "sweep.card_rerun_with_seed_btn": "🔁 以相同种子重跑",
+  "sweep.card_title": "Sweep",
+  "sweep.resume_not_found": "该文件上未找到 Sweep 元数据。",
+  "sweep.resume_populated": "Sweep 已恢复。点击 Generate 重新运行。",
+  "sweep.resume_unknown_param": "Sweep: 此桥接不支持的参数: ",
+  "sweep.resume_wrong_bridge": "Sweep 在其他桥接上执行: ",
+  "tags.add_tag": "Add tag",
+  "toast": {
+    "checkpoint_search": "Checkpoint 搜索：{model}",
+    "conditions_cleared": "所有搜索条件已清除",
+    "copy_done": "已复制",
+    "copy_done_strong": "已复制！",
+    "copy_failed": "复制失败",
+    "copy_failed_short": "复制失败",
+    "copy_with_label": "{label} 已复制",
+    "dir_open_failed": "打开目录失败",
+    "dir_opened": "已打开目录",
+    "error_occurred": "发生错误"
+  },
+  "tools": {
+    "ai_analyzing": "AI 分析中...",
+    "analyzing": "分析中...",
+    "analyzing_trends": "正在分析提示词趋势...",
+    "api_key_set": "API 密钥已设置",
+    "bulk_register_failed": "批量注册失败",
+    "cache_clear_failed": "缓存清除失败",
+    "cache_cleared": "文件缓存已清除",
+    "cancel": "取消",
+    "checking_roots": "正在检查已注册的文件夹...",
+    "clear_cache_confirm": "清除所有缩略图缓存？\n下次显示时将重新生成。",
+    "click_copy_path": "点击复制路径",
+    "click_preview": "点击预览",
+    "compute_hash_confirm": "计算 {type} 哈希值。\n如果文件较多可能需要较长时间。",
+    "computing_hashes": "正在计算哈希值...",
+    "confirm_db_delete": "从数据库中删除 {count} 个文件。\n（实际文件将保留在磁盘上）",
+    "confirm_hard_delete": "警告：将永久删除 {count} 个文件。\n此操作无法撤销！\n\n确定要继续吗？",
+    "counting_files": "正在统计文件...",
+    "db_path": "数据库路径：",
+    "db_size": "数据库大小：",
+    "delete": "删除",
+    "delete_failed": "删除失败",
+    "deleted": "已删除",
+    "deleting": "正在删除...",
+    "disable": "禁用",
+    "drag_to_move": "拖动移动",
+    "dup_groups_found": "发现重复组",
+    "duplicate": "重复",
+    "enable": "启用",
+    "enter_folder_path": "请输入文件夹路径",
+    "enter_search_query": "输入搜索关键词",
+    "error": "错误",
+    "exact_match": "精确匹配",
+    "ext_enabled": "已启用",
+    "fetch_failed": "获取失败",
+    "file": "文件",
+    "file_and_perceptual": "文件 + 感知",
+    "file_count": "文件数量：",
+    "file_hash_computed": "文件哈希值已计算",
+    "files": "文件",
+    "files_deleted": "已删除 {count} 个文件",
+    "folder_dialog_failed": "无法打开文件夹选择对话框。\n请手动输入路径。",
+    "force_rescan": "强制重新扫描（重新分析所有文件）",
+    "frequent_tags": "常用标签：",
+    "group": "分组",
+    "hash_not_computed": "哈希值未计算。请先运行“计算哈希值”。",
+    "hash_stats_total": "文件总数",
+    "include_subfolders": "包含子文件夹",
+    "items": "项",
+    "keep": "保留",
+    "load_failed": "加载失败",
+    "loading": "加载中...",
+    "no_analysis_yet": "还没有已分析的文件",
+    "no_duplicates": "未发现重复文件",
+    "no_extensions": "没有扩展",
+    "no_files_in_db": "数据库中没有文件",
+    "no_normalize_needed": "没有需要规范化的标签",
+    "no_registered_roots": "没有已注册的文件夹",
+    "no_results": "没有结果",
+    "no_subdirs": "没有子目录",
+    "normalize_confirm": "规范化标签？此操作无法撤销。",
+    "normalize_items": "待规范化项目",
+    "normalizing": "正在规范化...",
+    "normalizing_tags": "正在规范化标签...",
+    "open_detail_tab": "在新标签页中打开详情",
+    "perceptual": "感知",
+    "phash_computed": "感知哈希值已计算",
+    "phash_not_computed": "感知哈希值未计算。请先运行“计算哈希值”。",
+    "preparing": "准备中...",
+    "processed_files": "已处理文件：",
+    "prompt_trends": "提示词趋势分析",
+    "recommendations": "建议：",
+    "register_all": "全部注册到 config.json",
+    "register_failed": "注册失败",
+    "register_to_config": "注册到 config.json",
+    "remove_root_confirm": "取消注册此文件夹？（实际文件不会被删除）",
+    "rescan": "重新扫描",
+    "rescan_all": "全部重新扫描",
+    "rescanning_all": "正在重新扫描所有文件夹...",
+    "roots_drag_hint": "拖动排序 | Shift+↑↓ 移动 | 顺序影响文件夹排序",
+    "same_size": "相同大小",
+    "save_failed": "保存失败",
+    "saved": "已保存",
+    "scan_all_complete": "所有文件夹扫描完成",
+    "scan_complete": "扫描完成",
+    "scanning": "正在扫描...",
+    "schema_version": "架构版本：",
+    "search_zips": "搜索 ZIP 文件内部",
+    "searching": "正在搜索...",
+    "select": "选择",
+    "select_all_dupes": "选择所有重复项",
+    "select_files_to_delete": "请选择要删除的文件",
+    "showing_first": "显示前",
+    "similar_images": "相似图片",
+    "start_scan": "开始扫描",
+    "starting": "正在启动...",
+    "strengths": "优势：",
+    "style": "风格",
+    "style_tendency": "风格倾向：",
+    "tag_count": "标签数量：",
+    "th_deleted": "已删除",
+    "th_format": "格式",
+    "th_path": "路径",
+    "th_prompt": "提示词",
+    "th_size": "大小",
+    "th_source": "来源",
+    "toggle_failed": "切换失败",
+    "unexplored_themes": "未探索的主题：",
+    "unit_hours": "小时",
+    "unit_minutes": "分",
+    "uptime": "运行时间：",
+    "weaknesses": "改进空间：",
+    "wt_batch_failed": "批量处理启动失败",
+    "wt_close": "关闭",
+    "wt_complete": "完成",
+    "wt_config_failed": "保存配置失败",
+    "wt_config_saved": "WD-Tagger 配置已保存",
+    "wt_download_failed": "下载失败",
+    "wt_downloading": "正在下载模型...",
+    "wt_model_check_failed": "模型状态检查失败",
+    "wt_model_not_downloaded": "模型未下载",
+    "wt_model_ready": "模型就绪",
+    "wt_no_tags": "无标签",
+    "wt_processing": "处理中...",
+    "wt_sec_elapsed": "秒已过",
+    "wt_tagged_files": "已标记文件",
+    "wt_total_tags": "标签总数",
+    "wt_unique": "唯一",
+    "wt_untagged": "未标记的未知",
+    "wt_xmp_dc_subject": "dc:subject 标签：",
+    "wt_xmp_load_failed": "XMP 数据加载失败",
+    "wt_xmp_not_found": "未找到 XMP 数据",
+    "wt_xmp_raw_xml": "原始 XML",
+    "wt_xmp_title": "XMP 元数据",
+    "wt_xmp_wdtag_info": "wdtag 信息："
+  },
+  "yolo_stream.detect_error": "Detection failed",
+  "yolo_stream.register": "Register",
+  "sd_bridge.api_key_set": "(已设置密钥)",
+  "comfyui_bridge.api_key_set": "(已设置密钥)",
+  "common.delete": "删除",
+  "common.save": "保存",
+  "settings.apikeys_mcp_jump": "查看代码片段",
+  "settings.apikeys_mcp_updated": "↓ MCP 代码片段已用此密钥更新",
+  "settings.tsr_desc": "管理分布式标签推理服务器（Hailo Remote、ONNX Local 等）。支持并行批量标签处理。",
+  "settings.tsr_mesh_redirect": "单位网格推理切换在",
+  "settings.tsr_mesh_redirect_link": "网格推理矩阵",
+  "settings.tsr_mesh_redirect_suffix": "页面中管理",
+  "settings.tsr_title": "Tagger Server Registry",
+  "bridge.pl.load_tooltip": "加载 PL",
+  "bridge.pl.save_tooltip": "保存 PL",
+  "conditions.hasAnnotation.desc": "仅显示带有注释的文件（笔记）",
+  "conditions.hasAnnotation.label": "📝 有笔记"
+}

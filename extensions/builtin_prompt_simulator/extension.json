@@ -1,0 +1,30 @@
+{
+  "name": "builtin-prompt-simulator",
+  "version": "1.0.0",
+  "description": "Dynamic Prompts simulator, emphasis weight calculator, and prompt conversion tools",
+  "type": "ui_widget",
+  "category": "prompt",
+  "entry": "prompt_simulator.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/prompt-sim",
+  "nav": {
+    "label": "Prompt Simulator",
+    "icon": "\ud83e\uddea",
+    "children": [
+      {
+        "label": "Wildcard Manager",
+        "path": "/manager"
+      },
+      {
+        "label": "Sweep Axes",
+        "path": "/sweep-axes-manager"
+      }
+    ]
+  },
+  "core_shim": "prompt_sim_core",
+  "config": {
+    "enabled": true,
+    "priority": 300
+  }
+}

@@ -1,0 +1,92 @@
+{# _cat_scan.html — migrated from _tab_data_ingest.html: tab-scan, tab-parser, tab-remote #}
+<section id="cat-scan" data-settings-panel="cat-scan"
+         role="tabpanel" aria-labelledby="sidebar-item-cat-scan"
+         aria-hidden="true" style="display:none">
+  <h2 class="settings-cat-heading">
+    <span data-i18n="settings.cat.scan">スキャン</span>
+  </h2>
+
+  <div class="settings-section">
+    <h3><span aria-hidden="true">📂</span> <span data-i18n="settings.scan_roots">Registered Folders</span></h3>
+    <p style="font-size:13px;color:var(--muted);" data-i18n="settings.scan_roots_desc">Manage scan target folders. Drag to reorder, check to enable/disable.</p>
+    <div id="scanRootsList" style="margin-top:12px;">Loading...</div>
+    <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;">
+      <input type="text" id="newRootPath" data-i18n-placeholder="settings.new_root_placeholder" placeholder="Folder path (e.g. o:\webui\outputs)" aria-label="New scan folder path"
+             style="flex:3;min-width:200px;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+      <input type="text" id="newRootComment" data-i18n-placeholder="settings.root_comment_placeholder" placeholder="Memo (optional)" aria-label="Folder memo"
+             style="flex:2;min-width:120px;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+      <button type="button" data-action="settingsPageApi.addScanRoot" class="btn-save" style="padding:8px 16px;flex-shrink:0;"><span aria-hidden="true">➕</span> <span data-i18n="settings.add_root">Add</span></button>
+    </div>
+    <div id="addRootScanBanner" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;background:rgba(46,204,113,0.1);border:1px solid rgba(46,204,113,0.3);align-items:center;gap:10px;font-size:13px;">
+      <span id="addRootScanMsg" data-i18n="settings.root_added_msg">フォルダを追加しました</span>
+      <button type="button" id="addRootScanNowBtn" data-action="settingsPageApi.scanAddedRoot" class="btn-save" style="padding:5px 14px;font-size:12px;margin-left:auto;flex-shrink:0;" data-i18n="settings.scan_now">今すぐスキャン ▶</button>
+      <button type="button" data-action="settingsPageApi.dismissAddRootBanner" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:16px;padding:0 4px;" aria-label="dismiss"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-x"/></svg></button>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h3><span aria-hidden="true">🔧</span> <span data-i18n="settings.parser_title">Metadata Extraction Settings</span></h3>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-extract_a1111"><span data-i18n="settings.extract_a1111">Extract A1111 format</span><small data-i18n="settings.extract_a1111_hint">Parse Stable Diffusion WebUI format parameters</small></label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-extract_a1111" data-settings-field="extract_a1111" checked aria-label="Extract A1111 format"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-extract_comfyui"><span data-i18n="settings.extract_comfyui">Extract ComfyUI format</span><small data-i18n="settings.extract_comfyui_hint">Parse ComfyUI workflow metadata</small></label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-extract_comfyui" data-settings-field="extract_comfyui" checked aria-label="Extract ComfyUI format"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-lowercase_tags"><span data-i18n="settings.lowercase_tags">Normalize tags to lowercase</span><small data-i18n="settings.lowercase_tags_hint">Improves search consistency</small></label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-lowercase_tags" data-settings-field="lowercase_tags" checked aria-label="Normalize tags to lowercase"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-compute_hash"><span data-i18n="settings.compute_hash">Compute file hash</span><small data-i18n="settings.compute_hash_hint">For duplicate detection (slightly slower scan)</small></label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-compute_hash" data-settings-field="compute_hash" aria-label="Compute file hash"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-enable_fts"><span data-i18n="settings.enable_fts">Full-text search (FTS)</span><small data-i18n="settings.enable_fts_hint">Enables faster in-prompt search</small></label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-enable_fts" data-settings-field="enable_fts" checked aria-label="Full-text search"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section">
+    <h3><span aria-hidden="true">🌐</span> <span data-i18n="settings.remote_title">Remote File System Settings</span></h3>
+    <p style="font-size:13px;color:var(--muted);" data-i18n="settings.remote_desc">Timeout settings for scanning remote paths (WSL/NAS/SMB starting with \\). Increase values for slow wake-from-sleep environments.</p>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-rfs-probe_retries"><span data-i18n="settings.probe_retries">Probe retries</span><small data-i18n="settings.probe_retries_hint">Number of retries to confirm directory reachability</small></label>
+      <div class="setting-input"><input type="number" id="cfg-rfs-probe_retries" data-settings-field="remote_fs.probe_retries" value="6" min="1" max="20"></div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-rfs-probe_wait"><span data-i18n="settings.probe_wait">Probe wait (sec)</span><small data-i18n="settings.probe_wait_hint">Initial wait seconds (×1.5 backoff after)</small></label>
+      <div class="setting-input"><input type="number" id="cfg-rfs-probe_wait" data-settings-field="remote_fs.probe_wait" value="5" min="1" max="60" step="0.5"></div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-rfs-enumerate_retries"><span data-i18n="settings.enum_retries">File enumerate retries</span><small data-i18n="settings.enum_retries_hint">Retries when 0 files found</small></label>
+      <div class="setting-input"><input type="number" id="cfg-rfs-enumerate_retries" data-settings-field="remote_fs.enumerate_retries" value="5" min="1" max="20"></div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-rfs-enumerate_wait"><span data-i18n="settings.enum_wait">File enumerate wait (sec)</span><small data-i18n="settings.enum_wait_hint">Initial wait seconds (linear increase after)</small></label>
+      <div class="setting-input"><input type="number" id="cfg-rfs-enumerate_wait" data-settings-field="remote_fs.enumerate_wait" value="10" min="1" max="120" step="1"></div>
+    </div>
+    <div id="rfsCalc" style="margin-top:12px;font-size:12px;color:var(--muted);"></div>
+  </div>
+
+  <div class="settings-save-bar">
+    <button type="button" id="save-btn-cat-scan" class="btn btn-primary">
+      <span data-i18n="settings.save">保存</span>
+    </button>
+    <span id="save-status-cat-scan" class="save-status"></span>
+    <span id="save-hint-cat-scan" class="save-hint" hidden>
+      <span data-i18n="settings.unsaved_hint">未保存の変更があります</span>
+    </span>
+  </div>
+</section>

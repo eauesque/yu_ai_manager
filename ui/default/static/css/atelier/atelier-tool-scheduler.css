@@ -1,0 +1,119 @@
+/*
+ * Atelier System (γ) — scheduler.html
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool. classic / dark
+ * keep their existing pages/scheduler.css presentation untouched.
+ */
+
+/* ----- Header h1 polish ----- */
+
+body.theme-atelier-light.atelier-tool .sched-header h1,
+body.theme-atelier-dark.atelier-tool .sched-header h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  margin: 4px 0 16px;
+}
+
+/* ----- Cards / sections ----- */
+
+body.theme-atelier-light.atelier-tool .sched-status-card,
+body.theme-atelier-dark.atelier-tool .sched-status-card,
+body.theme-atelier-light.atelier-tool .sched-section,
+body.theme-atelier-dark.atelier-tool .sched-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .sched-status-card h2,
+body.theme-atelier-dark.atelier-tool .sched-status-card h2,
+body.theme-atelier-light.atelier-tool .sched-section h2,
+body.theme-atelier-dark.atelier-tool .sched-section h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 18px;
+  margin: 0 0 var(--space-3);
+  color: var(--text);
+}
+
+/* ----- Tables ----- */
+
+body.theme-atelier-light.atelier-tool .sched-table,
+body.theme-atelier-dark.atelier-tool .sched-table {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  border-collapse: collapse;
+  width: 100%;
+}
+
+body.theme-atelier-light.atelier-tool .sched-table th,
+body.theme-atelier-dark.atelier-tool .sched-table th,
+body.theme-atelier-light.atelier-tool .sched-table td,
+body.theme-atelier-dark.atelier-tool .sched-table td {
+  border-bottom: 1px solid var(--border);
+  padding: var(--space-2) var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .sched-table th,
+body.theme-atelier-dark.atelier-tool .sched-table th {
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--surface-raised);
+}
+
+body.theme-atelier-light.atelier-tool .sched-table tbody tr:hover,
+body.theme-atelier-dark.atelier-tool .sched-table tbody tr:hover {
+  background: var(--surface-raised);
+}
+
+/* ----- Badges / dots ----- */
+
+body.theme-atelier-light.atelier-tool .sched-badge,
+body.theme-atelier-dark.atelier-tool .sched-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .sched-badge.active,
+body.theme-atelier-dark.atelier-tool .sched-badge.active {
+  background: color-mix(in srgb, var(--accent-tool) 14%, var(--surface));
+  color: var(--accent-tool);
+  border-color: color-mix(in srgb, var(--accent-tool) 35%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .sched-badge.paused,
+body.theme-atelier-dark.atelier-tool .sched-badge.paused {
+  background: color-mix(in srgb, var(--accent-warm) 18%, var(--surface));
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent-warm) 45%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .sched-dot.running,
+body.theme-atelier-dark.atelier-tool .sched-dot.running {
+  background: var(--accent-tool);
+}
+
+body.theme-atelier-light.atelier-tool .sched-dot.stopped,
+body.theme-atelier-dark.atelier-tool .sched-dot.stopped {
+  background: var(--text-muted);
+}

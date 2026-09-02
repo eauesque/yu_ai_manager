@@ -1,0 +1,32 @@
+/** prompt-syntax styles — SD */
+
+.ps-sd-w                 { border-radius: 2px; }
+.ps-sd-w.ps-w-high       { background: rgba(80,220,140,0.1); }
+.ps-sd-w.ps-w-low        { background: rgba(80,220,140,0.05); }
+.ps-sd-w .ps-delim       { color: #66dda0; }
+.ps-sd-w .ps-weight      { color: #ffcc66; }
+
+.ps-sd-em .ps-bracket    { font-weight: 700; }
+.ps-sd-em {
+  background: rgba(255, 204, 102, 0.06);
+  border-radius: 2px;
+}
+
+.ps-lora    { color: #ffaa44; background: rgba(255,170,68,0.12); border-radius: 3px; box-shadow: inset 4px 0 0 rgba(255,170,68,0.12), inset -4px 0 0 rgba(255,170,68,0.12); font-weight: 500; }
+.ps-embed   { color: #44ddbb; background: rgba(68,221,187,0.1); border-radius: 3px; box-shadow: inset 4px 0 0 rgba(68,221,187,0.1), inset -4px 0 0 rgba(68,221,187,0.1); }
+.ps-hyper   { color: #66bbff; background: rgba(102,187,255,0.1); border-radius: 3px; box-shadow: inset 4px 0 0 rgba(102,187,255,0.1), inset -4px 0 0 rgba(102,187,255,0.1); }
+
+.ps-sd-alt               { background: rgba(80,200,240,0.08); border-radius: 2px; }
+.ps-sd-alt .ps-delim     { color: #66ccee; font-weight: 700; }
+.ps-sd-alt .ps-pipe      { color: #66ccee; }
+
+.ps-sd-sched             { background: rgba(68,221,187,0.08); border-radius: 2px; }
+.ps-sd-sched .ps-delim   { color: #44ddbb; }
+.ps-sd-sched .ps-weight  { color: #ffcc66; }
+
+.ps-sd-and {
+  color: #ff9944;
+  font-weight: 700;
+  background: rgba(255,153,68,0.15);
+  border-radius: 3px;
+}

@@ -1,0 +1,76 @@
+@charset "utf-8";
+/* main.css (aggregator)
+   Formerly a single 1,600+ line file; now split for maintainability.
+   Load order: base -> page/components -> widgets -> overrides.
+   All leaf files are listed flat — no nested @import chains.
+*/
+
+/* ── base ── */
+@import url("./base/base-theme.css");
+@import url("./base/base-layout.css");
+@import url("./base/base-controls.css");
+@import url("./base/base-buttons.css");
+@import url("./base/base-utilities.css");
+@import url("./base/base-icons.css");
+
+/* ── search ── */
+@import url("./search/search-results-header.css");
+@import url("./search/search-results-grid.css");
+@import url("./search/search-results-cards.css");
+@import url("./search/search-results-modal-nav.css");
+@import url("./search/search-results-prompts-actions.css");
+@import url("./search/search-results-container.css");
+@import url("./search/search-container-view.css");
+@import url("./search/search-skeleton.css");
+@import url("./search/search-states-status.css");
+@import url("./search/search-states-info-button.css");
+@import url("./search/search-controls-mode.css");
+@import url("./search/search-controls-status.css");
+@import url("./search/search-controls-meta.css");
+@import url("./search/search-floating-grid.css");
+@import url("./search/search-collections-sidebar.css");
+@import url("./search/search-util-bar.css");
+@import url("./search/search-a11y.css");
+
+/* ── modal ── */
+@import url("./modal/modal-base.css");
+@import url("./modal/modal-toolbar.css");
+@import url("./modal/modal-meta.css");
+@import url("./modal/modal-prompt-tags.css");
+@import url("./modal/modal-accordion.css");
+@import url("./modal/modal-viewer.css");
+@import url("./modal/modal-filmstrip.css");
+@import url("./modal/modal-tooltip.css");
+@import url("./modal/modal-wd-tags.css");
+@import url("./modal/modal-ocr.css");
+@import url("./modal/modal-s2t.css");
+@import url("./modal/modal-annotations.css");
+
+/* ── dock ── */
+@import url("./dock/dock-shell-vars.css");
+@import url("./dock/dock-shell-panel.css");
+@import url("./dock/dock-shell-controls.css");
+@import url("./dock/dock-keyboard.css");
+@import url("./dock/dock-cards.css");
+@import url("./dock/dock-overlays-toast.css");
+@import url("./dock/dock-overlays-copy.css");
+@import url("./dock/dock-overlays-dialog.css");
+
+/* ── widgets ── */
+@import url("./widgets/widgets-json-enhance.css");
+@import url("./widgets/widgets-progress-base.css");
+@import url("./widgets/widgets-progress-states.css");
+@import url("./widgets/widgets-input.css");
+@import url("./widgets/widgets-file-header.css");
+@import url("./widgets/widgets-prompt.css");
+@import url("./widgets/widgets-clickable-meta.css");
+
+/* ── keyboard ── */
+@import url("./keyboard/keyboard-help-theme.css");
+@import url("./keyboard/keyboard-help.css");
+
+/* ── uxpatch ── */
+@import url("./uxpatch/uxpatch-a11y.css");
+@import url("./uxpatch/uxpatch-responsive.css");
+@import url("./uxpatch/uxpatch-i18n-paths.css");
+@import url("./uxpatch/uxpatch-fixed-nav.css");

@@ -1,0 +1,44 @@
+{
+  "profile_version": "2",
+  "id": "camie_tagger_v2",
+  "display_name": "Camie Tagger v2",
+  "model_id": "Camais03/camie-tagger-v2",
+  "adapter_family": "camie",
+  "backend": "onnx",
+  "builtin": true,
+  "files": [
+    {"name": "camie-tagger-v2.onnx",          "required": true, "size_hint_mb": 600},
+    {"name": "camie-tagger-v2-metadata.json", "required": true, "size_hint_mb": 8}
+  ],
+  "preprocess_spec": {
+    "input_size": 512,
+    "resize_strategy": "longest_side_pad",
+    "pad_color": [255, 255, 255],
+    "channel_order": "RGB",
+    "dtype": "float32",
+    "scale": 0.00392156862745098,
+    "mean": [0.485, 0.456, 0.406],
+    "std": [0.229, 0.224, 0.225],
+    "layout": "NCHW"
+  },
+  "tag_source": {
+    "type": "json_dict",
+    "file": "camie-tagger-v2-metadata.json",
+    "container_key": "dataset_info.tag_mapping",
+    "idx_to_tag_key": "idx_to_tag",
+    "tag_to_category_key": "tag_to_category"
+  },
+  "output_spec": {"output_key": "refined_predictions", "activation": "sigmoid"},
+  "threshold_source": {"type": "global_per_category"},
+  "categories_mode": "from_tag_source",
+  "supports_categories": ["general", "rating", "meta", "year", "character", "artist", "copyright"],
+  "default_thresholds": {
+    "general": 0.55,
+    "character": 0.85,
+    "rating": 0.0,
+    "year": 0.7,
+    "meta": 0.7,
+    "artist": 0.7,
+    "copyright": 0.7
+  }
+}

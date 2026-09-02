@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="md_viewer.title">MD Viewer</title>
+  {% include "md_viewer/_style.html" %}
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+    <div class="mdv-layout">
+      {% include "md_viewer/_sidebar.html" %}
+      {% include "md_viewer/_content.html" %}
+    </div>
+  </main>
+  {% include "md_viewer/_script_utils.html" %}
+  {% include "md_viewer/_script.html" %}
+</body>
+</html>

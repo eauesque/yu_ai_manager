@@ -1,0 +1,1673 @@
+{
+  "a11y": {
+    "condition_added": "Condition « {label} » ajoutée",
+    "condition_menu_opened": "Menu de conditions ouvert",
+    "condition_removed": "Condition « {label} » supprimée",
+    "focus_search": "Champ de recherche actif",
+    "result_focus": "Élément {index} sur {total} : {label}",
+    "results_list_label": "Résultats de recherche"
+  },
+  "agent_journal": {
+    "scope_delete": "Supprimer",
+    "scopes_empty_with_default": "(aucune portée — défaut appliqué)"
+  },
+  "analysis": {
+    "analyzed_at": "Analysé le : {date}",
+    "btn_reanalyze": "Réanalyser",
+    "done_label": "Analysé",
+    "label": {
+      "ai_tags": "Tags IA :",
+      "color": "Couleur :",
+      "composition": "Composition :",
+      "engine": "Moteur :",
+      "mood": "Ambiance :",
+      "quality": "Qualité :",
+      "style": "Style :",
+      "suggestion": "Suggestion de prompt :"
+    },
+    "status_done": "✅ Terminé",
+    "status_done_engine": "✅ Terminé ({engine})",
+    "status_error": "❌ {error}",
+    "status_running": "Analyse en cours...",
+    "status_running_engine": "Analyse avec {engine}...",
+    "status_saved": "✅ {engine}"
+  },
+  "analysis.engine": "AI Engine",
+  "analysis.engine_default": "Auto",
+  "analysis.mode": "Analysis Mode",
+  "analysis.mode_full": "Full Analysis",
+  "analysis.mode_simple": "Color + Composition",
+  "analysis.model": "AI Model",
+  "api_error": {
+    "bad_zip_file": "Fichier d'archive corrompu",
+    "batch_empty": "Le lot est vide",
+    "batch_too_large": "La taille du lot dépasse la limite",
+    "collection_not_found": "Collection non trouvée",
+    "container_not_found": "Conteneur non trouvé pour ce fichier",
+    "convert_failed": "Échec de la conversion de format",
+    "debug_disabled": "Le mode debug n'est pas activé",
+    "empty_sql": "La requête SQL est vide",
+    "extract_register_failed": "Échec de l'enregistrement du fichier extrait",
+    "file_missing": "Fichier introuvable sur le disque",
+    "file_not_found": "Fichier non trouvé",
+    "gateway_no_db": "Base de données indisponible (mode passerelle)",
+    "internal_error": "Erreur interne du serveur",
+    "invalid_content_type": "Mauvais type de contenu",
+    "invalid_index": "Index invalide",
+    "invalid_json": "JSON malformé",
+    "invalid_json_object": "Un objet JSON est attendu",
+    "invalid_mode": "Mode invalide",
+    "invalid_request": "Requête invalide",
+    "invalid_value": "Valeur invalide",
+    "job_running": "Un travail par lots est déjà en cours",
+    "keyframe_error": "Échec de l'extraction des images clés",
+    "missing_dependency": "Bibliothèque requise manquante",
+    "missing_file_id": "L'ID du fichier est requis",
+    "model_not_available": "Le modèle n'est pas encore téléchargé",
+    "multi_stmt_rejected": "Les instructions SQL multiples ne sont pas autorisées",
+    "no_data": "Aucune donnée fournie",
+    "not_found": "Ressource non trouvée",
+    "not_select": "Seules les instructions SELECT sont autorisées",
+    "not_zip_member": "N'est pas un membre d'archive",
+    "path_required": "Le chemin est requis",
+    "purge_failed": "Échec de l'opération de purge",
+    "roots_summary_failed": "Échec du résumé des racines de scan",
+    "scan_roots_config_failed": "Échec de la configuration des racines de scan",
+    "sql_error": "Erreur d'exécution SQL",
+    "unsupported_type": "Ce type de fichier n'est pas pris en charge",
+    "write_rejected": "Les opérations d'écriture ne sont pas autorisées",
+    "zip_entry_not_found": "Entrée non trouvée dans l'archive",
+    "zip_not_found": "Fichier d'archive non trouvé",
+    "zip_path_traversal": "Traversée de chemin bloquée"
+  },
+  "boss_mode": {
+    "back": "Retour",
+    "brand": "Le Quotidien",
+    "esc_hint": "Appuyez sur Échap pour revenir",
+    "headline": "Les marchés mondiaux stables alors que l'inflation se modère dans les régions clés",
+    "story1": "Les banques centrales suggèrent un ralentissement du resserrement monétaire au prochain trimestre",
+    "story2": "Les coûts de transport maritime baissent avec la normalisation des routes transpacifiques",
+    "story3": "Les bénéfices tech dépassent les attentes grâce à la demande entreprise",
+    "story4": "Le secteur énergétique recule après un rallye de deux semaines sur les matières premières",
+    "subhead": "Les analystes ont noté une stabilité généralisée sur les principaux indices mardi, les investisseurs équilibrant les données sur l'emploi, les signaux politiques et les prix de l'énergie.",
+    "top_stories": "À la une",
+    "watchlist": "Liste de surveillance"
+  },
+  "bridge": {
+    "toolbar_legend": {
+      "title": "Légende / Symboles"
+    }
+  },
+  "bridge.syntax_warning.converting": "Converting...",
+  "bridge.syntax_warning.error": "Conversion failed",
+  "character": {
+    "negative_label": "Exclure :",
+    "section_title": "Prompts de personnage NovelAI V4"
+  },
+  "checkpoint": {
+    "option_count": "{name} ({count})"
+  },
+  "collections": {
+    "created": "Collection créée",
+    "deleted": "Collection supprimée",
+    "renamed": "Collection renommée"
+  },
+  "common": {
+    "clear": "Effacer",
+    "enabled": "Activé",
+    "error_prefix": "Erreur :",
+    "loading": "Chargement...",
+    "range_sep": "–",
+    "reset": "Réinitialiser"
+  },
+  "common.saved": "Saved",
+  "common.saving": "Saving...",
+  "conditions": {
+    "aiAnalyzed": {
+      "label": "🧠 Analysé par IA"
+    },
+    "artist": {
+      "label": "🎨 Artiste",
+      "placeholder": "nom de l'artiste"
+    },
+    "checkpoint": {
+      "label": "🎯 Checkpoint",
+      "placeholder": "ex. animagine, pony"
+    },
+    "clear_all": "Tout effacer",
+    "collection": {
+      "all": "Tous les favoris",
+      "label": "⭐ Collection"
+    },
+    "csvLimit": {
+      "label": "📥 Limite d'export CSV"
+    },
+    "disabled_in_grouped": "Non disponible en vue dossier/ZIP",
+    "favOnly": {
+      "label": "⭐ Favoris uniquement"
+    },
+    "format": {
+      "ext_filter_hint": "Filtrer par extension (optionnel)",
+      "ext_group_audio": "Audio",
+      "ext_group_container": "Conteneur",
+      "ext_group_image": "Image",
+      "ext_group_video": "Vidéo",
+      "label": "📄 Format"
+    },
+    "hasTags": {
+      "label": "🏷️ Étiqueté"
+    },
+    "hint": {
+      "count_many": "{count} conditions",
+      "count_one": "1 condition"
+    },
+    "inCharNeg": {
+      "label": "🚫 Dans négatif perso",
+      "placeholder": "recherche négatif personnage"
+    },
+    "inCharPos": {
+      "label": "✨ Dans positif perso",
+      "placeholder": "recherche positif personnage"
+    },
+    "inFolder": {
+      "label": "📂 Dossier",
+      "placeholder": "partie du chemin ex. o:\\test"
+    },
+    "inNegative": {
+      "label": "🚫 Dans le négatif",
+      "placeholder": "mot-clé dans le négatif"
+    },
+    "inPrompt": {
+      "label": "🔤 Dans le prompt",
+      "placeholder": "mot-clé dans le prompt"
+    },
+    "limit": {
+      "label": "#️⃣ Quantité",
+      "short_label": "Nombre"
+    },
+    "model": {
+      "label": "🤖 Modèle"
+    },
+    "orTags": {
+      "label": "🔀 Tags OR",
+      "placeholder": "contient l'un des (séparés par des virgules)"
+    },
+    "period": {
+      "label": "📅 Période"
+    },
+    "remove": "Supprimer la condition",
+    "resolution": {
+      "label": "📐 Résolution"
+    },
+    "sort": {
+      "label": "↕️ Tri"
+    },
+    "tagCase": {
+      "label": "Aa Sensible à la casse"
+    },
+    "toggle": {
+      "close": "▲ Fermer",
+      "more": "▼ Plus"
+    }
+  },
+  "container": {
+    "folder_items": "{count} images dans le dossier",
+    "no_members": "Le conteneur n'a aucun membre indexé.",
+    "preload_done": "La vue par catégorie Dossier / ZIP est prête",
+    "preloading_thumbs": "Génération des miniatures... ({done}/{total})",
+    "zip_items": "{count} images dans le ZIP"
+  },
+  "convert": {
+    "btn_expand_dynamic": "Dynamic Prompts",
+    "btn_restore": "Restaurer",
+    "failed": "Échec de la conversion",
+    "failed_with_error": "Échec de la conversion : {error}",
+    "label": {
+      "nai": "Format NAI ",
+      "sd": "Format SD "
+    }
+  },
+  "ctx.ai_analyze": "AI Analysis",
+  "ctx.clear_rating": "Clear",
+  "ctx.copied": "Copied",
+  "ctx.copied_nai": "Copied as NAI",
+  "ctx.copied_sd": "Copied as SD",
+  "ctx.copy_nai": "Copy as NAI",
+  "ctx.copy_negative": "Copy negative",
+  "ctx.copy_path": "Copy file path",
+  "ctx.copy_prompt": "Copy prompt",
+  "ctx.copy_sd": "Copy as SD",
+  "ctx.favorite": "Favorite ☆",
+  "ctx.find_similar": "Find similar",
+  "ctx.path_copied": "Path copied",
+  "ctx.qr_share": "Share via QR",
+  "ctx.rating": "Rating",
+  "ctx.save_pl": "Save to PL",
+  "ctx.send_bridge": "Send to Bridge",
+  "ctx.show_detail": "Show detail",
+  "detail": {
+    "audio_unsupported": "Votre navigateur ne prend pas en charge la lecture audio.",
+    "image_alt": "Image",
+    "load_failed": "Impossible de charger le détail",
+    "modal": {
+      "analysis_mode": "Basculer le mode analyse",
+      "audio_playback": "Lecture audio",
+      "autoplay": "Lecture auto (P)",
+      "autoplay_interval": "Intervalle (secondes)",
+      "bar_collapse": "Réduire la barre",
+      "bar_expand": "Développer la barre",
+      "close": "Fermer",
+      "container_items": "{count} éléments",
+      "container_view": "Vue conteneur",
+      "display": "Affichage :",
+      "favorite": "Basculer favori",
+      "fullscreen": "Plein écran",
+      "info_toggle": "Basculer le panneau d'info",
+      "mode_fit": "Ajuster",
+      "mode_fit_custom": "Personnalisé",
+      "mode_fit_height": "Ajuster H",
+      "mode_fit_width": "Ajuster L",
+      "mode_original": "Original",
+      "mute": "Couper le son (M)",
+      "next": "Image suivante",
+      "prev": "Image précédente",
+      "repeat_off": "Répétition : DÉSACTIVÉE (R)",
+      "repeat_on": "Répétition : ACTIVÉE (R)",
+      "resume_off": "Reprise désactivée",
+      "resume_on": "Reprise activée",
+      "spread_direction": "Sens de lecture (D)",
+      "spread_view": "Vue étalée (B)",
+      "toast_repeat_off": "Répétition : DÉSACTIVÉE",
+      "toast_repeat_on": "Répétition : ACTIVÉE",
+      "toast_resume_off": "Reprise : DÉSACTIVÉE",
+      "toast_resume_on": "Reprise : ACTIVÉE",
+      "toast_speed": "Vitesse : {rate}x",
+      "toast_spread_ltr": "Lecture : G→D",
+      "toast_spread_nav_rtl": "← Suivant / Précédent →",
+      "toast_spread_off": "Étalé : DÉSACTIVÉ",
+      "toast_spread_on": "Étalé : ACTIVÉ",
+      "toast_spread_rtl": "Lecture : D→G",
+      "toolbar_aria": "Commandes d'affichage de l'image",
+      "toolbar_hide": "Masquer la barre d'outils",
+      "toolbar_overflow_menu": "Plus",
+      "toolbar_show": "Afficher la barre d'outils",
+      "unmute": "Activer le son (M)",
+      "video_playback": "Lecture vidéo",
+      "viewing_mode": "Mode visionnage (V)",
+      "zoom_in": "Zoomer",
+      "zoom_out": "Dézoomer",
+      "zoom_reset": "Réinitialiser le zoom"
+    },
+    "save_failed": "Échec de l'enregistrement",
+    "saved_to_library": "Enregistré dans la bibliothèque de prompts",
+    "video_unsupported": "Votre navigateur ne prend pas en charge la balise vidéo."
+  },
+  "detail.ann_add_label": "Add note",
+  "detail.ann_delete_confirm": "Delete this annotation?",
+  "detail.ann_empty": "No annotations yet.",
+  "detail.ann_load_failed": "Failed to load annotations.",
+  "detail.ann_placeholder": "Add a personal note for this file...",
+  "detail.ann_save_failed": "Save failed",
+  "detail.ann_source_user": "Your notes",
+  "detail.s2t_copied": "Copied to clipboard",
+  "detail.s2t_done": "Transcription complete",
+  "detail.s2t_error": "Transcription failed",
+  "detail.s2t_no_transcript": "No transcript yet. Click \"Transcribe\" to start.",
+  "detail.s2t_processing": "Processing...",
+  "detail.s2t_segments": "Segments",
+  "detail.s2t_transcribe": "Transcribe",
+  "detail.search_by_prompt": "Search by Prompt",
+  "detail.tab_ai": "AI Analysis",
+  "detail.tab_analysis_trace": "Trace",
+  "detail.tab_annotations": "Notes",
+  "detail.tab_info": "Info",
+  "detail.tab_ocr": "OCR",
+  "detail.tab_s2t": "S2T",
+  "detail.trace_date": "Analyzed",
+  "detail.trace_error": "Failed to load analysis trace",
+  "detail.trace_loading": "Loading...",
+  "detail.trace_meta_source": "Metadata Source",
+  "detail.trace_model": "Model",
+  "detail.trace_none": "No analysis trace",
+  "detail.trace_quality": "Quality Analysis",
+  "detail.trace_quality_score": "Quality",
+  "detail.trace_s2t": "Speech Recognition",
+  "detail.trace_source": "Source",
+  "detail.trace_tags": "tags",
+  "ext": {
+    "builtin-a1111": {
+      "config": {
+        "parse_negative": {
+          "description": "Séparer et extraire la section Negative prompt:",
+          "label": "Extraire aussi le prompt négatif"
+        },
+        "parse_params": {
+          "description": "Extraire les paramètres tels que Steps, Sampler, CFG Scale, Model, etc.",
+          "label": "Extraire aussi les paramètres de génération"
+        }
+      }
+    },
+    "builtin-chatlog": {
+      "config": {
+        "api_key": {
+          "description": "Requise pour OpenAI / Claude API. Laisser vide pour Ollama local",
+          "label": "Clé API"
+        },
+        "base_url": {
+          "description": "URL du point de terminaison API pour le moteur IA",
+          "label": "URL de base de l'API"
+        },
+        "engine_type": {
+          "description": "Type de moteur IA utilisé pour l'analyse de conversation",
+          "label": "Moteur IA"
+        },
+        "model": {
+          "description": "Nom du modèle à utiliser (ex. llama3.2:latest, gpt-4o-mini)",
+          "label": "Nom du modèle"
+        }
+      }
+    },
+    "builtin-comfyui": {
+      "config": {
+        "extract_workflow": {
+          "description": "Stocker le JSON du workflow ComfyUI dans raw_meta_json",
+          "label": "Extraire aussi les infos de workflow"
+        }
+      }
+    },
+    "builtin-comfyui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Passer la boîte de dialogue de confirmation"
+        },
+        "default_sampler": {
+          "label": "Sampler par défaut"
+        },
+        "default_scheduler": {
+          "label": "Scheduler par défaut"
+        }
+      }
+    },
+    "builtin-nai-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Passer la boîte de dialogue de confirmation"
+        },
+        "default_model": {
+          "label": "Modèle par défaut"
+        },
+        "default_noise_schedule": {
+          "label": "Schedule de bruit par défaut"
+        },
+        "default_sampler": {
+          "label": "Sampler par défaut"
+        }
+      }
+    },
+    "builtin-novelai-v4": {
+      "config": {
+        "extract_vibe_transfer": {
+          "description": "Extraire la force/description du Vibe Transfer",
+          "label": "Extraire aussi les infos de Vibe Transfer"
+        },
+        "merge_character_prompts": {
+          "description": "Concaténer base_caption + char_captions avec des virgules",
+          "label": "Fusionner les prompts de personnage dans la base"
+        }
+      }
+    },
+    "builtin-ocr": {
+      "config": {
+        "batch_export_format": {
+          "label": "Format d'export par lots"
+        },
+        "batch_output_dir": {
+          "description": "Destination côté serveur pour l'export par lots. Si vide, téléchargement en ZIP",
+          "label": "Répertoire de sortie par lots (vide = téléchargement)"
+        },
+        "default_target_lang": {
+          "label": "Langue cible de traduction par défaut"
+        },
+        "default_task": {
+          "label": "Tâche OCR par défaut"
+        },
+        "manga_ocr_enabled": {
+          "label": "Préférer manga-ocr (pour la tâche ocr_manga)"
+        }
+      }
+    },
+    "builtin-prompt-syntax": {
+      "config": {
+        "auto_detect": {
+          "description": "Détecter automatiquement la syntaxe NAI/SD/DP dans le texte d'entrée",
+          "label": "Détection auto de la syntaxe"
+        },
+        "show_errors": {
+          "description": "Afficher les avertissements pour les crochets non fermés et les poids anormaux",
+          "label": "Afficher les erreurs"
+        }
+      }
+    },
+    "builtin-sd-nai-convert": {
+      "config": {
+        "convert_emphasis": {
+          "description": "Convertir aussi la syntaxe d'emphase entre SD ((tag)) et NAI {tag}",
+          "label": "Convertir aussi la syntaxe d'emphase"
+        },
+        "strip_embedding": {
+          "description": "Supprimer automatiquement les tags embedding:... lors de la conversion SD vers NAI",
+          "label": "Supprimer les tags Embedding lors de la conversion NAI"
+        },
+        "strip_lora": {
+          "description": "Supprimer automatiquement les tags <lora:...> lors de la conversion SD vers NAI",
+          "label": "Supprimer les tags LoRA lors de la conversion NAI"
+        }
+      }
+    },
+    "builtin-sd-webui-bridge": {
+      "config": {
+        "auto_send": {
+          "label": "Passer la boîte de dialogue de confirmation"
+        },
+        "default_sampler": {
+          "label": "Sampler par défaut"
+        }
+      }
+    }
+  },
+  "fleet.button.back_to_cowork": "← Back to LAN Cowork",
+  "fleet.button.refresh": "Refresh",
+  "fleet.button.restart_node": "Redémarrer ce nœud",
+  "fleet.consent.banner.approve_once": "Approve once",
+  "fleet.consent.banner.approve_permanent": "Approve permanently",
+  "fleet.consent.banner.countdown": "{sec} seconds remaining",
+  "fleet.consent.banner.deny": "Deny",
+  "fleet.consent.banner.title": "Remote update request from {peer}",
+  "fleet.consent.chief.cancel": "Cancel",
+  "fleet.consent.chief.re_request": "Re-request",
+  "fleet.consent.chief.send_request": "Send consent request",
+  "fleet.consent.chief.send_request_for": "Remote update disabled for {peer}. Send consent request?",
+  "fleet.consent.chief.timeout": "Consent timed out. Re-request?",
+  "fleet.consent.chief.waiting": "Waiting for consent ⏱ ({sec}s remaining)",
+  "fleet.error.branch_not_allowed": "Branch not allowed",
+  "fleet.error.cannot_dispatch_self": "Cannot dispatch to chief itself",
+  "fleet.error.consent_denied": "Consent was denied.",
+  "fleet.error.consent_token_invalid": "Consent invalidated. Please re-request.",
+  "fleet.error.deny_cooldown": "Deny cooldown active ({sec}s remaining)",
+  "fleet.error.git_not_available": "git is not available",
+  "fleet.error.invalid_source": "Invalid source",
+  "fleet.error.local_path_not_allowed": "Local path not allowed",
+  "fleet.error.not_in_allowlist": "Not in allowlist",
+  "fleet.error.other_chief_pending": "Another chief is awaiting consent ({sec}s remaining)",
+  "fleet.error.remote_update_disabled": "Remote update is disabled",
+  "fleet.error.update_failed_token_consumed": "Update failed — consent consumed. Re-request?",
+  "fleet.error.update_in_progress": "Update already in progress",
+  "fleet.logs.autoscroll": "Auto-scroll",
+  "fleet.logs.clear": "Effacer",
+  "fleet.logs.copied": "Copié !",
+  "fleet.logs.copy": "Copier",
+  "fleet.logs.copy_failed": "Échec de la copie",
+  "fleet.logs.download": "Télécharger",
+  "fleet.logs.pause": "Pause",
+  "fleet.logs.peer_select": "Select Peer",
+  "fleet.logs.placeholder": "Logs — select a peer to start streaming",
+  "fleet.logs.resume": "Resume",
+  "fleet.node.status.degraded": "Info Unavailable",
+  "fleet.node.status.offline": "Offline",
+  "fleet.node.status.online": "Online",
+  "fleet.node.status.restarting": "Restarting",
+  "fleet.settings.col.action": "Action",
+  "fleet.settings.col.log_stream": "Log stream",
+  "fleet.settings.col.peer": "Peer",
+  "fleet.settings.col.status": "Status",
+  "fleet.settings.col.update": "Update",
+  "fleet.settings.local.allow_remote_update": "Enable remote updates (master switch)",
+  "fleet.settings.local.desc": "Configure whether this node allows other peers to stream logs or perform remote updates. Toggle checkboxes per peer.",
+  "fleet.settings.local.save": "Save",
+  "fleet.settings.local.title": "This node's settings",
+  "fleet.settings.remote.already_granted": "Already granted",
+  "fleet.settings.remote.desc": "Use the pairing token to add the chief's peer_id to the target peer's allowlist. You don't need to log in on the peer, but a pairing token is required.",
+  "fleet.settings.remote.done": "Done",
+  "fleet.settings.remote.failed": "Failed",
+  "fleet.settings.remote.grant": "Grant on this peer",
+  "fleet.settings.remote.not_granted": "Not granted",
+  "fleet.settings.remote.revoke": "Revoke on this peer",
+  "fleet.settings.remote.status_unreachable": "Cannot check",
+  "fleet.settings.remote.title": "Remote grant (chief only)",
+  "fleet.settings.save_failed": "Save failed",
+  "fleet.settings.saved": "Saved",
+  "fleet.tab.logs": "Logs",
+  "fleet.tab.overview": "Overview",
+  "fleet.tab.settings": "Settings",
+  "fleet.tab.update": "Update",
+  "fleet.title": "Fleet Admin",
+  "fleet.update.branch": "Branch:",
+  "fleet.update.button.dispatch": "Update Selected Nodes",
+  "fleet.update.button.pull_restart": "Pull & Restart",
+  "fleet.update.button.restart_only": "Restart only",
+  "fleet.update.button.restart_only_dispatch": "Restart selected nodes",
+  "fleet.update.col.action": "Action",
+  "fleet.update.col.branch": "Branch",
+  "fleet.update.col.commit": "Commit",
+  "fleet.update.col.node": "Node",
+  "fleet.update.col.progress": "Progress",
+  "fleet.update.col.version": "Version",
+  "fleet.update.confirm.chief": "Updating this node will temporarily disconnect the admin UI. Continue?",
+  "fleet.update.confirm.restart": "Restart the selected nodes?",
+  "fleet.update.confirm.update": "Update the selected nodes? They will git pull and restart. Continue?",
+  "fleet.update.no_selection": "Please select at least one node",
+  "fleet.update.placeholder": "Update tab will be implemented in Phase 4.",
+  "fleet.update.source": "Source:",
+  "fleet.warning.multi_chief": "Multiple chiefs detected. Please restart the conflicting chief node.",
+  "genai.chat_delete_confirm": "Delete this conversation?",
+  "genai.chat_image_only": "Image-only messages are not supported",
+  "genai.chat_no_conversations": "No conversations",
+  "genai.chat_rename_prompt": "Enter a conversation name",
+  "genai.chat_search_sources": "Search sources",
+  "grid": {
+    "auto": "Auto",
+    "col_fixed": "cols (fixe)",
+    "col_unit": "cols",
+    "count_prefix": "Affichage : ",
+    "count_unit": " éléments / ",
+    "image_only": " / images uniquement",
+    "size_hint": " / la taille s'applique en mode auto"
+  },
+  "grouping": {
+    "btn_archive": "Archive",
+    "btn_files": "Fichiers",
+    "btn_folders": "Dossiers",
+    "btn_zip": "ZIP",
+    "count_folders": "{count} dossiers trouvés",
+    "count_zips": "{count} archives ZIP trouvées",
+    "rebuild": "Reconstruire les groupes",
+    "rebuilt": "Groupes reconstruits : {folders} dossiers, {zips} ZIP",
+    "summary": "Groupés : {visible} / {total}",
+    "summary_folders": "Dossiers : {visible} ({total} fichiers)",
+    "summary_zips": "ZIP : {visible} ({total} fichiers)"
+  },
+  "input_hint": {
+    "artist": "Échap : Quitter | Alt+0/$ : Début/fin de ligne | Ctrl+W : Supprimer mot | ? : Aide",
+    "condition": "Échap : Quitter | / : Aller à la recherche | ? : Liste des raccourcis",
+    "default": "/ : Recherche | Échap : Fermer | ? : Aide clavier",
+    "inPrompt": "Échap : Quitter | Alt+W/B : Mot suivant/précédent | Ctrl+U : Tout effacer | ? : Aide",
+    "tagQuery": "Échap : Quitter | / : Retour à la recherche | Alt+W/B : Mot suivant/précédent | Ctrl+K : Supprimer jusqu'à la fin | ? : Aide"
+  },
+  "inspect": {
+    "conv_expand": "Résultat d'expansion Dynamic Prompt",
+    "conv_nai_sd": "Résultat NAI → SD",
+    "conv_sd_nai": "Résultat SD → NAI",
+    "conv_warn_already_nai": "L'entrée semble déjà être au format NAI",
+    "conv_warn_already_sd": "L'entrée semble déjà être au format SD",
+    "conv_warn_mixed": "Les syntaxes NAI et SD sont mélangées dans l'entrée",
+    "copied": "Copié",
+    "copy": "Copier",
+    "error": "Erreur",
+    "fmt_a1111": "Format : A1111 (Stable Diffusion)",
+    "fmt_json": "Format : JSON",
+    "fmt_plain": "Format : Texte brut",
+    "negative": "Négatif",
+    "network_error": "Erreur réseau",
+    "open_in_sim": "Ouvrir dans le simulateur de prompt",
+    "output": "Sortie",
+    "parse_error": "Erreur d'analyse",
+    "positive": "Positif",
+    "resolution": "Résolution",
+    "sim_choices": "choix",
+    "sim_combinations": "{count} combinaisons",
+    "sim_depth": "Profondeur",
+    "sim_dp_analyze": "Analyse de probabilité DP",
+    "sim_link": "Ouvrir le simulateur de prompt",
+    "sim_link_text": "Ouvrir le simulateur de prompt",
+    "sim_pick_n": "Choisir {n} parmi {total}",
+    "sim_probability": "Probabilité",
+    "sim_syntax": "Syntaxe",
+    "sim_token": "Token",
+    "sim_weight": "Poids",
+    "sim_weight_calc": "Calculateur de poids d'emphase",
+    "tag_count": "Nombre de tags",
+    "wh_not_found": "Taille : motif LxH ou largeur/hauteur non trouvé",
+    "wh_swap_result": "Résultat d'échange L/H",
+    "zip_select": "Image dans ZIP"
+  },
+  "kb_help": {
+    "basic": {
+      "close_or_blur": "Fermer / quitter le focus",
+      "focus_search": "Activer le champ de recherche (depuis n'importe où)",
+      "run_search": "Lancer la recherche",
+      "screen_lock": "Verrouillage écran (si PIN défini)",
+      "title": "Basique",
+      "toggle_help": "Afficher/masquer cette aide"
+    },
+    "edit": {
+      "delete_prev_word": "Supprimer le mot précédent",
+      "kill_line": "Supprimer toute la ligne",
+      "kill_to_end": "Supprimer du curseur à la fin de la ligne",
+      "title": "Édition de texte (style Emacs)"
+    },
+    "existing": {
+      "open_condition_menu": "Ouvrir le menu d'ajout de condition",
+      "regex_cheatsheet": "Ouvrir l'aide-mémoire regex",
+      "title": "Raccourcis existants",
+      "toggle_regex": "Activer/désactiver regex"
+    },
+    "footer": {
+      "close": "pour fermer",
+      "hint_line": "Astuce : le focus sur un champ affiche l'aide en bas",
+      "or": "ou",
+      "regex_intro_link": "Qu'est-ce qu'une regex ? (Introduction pour débutants)"
+    },
+    "move": {
+      "delete_char": "Supprimer le caractère",
+      "line_end": "Aller à la fin de la ligne",
+      "line_start": "Aller au début de la ligne",
+      "next_word": "Aller au mot suivant",
+      "prev_word": "Aller au mot précédent",
+      "title": "Déplacement du curseur (style Vim)"
+    },
+    "regex_intro": {
+      "desc": "Trois exemples suffisent pour faciliter la recherche",
+      "open": "Ouvrir l'introduction",
+      "title": "Nouveau avec les regex ?"
+    },
+    "title": "Raccourcis clavier"
+  },
+  "keyboard": {
+    "close": "Fermer",
+    "guide": {
+      "autoplay": "lecture auto",
+      "close": "fermer",
+      "copy": "copier",
+      "dismiss": "Masquer le guide clavier",
+      "dismiss_toast": "Appuyez sur H pour réafficher",
+      "filmstrip_nav": "fichier précédent/suivant (fonctionne dans les médias)",
+      "filmstrip_toggle": "pellicule",
+      "focus_move": "déplacer focus",
+      "media_controls": "Médias",
+      "modal_label": "Modal",
+      "move": "déplacer",
+      "open": "ouvrir",
+      "prev_next": "précédent/suivant",
+      "prev_next_or_seek": "précédent/suivant (ou avancer 5s dans les médias)",
+      "results_label": "Résultats",
+      "scroll": "Défilement",
+      "speed": "Vitesse",
+      "spread_toggle": "vue étalée",
+      "to_search": "vers recherche",
+      "toggle_btn": "Guide clavier (H)",
+      "volume": "Vol"
+    },
+    "help": "Aide",
+    "prev_next": "Image précédente/suivante"
+  },
+  "lan_cowork.import.done": "Importation terminée",
+  "lan_cowork.import.partial": "Importation partiellement terminée",
+  "lan_cowork.import.err.no_folder": "Veuillez indiquer un dossier d’importation",
+  "lan_cowork.import.err.no_peer": "Veuillez sélectionner un pair à importer",
+  "lan_cowork.import.error": "Échec de l’importation",
+  "lan_cowork.import.folder": "Dossier d’importation",
+  "lan_cowork.import.folder.pick_failed": "Failed to choose folder",
+  "lan_cowork.import.mode": "Mode",
+  "lan_cowork.import.mode.diff": "Différentiel",
+  "lan_cowork.import.mode.full": "Complet",
+  "lan_cowork.import.opt.favorites": "Inclure les favoris",
+  "lan_cowork.import.opt.merge": "Fusionner les métadonnées (en cas de correspondance de hachage)",
+  "lan_cowork.import.peer": "Pair source",
+  "lan_cowork.import.running": "Importation en cours...",
+  "lan_cowork.import.start": "Démarrer l’importation",
+  "lan_cowork.import.timeout": "Délai d’importation dépassé",
+  "lan_cowork.import.title": "Importation distante",
+  "lan_cowork.peers.discover_error": "Échec de la recherche de pairs",
+  "lan_cowork.peers.empty": "Aucun pair connecté",
+  "lan_cowork.peers.extension_disabled": "L'extension LAN Cowork est désactivée. Activez-la depuis l'administration des extensions et redémarrez le serveur.",
+  "lan_cowork.peers.offline": "Hors ligne",
+  "lan_cowork.peers.online": "En ligne",
+  "lan_cowork.peers.pair_btn": "Pair request",
+  "lan_cowork.peers.pair_pin_prompt": "Enter the PIN shown on the other side.",
+  "lan_cowork.peers.pair_request_error": "Failed to request pairing",
+  "lan_cowork.peers.pair_request_sent": "Approve on the other side, then enter the displayed PIN.",
+  "lan_cowork.peers.pair_requesting": "Requesting...",
+  "lan_cowork.peers.pair_success": "Pairing completed",
+  "lan_cowork.peers.pair_verify_error": "PIN verification failed",
+  "lan_cowork.peers.paired": "Paired",
+  "lan_cowork.peers.refresh": "Actualiser",
+  "lan_cowork.peers.remove_btn": "Remove",
+  "lan_cowork.peers.remove_confirm": "Remove this peer?",
+  "lan_cowork.peers.remove_error": "Failed to remove peer",
+  "lan_cowork.peers.remove_success": "Removed",
+  "lan_cowork.peers.title": "Pairs connectés",
+  "lan_cowork.peers.unpaired": "Unpaired",
+  "lan_cowork.pin_modal.error.empty": "Please enter PIN",
+  "lan_cowork.title": "LAN Cowork",
+  "lc_peers": {
+    "pair_modal": {
+      "close": "Fermer"
+    },
+    "sse": {
+      "paired": "Appareils appairés",
+      "pairing_request": "Demande d'appairage reçue"
+    }
+  },
+  "lc_peers.fleet.enable_notifications": "Enable notifications",
+  "lc_peers.nav.back": "← LAN Cowork",
+  "lc_peers.page_title": "Gestion des pairs - LAN Cowork",
+  "lc_peers.pair_modal.cancel": "Annuler",
+  "lc_peers.pair_modal.confirm": "Confirmer",
+  "lc_peers.pair_modal.done": "Fermer",
+  "lc_peers.pair_modal.error.generic": "Une erreur s'est produite",
+  "lc_peers.pair_modal.error.unknown": "L'état du nœud distant n'a pas pu être confirmé.",
+  "lc_peers.pair_modal.paired_toast": "Appairage terminé",
+  "lc_peers.pair_modal.pin.error.empty": "Veuillez saisir le PIN",
+  "lc_peers.pair_modal.pin.error.invalid": "PIN incorrect",
+  "lc_peers.pair_modal.pin.error.retryable": "PIN incorrect. Il reste {attempts} tentatives.",
+  "lc_peers.pair_modal.pin.error.attempts_exhausted": "Le nombre maximal de tentatives de PIN est atteint.",
+  "lc_peers.pair_modal.repair_steps": "Recommencez l'appairage et demandez à l'administrateur de l'autre nœud d'approuver la nouvelle demande.",
+  "lc_peers.pair_modal.pin.label": "PIN",
+  "lc_peers.pair_modal.pin.placeholder": "••••••",
+  "lc_peers.pair_modal.step1.msg": "Envoi de la demande d'appairage...",
+  "lc_peers.pair_modal.step2.msg": "Approuvez le PIN sur l'hôte distant, puis saisissez le PIN affiché.",
+  "lc_peers.pair_modal.step3.msg": "Appairage terminé.",
+  "lc_peers.pair_modal.title": "Appairage",
+  "lc_peers.peers.col.actions": "Actions",
+  "lc_peers.peers.col.address": "Adresse",
+  "lc_peers.peers.col.name": "Nom du pair",
+  "lc_peers.peers.col.status": "Statut",
+  "lc_peers.peers.col.token_expires": "Expiration du token",
+  "lc_peers.peers.empty": "Aucun pair connecté",
+  "lc_peers.peers.load_error": "Échec du chargement de la liste des tokens",
+  "lc_peers.peers.pair_request_error": "Échec de la demande d'appairage",
+  "lc_peers.peers.refresh": "Actualiser",
+  "lc_peers.peers.revoke": "Révoquer",
+  "lc_peers.peers.revoke_confirm": "Révoquer le token de ce pair ?",
+  "lc_peers.peers.revoke_error": "Échec de la révocation",
+  "lc_peers.peers.revoked": "Token révoqué",
+  "lc_peers.peers.status.auth_lost": "Ré-appairage requis",
+  "lc_peers.peers.status.paired": "Appairé",
+  "lc_peers.peers.title": "Pairs connectés",
+  "lc_peers.requests.approve_error": "Échec de l'approbation",
+  "lc_peers.requests.col.actions": "Actions",
+  "lc_peers.requests.col.peer_name": "Nom du pair",
+  "lc_peers.requests.col.requester": "Demandeur",
+  "lc_peers.requests.col.time": "Reçu le",
+  "lc_peers.requests.empty": "Aucune demande d'appairage en attente",
+  "lc_peers.requests.load_error": "Échec du chargement de la liste des demandes",
+  "lc_peers.requests.refresh": "Actualiser",
+  "lc_peers.requests.reject_error": "Échec du rejet",
+  "lc_peers.requests.rejected": "Rejeté",
+  "lc_peers.requests.title": "Demandes d'appairage en attente",
+  "lc_peers.title": "Gestion des pairs",
+  "llm_router": {
+    "aliases_section": "Alias de routage",
+    "backends_section": "Backends",
+    "col": {
+      "actions": "Actions",
+      "alias": "Alias",
+      "alias_name": "Alias",
+      "base_url": "URL de base",
+      "last_seen": "Vu dernièrement",
+      "models": "Modèles",
+      "physical": "Modèle physique",
+      "slo": "SLO",
+      "status": "État"
+    },
+    "disable": "Désactiver",
+    "disabled_badge": "[DÉSACTIVÉ]",
+    "enable": "Activer",
+    "loading": "Chargement...",
+    "no_aliases": "Aucun alias de routage configuré",
+    "no_backends": "Aucun backend enregistré",
+    "refresh": "Rafraîchir",
+    "refresh_all": "Tout rafraîchir",
+    "refresh_failed": "Échec du rafraîchissement",
+    "refreshed": "Rafraîchi",
+    "source": {
+      "mdns": "mDNS",
+      "static": "Statique"
+    },
+    "status": {
+      "error": "erreur",
+      "ok": "ok",
+      "unknown": "inconnu",
+      "unreachable": "injoignable"
+    },
+    "summary": {
+      "aliases": "Alias de routage",
+      "backends": "Backends",
+      "enabled": "Activés",
+      "models": "Modèles"
+    },
+    "title": "LLM Router",
+    "toggle_failed": "Échec du basculement du backend"
+  },
+  "mesh_inference": {
+    "action": {
+      "local_only": "Mode local uniquement",
+      "local_only_tooltip": "Le pair local n'a aucun type d'inférence effectif",
+      "refresh": "Rafraîchir"
+    },
+    "col": {
+      "peer": "Pair"
+    },
+    "empty": "Aucun pair connecté.",
+    "subtitle": "Basculer l'inférence distribuée par pair et par type d'inférence.",
+    "title": "Matrice d'inférence Mesh",
+    "toast": {
+      "load_failed": "Échec du chargement",
+      "refreshed": "Rafraîchi",
+      "save_failed": "Échec de l'enregistrement",
+      "saved": "Enregistré"
+    },
+    "type": {
+      "clip": "clip",
+      "tagger": "tagger",
+      "whisper": "whisper",
+      "yolo": "yolo"
+    }
+  },
+  "meta": {
+    "checkpoint_search": "Recherche checkpoint",
+    "click_open_dir": "Cliquer pour ouvrir le répertoire",
+    "click_to_copy": "Cliquer pour copier",
+    "copy_original": "Copier",
+    "download_json": "Télécharger",
+    "negative_label": "Négatif",
+    "no_metadata": "Aucune métadonnée",
+    "parameters_title": "Paramètres",
+    "parse_success": "Analyse réussie",
+    "positive_label": "Positif",
+    "seed_copy": "Copier le seed"
+  },
+  "nav": {
+    "back_title": "Retour à la position précédente",
+    "bottom_aria": "Aller en bas",
+    "bottom_title": "Aller en bas (Fin)",
+    "llm_router": "LLM Router",
+    "mesh_inference": "Mesh Inference",
+    "top_aria": "Aller en haut",
+    "top_title": "Aller en haut (Accueil)"
+  },
+  "nav.lan_cowork": "LAN Cowork",
+  "path": {
+    "copy_label": "Chemin ",
+    "copy_label_filename": "Nom de fichier ",
+    "copy_label_zip": "Chemin ZIP ",
+    "copy_title": "Copier le chemin",
+    "copy_title_filename": "Copier le nom de fichier",
+    "copy_title_zip": "Copier le chemin ZIP",
+    "label": "Chemin :"
+  },
+  "period": {
+    "12h": "12h",
+    "24h": "24h",
+    "3h": "3h",
+    "8h": "8h",
+    "custom": "Personnalisé",
+    "days3": "3 jours",
+    "days5": "5 jours",
+    "half_year": "6 mois",
+    "last_month": "Mois dernier",
+    "month1": "1 mois",
+    "month2": "2 mois",
+    "month3": "3 mois",
+    "month9": "9 mois",
+    "week1": "1 semaine",
+    "week2": "2 semaines",
+    "year1": "1 an",
+    "yesterday": "Jusqu'à hier"
+  },
+  "presets": {
+    "deleted": "Préréglage supprimé : {name}",
+    "empty": "Aucun préréglage enregistré",
+    "loaded": "Préréglage chargé : {name}",
+    "nothing_to_save": "Aucun état de recherche à enregistrer",
+    "rename_prompt": "Nouveau nom du preset :",
+    "renamed": "Preset renommé : {name}",
+    "save_prompt": "Nom du préréglage :",
+    "saved": "Préréglage enregistré : {name}"
+  },
+  "prompt": {
+    "badge": {
+      "embedding": "Textual Inversion (Embedding)",
+      "lora_weight": "Poids LoRA : {weight}",
+      "novelai_weight": "Poids NovelAI : {weight}",
+      "paren_weight": "Poids : {weight} ({count} parenthèses)",
+      "random_choice": "Choix aléatoire",
+      "weight": "Poids : {weight}"
+    }
+  },
+  "prompt_library.insert_as_is": "Insert as-is",
+  "prompt_library.insert_cancel": "Cancel",
+  "prompt_library.insert_convert_and_insert": "Convert and insert",
+  "prompt_library.insert_syntax_mismatch_body": "The selected prompt appears to use a different syntax from the current bridge. What do you want to do?",
+  "prompt_library.insert_syntax_mismatch_title": "Syntax mismatch detected",
+  "qr": {
+    "content_label": "Contenu QR :",
+    "copy_text": "Copier le texte",
+    "info": {
+      "compressing": "⚠️ Trop long, compression du texte",
+      "meta_len": "📦 {count} caractères",
+      "negative_len": "🚫 {count} caractères",
+      "positive_len": "📝 {count} caractères",
+      "too_long": "⚠️ Le texte est trop long pour un QR. Veuillez utiliser la copie de texte.",
+      "url": "🔗 URL de partage"
+    },
+    "load_failed": "Impossible de charger la bibliothèque QR",
+    "mode": {
+      "meta": "Toutes les métadonnées (JSON)",
+      "negative": "Prompt négatif",
+      "positive": "Prompt positif",
+      "url": "URL de partage",
+      "url_local_disabled": "🚫 URL (localhost)"
+    },
+    "no_content": "Aucun contenu",
+    "save_image": "Enregistrer l'image QR",
+    "text_too_long": "Le texte est trop long",
+    "use_text_copy": "Veuillez utiliser la copie de texte"
+  },
+  "random": {
+    "empty": "Aucun résultat de recherche disponible pour l'affichage aléatoire",
+    "opened_one": "Un résultat aléatoire ouvert"
+  },
+  "resolution": {
+    "landscape": "Paysage L>=1024 H<=768",
+    "portrait": "Portrait L<=768 H>=1024",
+    "square": "Carré",
+    "square_1024": "1024x1024",
+    "w1024": "L>=1024",
+    "w512": "L>=512",
+    "w768": "L>=768"
+  },
+  "result": {
+    "ai_analysis": "Analyse IA",
+    "copy_id_title": "Copier l'ID du fichier",
+    "copy_prompt_title": "Copier le prompt",
+    "detail_label": "Détail",
+    "negative_label": "Négatif :",
+    "positive_label": "Positif :",
+    "qr_share": "Partage QR",
+    "save_to_library": "Enregistrer dans la bibliothèque",
+    "show_detail_aria": "Afficher le détail"
+  },
+  "scan": {
+    "banner": {
+      "dismiss": "Ignorer",
+      "interrupted": "Le scan précédent a été interrompu",
+      "resume": "Reprendre",
+      "resume_failed": "Échec de la reprise",
+      "resuming": "Reprise du scan...",
+      "scroll_top": "Aller en haut",
+      "stop": "Arrêter"
+    },
+    "complete_confirm_refresh": "Scan terminé. Rafraîchir les résultats maintenant ?",
+    "complete_label": "✓ Scan terminé !",
+    "complete_toast": "Scan terminé : {count} fichiers traités",
+    "details": {
+      "processed": "{total} fichiers traités",
+      "progress": "{current} / {total} fichiers"
+    },
+    "failed_label": "✗ Échec du scan",
+    "failed_toast": "Échec du scan : {error}",
+    "phase": {
+      "counting": "Comptage des fichiers...",
+      "initializing": "Initialisation...",
+      "scanning": "Scan des images..."
+    },
+    "start_failed": "Impossible de lancer le scan",
+    "time": {
+      "minutes": "{m}m{s}s",
+      "seconds": "{n}s"
+    },
+    "unknown_error": "Erreur inconnue"
+  },
+  "scheduler": {
+    "action_failed": "Échec de l'action",
+    "actions": "Actions",
+    "active": "Actif",
+    "add_dialog_title": "Ajouter une tâche planifiée",
+    "add_job": "Ajouter une tâche",
+    "added_msg": "Tâche ajoutée",
+    "cancel": "Annuler",
+    "delete": "Supprimer",
+    "delete_confirm": "Supprimer la tâche « {id} » ?",
+    "deleted_msg": "Tâche supprimée",
+    "duration": "Durée",
+    "error": "Erreur",
+    "failed": "Échoué",
+    "field_day": "Jour",
+    "field_day_of_week": "Jour de la semaine",
+    "field_func": "Fonction",
+    "field_hour": "Heure",
+    "field_job_id": "ID de tâche",
+    "field_minute": "Minute",
+    "field_trigger_type": "Type de déclencheur",
+    "hint_day": "1-31, virgule, ou *",
+    "hint_dow": "lun-dim, 0-6, ou *",
+    "hint_hour": "0-23, virgule, ou *",
+    "hint_minute": "0-59, virgule, ou *",
+    "history": "Historique d'exécution",
+    "job_desc_bsky_notification_poll": "Sondage des notifications Bluesky",
+    "job_desc_db_backup": "Sauvegarde de la base de données",
+    "job_desc_db_integrity_check": "Vérification d'intégrité de la BD",
+    "job_desc_db_vacuum": "SQLite VACUUM (récupérer de l'espace)",
+    "job_desc_github_issue_poll": "Sondage des issues GitHub",
+    "job_desc_prune_unused_tags": "Purger les tags inutilisés",
+    "job_desc_rebuild_groups_index": "Reconstruire l'index des groupes",
+    "job_desc_refresh_monthly_stats": "Rafraîchir le cache des stats mensuelles",
+    "job_desc_thumbnail_cleanup": "Nettoyage du cache des miniatures",
+    "job_id": "ID de tâche",
+    "jobs": "Tâches",
+    "loading": "Chargement...",
+    "next_run": "Prochaine exécution",
+    "no_history": "Aucun historique d'exécution",
+    "no_jobs": "Aucune tâche enregistrée",
+    "pause": "Pause",
+    "paused": "En pause",
+    "paused_msg": "Tâche en pause",
+    "refresh": "Rafraîchir",
+    "result": "Résultat",
+    "resume": "Reprendre",
+    "resumed_msg": "Tâche reprise",
+    "running": "En cours",
+    "status": "État du planificateur",
+    "status_label": "État",
+    "stopped": "Arrêté",
+    "submit": "Ajouter",
+    "success": "Succès",
+    "time": "Heure",
+    "title": "Planificateur de tâches",
+    "trigger": "Déclencheur",
+    "trigger_now": "Exécuter maintenant",
+    "triggered": "Tâche mise en file d'attente pour exécution immédiate",
+    "job_desc_thumbnail_integrity_check": "Vérification d'intégrité des miniatures (supprimer obsolètes/incohérentes)"
+  },
+  "sd_bridge": {
+    "inserted": "Inséré"
+  },
+  "sd_nai_convert": {
+    "copied": "Copié"
+  },
+  "search": {
+    "count": {
+      "normal": "{count} résultats trouvés",
+      "partial": "{shown} / {total} éléments",
+      "prompt_match": "{count} résultats (correspondance de prompt)",
+      "suffix_results": "résultats",
+      "unit": "{count}",
+      "zero": "0 résultats"
+    },
+    "error": {
+      "failed": "Échec de la recherche : {message}",
+      "generic": "Une erreur s'est produite lors de la recherche",
+      "network": "Impossible de se connecter au serveur. Veuillez vérifier que le serveur est en cours d'exécution.",
+      "regex": "Erreur regex : {error}"
+    },
+    "export_csv_hint": "Exporter {count} résultats en CSV (changer la limite depuis le menu « +Ajouter condition »)",
+    "live": {
+      "title": "Recherche en direct (auto)",
+      "toast_off": "Recherche en direct : DÉSACTIVÉE",
+      "toast_on": "Recherche en direct : ACTIVÉE"
+    },
+    "loading_more": "Chargement...",
+    "partial_warning": "Limite d'affichage atteinte ({limit}). Affinez les conditions ou augmentez le nombre d'affichage pour voir tous les résultats.",
+    "path_tip": {
+      "message": "Recherche dans les noms de tags et les noms de fichiers/dossiers. Pour des résultats précis, entrez les tags dans la barre de recherche et spécifiez les noms de fichiers/dossiers via « Ajouter condition » → « Dossier ».",
+      "move_btn": "📂 Aller à la recherche par dossier"
+    },
+    "placeholder": {
+      "plain": "Exemple : 1girl, blonde_hair, -nsfw",
+      "regex": "Exemple : 1girl, blue_(hair|eyes)  recherche par tag regex"
+    },
+    "regex_note": " (filtré par regex)",
+    "regex_warn_confirm": "⚠️ La recherche regex peut être lente sur de grands ensembles de données.\nContinuer la recherche ?",
+    "state": {
+      "empty_db_hint1": "Allez dans la page Paramètres et enregistrez des dossiers d'images",
+      "empty_db_hint2": "Cliquez sur « Lancer le scan » pour importer les métadonnées des images",
+      "empty_db_hint3": "Après le scan, les images apparaîtront dans les résultats de recherche",
+      "empty_db_message": "Ajoutez des dossiers d'images dans les Paramètres pour commencer",
+      "empty_db_settings_link": "Ouvrir les Paramètres",
+      "empty_db_title": "Aucune image dans la base de données",
+      "collection_empty_title": "Cette collection est encore vide",
+      "collection_empty_message": "Cliquez sur l'étoile en bas à droite d'une image pour l'ajouter à cette collection.",
+      "collection_empty_filtered_message": "Aucune image de cette collection ne correspond à vos critères de recherche. Essayez de retirer certains filtres.",
+      "empty_title": "Aucune image ne correspond à vos conditions",
+      "error_title": "Une erreur s'est produite",
+      "example1": "Recherche par tag : 1girl, blue eyes (ET avec des virgules)",
+      "example2": "Exclure : -bad quality (préfixe moins)",
+      "example3": "Utilisez +Ajouter condition pour les filtres modèle/date",
+      "example4": "Regex : girl.*hair (correspondance de motif)",
+      "examples_label": "Exemples :",
+      "first_message": "Entrez des tags ou des conditions pour rechercher des images",
+      "first_title": "Essayez de chercher",
+      "hint1": "Vérifiez l'orthographe des tags (exemple : 1girl, blue_eyes)",
+      "hint2": "Essayez d'élargir la plage de dates",
+      "hint3": "En mode regex, utilisez .*mot-clé.* pour les correspondances partielles",
+      "hint4": "Réduisez les conditions pour élargir la recherche",
+      "hint_label": "Conseils :",
+      "start_prompt": "Appuyez sur le bouton Rechercher ou Entrée",
+      "unknown_error": "Erreur inconnue"
+    }
+  },
+  "semantic_search.elapsed": "elapsed",
+  "semantic_search.elapsed_suffix": "elapsed",
+  "server_info": {
+    "files": "fichiers",
+    "load_failed": "Impossible de charger les infos serveur",
+    "startup_initializing": "Initialisation du serveur",
+    "startup_migration": "Mise à jour BD au démarrage",
+    "startup_stage_backfill": "Mise à jour des colonnes de recherche pour les enregistrements existants.",
+    "startup_stage_backup": "Création d'une sauvegarde de sécurité avant la mise à jour.",
+    "startup_stage_backup_reused": "Réutilisation d'une sauvegarde existante inchangée.",
+    "startup_stage_backup_skipped": "Sauvegarde ignorée pour une grande base de données.",
+    "startup_stage_file_cache": "Construction du cache de métadonnées. Prêt dans un instant.",
+    "startup_stage_finalizing": "Mise à jour terminée. Finalisation du démarrage…",
+    "startup_stage_migrate": "Application des mises à jour du schéma de base de données.",
+    "startup_stage_prepare": "Préparation des vérifications de mise à jour.",
+    "startup_stage_rebuild_fts": "Reconstruction des index de recherche pour le nouveau schéma.",
+    "startup_upgrade_in_progress": "Mise à jour de la base de données en cours",
+    "startup_upgrade_wait": "Cela peut prendre quelques minutes sur les grandes bases de données.",
+    "tags": "tags"
+  },
+  "settings": {
+    "apikeys_created": "Créée :",
+    "apikeys_empty": "Aucune clé API créée.",
+    "apikeys_full_access": "accès complet",
+    "apikeys_last_used": "Dernière utilisation :",
+    "apikeys_revoke": "Révoquer cette clé",
+    "apikeys_toast_copied": "Clé API copiée",
+    "apikeys_toast_create_failed": "Échec de la création de la clé API",
+    "apikeys_toast_created": "Clé API créée",
+    "apikeys_toast_mcp_copied": "Extrait MCP copié",
+    "apikeys_toast_revoke_failed": "Échec de la révocation de la clé API",
+    "apikeys_toast_revoked": "Clé API révoquée",
+    "blocker_local_only": "Cette opération n'est autorisée que depuis la machine locale",
+    "blocker_pin_not_active": "Authentification PIN non active (redémarrage requis)",
+    "blocker_pin_session": "Session d'authentification PIN requise",
+    "blocker_restart_disabled": "API de redémarrage désactivée (--allow-restart ou TAGDB_ALLOW_RESTART=1)",
+    "blocker_token_missing": "Jeton de redémarrage distant non défini",
+    "conditions_not_met": "conditions non remplies",
+    "container_nav_continuous": "Continuer vers le dossier/ZIP suivant",
+    "container_nav_continuous_hint": "Naviguer vers le dossier/ZIP adjacent en fin de parcours dans le visualiseur",
+    "container_nav_order": "Ordre de navigation par groupe",
+    "container_nav_order_hint": "Ordre de navigation entre dossiers/ZIPs",
+    "container_nav_order_name": "Ordre alphabétique",
+    "container_nav_order_result": "Ordre des résultats de recherche",
+    "database": "Base de données",
+    "delete": "Supprimer",
+    "disabled": "Désactivé",
+    "enabled": "Activé",
+    "env_var": "Variable d'env.",
+    "error": "Erreur",
+    "ext_disable": "Désactiver",
+    "ext_disabled": "Désactivée",
+    "ext_disabled_msg": "Extension désactivée.",
+    "ext_enable": "Activer",
+    "ext_enabled": "Activée",
+    "ext_enabled_msg": "Extension activée.",
+    "ext_restart_required": "Redémarrage requis pour appliquer.",
+    "ext_toggle_failed": "Échec du basculement de l'extension",
+    "failed": "Échoué",
+    "files_tags": "Fichiers / Tags",
+    "json_saved": "✅ JSON enregistré",
+    "lan_public": "LAN public",
+    "load_failed": "Échec du chargement",
+    "local_only": "Local uniquement",
+    "lock_failed": "Échec du verrouillage",
+    "meta_breakdown": "Répartition des métadonnées",
+    "modal_kb_guide": "Afficher le guide clavier dans le visualiseur",
+    "modal_kb_guide_hint": "Afficher les raccourcis clavier en bas du visualiseur modal",
+    "network": "Réseau",
+    "no_extensions": "Aucune extension installée.",
+    "no_roots": "Aucun dossier enregistré.",
+    "none_detected": "Aucun détecté",
+    "not_set": "Non défini",
+    "path_updated": "Chemin mis à jour",
+    "pin_active": "PIN actif",
+    "pin_disabled": "PIN désactivé",
+    "pin_pending": "PIN défini (redémarrage requis)",
+    "pin_source": "Source du PIN",
+    "profile_active_badge": "Actif",
+    "profile_ago": "il y a",
+    "profile_create": "Créer un profil",
+    "profile_create_failed": "Échec de la création",
+    "profile_days": "j",
+    "profile_delete": "Supprimer",
+    "profile_delete_confirm": "Supprimer le profil « {label} » ? Cette action est irréversible.",
+    "profile_delete_failed": "Échec de la suppression",
+    "profile_desc_prompt": "Description (optionnelle) :",
+    "profile_dup_failed": "Échec de la duplication",
+    "profile_dup_label_prompt": "Nouveau libellé d'affichage :",
+    "profile_dup_name_prompt": "Nouveau nom de profil :",
+    "profile_duplicate": "Dupliquer",
+    "profile_empty": "Aucun profil configuré.",
+    "profile_export_failed": "Échec de l'export",
+    "profile_import_exists": "Le profil « {name} » existe déjà. {count} champ(s) diffèrent.\nMode d'import : complet (écraser) ou diff (fusionner les modifications) ?",
+    "profile_import_failed": "Échec de l'import",
+    "profile_import_prompt": "Collez les données de profil QR (JSON) :",
+    "profile_import_success": "Profil importé avec succès.",
+    "profile_just_now": "à l'instant",
+    "profile_label_prompt": "Libellé d'affichage :",
+    "profile_last_used": "Dernière utilisation",
+    "profile_name_prompt": "Nom du profil (alphanumérique, tirets, underscores) :",
+    "profile_never_used": "Jamais utilisé",
+    "profile_no_desc": "Aucune description",
+    "profile_no_pin": "La gestion des profils nécessite l'authentification PIN. Définissez un PIN et redémarrez.",
+    "profile_qr_hint": "Copiez les données ci-dessous ou scannez le code QR pour importer sur une autre instance.",
+    "profile_qr_import": "Import QR",
+    "profile_qr_title": "Export de profil",
+    "profile_rename": "Renommer",
+    "profile_rename_failed": "Échec du renommage",
+    "profile_rename_prompt": "Nouveau nom :",
+    "profile_switch_back": "Le serveur est de retour avec le nouveau profil. Rechargement...",
+    "profile_switch_btn": "Basculer",
+    "profile_switch_confirm": "Basculer vers le profil « {label} » ? Le serveur va redémarrer.",
+    "profile_switch_failed": "Échec du changement de profil",
+    "profile_switch_sending": "Envoi de la demande de changement de profil...",
+    "profile_switch_timeout": "Demande de changement de profil envoyée mais le serveur n'a pas répondu dans les 90 secondes.",
+    "profile_switch_waiting": "Changement de profil accepté. En attente du retour du serveur...",
+    "profile_toggle_fav": "Basculer favori",
+    "recursive_scan": "Scan récursif",
+    "remote_restart_off": "Redémarrage distant : DÉSACTIVÉ",
+    "remote_restart_on": "Redémarrage distant : ACTIVÉ",
+    "remove_root_confirm": "Désenregistrer ce dossier ?",
+    "restart_api": "Redémarrer l'API",
+    "restart_back": "Le serveur est de retour. Rechargement...",
+    "restart_confirm": "Redémarrer le serveur ? (inaccessible pendant quelques secondes)",
+    "restart_failed": "Échec du redémarrage",
+    "restart_sending": "Envoi de la demande de redémarrage...",
+    "restart_server": "Redémarrer le serveur",
+    "restart_timeout": "Demande de redémarrage envoyée mais le serveur n'a pas répondu dans les 90 secondes.",
+    "restart_waiting": "Redémarrage accepté. En attente du retour du serveur...",
+    "rfs_enum_max": "Énumération max",
+    "rfs_probe_max": "Sonde max",
+    "rfs_total_max": "Total max",
+    "save_failed": "Échec de l'enregistrement",
+    "save_path": "Chemin d'enregistrement",
+    "saved": "✅ Enregistré",
+    "saved_cli_override": "⚠ Enregistré (le --pin CLI a priorité. Vérifiez les options de démarrage pour appliquer)",
+    "saved_restart_needed": "✅ Enregistré (redémarrage requis pour appliquer)",
+    "saving": "Enregistrement...",
+    "screen_lock": "Verrouillage écran",
+    "security": "Sécurité",
+    "source": "source",
+    "toggle_root": "Activer/Désactiver",
+    "token_not_set": "Jeton : non défini",
+    "token_set": "Jeton : défini",
+    "tsr_desc": "Gérer les serveurs d'inférence de tags distribués (Hailo Remote, ONNX Local, etc.). Prend en charge le tagging par lots parallèle avec vol de travail.",
+    "tsr_mesh_redirect": "Les bascules d'inférence mesh par pair sont gérées dans",
+    "tsr_mesh_redirect_link": "Matrice d'inférence Mesh",
+    "tsr_mesh_redirect_suffix": "page.",
+    "tsr_title": "Registre des serveurs Tagger",
+    "unit_hours": "h",
+    "unit_min": "min",
+    "unit_minutes": "m",
+    "unit_sec": "s",
+    "unknown": "Inconnu",
+    "uptime": "Temps de fonctionnement",
+    "version": "Version"
+  },
+  "settings.theme_applied": "Theme applied:",
+  "settings.theme_click_to_apply": "Click to apply",
+  "settings.theme_hint": "Click a theme to apply it instantly.",
+  "similar.error": "An error occurred",
+  "similar.none_found": "No similar images were found. Run hash calculation first.",
+  "similar.searching": "Searching...",
+  "similar.title": "Similar Images",
+  "stats": {
+    "load_failed": "Impossible de charger les statistiques",
+    "no_model_data": "Aucune donnée de modèle disponible",
+    "no_resolution_data": "Aucune donnée de résolution disponible",
+    "period": {
+      "dawn": "Aube (03h-09h)",
+      "day": "Journée (09h-15h)",
+      "evening": "Soirée (15h-21h)",
+      "night": "Nuit (21h-03h)"
+    },
+    "personality": {
+      "balanced": {
+        "advice": "Vous avez un style de travail flexible !",
+        "description": "Un créateur libre, non contraint par le temps",
+        "type": "Équilibré"
+      },
+      "daytime": {
+        "advice": "Vous gardez un rythme sain !",
+        "description": "Un créateur avec une routine régulière",
+        "type": "Type diurne"
+      },
+      "early_bird": {
+        "advice": "Excellentes habitudes de vie !",
+        "description": "Un créateur qui exploite la concentration matinale",
+        "type": "Lève-tôt"
+      },
+      "evening": {
+        "advice": "Vous tirez le meilleur des heures dorées !",
+        "description": "Un créateur qui atteint son pic en soirée",
+        "type": "Productif en soirée"
+      },
+      "night_owl": {
+        "advice": "Prenez soin de votre santé !",
+        "description": "Un créateur qui aime le calme de la nuit",
+        "type": "Oiseau de nuit"
+      },
+      "unknown": {
+        "advice": "",
+        "description": "Pas assez de données",
+        "type": "Inconnu"
+      }
+    }
+  },
+  "story": {
+    "event": {
+      "first_month": {
+        "desc": "Débuté avec {count} images",
+        "title": "Le voyage créatif commence"
+      },
+      "milestone_100": {
+        "desc": "Total cumulé : {total}",
+        "title": "100 images !"
+      },
+      "milestone_100k": {
+        "desc": "Total cumulé : {total}",
+        "title": "100 000 images !"
+      },
+      "milestone_10k": {
+        "desc": "Total cumulé : {total}",
+        "title": "10 000 images !"
+      },
+      "milestone_1k": {
+        "desc": "Total cumulé : {total}",
+        "title": "1 000 images !"
+      },
+      "milestone_2k": {
+        "desc": "Total cumulé : {total}",
+        "title": "2 000 images !"
+      },
+      "milestone_500": {
+        "desc": "Total cumulé : {total}",
+        "title": "500 images !"
+      },
+      "milestone_50k": {
+        "desc": "Total cumulé : {total}",
+        "title": "50 000 images !"
+      },
+      "milestone_5k": {
+        "desc": "Total cumulé : {total}",
+        "title": "5 000 images !"
+      },
+      "new_source": {
+        "desc": "Début d'utilisation de {source}",
+        "title": "Nouvel outil : {source}"
+      },
+      "peak_month": {
+        "desc": "{count} images créées",
+        "title": "Mois le plus productif"
+      },
+      "productivity_down": {
+        "desc": "-{percent}% par rapport au mois dernier",
+        "title": "Période calme"
+      },
+      "productivity_up": {
+        "desc": "+{percent}% par rapport au mois dernier",
+        "title": "Pic de productivité"
+      },
+      "quiet_month": {
+        "desc": "Seulement {count} images ce mois",
+        "title": "Mois calme"
+      },
+      "tag_diversity": {
+        "desc": "{count} tags uniques ce mois",
+        "title": "Record de diversité créative"
+      }
+    },
+    "load_failed": "Impossible de charger l'histoire",
+    "no_data": "Pas encore assez de données pour créer votre histoire",
+    "on_this_day": "Il y a 1 an aujourd'hui ({date}) : {count} images créées"
+  },
+  "sweep.card_loading": "Chargement…",
+  "sweep.card_no_axis": "pas d'info d'axe",
+  "sweep.card_open_view_btn": "🔎 Ouvrir la vue Sweep",
+  "sweep.card_others_btn": "🖼️ Afficher les autres images de ce sweep",
+  "sweep.card_others_empty": "Aucune image correspondante trouvée dans ce dossier.",
+  "sweep.card_others_error": "Échec : ",
+  "sweep.card_rerun_btn": "🔁 Réexécuter ce sweep",
+  "sweep.card_rerun_no_seed_btn": "🎲 Relancer (nouveau seed)",
+  "sweep.card_rerun_other_bridge_btn": "Relancer sur un autre bridge",
+  "sweep.card_rerun_with_seed_btn": "🔁 Relancer (même seed)",
+  "sweep.card_title": "Sweep",
+  "sweep.resume_not_found": "Aucune métadonnée de sweep trouvée dans ce fichier.",
+  "sweep.resume_populated": "Sweep restauré. Cliquez sur Generate pour réexécuter.",
+  "sweep.resume_unknown_param": "Sweep : paramètre non pris en charge sur ce bridge : ",
+  "sweep.resume_wrong_bridge": "Sweep réalisé sur un bridge différent : ",
+  "tags.add_tag": "Add tag",
+  "toast": {
+    "checkpoint_search": "Recherche checkpoint : {model}",
+    "conditions_cleared": "Toutes les conditions de recherche ont été effacées",
+    "copy_done": "Copié",
+    "copy_done_strong": "Copié !",
+    "copy_failed": "Échec de la copie",
+    "copy_failed_short": "Échec de la copie",
+    "copy_with_label": "{label} copié",
+    "dir_open_failed": "Impossible d'ouvrir le répertoire",
+    "dir_opened": "Répertoire ouvert",
+    "error_occurred": "Une erreur s'est produite"
+  },
+  "tools": {
+    "ai_analyzing": "Analyse IA en cours...",
+    "analyzing": "Analyse en cours...",
+    "analyzing_trends": "Analyse des tendances de prompts...",
+    "api_key_set": "Clé API définie",
+    "bulk_register_failed": "Échec de l'enregistrement en masse",
+    "cache_clear_failed": "Échec du nettoyage du cache",
+    "cache_cleared": "caches de fichiers nettoyés",
+    "cancel": "Annuler",
+    "checking_roots": "Vérification des dossiers enregistrés...",
+    "clear_cache_confirm": "Effacer tous les caches de miniatures ?\nIls seront régénérés lors du prochain affichage.",
+    "click_copy_path": "Cliquer pour copier le chemin",
+    "click_preview": "Cliquer pour prévisualiser",
+    "compute_hash_confirm": "Calculer les hachages {type}.\nCela peut prendre du temps s'il y a beaucoup de fichiers.",
+    "computing_hashes": "Calcul des hachages...",
+    "confirm_db_delete": "Supprimer {count} fichiers de la base de données.\n(Les fichiers réels resteront sur le disque)",
+    "confirm_hard_delete": "Attention : Supprimer définitivement {count} fichiers.\nCette action est irréversible !\n\nÊtes-vous sûr ?",
+    "counting_files": "Comptage des fichiers...",
+    "db_path": "Chemin de la base de données :",
+    "db_size": "Taille de la base de données :",
+    "delete": "Supprimer",
+    "delete_failed": "Échec de la suppression",
+    "deleted": "Supprimé",
+    "deleting": "Suppression...",
+    "disable": "Désactiver",
+    "drag_to_move": "Glisser pour déplacer",
+    "dup_groups_found": "Groupes de doublons trouvés",
+    "duplicate": "Doublon",
+    "enable": "Activer",
+    "enter_folder_path": "Veuillez entrer un chemin de dossier",
+    "enter_search_query": "Entrez une requête de recherche",
+    "error": "Erreur",
+    "exact_match": "Correspondance exacte",
+    "ext_enabled": "activée",
+    "fetch_failed": "Échec du chargement",
+    "file": "Fichier",
+    "file_and_perceptual": "Fichier + Perceptuel",
+    "file_count": "Nombre de fichiers :",
+    "file_hash_computed": "Hachages de fichiers calculés",
+    "files": "fichiers",
+    "files_deleted": "{count} fichiers supprimés",
+    "folder_dialog_failed": "Impossible d'ouvrir le sélecteur de dossier.\nVeuillez entrer le chemin manuellement.",
+    "force_rescan": "Forcer le rescan (réanalyser tous les fichiers)",
+    "frequent_tags": "Tags fréquents :",
+    "group": "Groupe",
+    "hash_not_computed": "Hachages non calculés. Exécutez d'abord « Calculer les hachages ».",
+    "hash_stats_total": "Total fichiers",
+    "include_subfolders": "Inclure les sous-dossiers",
+    "items": "éléments",
+    "keep": "Garder",
+    "load_failed": "Échec du chargement",
+    "loading": "Chargement...",
+    "no_analysis_yet": "Aucun fichier analysé",
+    "no_duplicates": "Aucun doublon trouvé",
+    "no_extensions": "Aucune extension",
+    "no_files_in_db": "Aucun fichier dans la base de données",
+    "no_normalize_needed": "Aucun tag ne nécessite de normalisation",
+    "no_registered_roots": "Aucun dossier enregistré",
+    "no_results": "Aucun résultat",
+    "no_subdirs": "Aucun sous-répertoire",
+    "normalize_confirm": "Normaliser les tags ? Cette action est irréversible.",
+    "normalize_items": "Éléments à normaliser",
+    "normalizing": "Normalisation...",
+    "normalizing_tags": "Normalisation des tags...",
+    "open_detail_tab": "Ouvrir le détail dans un nouvel onglet",
+    "perceptual": "Perceptuel",
+    "phash_computed": "Hachages perceptuels calculés",
+    "phash_not_computed": "Hachages perceptuels non calculés. Exécutez d'abord « Calculer les hachages ».",
+    "preparing": "Préparation...",
+    "processed_files": "Fichiers traités :",
+    "prompt_trends": "Analyse des tendances de prompts",
+    "recommendations": "Recommandations :",
+    "register_all": "Tout enregistrer dans config.json",
+    "register_failed": "Échec de l'enregistrement",
+    "register_to_config": "Enregistrer dans config.json",
+    "remove_root_confirm": "Désenregistrer ce dossier ? (les fichiers réels ne seront pas supprimés)",
+    "rescan": "Rescanner",
+    "rescan_all": "Tout rescanner",
+    "rescanning_all": "Rescan de tous les dossiers...",
+    "roots_drag_hint": "Glisser pour réordonner | Maj+↑↓ pour déplacer | L'ordre affecte le tri des dossiers",
+    "same_size": "Même taille",
+    "save_failed": "Échec de l'enregistrement",
+    "saved": "Enregistré",
+    "scan_all_complete": "Scan de tous les dossiers terminé",
+    "scan_complete": "Scan terminé",
+    "scanning": "Scan en cours...",
+    "schema_version": "Version du schéma :",
+    "search_zips": "Chercher dans les fichiers ZIP",
+    "searching": "Recherche en cours...",
+    "select": "Sélectionner",
+    "select_all_dupes": "Sélectionner tous les doublons",
+    "select_files_to_delete": "Veuillez sélectionner les fichiers à supprimer",
+    "showing_first": "affichage des premiers",
+    "similar_images": "Images similaires",
+    "start_scan": "Lancer le scan",
+    "starting": "Démarrage...",
+    "strengths": "Points forts :",
+    "style": "Style",
+    "style_tendency": "Tendance stylistique :",
+    "tag_count": "Nombre de tags :",
+    "th_deleted": "Supprimé",
+    "th_format": "Format",
+    "th_path": "Chemin",
+    "th_prompt": "Prompt",
+    "th_size": "Taille",
+    "th_source": "Source",
+    "toggle_failed": "Échec du basculement",
+    "unexplored_themes": "Thèmes inexplorés :",
+    "unit_hours": "h",
+    "unit_minutes": "m",
+    "uptime": "Temps de fonctionnement :",
+    "weaknesses": "Axes d'amélioration :",
+    "wt_batch_failed": "Échec du démarrage du lot",
+    "wt_close": "Fermer",
+    "wt_complete": "Terminé",
+    "wt_config_failed": "Échec de l'enregistrement de la configuration",
+    "wt_config_saved": "Configuration WD-Tagger enregistrée",
+    "wt_download_failed": "Échec du téléchargement",
+    "wt_downloading": "Téléchargement du modèle...",
+    "wt_model_check_failed": "Échec de la vérification du modèle",
+    "wt_model_not_downloaded": "Modèle non téléchargé",
+    "wt_model_ready": "Modèle prêt",
+    "wt_no_tags": "Aucun tag",
+    "wt_processing": "Traitement...",
+    "wt_sec_elapsed": "s écoulées",
+    "wt_tagged_files": "Fichiers tagués",
+    "wt_total_tags": "Total tags",
+    "wt_unique": "Uniques",
+    "wt_untagged": "Inconnus non tagués",
+    "wt_xmp_dc_subject": "Tags dc:subject :",
+    "wt_xmp_load_failed": "Échec du chargement des données XMP",
+    "wt_xmp_not_found": "Aucune donnée XMP trouvée",
+    "wt_xmp_raw_xml": "XML brut",
+    "wt_xmp_title": "Métadonnées XMP",
+    "wt_xmp_wdtag_info": "Infos wdtag :"
+  },
+  "yolo_stream.detect_error": "Detection failed",
+  "yolo_stream.register": "Register",
+  "sd_bridge.api_key_set": "(Clé configurée)",
+  "comfyui_bridge.api_key_set": "(Clé configurée)",
+  "bridge.pl.load_tooltip": "Charger PL",
+  "bridge.pl.save_tooltip": "Enregistrer PL",
+  "common.delete": "Supprimer",
+  "common.save": "Enregistrer",
+  "conditions.hasAnnotation.desc": "Afficher uniquement les fichiers avec annotations (notes)",
+  "conditions.hasAnnotation.label": "📝 Avec note",
+  "settings.apikeys_mcp_jump": "Afficher l'extrait",
+  "settings.apikeys_mcp_updated": "↓ Extrait MCP mis à jour avec cette clé",
+  "settings.bitwarden_desc": "Lier les secrets à Bitwarden pour récupération dynamique via bw CLI. Nécessite Bitwarden CLI installé et déverrouillé.",
+  "settings.bitwarden_title": "Bitwarden CLI",
+  "settings.bsky_auto_dismiss_follow": "Rejeter automatiquement les abonnements",
+  "settings.bsky_auto_dismiss_like": "Rejeter automatiquement les mentions J'aime",
+  "settings.bsky_auto_dismiss_repost": "Rejeter automatiquement les partages",
+  "settings.bsky_auto_respond": "Activer la réponse automatique",
+  "settings.bsky_monitor_desc": "Surveiller les mentions, réponses et autres notifications Bluesky. Configurer les critères de tri et les modèles de réponse automatique.",
+  "settings.bsky_monitor_title": "Moniteur Bluesky",
+  "settings.bsky_notify_connect": "Notifier lors de la connexion MCP",
+  "settings.bsky_poll_interval": "Intervalle de sondage (minutes)",
+  "settings.bsky_poll_now": "Sonder maintenant",
+  "settings.bsky_polling": "Sondage en cours...",
+  "settings.bsky_response_mention": "Réponse aux mentions",
+  "settings.bsky_response_reply": "Réponse aux réponses",
+  "settings.bsky_response_title": "Modèles de réponse automatique",
+  "settings.bsky_save_failed": "Impossible d'enregistrer les paramètres du moniteur",
+  "settings.bsky_save_monitor": "Enregistrer les paramètres du moniteur",
+  "settings.bsky_saved": "Paramètres du moniteur enregistrés",
+  "settings.bsky_triage_mention": "Mentions",
+  "settings.bsky_triage_quote": "Citations",
+  "settings.bsky_triage_reply": "Réponses",
+  "settings.bsky_triage_title": "Prompts de tri",
+  "settings.sns_bluesky_title": "Bluesky",
+  "settings_schema.agent_safety_budget_preset": "Preset de budget",
+  "settings_schema.agent_safety_circuit_breaker_cooldown_seconds": "Délai Circuit Breaker (secondes)",
+  "settings_schema.agent_safety_circuit_breaker_enabled": "Circuit Breaker activé",
+  "settings_schema.agent_safety_circuit_breaker_error_rate_threshold": "Seuil de taux d'erreur (0.0-1.0)",
+  "settings_schema.agent_safety_circuit_breaker_max_actions_per_minute": "Max d'actions par minute",
+  "settings_schema.agent_safety_circuit_breaker_max_consecutive_errors": "Max d'erreurs consécutives",
+  "settings_schema.agent_safety_circuit_breaker_max_identical_consecutive": "Max d'appels consécutifs identiques",
+  "settings_schema.agent_safety_circuit_breaker_max_same_tool_per_minute": "Max du même outil par minute",
+  "settings_schema.ai_analysis_api_key": "Clé API Anthropic (Claude)",
+  "settings_schema.ai_analysis_openai_api_key": "Clé API OpenAI",
+  "settings_schema.ai_analysis_openai_compat_api_key": "Clé API compatible OpenAI",
+  "settings_schema.archive_cleanup_llm_api_key": "Clé API Anthropic de nettoyage d'archive",
+  "settings_schema.archive_cleanup_llm_openai_api_key": "Clé API OpenAI de nettoyage d'archive",
+  "settings_schema.archive_cleanup_llm_openai_compat_api_key": "Clé API compatible OpenAI de nettoyage d'archive",
+  "settings_schema.archive_throttle_ms": "Limitation d'archive (ms)",
+  "settings_schema.backup_backup_dir": "Répertoire de sauvegarde",
+  "settings_schema.backup_backup_on_scan_complete": "Sauvegarder lors de la fin du scan",
+  "settings_schema.backup_cooldown_minutes": "Délai (minutes)",
+  "settings_schema.backup_enabled": "Sauvegarde automatique activée",
+  "settings_schema.backup_max_generations": "Max de générations de sauvegarde",
+  "settings_schema.backup_periodic_interval_hours": "Intervalle de sauvegarde périodique (heures)",
+  "settings_schema.brace_choice": "Choix d'accolade",
+  "settings_schema.compute_hash": "Calcul de pHash",
+  "settings_schema.direct_prompt_convert": "Conversion directe de prompt",
+  "settings_schema.enable_fts": "Recherche texte intégral (FTS5) activée",
+  "settings_schema.extensions_builtin-nai-bridge_api_token": "Token API NovelAI",
+  "settings_schema.extract_a1111": "Extraction de métadonnées A1111",
+  "settings_schema.extract_comfyui": "Extraction de métadonnées ComfyUI",
+  "settings_schema.lowercase_tags": "Tags en minuscules",
+  "settings_schema.preserve_templates": "Préserver les modèles",
+  "settings_schema.server_allow_remote_restart": "API redémarrage distant activée",
+  "settings_schema.server_allow_restart": "API redémarrage activée",
+  "settings_schema.server_host": "Hôte lié",
+  "settings_schema.server_lan": "Accès LAN activé",
+  "settings_schema.server_pin": "Code d'authentification PIN",
+  "settings_schema.server_pin_boss_login_ui": "Interface de connexion patron",
+  "settings_schema.server_port": "Numéro de port",
+  "settings_schema.server_quick_lock_enabled": "Verrouillage rapide activé",
+  "settings_schema.server_restart_token": "Token redémarrage distant",
+  "settings_schema.sns_bluesky_app_password": "Mot de passe application Bluesky",
+  "settings_schema.sns_bluesky_handle": "Identifiant Bluesky",
+  "settings_schema.sns_post_template": "Modèle de publication",
+  "settings_schema.timezone": "Fuseau horaire",
+  "settings_schema.ui": "Thème UI (défaut/personnalisé)",
+  "settings_schema.video_analysis_enabled": "Analyse vidéo activée",
+  "settings_schema.video_analysis_keyframe_count": "Nombre d'images clés",
+  "settings_schema.video_analysis_scene_threshold": "Seuil de scène",
+  "settings_schema.video_analysis_strategy": "Stratégie d'images clés",
+  "settings_schema.webhook_secret": "Secret de signature webhook"
+}

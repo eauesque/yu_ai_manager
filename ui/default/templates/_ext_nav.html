@@ -1,0 +1,168 @@
+{# Navbar for Extension pages. Must be included in every blueprint HTML page.
+   - --nav-h CSS variable defines the navbar height (used for layout adjustment)
+   - Embeds skip-link styles for Extensions that do not load main.css
+   Usage:
+     {% include "_ext_nav.html" %}
+   Layout adjustment examples:
+     Scrollable page:   body { padding-top: calc(var(--nav-h, 50px) + 10px); }
+     Full-screen flex:  .container { height: calc(100vh - var(--nav-h, 50px)); }
+#}
+<link rel="stylesheet" href="/static/css/base/base-theme.css">
+<!-- Atelier System (γ): tokens → components → editorial → tool tokens → tool components.
+     All rules are scoped under body.theme-atelier-{light,dark}, so when a user is on the
+     classic theme these stylesheets stay dormant and the legacy extension look is preserved. -->
+<link rel="stylesheet" href="/static/css/atelier/atelier-tokens.css?v=20260507">
+<link rel="stylesheet" href="/static/css/atelier/atelier-components.css?v=20260507">
+<link rel="stylesheet" href="/static/css/atelier/atelier-index.css?v=20260507">
+<link rel="stylesheet" href="/static/css/atelier/atelier-tool-tokens.css?v=20260507">
+<link rel="stylesheet" href="/static/css/atelier/atelier-tool-components.css?v=20260507">
+<!-- atelier-ext-overrides: redefine extension-specific tokens (--nab-*)
+     and override hard-coded literals (.cfb-*) so atelier theme reaches
+     bridge surfaces. Scoped under body.theme-atelier-* — classic safe. -->
+<link rel="stylesheet" href="/static/css/atelier/atelier-ext-overrides.css?v=20260508b">
+<script nonce="{{ csp_nonce }}">
+  // atelier-tool-components.css scopes its rules to body.atelier-tool, so add the
+  // marker as soon as <body> exists. Idempotent — safe to run on every page load.
+  (function () {
+    var add = function () { if (document.body) document.body.classList.add('atelier-tool'); };
+    if (document.body) add();
+    else document.addEventListener('DOMContentLoaded', add, { once: true });
+  })();
+</script>
+<style>
+  :root { --nav-h: 44px; }
+  #fixedNav {
+    min-height: 44px;
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  #fixedNav .nav-btn,
+  #navHamburger {
+    min-width: 36px;
+    min-height: 36px;
+  }
+  @media (max-width: 768px) {
+    #navHamburger {
+      display: flex;
+    }
+    #fixedNav .nav-links {
+      display: none;
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      flex-direction: column;
+      gap: 2px;
+      padding: 8px 12px;
+      background: var(--card, #1e1e3a);
+      border-bottom: 1px solid rgba(128,128,128,0.15);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 801;
+    }
+    #fixedNav .nav-links.open {
+      display: flex;
+    }
+  }
+  /* WCAG 2.2 AA skip-link (embedded for Extensions that do not load main.css) */
+  .skip-link {
+    position: fixed; top: 0; left: 16px; z-index: 10000;
+    padding: 8px 16px; background: var(--accent, #2563eb); color: #fff;
+    border-radius: 0 0 8px 8px; font-size: 14px; font-weight: 600;
+    text-decoration: none; transform: translateY(-100%);
+    transition: transform 0.15s ease;
+  }
+  .skip-link:focus {
+    transform: translateY(0);
+    outline: 2px solid #35b7ff; outline-offset: 2px;
+  }
+  /* Universal :focus-visible (for Extensions that do not load uxpatch-a11y.css) */
+  :focus-visible {
+    outline: 2px solid rgba(59, 130, 246, 0.65);
+    outline-offset: 2px;
+  }
+  button:focus:not(:focus-visible),
+  a:focus:not(:focus-visible),
+  summary:focus:not(:focus-visible) {
+    outline: none;
+  }
+  /* Screen-reader only (visually hidden but accessible) */
+  .sr-only {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  /* Checkbox / range / select touch target hardening (WCAG 2.2 AA) */
+  select {
+    min-height: 28px;
+    -webkit-appearance: none; appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 0l6 6 6-6z' fill='%23888'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: right 8px center;
+    padding-right: 28px;
+  }
+  input[type="range"] {
+    min-height: 28px;
+  }
+  input[type="checkbox"] {
+    min-width: 24px;
+    min-height: 24px;
+  }
+  /* Toast (for Extensions that do not load dock-overlays-toast.css) */
+  #toast-container {
+    position: fixed; left: 50%; bottom: 62px;
+    transform: translateX(-50%); z-index: 2000;
+    display: flex; flex-direction: column-reverse;
+    align-items: center; gap: 8px;
+    pointer-events: none;
+    max-width: min(520px, calc(100vw - 24px));
+  }
+  .toast {
+    background: rgba(0,0,0,0.78); color: #fff;
+    padding: 10px 14px; border-radius: 12px; font-size: 14px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+    opacity: 0; pointer-events: none;
+    transition: opacity .16s ease, transform .16s ease;
+    max-width: min(520px, calc(100vw - 24px));
+    text-align: center; transform: translateY(8px);
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.hide { opacity: 0; transform: translateY(-8px); }
+  /* Progress bar (for Extensions that do not load widgets-progress-base.css) */
+  #progress-bar-stack { display: contents; }
+  .scan-progress-bar {
+    position: fixed; bottom: 0; left: 0; right: 0; height: 60px;
+    background: rgba(0,0,0,0.96); border-top: 2px solid #3b82f6;
+    display: flex; align-items: center; padding: 0 20px; z-index: 790;
+    box-shadow: 0 -4px 12px rgba(0,0,0,0.3); pointer-events: none;
+    opacity: 0; transform: translateY(100%);
+    transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;
+  }
+  .scan-progress-bar.active { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  .scan-progress-content { display: flex; align-items: center; gap: 20px; width: 100%; max-width: 1200px; margin: 0 auto; }
+  .scan-progress-icon { font-size: 24px; animation: spin 2s linear infinite; }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
+  .scan-progress-info { flex: 1; display: flex; flex-direction: column; gap: 8px; }
+  .scan-progress-text { color: #e0e0e0; font-size: 14px; font-weight: 500; }
+  .scan-progress-details { color: #999; font-size: 12px; }
+  .scan-progress-track { flex: 1; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+  .scan-progress-fill { height: 100%; background: linear-gradient(90deg,#3b82f6,#60a5fa); border-radius: 4px; transition: width 0.3s ease; }
+  .scan-progress-percent { color: #60a5fa; font-size: 18px; font-weight: 600; min-width: 60px; text-align: right; }
+  .scan-progress-close { background: rgba(255,255,255,0.1); border: none; color: #e0e0e0; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 14px; }
+  .scan-progress-close:hover { background: rgba(255,255,255,0.2); }
+  .scan-queue-badge { background: #f59e0b; color: #000; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 10px; white-space: nowrap; }
+  .scan-progress-bar.complete { border-top-color: #22c55e; }
+  .scan-progress-bar.complete .scan-progress-fill { background: linear-gradient(90deg,#22c55e,#4ade80); }
+  .scan-progress-bar.error { border-top-color: #ef4444; }
+  .scan-progress-bar.error .scan-progress-fill { background: linear-gradient(90deg,#ef4444,#f87171); }
+  /* Language menu (for Extensions that do not load uxpatch-i18n-paths.css) */
+  .lang-menu { position: relative; display: inline-flex; align-items: center; }
+  .lang-menu .lang-select {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    opacity: 0; cursor: pointer; -webkit-appearance: none; appearance: none;
+  }
+  .lang-menu:focus-within .lang-toggle {
+    outline: 2px solid rgba(77, 144, 226, 0.9); outline-offset: 2px;
+  }
+</style>
+{% include "_nav.html" %}
+<script nonce="{{ csp_nonce }}" type="module" src="/static/dist/a11y.js?v={{ dist_v }}"></script>
+<script nonce="{{ csp_nonce }}" type="module" src="/static/dist/ext-bridges-app.js?v={{ dist_v }}"></script>

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Crypto Tools - YU AI Manager</title>
+  <link rel="stylesheet" href="/static/css/main.css?v=20260213">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tokens.css?v=20260507">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-components.css?v=20260507">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-index.css?v=20260507">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tool-tokens.css?v=20260525">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tool-components.css?v=20260525">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-crypto-tools.css?v=20260525">
+  <link rel="stylesheet" href="/static/css/pages/crypto-tools.css?v=20260524">
+</head>
+<body class="atelier-tool">
+  {% include "_nav.html" %}
+  <main id="main-content" class="crypto-tools-page">
+    <header class="crypto-header">
+      <h1>🔐 暗号化ツール</h1>
+      <p class="crypto-subtitle">ブラウザ完結のテキスト暗号化（X25519 公開鍵方式 / パスフレーズ方式）</p>
+      <div id="cryptoUnsupportedBanner" class="crypto-banner crypto-banner-warn" hidden>
+        ⚠️ お使いのブラウザは X25519 に対応していません。パスフレーズモードのみ利用できます。
+      </div>
+    </header>
+
+    <nav class="crypto-tabs" role="tablist">
+      <button type="button" role="tab" class="crypto-tab active" data-tab="keys" aria-selected="true">🔑 鍵管理</button>
+      <button type="button" role="tab" class="crypto-tab" data-tab="encrypt" aria-selected="false">🔒 暗号化</button>
+      <button type="button" role="tab" class="crypto-tab" data-tab="decrypt" aria-selected="false">🔓 復号</button>
+    </nav>
+
+    <!-- ─── Tab 1: 鍵管理 ───────────────────────────────────────── -->
+    <section class="crypto-panel active" data-panel="keys" role="tabpanel">
+      <div id="keyStatus" class="key-status">
+        <p class="key-status-empty">鍵ペアがまだ生成されていません。</p>
+      </div>
+
+      <div class="key-fingerprint" id="keyFingerprintBlock" hidden>
+        <h3>公開鍵 fingerprint（口頭/手渡し確認用）</h3>
+        <code id="keyFingerprint" class="fingerprint-display"></code>
+      </div>
+
+      <div class="key-qr-block" id="keyQrBlock" hidden>
+        <h3>公開鍵 QR</h3>
+        <canvas id="keyQrCanvas" width="200" height="200" style="max-width:100%"></canvas>
+        <div class="key-qr-actions">
+          <button type="button" id="copyPubKeyBtn" class="btn">公開鍵をコピー</button>
+          <label class="btn" for="readPubQrFile">QR 画像から公開鍵を読み込む
+            <input type="file" id="readPubQrFile" accept="image/*" hidden>
+          </label>
+          <button type="button" id="readPubQrCamera" class="btn">📷 カメラで読み取る</button>
+        </div>
+        <textarea id="readPubResult" class="json-output" hidden readonly></textarea>
+      </div>
+
+      <div class="key-actions">
+        <button type="button" id="generateKeyBtn" class="btn btn-primary">鍵ペアを生成</button>
+      </div>
+
+      <details class="key-export-block">
+        <summary>秘密鍵をエクスポート（バックアップ）</summary>
+        <p class="caution">⚠ 秘密鍵を紛失すると復号できなくなります。安全な場所に保管してください。<br>
+          ⚠ 弱いパスフレーズは保護にならない（推奨: 12 文字以上の長いフレーズ）。</p>
+        <label>パスフレーズ
+          <input type="password" id="exportPassphrase" minlength="12" autocomplete="new-password">
+        </label>
+        <button type="button" id="exportKeyBtn" class="btn" disabled>エクスポート</button>
+      </details>
+
+      <details class="key-import-block">
+        <summary>秘密鍵をインポート（復元）</summary>
+        <input type="file" id="importKeyFile" accept="application/json,.json">
+        <label>パスフレーズ
+          <input type="password" id="importPassphrase" autocomplete="current-password">
+        </label>
+        <button type="button" id="importKeyBtn" class="btn">インポート</button>
+        <p class="caution">⚠ 公開鍵の真正性は QR の直接手渡しで確認してください。URL 経由の共有は MITM リスクあり。</p>
+      </details>
+    </section>
+
+    <!-- ─── Tab 2: 暗号化 ───────────────────────────────────────── -->
+    <section class="crypto-panel" data-panel="encrypt" role="tabpanel">
+      <fieldset class="mode-select">
+        <legend>モード</legend>
+        <label><input type="radio" name="encMode" value="x25519" checked> 公開鍵</label>
+        <label><input type="radio" name="encMode" value="passphrase"> パスフレーズ</label>
+      </fieldset>
+
+      <div class="enc-mode-x25519">
+        <label>受信者の公開鍵（JSON）
+          <textarea id="recipientPub" rows="4" placeholder='{"schema":"yu://key/1","alg":"x25519","pub":"..."}'></textarea>
+        </label>
+        <label class="btn" for="recipientPubFile">QR 画像から読み込む
+          <input type="file" id="recipientPubFile" accept="image/*" hidden>
+        </label>
+        <button type="button" id="recipientPubCamera" class="btn">📷 カメラで読み取る</button>
+        <div id="recipientFingerprintBlock" class="recipient-fingerprint" hidden>
+          <small>受信者公開鍵 fingerprint（事前共有された値と一致するか確認してください）:</small>
+          <code id="recipientFingerprint" class="fingerprint-display"></code>
+        </div>
+      </div>
+
+      <div class="enc-mode-passphrase" hidden>
+        <label>パスフレーズ
+          <input type="password" id="encPassphrase" autocomplete="off">
+          <small class="hint">短いパスフレーズは暗号強度を著しく下げます。</small>
+        </label>
+      </div>
+
+      <label>平文
+        <textarea id="encPlaintext" rows="6"></textarea>
+      </label>
+
+      <button type="button" id="encryptBtn" class="btn btn-primary">暗号化する</button>
+
+      <div class="enc-result" id="encResultBlock" hidden>
+        <h3>結果</h3>
+        <canvas id="encQrCanvas" width="200" height="200" style="max-width:100%" hidden></canvas>
+        <p id="encOversizeMsg" class="caution" hidden>データが大きすぎます。ダウンロードをご利用ください。</p>
+        <textarea id="encJson" rows="8" readonly></textarea>
+        <div class="enc-actions">
+          <button type="button" id="copyEncJsonBtn" class="btn">コピー</button>
+          <button type="button" id="downloadEncBtn" class="btn">ダウンロード</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ─── Tab 3: 復号 ──────────────────────────────────────── -->
+    <section class="crypto-panel" data-panel="decrypt" role="tabpanel">
+      <label>暗号文（JSON）
+        <textarea id="decInput" rows="6" placeholder='{"schema":"yu://seal/1","alg":"...","ciphertext":"..."}'></textarea>
+      </label>
+      <div class="dec-qr-actions">
+        <label class="btn" for="decFileQr">QR 画像から読み込む
+          <input type="file" id="decFileQr" accept="image/*" hidden>
+        </label>
+        <button type="button" id="decCameraQr" class="btn">📷 カメラで読み取る</button>
+      </div>
+
+      <p id="decModeHint" class="hint"></p>
+
+      <div class="dec-passphrase-row" hidden>
+        <label>パスフレーズ
+          <input type="password" id="decPassphrase" autocomplete="off">
+        </label>
+      </div>
+
+      <button type="button" id="decryptBtn" class="btn btn-primary">復号する</button>
+
+      <div class="dec-result" id="decResultBlock" hidden>
+        <h3>結果</h3>
+        <textarea id="decPlaintext" rows="6" readonly></textarea>
+        <p id="decSenderStatus" class="dec-sender-unverified"></p>
+        <div class="dec-actions">
+          <button type="button" id="copyDecBtn" class="btn">コピー</button>
+          <button type="button" id="decRecipeBtn" class="btn btn-primary" hidden>▶ Bridge で開く</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Camera QR scanner modal -->
+  <div id="cameraQrModal" class="camera-qr-modal" hidden role="dialog" aria-modal="true" aria-label="カメラで QR を読み取る">
+    <div class="camera-qr-inner">
+      <h3>📷 カメラで QR を読み取る</h3>
+      <div class="camera-qr-viewport">
+        <video id="cameraQrVideo" autoplay playsinline muted></video>
+        <canvas id="cameraQrCapture" hidden></canvas>
+        <div class="camera-qr-reticle" aria-hidden="true"></div>
+      </div>
+      <p id="cameraQrStatus" class="camera-qr-status hint">カメラを QR コードに向けてください...</p>
+      <button type="button" id="cameraQrClose" class="btn">閉じる</button>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/crypto-tools-app.js?v={{ dist_v }}"></script>
+</body>
+</html>

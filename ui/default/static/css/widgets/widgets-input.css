@@ -1,0 +1,70 @@
+/* ===== Input Clear Buttons ===== */
+.input-with-clear {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-with-clear input {
+  flex: 1;
+  padding-right: 36px;
+}
+
+.clear-btn {
+  position: absolute;
+  right: 4px;
+  background: transparent;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  opacity: 0.5;
+  transition: opacity 0.2s ease;
+  border-radius: 4px;
+}
+
+.clear-btn:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.05);
+}
+
+body.dark .clear-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.clear-btn:active {
+  transform: scale(0.95);
+}
+
+.input-with-clear input:placeholder-shown ~ .clear-btn {
+  opacity: 0.3;
+}
+
+#clearAllBtn {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+#clearAllBtn:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+#clearAllBtn:active {
+  transform: translateY(0);
+}
+
+body.dark #clearAllBtn {
+  background: #b91c1c;
+}
+
+body.dark #clearAllBtn:hover {
+  background: #991b1b;
+}

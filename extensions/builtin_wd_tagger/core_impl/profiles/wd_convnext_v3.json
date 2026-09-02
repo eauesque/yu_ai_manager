@@ -1,0 +1,36 @@
+{
+  "profile_version": "1",
+  "id": "wd_convnext_v3",
+  "display_name": "WD ConvNeXt v3",
+  "model_id": "SmilingWolf/wd-convnext-tagger-v3",
+  "adapter_family": "wd",
+  "backend": "onnx",
+  "builtin": true,
+  "files": [
+    {"name": "model.onnx", "required": true, "size_hint_mb": 350},
+    {"name": "selected_tags.csv", "required": true, "size_hint_mb": 1}
+  ],
+  "preprocess_spec": {
+    "input_size": 448,
+    "resize_strategy": "longest_side_pad",
+    "pad_color": [255, 255, 255],
+    "channel_order": "BGR",
+    "dtype": "float32",
+    "scale": 1.0,
+    "mean": null,
+    "std": null,
+    "layout": "NHWC"
+  },
+  "tag_csv_spec": {
+    "delimiter": ",",
+    "name_col": "name",
+    "category_col": "category",
+    "category_map": {"0": "general", "4": "character", "9": "rating"}
+  },
+  "default_thresholds": {
+    "general": 0.35,
+    "character": 0.85,
+    "rating": 0.0
+  },
+  "supports_categories": ["general", "character", "rating"]
+}

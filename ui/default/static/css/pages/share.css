@@ -1,0 +1,43 @@
+/* share.css - Prompt sharing page */
+#content.card{
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 18px;
+  margin-top: 14px;
+}
+.loading{ color: var(--muted); }
+.error{
+  color: var(--text);
+  background: rgba(180,40,40,0.10);
+  border: 1px solid rgba(180,40,40,0.35);
+  border-radius: 10px;
+  padding: 12px;
+}
+.section{ margin-top: 14px; }
+.section h2{ margin: 0 0 8px 0; font-size: 16px; }
+.prompt-text{
+  background: rgba(0,0,0,0.04);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+body.dark .prompt-text{ background: rgba(255,255,255,0.06); }
+.meta-row{ display:flex; flex-wrap:wrap; gap:10px; margin: 8px 0 0; }
+.meta-item{ font-size: 12px; color: var(--muted); }
+.badge{
+  display:inline-flex; align-items:center; gap:6px;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(0,0,0,0.03);
+}
+body.dark .badge{ background: rgba(255,255,255,0.06); }
+.actions{ display:flex; flex-wrap:wrap; gap:10px; margin-top: 12px; }
+.actions .btn{ padding: 8px 12px; border-radius: 10px; border: 1px solid var(--border); background: var(--btn-bg); color: var(--btn-text); cursor:pointer; }
+.actions .btn:hover{ background: var(--btn-hover); }

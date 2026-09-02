@@ -1,0 +1,456 @@
+  <script nonce="{{ csp_nonce }}">
+  (function() {
+    // ── Live Stream Transcription ────────────────────
+    var streamUrlInput = document.getElementById('s2tStreamUrl');
+    var streamLang = document.getElementById('s2tStreamLang');
+    var streamStartBtn = document.getElementById('s2tStreamStartBtn');
+    var streamStopBtn = document.getElementById('s2tStreamStopBtn');
+    var streamStatus = document.getElementById('s2tStreamStatus');
+    var streamSubtitles = document.getElementById('s2tStreamSubtitles');
+    var streamCopyBtn = document.getElementById('s2tStreamCopyBtn');
+    var streamExportTxt = document.getElementById('s2tStreamExportTxt');
+    var streamExportSrt = document.getElementById('s2tStreamExportSrt');
+    var llmSection = document.getElementById('s2tLlmSection');
+    var llmModeSelect = document.getElementById('s2tLlmMode');
+    var llmTargetLang = document.getElementById('s2tLlmTargetLang');
+    var llmBtn = document.getElementById('s2tLlmBtn');
+    var llmResult = document.getElementById('s2tLlmResult');
+    var llmCopyBtn = document.getElementById('s2tLlmCopyBtn');
+    var streamAudio = document.getElementById('s2tStreamAudio');
+    var streamVideo = document.getElementById('s2tStreamVideo');
+    var streamVideoMjpeg = document.getElementById('s2tStreamVideoMjpeg');
+    var _streamVideoMode = 'fmp4'; // 'fmp4' or 'mjpeg'
+    var streamPollTimer = null;
+
+    function s2tStreamStart() {
+      var url = streamUrlInput.value.trim();
+      if (!url) {
+        streamStatus.textContent = window.tr('s2t.stream_url_required', 'Please enter a URL');
+        return;
+      }
+      streamStartBtn.disabled = true;
+      streamStatus.textContent = '';
+
+      fetch('api/s2t/stream/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify({
+          source_url: url,
+          language: window._s2tGetResolvedLang(streamLang),
+          model_size: document.getElementById('s2tStreamModelSize').value,
+          mode: document.getElementById('s2tStreamMode').value,
+        }),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        streamStartBtn.disabled = false;
+        if (d.status === 'ok' || d.status === 'started') {
+          _streamVideoMode = d.video_mode || 'fmp4';
+          streamStartBtn.style.display = 'none';
+          streamStopBtn.style.display = '';
+          _showTranscriptActions();
+          streamStatus.textContent = window.tr('s2t.stream_status_running', 'Transcribing...');
+          startStreamMedia();
+          startStreamPolling();
+        } else {
+          streamStatus.textContent = window.tr('s2t.error_prefix', 'Error') + ': ' + (d.message || JSON.stringify(d));
+        }
+      })
+      .catch(function(err) {
+        streamStartBtn.disabled = false;
+        streamStatus.textContent = window.tr('s2t.request_failed', 'Request failed') + ': ' + err.message;
+      });
+    }
+
+    function s2tStreamStop() {
+      streamStopBtn.disabled = true;
+
+      fetch('api/s2t/stream/stop', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        streamStopBtn.disabled = false;
+        streamStopBtn.style.display = 'none';
+        streamStartBtn.style.display = '';
+        streamStatus.textContent = window.tr('s2t.stream_status_stopped', 'Stopped');
+        stopStreamMedia();
+        stopStreamPolling();
+      })
+      .catch(function(err) {
+        streamStopBtn.disabled = false;
+        streamStatus.textContent = window.tr('s2t.request_failed', 'Request failed') + ': ' + err.message;
+      });
+    }
+
+    function s2tStreamCopy() {
+      var text = streamSubtitles.textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+      } else {
+        // Fallback for older browsers
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+    }
+
+    function startStreamMedia() {
+      if (_streamVideoMode === 'mjpeg') {
+        // RTSP: legacy AudioRelay (MP3) + VideoRelay (MJPEG)
+        streamAudio.src = 'api/s2t/stream/audio';
+        streamAudio.style.display = '';
+        streamAudio.play().catch(function() {});
+        streamVideoMjpeg.src = 'api/s2t/stream/video';
+        streamVideoMjpeg.style.display = 'block';
+        streamVideoMjpeg.onerror = function() {
+          streamVideoMjpeg.style.display = 'none';
+        };
+        streamVideo.style.display = 'none';
+      } else {
+        // HTTP/HLS: single MediaRelay (fMP4 video+audio)
+        _loadMediaStream();
+        // No separate audio needed — <video> includes audio track
+        streamAudio.style.display = 'none';
+        streamVideoMjpeg.style.display = 'none';
+      }
+      // Auto-hide if nothing loads within 3s
+      setTimeout(function() {
+        if (_streamVideoMode === 'mjpeg') {
+          if (!streamVideoMjpeg.naturalWidth) streamVideoMjpeg.style.display = 'none';
+        } else {
+          if (streamVideo.readyState === 0) streamVideo.style.display = 'none';
+        }
+      }, 3000);
+    }
+
+    var _mediaReconnectTimer = null;
+
+    function _loadMediaStream() {
+      // Cache-bust to force a fresh connection on each load
+      streamVideo.src = 'api/s2t/stream/media?t=' + Date.now();
+      streamVideo.style.display = 'block';
+      streamVideo.play().catch(function() {});
+      // Auto-reconnect only on actual error (not stalled — stalled fires during normal buffering)
+      streamVideo.onerror = _handleMediaError;
+    }
+
+    function _handleMediaError() {
+      if (_streamVideoMode !== 'fmp4') return;
+      if (_mediaReconnectTimer) return;
+      // Check status and auto-switch to mjpeg if server reports mjpeg mode
+      _mediaReconnectTimer = setTimeout(function() {
+        _mediaReconnectTimer = null;
+        fetch('api/s2t/stream/status', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (!d.running) return;
+            // Server may report the actual video_mode — switch if needed
+            if (d.video_mode === 'mjpeg' && _streamVideoMode !== 'mjpeg') {
+              _streamVideoMode = 'mjpeg';
+              stopStreamMedia();
+              startStreamMedia();
+              return;
+            }
+            streamVideo.src = 'api/s2t/stream/media?t=' + Date.now();
+            streamVideo.play().catch(function() {});
+          })
+          .catch(function() {});
+      }, 3000);
+    }
+
+    function stopStreamMedia() {
+      // Cancel pending reconnect
+      if (_mediaReconnectTimer) { clearTimeout(_mediaReconnectTimer); _mediaReconnectTimer = null; }
+      // Clean up <video> (fMP4)
+      streamVideo.pause();
+      streamVideo.removeAttribute('src');
+      streamVideo.load();
+      streamVideo.style.display = 'none';
+      streamVideo.onerror = null;
+      streamVideo.onstalled = null;
+      // Clean up <audio> (MJPEG mode)
+      streamAudio.pause();
+      streamAudio.removeAttribute('src');
+      streamAudio.load();
+      streamAudio.style.display = 'none';
+      // Clean up <img> (MJPEG)
+      streamVideoMjpeg.removeAttribute('src');
+      streamVideoMjpeg.style.display = 'none';
+      streamVideoMjpeg.onerror = null;
+    }
+
+    var _lastTranscriptCount = 0;
+    var _sseChunksReceived = 0;  // count chunks received via SSE
+    var streamStatusTimer = null;
+
+    function startStreamPolling() {
+      stopStreamPolling();
+      _lastTranscriptCount = 0;
+      _sseChunksReceived = 0;
+
+      // Status polling: 5s interval for elapsed time & running state
+      streamStatusTimer = setInterval(function() {
+        fetch('api/s2t/stream/status', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            if (d.running) {
+              var elapsed = d.elapsed_seconds || 0;
+              var chunks = d.chunks_processed || 0;
+              var modeLabel = d.mode === 'live' ? 'LIVE' : 'CHUNK';
+              streamStatus.textContent = window.tr('s2t.stream_status_running', 'Transcribing...')
+                + ' [' + modeLabel + '] '
+                + window._s2tFmtTime(elapsed) + ' / ' + chunks + ' chunks';
+            } else {
+              streamStatus.textContent = window.tr('s2t.stream_status_stopped', 'Stopped');
+              streamStopBtn.style.display = 'none';
+              streamStartBtn.style.display = '';
+              stopStreamMedia();
+              stopStreamPolling();
+            }
+          })
+          .catch(function() {});
+      }, 5000);
+
+      // Transcript polling: 10s fallback for when SSE is unavailable
+      streamPollTimer = setInterval(function() {
+        fetch('api/s2t/stream/transcript', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+          .then(function(r) { return r.json(); })
+          .then(function(d) {
+            var offset = d.offset || 0;
+            var totalCount = d.total_count || d.count || 0;
+            if (totalCount > _lastTranscriptCount) {
+              // Append only new segments
+              var startIndex = Math.max(0, _lastTranscriptCount - offset);
+              var newSegs = d.segments.slice(startIndex);
+              for (var i = 0; i < newSegs.length; i++) {
+                var text = newSegs[i].text || '';
+                if (text) {
+                  var line = document.createElement('div');
+                  line.textContent = text;
+                  streamSubtitles.appendChild(line);
+                }
+              }
+              _lastTranscriptCount = totalCount;
+              streamSubtitles.scrollTop = streamSubtitles.scrollHeight;
+              _showTranscriptActions();
+            }
+          })
+          .catch(function() {});
+      }, 10000);
+    }
+
+    function stopStreamPolling() {
+      if (streamPollTimer) {
+        clearInterval(streamPollTimer);
+        streamPollTimer = null;
+      }
+      if (streamStatusTimer) {
+        clearInterval(streamStatusTimer);
+        streamStatusTimer = null;
+      }
+    }
+
+    // Show/hide custom language input for stream language select
+    streamLang.addEventListener('change', function() {
+      var customInput = this.parentElement.querySelector('.s2t-custom-lang');
+      if (customInput) customInput.style.display = this.value === 'custom' ? 'inline-block' : 'none';
+    });
+
+    // Event listeners (no inline onclick)
+    streamStartBtn.addEventListener('click', s2tStreamStart);
+    streamStopBtn.addEventListener('click', s2tStreamStop);
+    streamCopyBtn.addEventListener('click', s2tStreamCopy);
+
+    streamExportTxt.addEventListener('click', function() {
+      window.open('api/s2t/stream/export/txt', '_blank');
+    });
+    streamExportSrt.addEventListener('click', function() {
+      window.open('api/s2t/stream/export/srt', '_blank');
+    });
+
+    // LLM mode toggle: show target language only for "translate"
+    llmModeSelect.addEventListener('change', function() {
+      llmTargetLang.style.display = (llmModeSelect.value === 'translate') ? '' : 'none';
+    });
+
+    // LLM process button
+    llmBtn.addEventListener('click', function() {
+      llmBtn.disabled = true;
+      llmBtn.textContent = window.tr('s2t.llm_processing', '処理中...');
+      llmResult.style.display = 'none';
+      llmCopyBtn.style.display = 'none';
+
+      var payload = { mode: llmModeSelect.value };
+      if (llmModeSelect.value === 'translate') {
+        payload.target_lang = llmTargetLang.value;
+      }
+
+      fetch('api/s2t/stream/llm-process', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify(payload),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        llmBtn.disabled = false;
+        llmBtn.textContent = window.tr('s2t.llm_process', '実行');
+        if (d.status === 'error') {
+          llmResult.textContent = d.message || 'Error';
+          llmResult.style.display = '';
+          return;
+        }
+        if (d.backend === 'none') {
+          // No LLM available — show prompt for user to copy
+          llmResult.textContent = window.tr('s2t.llm_no_backend',
+            'LLM未検出。以下のプロンプトを外部LLMにコピーしてください') + '\n\n' + (d.prompt || '');
+        } else {
+          llmResult.textContent = d.result || '';
+        }
+        llmResult.style.display = '';
+        llmCopyBtn.style.display = '';
+      })
+      .catch(function(err) {
+        llmBtn.disabled = false;
+        llmBtn.textContent = window.tr('s2t.llm_process', '実行');
+        llmResult.textContent = window.tr('s2t.request_failed', 'Request failed') + ': ' + err.message;
+        llmResult.style.display = '';
+      });
+    });
+
+    // Copy LLM result
+    llmCopyBtn.addEventListener('click', function() {
+      var text = llmResult.textContent;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+      }
+    });
+
+    // Helper to show/hide export & LLM buttons based on transcript content
+    function _showTranscriptActions() {
+      streamCopyBtn.style.display = '';
+      streamExportTxt.style.display = '';
+      streamExportSrt.style.display = '';
+      llmSection.style.display = '';
+    }
+
+    // SSE subscriptions for real-time subtitle updates
+    // Deferred to window.load to ensure nav.js (module) has initialized sseSubscribe
+    var _interimLine = null;  // reusable element for interim (tentative) text
+
+    function _appendConfirmedText(text) {
+      // Remove interim line before appending confirmed text
+      if (_interimLine && _interimLine.parentNode) {
+        _interimLine.parentNode.removeChild(_interimLine);
+        _interimLine = null;
+      }
+      if (!text) return;
+      var line = document.createElement('div');
+      line.textContent = text;
+      streamSubtitles.appendChild(line);
+      streamSubtitles.scrollTop = streamSubtitles.scrollHeight;
+      _showTranscriptActions();
+      _lastTranscriptCount++;  // keep poll counter in sync
+      _sseChunksReceived++;
+    }
+
+    function _initSseSubs() {
+      if (!window.sseSubscribe) return;
+
+      // Confirmed text (Phase A compat)
+      window.sseSubscribe('s2t.stream_chunk', function(d) {
+        var data = d.data || d;
+        _appendConfirmedText(data.text || '');
+      });
+
+      // Confirmed text (Phase B)
+      window.sseSubscribe('s2t.stream_final', function(d) {
+        var data = d.data || d;
+        _appendConfirmedText(data.text || '');
+      });
+
+      // Tentative text (Phase B) — shown in italic/gray, replaced on next event
+      window.sseSubscribe('s2t.stream_interim', function(d) {
+        var data = d.data || d;
+        var text = data.text || '';
+        if (!text) return;
+        if (!_interimLine) {
+          _interimLine = document.createElement('div');
+          _interimLine.className = 's2t-interim';
+        }
+        _interimLine.textContent = text;
+        if (!_interimLine.parentNode) {
+          streamSubtitles.appendChild(_interimLine);
+        }
+        streamSubtitles.scrollTop = streamSubtitles.scrollHeight;
+      });
+
+      // Stream completed
+      window.sseSubscribe('s2t.stream_complete', function(d) {
+        // Remove any remaining interim text
+        if (_interimLine && _interimLine.parentNode) {
+          _interimLine.parentNode.removeChild(_interimLine);
+          _interimLine = null;
+        }
+        var data = d.data || d;
+        var elapsed = data.elapsed_seconds || 0;
+        streamStatus.textContent = window.tr('s2t.stream_status_stopped', 'Stopped')
+          + ' (' + window._s2tFmtTime(elapsed) + ')';
+        streamStopBtn.style.display = 'none';
+        streamStartBtn.style.display = '';
+        stopStreamMedia();
+        stopStreamPolling();
+      });
+
+      // Stream error
+      window.sseSubscribe('s2t.stream_error', function(d) {
+        var data = d.data || d;
+        var errMsg = data.error || data.message || 'Unknown error';
+        streamStatus.textContent = window.tr('s2t.error_prefix', 'Error') + ': ' + errMsg;
+      });
+
+      // Stream started (update UI if started from elsewhere, e.g. MCP)
+      window.sseSubscribe('s2t.stream_start', function(d) {
+        var data = d.data || d;
+        streamStartBtn.style.display = 'none';
+        streamStopBtn.style.display = '';
+        streamStatus.textContent = window.tr('s2t.stream_status_running', 'Transcribing...');
+        if (data.source_url) streamUrlInput.value = data.source_url;
+        _showTranscriptActions();
+      });
+    }
+    if (document.readyState === 'complete') {
+      _initSseSubs();
+    } else {
+      window.addEventListener('load', _initSseSubs);
+    }
+
+    // On page load: check if stream is already running
+    fetch('api/s2t/stream/status', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.running) {
+          streamStartBtn.style.display = 'none';
+          streamStopBtn.style.display = '';
+          _showTranscriptActions();
+          streamStatus.textContent = window.tr('s2t.stream_status_running', 'Transcribing...');
+          if (d.source_url) streamUrlInput.value = d.source_url;
+          _streamVideoMode = d.video_mode || 'fmp4';
+          startStreamMedia();
+          startStreamPolling();
+        }
+      })
+      .catch(function() {});
+  })();
+  </script>

@@ -1,0 +1,28 @@
+  <!-- Search modal (in-place search when scrolled down) -->
+  <div id="searchModal" role="dialog" aria-modal="true" aria-label="Quick search" style="display:none;position:fixed;inset:0;z-index:850;background:rgba(0,0,0,0.6);backdrop-filter:blur(4px);align-items:flex-start;justify-content:center;padding-top:60px;" data-action="runtimeInitApi.closeSearchModal" data-action-self="1">
+    <div style="background:var(--card,#1e1e3a);border-radius:12px;padding:16px 20px;width:90%;max-width:700px;box-shadow:0 8px 32px rgba(0,0,0,0.4);border:1px solid rgba(128,128,128,0.2);">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:16px;">🔍</span>
+        <input type="text" id="searchModalInput" data-i18n-placeholder="search_modal.placeholder" placeholder="Tag search (e.g. 1girl, blonde_hair, -nsfw)" aria-label="Quick tag search" data-i18n-aria-label="search_modal.input_label" style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg,#1a1a2e);color:var(--text,#eee);font-size:14px;" autocomplete="off" />
+        <button type="button" data-action="runtimeInitApi.executeSearchModal" style="padding:8px 16px;border-radius:6px;border:none;background:var(--accent,#667eea);color:#fff;cursor:pointer;font-size:13px;white-space:nowrap;" data-i18n="search_modal.search_btn">Search</button>
+        <button type="button" data-action="runtimeInitApi.closeSearchModal" style="padding:8px;border-radius:6px;border:none;background:none;color:var(--muted,#888);cursor:pointer;font-size:18px;line-height:1;"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-x"/></svg></button>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin:8px 0;align-items:center;">
+        <select id="smModelFilter" aria-label="Model filter" data-i18n-aria-label="search_modal.model_filter_label" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg,#1a1a2e);color:var(--text,#eee);font-size:12px;">
+          <option value="all" data-i18n="search_modal.model_all">All models</option><option value="sd">SD</option><option value="nai">NAI</option><option value="comfy">ComfyUI</option><option value="unknown" data-i18n="search_modal.model_unknown">Unknown</option>
+        </select>
+        <select id="smSortBy" aria-label="Sort order" data-i18n-aria-label="search_modal.sort_label" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg,#1a1a2e);color:var(--text,#eee);font-size:12px;">
+          <option value="date_new" data-i18n="search_modal.sort_date_new">Newest first</option><option value="date_old" data-i18n="search_modal.sort_date_old">Oldest first</option><option value="folder" data-i18n="search_modal.sort_folder">Folder order</option><option value="random" data-i18n="search_modal.sort_random">Random</option>
+        </select>
+        <input type="text" id="smInPrompt" data-i18n-placeholder="search_modal.in_prompt_placeholder" placeholder="In prompt" aria-label="In prompt" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg,#1a1a2e);color:var(--text,#eee);font-size:12px;width:120px;" />
+        <input type="text" id="smInPath" data-i18n-placeholder="search_modal.path_placeholder" placeholder="Path" aria-label="Path filter" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg,#1a1a2e);color:var(--text,#eee);font-size:12px;width:100px;" />
+        <label style="display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--text,#eee);cursor:pointer;user-select:none;">
+          <input type="checkbox" id="smHasTags" style="margin:0;" /><span data-i18n="search_modal.has_tags">Tagged</span>
+        </label>
+        <label style="display:inline-flex;align-items:center;gap:3px;font-size:12px;color:var(--text,#eee);cursor:pointer;user-select:none;">
+          <input type="checkbox" id="smAiAnalyzed" style="margin:0;" /><span data-i18n="search_modal.ai_analyzed">AI analyzed</span>
+        </label>
+      </div>
+      <div style="font-size:11px;color:var(--muted,#888);" data-i18n="search_modal.hint">Enter to search / Esc to close / Syncs with main search</div>
+    </div>
+  </div>

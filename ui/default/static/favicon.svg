@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <defs>
+    <mask id="n">
+      <rect width="100" height="100" fill="white"/>
+      <path fill="black" d="M 50 50 Q 39.67 27.10 25.00 6.70 A 50 50 0 0 1 48.82 0.01 Q 46.91 25.07 50 50 Z"/>
+    </mask>
+  </defs>
+  <g mask="url(#n)">
+    <path fill="#0077bb" fill-rule="evenodd"
+      d="M50 18 A32 32 0 1 1 49.999 18 Z M50 31 A19 19 0 1 0 50.001 31 Z"/>
+    <g stroke="#0077bb" stroke-width="3.2" stroke-linecap="round" fill="none">
+      <path d="M50,31 Q53.5,35.0 50,39"/>
+      <path d="M50,31 Q53.5,35.0 50,39" transform="rotate(45  50 50)"/>
+      <path d="M50,31 Q53.5,35.0 50,39" transform="rotate(90  50 50)"/>
+      <path d="M50,31 Q53.5,35.0 50,39" transform="rotate(135 50 50)"/>
+      <path d="M50,31 Q53.5,35.0 50,39" transform="rotate(180 50 50)"/>
+      <path d="M50,31 Q53.5,35.0 50,39" transform="rotate(225 50 50)"/>
+      <path d="M50,31 Q53.5,35.0 50,39" transform="rotate(270 50 50)"/>
+      <path d="M50,31 Q53.5,35.0 50,39" transform="rotate(315 50 50)"/>
+    </g>
+  </g>
+  <g fill="#0077bb" opacity="0.90">
+    <path d="M58.70,14.64 A5.5,5.5,0,1,1,68.86,18.85 Q65.24,14.64 66.46,10.27 Q64.23,14.22 58.70,14.64Z"/>
+    <path d="M81.15,31.14 A5.5,5.5,0,1,1,85.36,41.30 Q85.78,35.77 89.73,33.54 Q85.36,34.76 81.15,31.14Z"/>
+    <path d="M85.36,58.70 A5.5,5.5,0,1,1,81.15,68.86 Q85.36,65.24 89.73,66.46 Q85.78,64.23 85.36,58.70Z"/>
+    <path d="M68.86,81.15 A5.5,5.5,0,1,1,58.70,85.36 Q64.23,85.78 66.46,89.73 Q65.24,85.36 68.86,81.15Z"/>
+    <path d="M41.30,85.36 A5.5,5.5,0,1,1,31.14,81.15 Q34.76,85.36 33.54,89.73 Q35.77,85.78 41.30,85.36Z"/>
+    <path d="M18.85,68.86 A5.5,5.5,0,1,1,14.64,58.70 Q14.22,64.23 10.27,66.46 Q14.64,65.24 18.85,68.86Z"/>
+  </g>
+  <circle cx="50" cy="50" r="8.5"  fill="#0077bb"/>
+  <circle cx="50" cy="50" r="6.2"  fill="none" stroke="white" stroke-width="1.1" opacity="0.32"/>
+  <circle cx="50" cy="50" r="4.0"  fill="none" stroke="white" stroke-width="0.9" opacity="0.27"/>
+  <circle cx="50" cy="50" r="2.0"  fill="none" stroke="white" stroke-width="0.7" opacity="0.22"/>
+  <circle cx="50" cy="50" r="0.7"  fill="white" opacity="0.40"/>
+</svg>

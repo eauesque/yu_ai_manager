@@ -1,0 +1,181 @@
+<script nonce="{{ csp_nonce }}">
+/* GitHub Integration — Issues tab */
+
+async function ghubLoadIssues() {
+  if (!ghubCurrentLabel) { ghubShowToast(_t('select_first')); return; }
+  var list = ghubEl('ghubIssueList');
+  list.innerHTML = '<div class="ghub-loading">' + _t('loading_issues') + '</div>';
+
+  var repo = ghubEl('ghubIssueRepo').value;
+  var state = ghubEl('ghubIssueState').value;
+  var url = '/api/github/issues/' + encodeURIComponent(ghubCurrentLabel) + '?state=' + state;
+  if (repo) url += '&repo=' + encodeURIComponent(repo);
+
+  try {
+    var data = await ghubFetch(url);
+    var result = data.data || data;
+    var issues = result.issues || [];
+    var errors = result.errors || [];
+
+    if (errors.length) {
+      ghubShowToast(_t('errors_prefix') + errors.join(', '));
+    }
+    if (!issues.length) {
+      list.innerHTML = '<div class="ghub-empty">' + _t('no_issues') + '</div>';
+      return;
+    }
+    list.innerHTML = issues.map(ghubRenderIssueCard).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+
+function ghubRenderIssueCard(issue) {
+  var html = '<div class="ghub-card" style="cursor:pointer" role="button" tabindex="0"' +
+    ' data-action="ghubShowIssueDetail" data-action-arg="' + ghubEsc(issue.repo) + ',' + issue.number + '"' +
+    ' data-action-enter="__click__"' +
+    ' aria-label="Issue #' + issue.number + ' ' + ghubEsc(issue.title) + '">';
+  html += '<div class="ghub-card-title">';
+  html += '<span class="' + ghubStateClass(issue.state) + '">' + ghubStateIcon(issue.state) + '</span>';
+  html += ' #' + issue.number + ' ' + ghubEsc(issue.title);
+  html += '</div>';
+  html += '<div class="ghub-card-meta">';
+  html += '<span>' + ghubEsc(issue.repo) + '</span>';
+  html += '<span>' + _t('by') + ghubEsc(issue.user) + '</span>';
+  if (issue.comments_count > 0) html += '<span>&#x1F4AC; ' + issue.comments_count + '</span>';
+  html += '<span>' + ghubTimeAgo(issue.created_at) + '</span>';
+  html += ' ' + ghubLabelsHtml(issue.labels);
+  html += '</div>';
+  if (issue.body) {
+    html += '<div class="ghub-card-body">' + ghubEsc(issue.body.substring(0, 200)) + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+async function ghubShowIssueDetail(repo, number) {
+  ghubShowDetail('<div class="ghub-loading">' + _t('loading_detail') + '</div>');
+  try {
+    var data = await ghubFetch('/api/github/issue/' + encodeURIComponent(ghubCurrentLabel) +
+      '/' + encodeURIComponent(repo) + '/' + number);
+    var result = data.data || data;
+    var issue = result.issue;
+    var formatted = result.formatted || '';
+
+    var html = '<h2 style="margin:0 0 8px">';
+    html += '<span class="' + ghubStateClass(issue.state) + '">' + ghubStateIcon(issue.state) + '</span> ';
+    html += '#' + issue.number + ' ' + ghubEsc(issue.title);
+    html += '</h2>';
+    html += '<div class="ghub-card-meta" style="margin-bottom:16px">';
+    html += '<span>' + ghubEsc(issue.repo || repo) + '</span>';
+    html += '<span>' + _t('by') + ghubEsc(issue.user) + '</span>';
+    html += '<span>' + ghubTimeAgo(issue.created_at) + '</span>';
+    html += ' ' + ghubLabelsHtml(issue.labels);
+    html += '<a href="' + ghubEsc(issue.html_url) + '" target="_blank" rel="noopener" class="ghub-btn ghub-btn-secondary ghub-btn-small">' + _t('open_github') + '</a>';
+    html += '</div>';
+    html += '<div style="white-space:pre-wrap;font-size:0.9rem;line-height:1.6;color:var(--text)">';
+    html += ghubEsc(issue.body || _t('no_desc'));
+    html += '</div>';
+
+    if (result.comments_count > 0) {
+      html += '<div class="ghub-section-header">' + _t('comments') + ' (' + result.comments_count + ')</div>';
+      html += '<div style="white-space:pre-wrap;font-size:0.85rem;color:var(--text-muted)">';
+      html += ghubEsc(formatted.split('### Comments\n')[1] || '');
+      html += '</div>';
+    }
+
+    ghubEl('ghubDetailContent').innerHTML = html;
+  } catch (e) {
+    ghubEl('ghubDetailContent').innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+
+/* ── Triage ───────────────────────────────────────────────── */
+
+async function ghubTriageIssues() {
+  if (!ghubCurrentLabel) { ghubShowToast(_t('select_first')); return; }
+  var list = ghubEl('ghubIssueList');
+  list.innerHTML = '<div class="ghub-loading">' + _t('running_triage') + '</div>';
+
+  try {
+    var data = await ghubFetch('/api/github/triage/' + encodeURIComponent(ghubCurrentLabel), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ state: ghubEl('ghubIssueState').value }),
+    });
+    var report = data.data || data;
+    var results = report.results || [];
+
+    var html = '<div class="ghub-card" style="margin-bottom:16px">';
+    html += '<div style="font-weight:600;margin-bottom:8px">' + _t('triage_report') + '</div>';
+    html += '<div class="ghub-card-meta">';
+    html += '<span>' + _t('total') + report.total + '</span>';
+    html += '<span>' + _t('actionable') + report.actionable + '</span>';
+    html += '<span>' + _t('skipped') + report.skipped + '</span>';
+    html += '<span class="ghub-priority-high" style="padding:2px 8px;border-radius:4px">' + _t('high') + report.high_priority + '</span>';
+    html += '<span class="ghub-priority-medium" style="padding:2px 8px;border-radius:4px">' + _t('medium') + report.medium_priority + '</span>';
+    html += '</div></div>';
+
+    // Sort: high first, then medium, then low
+    var order = { high: 0, medium: 1, low: 2 };
+    results.sort(function(a, b) {
+      if (a.actionable !== b.actionable) return a.actionable ? -1 : 1;
+      return (order[a.priority] || 3) - (order[b.priority] || 3);
+    });
+
+    results.forEach(function(r) {
+      var prioClass = r.actionable ? ('ghub-priority-' + r.priority) : '';
+      html += '<div class="ghub-card">';
+      html += '<div class="ghub-card-title">';
+      if (r.actionable) {
+        html += '<span class="ghub-label ' + prioClass + '">' + r.priority.toUpperCase() + '</span> ';
+      } else {
+        html += '<span class="ghub-label">' + ghubEsc(r.category) + '</span> ';
+      }
+      html += '#' + r.number + ' ' + ghubEsc(r.title);
+      html += '</div>';
+      html += '<div class="ghub-card-meta"><span>' + ghubEsc(r.reason) + '</span></div>';
+      html += '</div>';
+    });
+
+    list.innerHTML = html;
+  } catch (e) {
+    list.innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+
+/* ── New Issue ────────────────────────────────────────────── */
+
+function ghubShowNewIssueForm() {
+  ghubEl('ghubNewIssueForm').style.display = 'block';
+}
+
+function ghubHideNewIssueForm() {
+  ghubEl('ghubNewIssueForm').style.display = 'none';
+  ghubEl('ghubNewIssueTitle').value = '';
+  ghubEl('ghubNewIssueBody').value = '';
+}
+
+async function ghubSubmitNewIssue() {
+  if (!ghubCurrentLabel) { ghubShowToast(_t('select_first')); return; }
+  var repo = ghubEl('ghubNewIssueRepo').value;
+  var title = ghubEl('ghubNewIssueTitle').value.trim();
+  var body = ghubEl('ghubNewIssueBody').value;
+
+  if (!repo) { ghubShowToast(_t('select_repo')); return; }
+  if (!title) { ghubShowToast(_t('title_required')); return; }
+
+  try {
+    await ghubFetch('/api/github/issues/' + encodeURIComponent(ghubCurrentLabel), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ repo: repo, title: title, body: body }),
+    });
+    ghubShowToast(_t('issue_created'));
+    ghubHideNewIssueForm();
+    ghubLoadIssues();
+  } catch (e) {
+    ghubShowToast('Error: ' + e.message);
+  }
+}
+</script>

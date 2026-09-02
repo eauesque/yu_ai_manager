@@ -1,0 +1,10 @@
+{
+  "name": "sample-minimalist",
+  "version": "1.0.0",
+  "description": "Minimalist sample UI — clean, spacious design with essential features",
+  "author": "YU AI Manager Team",
+  "api_version": "1",
+  "type": "full",
+  "label": "サンプル: ミニマリスト",
+  "is_sample": true
+}

@@ -1,0 +1,62 @@
+<div class="pl-modal-overlay hidden" id="plModalOverlay">
+  <div class="pl-modal">
+    <h2 id="plModalTitle" style="font-size:1.1em;" data-i18n="prompt_library.save_prompt">Save Prompt</h2>
+    <input type="hidden" id="plEditId" value="">
+
+    <label for="plFieldTitle" data-i18n="prompt_library.label_title">Title *</label>
+    <input type="text" id="plFieldTitle" placeholder="e.g. Sunset landscape v2" data-i18n-placeholder="prompt_library.title_placeholder">
+
+    <label for="plFieldPositive" data-i18n="prompt_library.label_positive">Positive Prompt</label>
+    <textarea id="plFieldPositive" rows="3" placeholder="masterpiece, best quality, ..." data-i18n-placeholder="prompt_library.positive_placeholder"></textarea>
+
+    <label for="plFieldNegative" data-i18n="prompt_library.label_negative">Negative Prompt</label>
+    <textarea id="plFieldNegative" rows="2" placeholder="worst quality, ..." data-i18n-placeholder="prompt_library.negative_placeholder"></textarea>
+
+    <div class="pl-modal-row">
+      <div>
+        <label for="plFieldSeed" data-i18n="prompt_library.label_seed">Seed</label>
+        <input type="text" id="plFieldSeed" placeholder="">
+      </div>
+      <div>
+        <label for="plFieldSteps" data-i18n="prompt_library.label_steps">Steps</label>
+        <input type="text" id="plFieldSteps" placeholder="">
+      </div>
+    </div>
+
+    <div class="pl-modal-row">
+      <div>
+        <label for="plFieldSampler" data-i18n="prompt_library.label_sampler">Sampler</label>
+        <input type="text" id="plFieldSampler" placeholder="">
+      </div>
+      <div>
+        <label for="plFieldCfg" data-i18n="prompt_library.label_cfg_scale">CFG Scale</label>
+        <input type="text" id="plFieldCfg" placeholder="">
+      </div>
+    </div>
+
+    <label for="plFieldModel" data-i18n="prompt_library.label_model">Model</label>
+    <input type="text" id="plFieldModel" placeholder="">
+
+    <label for="plFieldMemo" data-i18n="prompt_library.label_memo">Memo</label>
+    <textarea id="plFieldMemo" rows="2" placeholder="Notes about this prompt..." data-i18n-placeholder="prompt_library.memo_placeholder"></textarea>
+
+    <div id="plFieldCharsWrap" style="display:none;">
+      <label data-i18n="prompt_library.label_character_prompts">Character Prompts</label>
+      <div class="pl-modal-chars" id="plFieldChars"></div>
+    </div>
+
+    <div id="plFieldFoldersWrap" style="display:none;">
+      <label data-i18n="prompt_library.label_folders">Folders</label>
+      <div class="pl-modal-chips" id="plFieldFolders"></div>
+    </div>
+    <div id="plFieldTagsWrap" style="display:none;">
+      <label data-i18n="prompt_library.label_tags">Tags</label>
+      <div class="pl-modal-chips" id="plFieldTags"></div>
+    </div>
+
+    <div class="pl-modal-actions">
+      <button class="pl-btn" id="plModalCancel" data-i18n="prompt_library.cancel">Cancel</button>
+      <button class="pl-btn primary" id="plModalSave" data-i18n="prompt_library.save">Save</button>
+    </div>
+  </div>
+</div>

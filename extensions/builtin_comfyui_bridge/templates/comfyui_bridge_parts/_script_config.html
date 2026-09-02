@@ -1,0 +1,167 @@
+  // -- Config -----------------------------------------------------
+
+  window.cfbBrowseSaveFolder = function() {
+    fetch("/api/tools/select-folder")
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.path) $("cfbCfgSaveFolder").value = d.path;
+        else if (d.error) window.showToast(window.tr('comfyui_bridge.folder_selection_failed', 'Folder selection failed') + ": " + (d.error || "unknown"), true);
+      })
+      .catch(function(e) { window.showToast(window.tr('comfyui_bridge.folder_selection_failed', 'Folder selection failed') + ": " + e.message, true); });
+  };
+
+  window.cfbBrowseComfyOutputRoot = function() {
+    fetch("/api/tools/select-folder")
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.path) $("cfbCfgComfyOutputRoot").value = d.path;
+        else if (d.error) window.showToast(window.tr('comfyui_bridge.folder_selection_failed', 'Folder selection failed') + ": " + (d.error || "unknown"), true);
+      })
+      .catch(function(e) { window.showToast(window.tr('comfyui_bridge.folder_selection_failed', 'Folder selection failed') + ": " + e.message, true); });
+  };
+
+  // Restore prompt-open preference on page load
+  (function() {
+    var el = $("cfbCfgPromptOpen");
+    if (el) el.checked = localStorage.getItem("cfb_prompt_open") !== "false";
+  })();
+
+  window.cfbSaveConfig = function() {
+    // Save prompt-open preference to localStorage (client-only setting)
+    var promptOpenEl = $("cfbCfgPromptOpen");
+    if (promptOpenEl) localStorage.setItem("cfb_prompt_open", promptOpenEl.checked ? "true" : "false");
+    var body = {
+      api_url: $("cfbCfgUrl").value.trim(),
+      gateway_url: ($("cfbCfgGatewayUrl") || {}).value !== undefined ? ($("cfbCfgGatewayUrl").value || "").trim() : undefined,
+      default_sampler: $("cfbCfgSampler").value,
+      default_scheduler: $("cfbCfgScheduler").value,
+      auto_send: $("cfbCfgAutoSend").checked,
+      save_folder: $("cfbCfgSaveFolder").value.trim(),
+      auto_save: $("cfbCfgAutoSave").checked,
+      save_naming: $("cfbCfgSaveNaming").value,
+      auto_import: $("cfbCfgAutoImport").checked,
+      default_image_format: $("cfbCfgImageFormat").value,
+      models_root: ($("cfbCfgModelsRoot") || {}).value ? $("cfbCfgModelsRoot").value.trim() : "",
+      bridge_managed_save: $("cfbCfgBridgeManagedSave") ? $("cfbCfgBridgeManagedSave").checked : false,
+      comfy_output_root: $("cfbCfgComfyOutputRoot") ? $("cfbCfgComfyOutputRoot").value.trim() : "",
+      comfy_output_same_as_save_folder: $("cfbCfgComfyOutputSameAsSaveFolder") ? $("cfbCfgComfyOutputSameAsSaveFolder").checked : true,
+      max_batch_size: parseInt(($("cfbCfgMaxBatchSize") || {}).value, 10) || 8,
+    };
+    var apiKeyEl = $("cfbCfgApiKey");
+    if (apiKeyEl && apiKeyEl.value.trim()) body.api_key_enc = apiKeyEl.value.trim();
+    postJSON("/api/config", body).then(function(d) {
+      if (d.ok) {
+        window.showToast(window.tr('comfyui_bridge.settings_saved', 'Settings saved'));
+        if (apiKeyEl && apiKeyEl.value.trim()) { apiKeyEl.value = ""; apiKeyEl.placeholder = window.tr('comfyui_bridge.api_key_set', '(設定済み)'); }
+        // Sync generation panel defaults from saved config
+        $("cfbSampler").value = body.default_sampler;
+        $("cfbImageFormat").value = body.default_image_format;
+        // Apply new max_batch_size to the batch size input
+        var bsEl = $("cfbBatchSize");
+        if (bsEl) {
+          bsEl.max = body.max_batch_size;
+          if (parseInt(bsEl.value, 10) > body.max_batch_size) bsEl.value = body.max_batch_size;
+        }
+        // Forever loop is now allowed for cloud too (capped at 50 in the
+        // run loop). Always-enabled here.
+      }
+      else window.showToast(window.tr('comfyui_bridge.save_failed', 'Save failed') + ": " + (d.error || "unknown"), true);
+    }).catch(function(e) {
+      window.showToast(window.tr('comfyui_bridge.save_failed', 'Save failed') + ": " + e.message, true);
+    });
+  };
+
+  // Assign val to a <select>, injecting a matching <option> first when the
+  // server-populated list lacks it (ComfyUI offline, or a sampler/scheduler not
+  // in the static fallback list). Without this, setting an out-of-list value
+  // silently resets the select to "", and saving then fails the backend's
+  // "must not be empty" guard. Mirrors the preserve-unknown behaviour in
+  // _script_loaders.html.
+  function cfbEnsureOption(sel, val) {
+    if (!sel || !val) return;
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === val) { sel.value = val; return; }
+    }
+    var opt = document.createElement("option");
+    opt.value = val; opt.textContent = val;
+    sel.appendChild(opt);
+    sel.value = val;
+  }
+  function loadConfig() {
+    return getJSON("/api/config").then(function(d) {
+      if (!d.ok) return;
+      if (d.api_url) {
+        $("cfbCfgUrl").value = d.api_url;
+      }
+      if (typeof d.gateway_url === "string" && $("cfbCfgGatewayUrl")) {
+        $("cfbCfgGatewayUrl").value = d.gateway_url;
+      }
+      var akEl = $("cfbCfgApiKey");
+      if (akEl) akEl.placeholder = d.api_key_enc === "***" ? window.tr('comfyui_bridge.api_key_set', '(設定済み)') : "";
+      if (d.default_sampler) {
+        cfbEnsureOption($("cfbCfgSampler"), d.default_sampler);
+        // Don't overwrite values already applied by receivePrompt() on page load.
+        if (!_cfbReceivedPrompt) cfbEnsureOption($("cfbSampler"), d.default_sampler);
+      }
+      if (d.default_scheduler) {
+        cfbEnsureOption($("cfbCfgScheduler"), d.default_scheduler);
+        if (!_cfbReceivedPrompt) cfbEnsureOption($("cfbScheduler"), d.default_scheduler);
+      }
+      if (d.auto_send) $("cfbCfgAutoSend").checked = true;
+      if (d.save_folder) $("cfbCfgSaveFolder").value = d.save_folder;
+      if (d.auto_save) $("cfbCfgAutoSave").checked = true;
+      if (d.save_naming) $("cfbCfgSaveNaming").value = d.save_naming;
+      if (d.default_image_format) {
+        $("cfbCfgImageFormat").value = d.default_image_format;
+        $("cfbImageFormat").value = d.default_image_format;
+      }
+      $("cfbCfgAutoImport").checked = d.auto_import !== false;
+      if (typeof d.models_root === "string" && $("cfbCfgModelsRoot")) {
+        $("cfbCfgModelsRoot").value = d.models_root;
+      }
+      if ($("cfbCfgBridgeManagedSave")) $("cfbCfgBridgeManagedSave").checked = !!d.bridge_managed_save;
+      if (typeof d.comfy_output_root === "string" && $("cfbCfgComfyOutputRoot")) {
+        $("cfbCfgComfyOutputRoot").value = d.comfy_output_root;
+      }
+      if ($("cfbCfgComfyOutputSameAsSaveFolder")) {
+        $("cfbCfgComfyOutputSameAsSaveFolder").checked = !!d.comfy_output_same_as_save_folder;
+      }
+      if (typeof window._cfbSyncOutputRootDisabled === "function") {
+        window._cfbSyncOutputRootDisabled();
+      }
+      if (typeof d.max_batch_size === "number") {
+        var cfgMbs = $("cfbCfgMaxBatchSize");
+        if (cfgMbs) cfgMbs.value = d.max_batch_size;
+        var bsEl = $("cfbBatchSize");
+        if (bsEl) {
+          bsEl.max = d.max_batch_size;
+          // Clamp current value if it exceeds new max
+          if (parseInt(bsEl.value, 10) > d.max_batch_size) bsEl.value = d.max_batch_size;
+        }
+      }
+    }).catch(function() {});
+  }
+
+  // Grey out the explicit XMP target path input when "same as save_folder" is on.
+  window._cfbSyncOutputRootDisabled = function() {
+    var same = $("cfbCfgComfyOutputSameAsSaveFolder");
+    var input = $("cfbCfgComfyOutputRoot");
+    var browseBtn = $("cfbCfgComfyOutputRootBrowse");
+    if (!same || !input) return;
+    var disabled = !!same.checked;
+    input.disabled = disabled;
+    input.style.opacity = disabled ? "0.5" : "";
+    input.style.cursor = disabled ? "not-allowed" : "";
+    if (browseBtn) browseBtn.disabled = disabled;
+  };
+  (function() {
+    var same = $("cfbCfgComfyOutputSameAsSaveFolder");
+    if (same) {
+      same.addEventListener("change", function() {
+        window._cfbSyncOutputRootDisabled();
+      });
+    }
+    if (typeof window._cfbSyncOutputRootDisabled === "function") {
+      window._cfbSyncOutputRootDisabled();
+    }
+  })();

@@ -1,0 +1,190 @@
+<script nonce="{{ csp_nonce }}">
+/* -- SD WebUI Bridge: Scripts Panel (ADetailer etc.) -- */
+(function() {
+  "use strict";
+
+  var _scriptInfoCache = null;
+  var _enabledScripts = {};
+
+  window.sdwbRefreshScripts = function() {
+    var panel = document.getElementById("sdwbScriptsPanel");
+    if (!panel) return;
+    var listEl = document.getElementById("sdwbScriptsList");
+    var paramsEl = document.getElementById("sdwbScriptsParams");
+    if (!listEl || !paramsEl) return;
+
+    listEl.innerHTML = '<span class="sdwb-scripts-loading">Loading...</span>';
+    paramsEl.innerHTML = "";
+    _enabledScripts = {};
+    _scriptInfoCache = null;
+
+    fetch("/ext/sd-webui/api/script-info", {
+      headers: { "X-Requested-With": "XMLHttpRequest" }
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var scripts = (data && data.scripts) || [];
+        _scriptInfoCache = scripts;
+        if (!scripts.length) {
+          listEl.innerHTML = '<span class="sdwb-scripts-empty">No scripts found</span>';
+          return;
+        }
+        _renderScriptList(listEl, paramsEl, scripts);
+      })
+      .catch(function(err) {
+        listEl.innerHTML = '<span class="sdwb-scripts-error">Failed to load scripts</span>';
+      });
+  };
+
+  function _renderScriptList(listEl, paramsEl, scripts) {
+    var html = "";
+    for (var i = 0; i < scripts.length; i++) {
+      var s = scripts[i];
+      var name = s.name || "Script " + i;
+      var isAlwayson = s.is_alwayson || false;
+      if (!isAlwayson) continue;
+      var id = "sdwbScript_" + i;
+      html += '<label class="sdwb-script-toggle">';
+      html += '<input type="checkbox" id="' + id + '" data-script-idx="' + i + '">';
+      html += ' <span>' + _escHtml(name) + '</span>';
+      html += '</label>';
+    }
+    if (!html) {
+      listEl.innerHTML = '<span class="sdwb-scripts-empty">No alwayson scripts</span>';
+      return;
+    }
+    listEl.innerHTML = html;
+    listEl.querySelectorAll("input[type=checkbox]").forEach(function(cb) {
+      cb.addEventListener("change", function() {
+        var idx = parseInt(cb.getAttribute("data-script-idx") || "0", 10);
+        if (cb.checked) {
+          _enabledScripts[idx] = true;
+          _buildScriptForm(paramsEl, scripts[idx], idx);
+        } else {
+          delete _enabledScripts[idx];
+          var formEl = document.getElementById("sdwbScriptForm_" + idx);
+          if (formEl) formEl.remove();
+        }
+      });
+    });
+  }
+
+  function _buildScriptForm(paramsEl, info, scriptIdx) {
+    var existing = document.getElementById("sdwbScriptForm_" + scriptIdx);
+    if (existing) existing.remove();
+
+    var args = info.args || [];
+    if (!args.length) return;
+
+    var div = document.createElement("div");
+    div.id = "sdwbScriptForm_" + scriptIdx;
+    div.className = "sdwb-script-form";
+
+    var title = document.createElement("h4");
+    title.className = "sdwb-script-form-title";
+    title.textContent = info.name || "Script";
+    div.appendChild(title);
+
+    for (var i = 0; i < args.length; i++) {
+      var arg = args[i];
+      var label = arg.label || "arg " + i;
+      var fieldId = "sdwbSA_" + scriptIdx + "_" + i;
+
+      var row = document.createElement("div");
+      row.className = "sdwb-script-arg";
+
+      var lbl = document.createElement("label");
+      lbl.setAttribute("for", fieldId);
+      lbl.textContent = label;
+      row.appendChild(lbl);
+
+      var input = _createArgInput(arg, fieldId);
+      if (input) row.appendChild(input);
+      div.appendChild(row);
+    }
+
+    paramsEl.appendChild(div);
+  }
+
+  function _createArgInput(arg, fieldId) {
+    var type = (arg.type || "").toLowerCase();
+    var defaultVal = arg.default != null ? arg.default : "";
+
+    if (arg.choices && arg.choices.length) {
+      var sel = document.createElement("select");
+      sel.id = fieldId;
+      sel.className = "sdwb-script-input";
+      for (var i = 0; i < arg.choices.length; i++) {
+        var opt = document.createElement("option");
+        opt.value = arg.choices[i];
+        opt.textContent = arg.choices[i];
+        if (arg.choices[i] === defaultVal) opt.selected = true;
+        sel.appendChild(opt);
+      }
+      return sel;
+    }
+
+    if (type === "boolean" || type === "bool" || typeof defaultVal === "boolean") {
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.id = fieldId;
+      cb.className = "sdwb-script-input";
+      cb.checked = !!defaultVal;
+      return cb;
+    }
+
+    if (type === "number" || type === "int" || type === "float" || typeof defaultVal === "number") {
+      var num = document.createElement("input");
+      num.type = "number";
+      num.id = fieldId;
+      num.className = "sdwb-script-input";
+      num.value = String(defaultVal);
+      if (arg.minimum != null) num.min = String(arg.minimum);
+      if (arg.maximum != null) num.max = String(arg.maximum);
+      if (type === "float") num.step = "0.01";
+      return num;
+    }
+
+    var txt = document.createElement("input");
+    txt.type = "text";
+    txt.id = fieldId;
+    txt.className = "sdwb-script-input";
+    txt.value = String(defaultVal);
+    return txt;
+  }
+
+  window.sdwbCollectAlwaysonScripts = function() {
+    if (!_scriptInfoCache) return null;
+    var result = {};
+    var hasAny = false;
+    for (var idxStr in _enabledScripts) {
+      var idx = parseInt(idxStr, 10);
+      var info = _scriptInfoCache[idx];
+      if (!info) continue;
+      var args = info.args || [];
+      var values = [];
+      for (var i = 0; i < args.length; i++) {
+        var fieldId = "sdwbSA_" + idx + "_" + i;
+        var el = document.getElementById(fieldId);
+        if (!el) { values.push(args[i].default || null); continue; }
+        if (el.type === "checkbox") {
+          values.push(el.checked);
+        } else if (el.type === "number") {
+          values.push(parseFloat(el.value) || 0);
+        } else {
+          values.push(el.value);
+        }
+      }
+      result[info.name] = { args: values };
+      hasAny = true;
+    }
+    return hasAny ? result : null;
+  };
+
+  function _escHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+})();
+</script>

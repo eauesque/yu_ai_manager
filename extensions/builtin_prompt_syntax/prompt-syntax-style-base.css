@@ -1,0 +1,114 @@
+/**
+ * prompt-syntax styles — base/editor/display
+ */
+
+.ps-editor-container { position: relative; }
+.ps-editor-wrap {
+  position: relative;
+  border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 8px;
+  overflow: hidden;
+  background: #141428;
+}
+body:not(.dark) .ps-editor-wrap {
+  background: #f0f1f5;
+  border-color: rgba(100,100,120,0.25);
+}
+.ps-editor-wrap:focus-within { border-color: #667eea; }
+
+.ps-textarea {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  padding: 10px 12px; margin: 0; border: none;
+  background: transparent !important;
+  color: transparent !important;
+  caret-color: #fff;
+  font-family: 'Consolas','Monaco','Source Code Pro','Menlo','BIZ UDGothic','MS Gothic','Osaka-Mono',monospace;
+  font-size: 13px; line-height: 1.6;
+  resize: none; z-index: 2;
+  white-space: pre-wrap; overflow-wrap: break-word; word-break: normal;
+  overflow: auto; box-sizing: border-box; outline: none;
+  /* Hide scrollbar to keep text width identical to .ps-highlight (no-scrollbar).
+     Without this, Windows scrollbars (~17px) reduce textarea text width,
+     causing different line-wrap positions → cursor drift / ResizeObserver loop. */
+  scrollbar-width: none;        /* Firefox */
+  -ms-overflow-style: none;     /* IE/Edge legacy */
+  -webkit-text-fill-color: transparent !important;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  -webkit-text-size-adjust: none;
+  font-kerning: none;
+  text-rendering: geometricPrecision;
+  font-variant-ligatures: none;
+  letter-spacing: 0;
+  word-spacing: 0;
+}
+.ps-textarea::-webkit-scrollbar {
+  display: none;  /* Chrome / Safari / Edge Chromium */
+}
+/* Selection: keep textarea text invisible during selection.
+   Browser default ::selection overrides element color, causing double text
+   (ACCIDENT_POINTS #8 variant). */
+.ps-textarea::selection {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+  background: rgba(102,126,234,0.3);
+}
+.ps-textarea::-moz-selection {
+  color: transparent !important;
+  background: rgba(102,126,234,0.3);
+}
+
+.ps-highlight {
+  padding: 10px 12px;
+  font-family: 'Consolas','Monaco','Source Code Pro','Menlo','BIZ UDGothic','MS Gothic','Osaka-Mono',monospace;
+  font-size: 13px; line-height: 1.6;
+  white-space: pre-wrap; overflow-wrap: break-word; word-break: normal;
+  overflow: hidden; min-height: 120px;
+  color: #d4d4d4;
+  pointer-events: none; z-index: 1;
+  box-sizing: border-box;
+  font-kerning: none;
+  text-rendering: geometricPrecision;
+  font-variant-ligatures: none;
+  letter-spacing: 0;
+  word-spacing: 0;
+}
+body:not(.dark) .ps-highlight {
+  color: #333;
+}
+body:not(.dark) .ps-textarea {
+  caret-color: #222;
+}
+
+/* ── Editor highlight layer: reset ALL layout-affecting properties ──
+   Spans must be layout-invisible so the highlight layer renders
+   at exactly the same pixel positions as the underlying textarea.
+   Only color / background / border-radius / text-decoration are safe. */
+.ps-highlight span {
+  font-family: inherit;
+  line-height: inherit;
+  vertical-align: baseline;
+  font-weight: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+.ps-display {
+  padding: 10px 12px;
+  font-family: 'Consolas','Monaco','Source Code Pro','Menlo',monospace;
+  font-size: 12px; line-height: 1.6;
+  white-space: pre-wrap; overflow-wrap: break-word; word-break: normal;
+  overflow: auto;
+  background: #141428;
+  border-radius: 6px;
+  color: #d4d4d4;
+}
+body:not(.dark) .ps-display {
+  background: #f0f1f5;
+  color: #333;
+}

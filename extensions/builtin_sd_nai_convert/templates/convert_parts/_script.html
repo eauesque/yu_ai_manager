@@ -1,0 +1,293 @@
+<script nonce="{{ csp_nonce }}">
+let direction = 'sd_to_nai';
+var _convertEditor = null;
+var _convertNegEditor = null;
+var _convertGen = 0;
+
+/* ── Editor initialization ── */
+(function initEditors() {
+  var promptContainer = document.getElementById('convertInputContainer');
+  var negContainer = document.getElementById('convertNegContainer');
+
+  if (typeof PromptSyntaxWidget !== 'undefined' && promptContainer) {
+    _convertEditor = PromptSyntaxWidget.createEditor(promptContainer, {
+      value: '',
+      placeholder: '(masterpiece:1.2), 1girl, <lora:detail:0.8>, blue eyes',
+      rows: 6,
+      showSyntaxBar: true,
+      showErrors: true,
+      ariaLabel: 'Input prompt',
+    });
+  } else if (promptContainer) {
+    var ta = document.createElement('textarea');
+    ta.id = 'inputPrompt';
+    ta.rows = 6;
+    ta.placeholder = '(masterpiece:1.2), 1girl, <lora:detail:0.8>, blue eyes';
+    ta.setAttribute('aria-label', 'Input prompt');
+    ta.style.cssText = 'width:100%;min-height:140px;padding:10px;border-radius:8px;border:1px solid rgba(128,128,128,0.2);background:rgba(30,30,50,0.8);color:var(--text,#e0e0e0);font-family:monospace;font-size:13px;resize:vertical;line-height:1.5;';
+    promptContainer.appendChild(ta);
+  }
+
+  if (typeof PromptSyntaxWidget !== 'undefined' && negContainer) {
+    _convertNegEditor = PromptSyntaxWidget.createEditor(negContainer, {
+      value: '',
+      placeholder: '(worst quality:1.4), blurry',
+      rows: 3,
+      showSyntaxBar: false,
+      showErrors: false,
+      ariaLabel: 'Negative input prompt',
+    });
+  } else if (negContainer) {
+    var ta2 = document.createElement('textarea');
+    ta2.id = 'inputNeg';
+    ta2.rows = 3;
+    ta2.placeholder = '(worst quality:1.4), blurry';
+    ta2.setAttribute('aria-label', 'Negative input prompt');
+    ta2.style.cssText = 'width:100%;min-height:80px;padding:10px;border-radius:8px;border:1px solid rgba(128,128,128,0.2);background:rgba(30,30,50,0.8);color:var(--text,#e0e0e0);font-family:monospace;font-size:13px;resize:vertical;line-height:1.5;';
+    negContainer.appendChild(ta2);
+  }
+})();
+
+/* ── Helpers to get/set editor values ── */
+function _getPromptVal() {
+  if (_convertEditor) return _convertEditor.getValue();
+  var el = document.getElementById('inputPrompt');
+  return el ? el.value : '';
+}
+function _setPromptVal(v) {
+  if (_convertEditor) { _convertEditor.setValue(v); return; }
+  var el = document.getElementById('inputPrompt');
+  if (el) el.value = v;
+}
+function _getNegVal() {
+  if (_convertNegEditor) return _convertNegEditor.getValue();
+  var el = document.getElementById('inputNeg');
+  return el ? el.value : '';
+}
+function _setNegVal(v) {
+  if (_convertNegEditor) { _convertNegEditor.setValue(v); return; }
+  var el = document.getElementById('inputNeg');
+  if (el) el.value = v;
+}
+
+function setDirection(dir) {
+  direction = dir;
+  document.getElementById('btnSdToNai').classList.toggle('active', dir === 'sd_to_nai');
+  document.getElementById('btnNaiToSd').classList.toggle('active', dir === 'nai_to_sd');
+  if (dir === 'sd_to_nai') {
+    document.getElementById('lblInput').firstChild.textContent = window.tr('sd_nai_convert.input_sd_label', '入力 (SD形式)') + ' ';
+    document.getElementById('lblOutput').firstChild.textContent = window.tr('sd_nai_convert.output_nai_label', '出力 (NAI形式)') + ' ';
+  } else {
+    document.getElementById('lblInput').firstChild.textContent = window.tr('sd_nai_convert.input_nai_label', '入力 (NAI形式)') + ' ';
+    document.getElementById('lblOutput').firstChild.textContent = window.tr('sd_nai_convert.output_sd_label', '出力 (SD形式)') + ' ';
+  }
+  // Highlight the bridge button matching the output format
+  var naiBtn = document.getElementById('cvtBtnNai');
+  var sdBtn = document.getElementById('cvtBtnSd');
+  var comfyBtn = document.getElementById('cvtBtnComfy');
+  if (naiBtn && sdBtn && comfyBtn) {
+    naiBtn.classList.toggle('btn-primary', dir === 'sd_to_nai');
+    sdBtn.classList.toggle('btn-primary', dir === 'nai_to_sd');
+    comfyBtn.classList.toggle('btn-primary', dir === 'nai_to_sd');
+  }
+  if (_getPromptVal().trim()) doConvert();
+}
+
+async function doConvert() {
+  var gen = ++_convertGen;
+  var prompt = _getPromptVal();
+  var negative = _getNegVal();
+  var endpoint = direction === 'sd_to_nai' ? '/ext/convert/sd-to-nai' : '/ext/convert/nai-to-sd';
+
+  try {
+    var resp = await fetch(endpoint, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        prompt: prompt, negative: negative,
+        options: {
+          strip_lora: document.getElementById('optStripLora').checked,
+          strip_embedding: document.getElementById('optStripEmbed').checked,
+          convert_emphasis: document.getElementById('optEmphasis').checked,
+        }
+      })
+    });
+    if (gen !== _convertGen) return;
+    var data = await resp.json();
+    if (gen !== _convertGen) return;
+    document.getElementById('outputPrompt').value = data.prompt || '';
+    document.getElementById('outputNeg').value = data.negative || '';
+    showDiff(prompt, data.prompt || '');
+  } catch (e) {
+    if (gen !== _convertGen) return;
+    document.getElementById('outputPrompt').value = window.tr('sd_nai_convert.error_prefix', 'Error') + ': ' + e.message;
+  }
+}
+
+function showDiff(original, converted) {
+  var el = document.getElementById('diffOutput');
+  if (!original || original === converted) {
+    el.textContent = '';
+    return;
+  }
+  var origTags = new Set(original.split(',').map(function(s){ return s.trim(); }).filter(Boolean));
+  var convTags = new Set(converted.split(',').map(function(s){ return s.trim(); }).filter(Boolean));
+
+  var removed = [...origTags].filter(function(t){ return !convTags.has(t); });
+  var added = [...convTags].filter(function(t){ return !origTags.has(t); });
+
+  el.textContent = '';
+  if (removed.length) {
+    var rmSpan = document.createElement('span');
+    rmSpan.className = 'removed';
+    rmSpan.textContent = removed.map(function(t){ return '-' + t; }).join(', ');
+    el.appendChild(rmSpan);
+    el.appendChild(document.createTextNode(' '));
+  }
+  if (added.length) {
+    var addSpan = document.createElement('span');
+    addSpan.className = 'added';
+    addSpan.textContent = added.map(function(t){ return '+' + t; }).join(', ');
+    el.appendChild(addSpan);
+  }
+  if (!removed.length && !added.length) {
+    var okSpan = document.createElement('span');
+    okSpan.style.color = '#6bcf6b';
+    okSpan.textContent = window.tr('sd_nai_convert.conversion_ok', 'OK - 変換完了');
+    el.appendChild(okSpan);
+  }
+}
+
+function copyText(id) {
+  var text = '';
+  if (id === 'inputPrompt') {
+    text = _getPromptVal();
+  } else if (id === 'inputNeg') {
+    text = _getNegVal();
+  } else {
+    var el = document.getElementById(id);
+    if (el) text = el.value;
+  }
+  if (!text) return;
+  var btn = document.querySelector('.copy-btn[data-action-arg="' + id + '"]');
+  navigator.clipboard.writeText(text).then(function() {
+    if (btn) { btn.textContent = '\u2713'; setTimeout(function(){ btn.textContent = '\uD83D\uDCCB'; }, 1000); }
+    if (typeof window.showToast === 'function') window.showToast(window.tr('sd_nai_convert.copied', 'コピーしました'));
+  });
+}
+
+function clearAll() {
+  ++_convertGen;
+  clearTimeout(debounceTimer);
+  _setPromptVal('');
+  _setNegVal('');
+  var op = document.getElementById('outputPrompt');
+  if (op) op.value = '';
+  var oneg = document.getElementById('outputNeg');
+  if (oneg) oneg.value = '';
+  document.getElementById('diffOutput').textContent = '';
+  try { localStorage.removeItem('sd_nai_convert_state'); } catch(_e) {}
+}
+
+function swapIO() {
+  var curPrompt = _getPromptVal();
+  var curNeg = _getNegVal();
+  var op = document.getElementById('outputPrompt');
+  var oneg = document.getElementById('outputNeg');
+  _setPromptVal(op.value);
+  _setNegVal(oneg.value);
+  op.value = curPrompt;
+  oneg.value = curNeg;
+  setDirection(direction === 'sd_to_nai' ? 'nai_to_sd' : 'sd_to_nai');
+}
+
+/* ── Send to Bridge ── */
+function sendToBridge(target) {
+  var prompt = document.getElementById('outputPrompt').value.trim();
+  var negative = document.getElementById('outputNeg').value.trim();
+  if (!prompt) { alert(window.tr('sd_nai_convert.convert_first', '先に変換してください')); return; }
+  var urls = { nai: '/ext/nai-bridge/', sd: '/ext/sd-webui/', comfy: '/ext/comfyui-bridge/' };
+  var url = urls[target] || '/ext/nai-bridge/';
+  try {
+    localStorage.setItem('bridge_send_prompt', JSON.stringify({
+      prompt: prompt, negative: negative, source: 'sd-nai-convert',
+    }));
+  } catch (_e) {}
+  window.location.href = url;
+}
+
+/* ── Debounce auto-convert on input ── */
+var debounceTimer;
+function _attachDebounce(editor, fallbackId) {
+  var ta = editor ? editor.getTextarea() : document.getElementById(fallbackId);
+  if (ta) {
+    ta.addEventListener('input', function() {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(doConvert, 300);
+    });
+  }
+}
+_attachDebounce(_convertEditor, 'inputPrompt');
+_attachDebounce(_convertNegEditor, 'inputNeg');
+
+/* ── localStorage persistence ── */
+(function() {
+  var _convertPersistTimer;
+  function _convertPersist() {
+    clearTimeout(_convertPersistTimer);
+    _convertPersistTimer = setTimeout(function() {
+      try {
+        localStorage.setItem('sd_nai_convert_state', JSON.stringify({
+          prompt: _getPromptVal(),
+          negative: _getNegVal(),
+          direction: direction,
+        }));
+      } catch(_e) {}
+    }, 500);
+  }
+  /* Attach persist to input events */
+  var promptTa = _convertEditor ? _convertEditor.getTextarea() : document.getElementById('inputPrompt');
+  var negTa = _convertNegEditor ? _convertNegEditor.getTextarea() : document.getElementById('inputNeg');
+  if (promptTa) promptTa.addEventListener('input', _convertPersist);
+  if (negTa) negTa.addEventListener('input', _convertPersist);
+
+  /* Restore on load */
+  try {
+    var saved = localStorage.getItem('sd_nai_convert_state');
+    if (saved) {
+      var state = JSON.parse(saved);
+      if (state.prompt) _setPromptVal(state.prompt);
+      if (state.negative) _setNegVal(state.negative);
+      if (state.direction && state.direction !== direction) setDirection(state.direction);
+    }
+  } catch(_e) {}
+})();
+
+/* ── Apply initial highlight to bridge buttons ── */
+(function() {
+  var naiBtn = document.getElementById('cvtBtnNai');
+  var sdBtn = document.getElementById('cvtBtnSd');
+  var comfyBtn = document.getElementById('cvtBtnComfy');
+  if (naiBtn && sdBtn && comfyBtn) {
+    naiBtn.classList.toggle('btn-primary', direction === 'sd_to_nai');
+    sdBtn.classList.toggle('btn-primary', direction === 'nai_to_sd');
+    comfyBtn.classList.toggle('btn-primary', direction === 'nai_to_sd');
+  }
+})();
+
+/* ── Vim / Emacs keybindings — resolve keyboardPowerVimEdit lazily (module loads after inline) ── */
+(function() {
+  function attach(editor, fallbackId) {
+    var ta = editor ? editor.getTextarea() : document.getElementById(fallbackId);
+    if (!ta) return;
+    ta.addEventListener('keydown', function(e) {
+      var edit = window.keyboardPowerVimEdit;
+      if (!edit) return;
+      if (e.altKey && !e.ctrlKey && !e.shiftKey) edit.handleVimNavigation(e, ta);
+      if (e.ctrlKey && !e.altKey) edit.handleCtrlShortcuts(e, ta);
+    });
+  }
+  attach(_convertEditor, 'inputPrompt');
+  attach(_convertNegEditor, 'inputNeg');
+})();
+</script>

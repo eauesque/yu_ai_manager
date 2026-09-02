@@ -1,0 +1,46 @@
+  var core = window.floatingGridApiCore;
+  if (!core) return;
+
+  function applyMinSize(px){
+    var g = document.getElementById('results');
+    if (core.sizeVal) core.sizeVal.textContent = px;
+    if (g) g.style.setProperty('--grid-min-size', px + 'px');
+    localStorage.setItem('gridMinSize', String(px));
+    core.updateCompactMode();
+    core.updateLiveInfo();
+  }
+
+  function applyCols(n){
+    var _t = typeof tr === 'function' ? tr : function(k,f){return f||'';};
+    if (core.colVal) core.colVal.textContent = n === 0 ? _t('grid.auto','自動') : (n + _t('grid.col_unit','列'));
+    if (window.runtimeInitApi && typeof window.runtimeInitApi.setGridColumns === 'function') {
+      window.runtimeInitApi.setGridColumns(n);
+    } else if (core.re) {
+      if (n > 0) core.re.style.setProperty('--grid-columns', n);
+      else core.re.style.removeProperty('--grid-columns');
+      localStorage.setItem('gridColumns', String(n));
+    }
+    core.updateCompactMode();
+    core.updateLiveInfo();
+  }
+
+  if (!window.floatingGridApi || typeof window.floatingGridApi !== 'object') {
+    window.floatingGridApi = {};
+  }
+  Object.assign(window.floatingGridApi, {
+    applyCols: applyCols,
+    applyMinSize: applyMinSize,
+    closePanel: core.closePanel,
+    cs: core.cs,
+    getCurrentCols: core.getCurrentCols,
+    getCurrentMinSize: core.getCurrentMinSize,
+    isPanelOpen: core.isPanelOpen,
+    re: core.re,
+    setCtrlVisible: core.setCtrlVisible,
+    ss: core.ss,
+    updateCompactMode: core.updateCompactMode,
+    updateLiveInfo: core.updateLiveInfo,
+  });
+  window.floatingGridApiCore = null;
+})();
+</script>

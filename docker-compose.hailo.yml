@@ -1,0 +1,28 @@
+# docker-compose.hailo.yml — Hailo-10H device passthrough overlay
+#
+# Usage (combined with docker-compose.yml):
+#   docker compose -f docker-compose.yml -f docker-compose.hailo.yml up yu-ai-manager
+#
+# Prerequisites:
+#   - Pi5 + AI HAT 2 (Hailo-10H) must be present at /dev/h1x-0
+#     (driver: hailo1x_pci; older driver exposed /dev/hailort0)
+#   - HEF model files must be placed in ~/hailo_models/
+#   - Image must be built with the Hailo variant:
+#       ./tools/docker-build.sh --hailo --hailo-wheel <path>
+
+services:
+  yu-ai-manager:
+    image: yu-ai-manager:hailo
+    devices:
+      - /dev/h1x-0:/dev/h1x-0
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+      - ~/hailo_models:/app/hailo_models:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - HAILO_HEF_DIR=/app/hailo_models
+    deploy:
+      resources:
+        limits:
+          memory: 2g

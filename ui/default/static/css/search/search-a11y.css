@@ -1,0 +1,185 @@
+/* Skip link (WCAG 2.2 AA) */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 16px;
+  z-index: 10000;
+  padding: 8px 16px;
+  background: var(--accent, #667eea);
+  color: #fff;
+  border-radius: 0 0 8px 8px;
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-100%);
+  transition: transform 0.15s ease;
+}
+
+.skip-link:focus {
+  transform: translateY(0);
+  outline: 2px solid #35b7ff;
+  outline-offset: 2px;
+}
+
+/* WCAG AA: dark/retro themes — --accent is light blue → contrast with white fails */
+body.dark .skip-link,
+body.theme-atelier-dark .skip-link {
+  background: #1d4ed8; /* 6.67:1 with #fff */
+}
+body.theme-retro .skip-link {
+  background: #6d28d9; /* 7.2:1 with #fff */
+  color: #fff; /* override body.theme-retro a { color: #bf5af2 } which wins on type selector */
+}
+
+/* Keyboard focus visibility (WCAG 2.2 AA baseline) */
+:where(
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea,
+  [tabindex]
+):focus-visible {
+  outline: 2px solid #35b7ff;
+  outline-offset: 2px;
+  box-shadow: 0 0 0 3px rgba(53, 183, 255, 0.22);
+}
+
+body.dark :where(
+  button,
+  [role="button"],
+  a,
+  input,
+  select,
+  textarea,
+  [tabindex]
+):focus-visible {
+  outline-color: #79d2ff;
+  box-shadow: 0 0 0 3px rgba(121, 210, 255, 0.24);
+}
+
+.keyboard-guide{
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 14px;
+  z-index: 805;
+  transition: bottom 0.3s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(18, 22, 36, 0.85);
+  border: 1px solid rgba(120, 140, 180, 0.35);
+  color: #d6deee;
+  font-size: 11px;
+  line-height: 1.3;
+  max-width: min(86vw, 560px);
+}
+
+.keyboard-guide kbd,
+.modal-kbd-guide kbd{
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 4px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(255,255,255,0.08);
+  font-size: 10px;
+}
+
+.keyboard-guide .kg-help{
+  margin-left: 4px;
+  padding: 2px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255,255,255,0.2);
+  background: transparent;
+  color: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.modal-kbd-guide{
+  margin-top: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.14);
+  color: #b8c1d8;
+  font-size: 11px;
+  line-height: 1.3;
+}
+
+/* Modal keyboard guide: compact, inside image container */
+.modal-kbd-guide.modal-kbd-floating{
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 13;
+  max-width: calc(100% - 20px);
+  background: rgba(18, 22, 36, 0.7);
+  border: 1px solid rgba(120, 140, 180, 0.25);
+  color: #c8d0e0;
+  padding: 5px 24px 5px 8px;
+  border-radius: 8px;
+  pointer-events: auto;
+  margin-top: 0;
+  font-size: 10px;
+  opacity: 0.8;
+  transition: opacity 0.25s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.modal-kbd-guide.modal-kbd-floating:hover {
+  opacity: 1;
+}
+.modal-kbd-guide.modal-kbd-floating.kbd-guide-dismissed{
+  display: none;
+}
+
+/* Dismiss button inside keyboard guide */
+.kbd-guide-dismiss{
+  position: absolute;
+  top: 3px;
+  right: 4px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.4);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 2px 4px;
+  border-radius: 4px;
+  transition: color 0.15s, background 0.15s;
+}
+.kbd-guide-dismiss:hover{
+  color: #fff;
+  background: rgba(255,255,255,0.15);
+}
+
+/* Hide modal keyboard guide on touch devices (mobile/tablet) */
+@media (hover: none), (pointer: coarse) {
+  .modal-kbd-guide.modal-kbd-floating {
+    display: none !important;
+  }
+}
+
+/* UX audit (2026-04-29): on small viewports the floating shortcut bar
+   covered up to 1/4 of the screen and obscured search result captions.
+   Hide on touch / narrow screens — the keyboard hints aren't useful
+   there anyway, and the help button (📖) gives access to the full guide. */
+@media (max-width: 640px), (hover: none), (pointer: coarse) {
+  .keyboard-guide {
+    display: none !important;
+  }
+}
+
+/* Filmstrip present: move guide above it */
+.modal-filmstrip.filmstrip-visible ~ .modal-kbd-guide.modal-kbd-floating {
+  bottom: 78px;
+}

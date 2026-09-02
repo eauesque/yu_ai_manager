@@ -1,0 +1,152 @@
+/*
+ * Atelier System (γ) — crypto_tools.html
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool.
+ * classic / dark keep their existing pages/crypto-tools.css untouched.
+ */
+
+/* ----- Page heading ----- */
+
+body.theme-atelier-light.atelier-tool .crypto-header h1,
+body.theme-atelier-dark.atelier-tool .crypto-header h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 24px;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+
+body.theme-atelier-light.atelier-tool .crypto-subtitle,
+body.theme-atelier-dark.atelier-tool .crypto-subtitle {
+  color: var(--text-muted);
+}
+
+/* ----- Warning banner ----- */
+
+body.theme-atelier-light.atelier-tool .crypto-banner-warn,
+body.theme-atelier-dark.atelier-tool .crypto-banner-warn {
+  background: color-mix(in srgb, var(--accent-warm) 15%, var(--surface));
+  border: 1px solid var(--accent-warm);
+  color: var(--text);
+}
+
+/* ----- Tabs ----- */
+
+body.theme-atelier-light.atelier-tool .crypto-tabs,
+body.theme-atelier-dark.atelier-tool .crypto-tabs {
+  border-bottom-color: var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .crypto-tab,
+body.theme-atelier-dark.atelier-tool .crypto-tab {
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light.atelier-tool .crypto-tab.active,
+body.theme-atelier-dark.atelier-tool .crypto-tab.active {
+  border-bottom-color: var(--accent-tool);
+  color: var(--accent-tool);
+}
+
+/* ----- Fingerprint / code display ----- */
+
+body.theme-atelier-light.atelier-tool .key-fingerprint,
+body.theme-atelier-dark.atelier-tool .key-fingerprint,
+body.theme-atelier-light.atelier-tool .recipient-fingerprint,
+body.theme-atelier-dark.atelier-tool .recipient-fingerprint {
+  background: var(--canvas);
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .fingerprint-display,
+body.theme-atelier-dark.atelier-tool .fingerprint-display {
+  font-family: var(--font-mono);
+}
+
+/* ----- Monospace JSON textarea ----- */
+
+body.theme-atelier-light.atelier-tool .json-output,
+body.theme-atelier-dark.atelier-tool .json-output {
+  background: var(--canvas);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-family: var(--font-mono);
+}
+
+/* ----- Severity text colors ----- */
+
+body.theme-atelier-light.atelier-tool .caution,
+body.theme-atelier-dark.atelier-tool .caution {
+  /* "注意" = warm amber; separated from --danger to preserve severity hierarchy */
+  color: var(--accent-warm);
+}
+
+body.theme-atelier-light.atelier-tool .warning,
+body.theme-atelier-dark.atelier-tool .warning {
+  /* "危険" = red */
+  color: var(--danger);
+}
+
+body.theme-atelier-light.atelier-tool .dec-sender-verified,
+body.theme-atelier-dark.atelier-tool .dec-sender-verified {
+  /* 緑シグナルを維持 — 青系 --accent-tool は不使用 */
+  color: color-mix(in srgb, #2d7a3a 70%, var(--text));
+}
+
+body.theme-atelier-light.atelier-tool .dec-sender-unverified,
+body.theme-atelier-dark.atelier-tool .dec-sender-unverified {
+  color: var(--danger);
+}
+
+/* ----- Result panels ----- */
+
+body.theme-atelier-light.atelier-tool .enc-result,
+body.theme-atelier-dark.atelier-tool .enc-result,
+body.theme-atelier-light.atelier-tool .dec-result,
+body.theme-atelier-dark.atelier-tool .dec-result {
+  background: var(--surface);
+  border: 1px solid var(--border);
+}
+
+/* ----- Camera QR modal ----- */
+
+body.theme-atelier-light.atelier-tool .camera-qr-inner,
+body.theme-atelier-dark.atelier-tool .camera-qr-inner {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .camera-qr-inner h3,
+body.theme-atelier-dark.atelier-tool .camera-qr-inner h3 {
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+/* ----- Button secondary override ----- */
+/* atelier-tool-components.css makes ALL .btn primary-colored (--accent-tool bg);
+   restore non-primary buttons to neutral surface style.
+   Specificity: 0,4,2 beats atelier-tool-components 0,3,1 safely. */
+
+body.theme-atelier-light.atelier-tool .crypto-tools-page .btn:not(.btn-primary),
+body.theme-atelier-dark.atelier-tool .crypto-tools-page .btn:not(.btn-primary) {
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .crypto-tools-page .btn:not(.btn-primary):hover:not(:disabled),
+body.theme-atelier-dark.atelier-tool .crypto-tools-page .btn:not(.btn-primary):hover:not(:disabled) {
+  background: var(--canvas);
+}
+
+/* disabled state — explicit compensation for atelier-tool-components specificity */
+
+body.theme-atelier-light.atelier-tool .crypto-tools-page .btn:disabled,
+body.theme-atelier-dark.atelier-tool .crypto-tools-page .btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}

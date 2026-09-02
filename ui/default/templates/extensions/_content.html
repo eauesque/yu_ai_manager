@@ -1,0 +1,52 @@
+  {% include "_nav.html" %}
+  <main id="main-content" class="container" style="padding-top:50px;">
+    <header>
+      <h1><span aria-hidden="true">🧩</span> <span data-i18n="page.extensions.title">Extensions</span></h1>
+    </header>
+
+    <div class="tool-section">
+      <h2 data-i18n="ext.installed">Installed</h2>
+      <div id="extensionsList" style="margin-bottom:16px;">
+        <div style="color:var(--muted,#aab2c0);font-size:13px;">Loading...</div>
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn btn-secondary" data-action="extensionsPageApi.updateAllExtensions" id="updateAllExtBtn" data-i18n="ext.update_all">
+          Update All
+        </button>
+        <button class="btn btn-secondary" data-action="extensionsPageApi.loadExtensions" data-i18n="ext.reload">
+          Reload
+        </button>
+      </div>
+    </div>
+
+    <div class="tool-section">
+      <h2 data-i18n="ext.install_new">Install New Extension</h2>
+      <div style="margin-top:8px;">
+        <label style="display:block;margin-bottom:5px;font-weight:600;font-size:13px;" data-i18n="ext.git_url_label">Git URL:</label>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="extensionGitUrl" placeholder="https://github.com/user/extension-name.git" aria-label="Extension Git URL"
+                 style="flex:1;padding:10px;border-radius:5px;border:1px solid rgba(255,255,255,0.2);background:rgba(0,0,0,0.2);color:inherit;font-size:13px;">
+          <button class="btn btn-primary" data-action="extensionsPageApi.installExtension" data-i18n="ext.install_btn">
+            Install
+          </button>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:#c2410c;" data-i18n="ext.security_warning">
+          Warning: Extensions execute arbitrary code. Only install from trusted sources.
+        </div>
+      </div>
+
+      <div id="extensionResult" class="result-box" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="tool-section">
+      <h2 data-i18n="ext.hooks_title">Hook Registration</h2>
+      <p style="font-size:13px;color:var(--muted,#aab2c0);margin-bottom:12px;" data-i18n="ext.hooks_desc">
+        Extensions registered for each hook, ordered by priority. In exclusive mode, the first match takes precedence.
+      </p>
+      <div id="extensionHooks" style="font-size:13px;color:#666;">
+        Loading...
+      </div>
+    </div>
+
+  </main>

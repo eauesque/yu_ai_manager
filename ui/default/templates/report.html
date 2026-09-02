@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="page.report_title">YU AI Manager - Monthly Report</title>
+  <link rel="stylesheet" href="static/css/main.css?v=20260213">
+  <link rel="stylesheet" href="static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260225">
+  <link rel="stylesheet" href="static/css/dark-mode/tags/dark-mode-tags-enhanced.css?v=20260225">
+  <link rel="stylesheet" href="static/css/pages/report.css?v=20260304">
+  <!-- Atelier System (γ): tokens → components → editorial -->
+  <link rel="stylesheet" href="static/css/atelier/atelier-tokens.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-components.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-index.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-report.css?v=20260507">
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "report/_content.html" %}
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  {% include "report/_scripts.html" %}
+</body>
+</html>

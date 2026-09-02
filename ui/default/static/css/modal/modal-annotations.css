@@ -1,0 +1,155 @@
+/* modal-annotations.css — Notes (annotations) tab styles */
+
+.ann-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+/* ── Annotation list ── */
+
+.ann-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 40px;
+}
+
+.ann-loading,
+.ann-empty {
+  color: var(--muted, #888);
+  font-size: 12px;
+  padding: 4px 0;
+}
+
+.ann-error {
+  color: #e74c3c;
+}
+
+.ann-source-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ann-source-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted, #888);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 2px;
+}
+
+.ann-item {
+  background: var(--card, rgba(255,255,255,0.04));
+  border: 1px solid var(--border, rgba(128,128,128,0.2));
+  border-radius: 6px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.ann-item-body {
+  color: var(--text, #e0e0e0);
+  line-height: 1.5;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.ann-key-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  background: rgba(52, 152, 219, 0.2);
+  color: #3498db;
+  border: 1px solid rgba(52,152,219,0.3);
+  vertical-align: middle;
+}
+
+.ann-item-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--muted, #888);
+}
+
+.ann-conf {
+  background: rgba(46, 204, 113, 0.15);
+  color: #2ecc71;
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.ann-btn-delete {
+  margin-left: auto;
+  background: transparent;
+  border: none;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 13px;
+  padding: 0 3px;
+  border-radius: 3px;
+  line-height: 1;
+}
+
+.ann-btn-delete:hover {
+  color: #e74c3c;
+  background: rgba(231, 76, 60, 0.1);
+}
+
+/* ── Add note form ── */
+
+.ann-add-form {
+  border-top: 1px solid var(--border, rgba(128,128,128,0.15));
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ann-add-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted, #888);
+}
+
+.ann-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--bg, #1a1a1a);
+  color: var(--text, #e0e0e0);
+  border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.ann-textarea:focus {
+  outline: none;
+  border-color: var(--accent, #a78bfa);
+  box-shadow: 0 0 0 2px rgba(167,139,250,0.15);
+}
+
+.ann-btn-save {
+  background: var(--accent, #7c3aed);
+  color: white;
+  padding: 5px 12px;
+  font-weight: 600;
+}
+
+.ann-btn-save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}

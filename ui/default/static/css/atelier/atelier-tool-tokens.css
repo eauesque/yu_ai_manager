@@ -1,0 +1,90 @@
+/*
+ * Atelier System (γ) — Tool Variant Tokens
+ *
+ * Sub-modifier of editorial atelier. Apply via:
+ *   <body class="theme-atelier-light atelier-tool">
+ *
+ * Inherits all color tokens from atelier-tokens.css; only typography
+ * and density are overridden here.
+ */
+
+body.theme-atelier-light.atelier-tool,
+body.theme-atelier-dark.atelier-tool {
+  /* Typography — UI sans主体 (Inter), Fraunces is reserved for h1 only */
+  --font-body: var(--font-ui);
+  --opsz-display: 36;
+  --fs-h1: 1.75rem;     /* 28px — Fraunces */
+  --fs-h2: 1.25rem;     /* 20px — Inter */
+  --fs-h3: 1rem;        /* 16px — Inter */
+  --fs-body: 0.8125rem; /* 13px */
+  --fs-small: 0.75rem;  /* 12px */
+  --lh-body: 1.5;
+  --lh-tight: 1.3;
+
+  /* Density scale — 4px base, raw */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  /* Semantic spacing — components should prefer these */
+  --space-section: var(--space-5);
+  --space-stack: var(--space-3);
+  --space-inline: var(--space-2);
+
+  /* Component sizing */
+  --control-h-md: 32px;
+  --control-h-lg: 40px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+
+  /* Table */
+  --table-row-height: 32px;
+  --table-cell-padding-x: var(--space-3);
+  --table-border: var(--border);
+  --table-stripe: color-mix(in srgb, var(--text) 4%, var(--surface));
+
+  /* Apply font-body globally inside atelier-tool pages */
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+
+body.theme-atelier-light.atelier-tool {
+  --danger: #b03a48;
+  --danger-strong: #8a2c38;
+  --danger-fg: #ffffff;
+}
+
+body.theme-atelier-dark.atelier-tool {
+  --danger: #c73c54;
+  --danger-strong: #b03a48;
+  --danger-fg: #ffffff;
+}
+
+/* h1 keeps Fraunces with reduced opsz */
+body.theme-atelier-light.atelier-tool h1,
+body.theme-atelier-dark.atelier-tool h1 {
+  font-family: var(--font-display);
+  font-size: var(--fs-h1);
+  font-variation-settings: "opsz" var(--opsz-display);
+  line-height: var(--lh-tight);
+}
+
+body.theme-atelier-light.atelier-tool h2,
+body.theme-atelier-dark.atelier-tool h2 {
+  font-family: var(--font-body);
+  font-size: var(--fs-h2);
+  line-height: var(--lh-tight);
+}
+
+body.theme-atelier-light.atelier-tool h3,
+body.theme-atelier-dark.atelier-tool h3 {
+  font-family: var(--font-body);
+  font-size: var(--fs-h3);
+  line-height: var(--lh-tight);
+}

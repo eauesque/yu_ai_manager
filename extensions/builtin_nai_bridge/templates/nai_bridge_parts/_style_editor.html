@@ -1,0 +1,131 @@
+<style>
+  /* Editor toolbar + Sed bar */
+  .bridge-editor-toolbar {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 8px; flex-wrap: wrap;
+  }
+  .bridge-editor-toolbar .nab-btn.on {
+    background: rgba(102,126,234,0.3);
+    border-color: var(--accent, #667eea);
+  }
+  .bridge-toolbar-hint {
+    font-size: 11px; color: var(--text-secondary, #aaa);
+    margin-left: auto; min-width: 180px;
+  }
+  #fixedNav .nav-btn,
+  #navHamburger,
+  #themeToggleNav {
+    color: var(--text, #e0e0e0);
+    background: rgba(255,255,255,0.06);
+    border-radius: 6px;
+  }
+  #fixedNav .nav-btn:hover,
+  #navHamburger:hover,
+  #themeToggleNav:hover {
+    background: rgba(102,126,234,0.18);
+  }
+  .bridge-sed-bar {
+    display: flex; align-items: center; gap: 6px;
+    margin-bottom: 8px; padding: 6px 10px;
+    border-radius: 6px; background: var(--nab-surface-deep);
+    border: 1px solid var(--nab-border-dim);
+  }
+  .bridge-sed-bar label {
+    font-size: 12px; font-weight: 600; color: var(--accent, #667eea);
+    white-space: nowrap;
+  }
+  .bridge-sed-bar input {
+    flex: 1; padding: 4px 8px; border-radius: 4px;
+    border: 1px solid var(--nab-border); background: var(--nab-surface);
+    color: var(--text, #e0e0e0); font-family: monospace; font-size: 13px;
+  }
+  .bridge-sed-bar input:focus { outline: none; border-color: var(--accent, #667eea); }
+  .bridge-sed-toast {
+    font-size: 11px; color: #4caf50; white-space: nowrap;
+  }
+
+  /* Editor wrap + Autocomplete dropdown */
+  .nab-editor-wrap { position: relative; }
+  .bridge-ac-dropdown {
+    position: absolute; z-index: 100;
+    min-width: 260px; max-width: min(480px, calc(100vw - 24px));
+    max-height: 200px; overflow-y: auto;
+    background: var(--nab-surface); border: 1px solid var(--nab-border);
+    border-radius: 6px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-size: 13px;
+  }
+  body:is(.dark, [data-theme="dark"]) .bridge-ac-dropdown {
+    background: rgba(25,25,45,0.98);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+  }
+  .bridge-ac-item {
+    padding: 6px 10px; cursor: pointer; display: flex; gap: 8px; align-items: center;
+  }
+  .bridge-ac-item:hover, .bridge-ac-item.active {
+    background: rgba(102,126,234,0.2);
+  }
+  .bridge-ac-name { flex: 1; }
+  .bridge-ac-sub { font-size: 11px; color: var(--text-secondary, #aaa); }
+  .bridge-ac-cat { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .bridge-ac-cat-0 { background: #6c8eb5; }
+  .bridge-ac-cat-1 { background: #cc4444; }
+  .bridge-ac-cat-3 { background: #aa55bb; }
+  .bridge-ac-cat-4 { background: #22aa22; }
+  .bridge-ac-cat-5 { background: #ee7733; }
+
+  /* Light mode overrides */
+  body:not(.dark):not([data-theme=dark]) .nab-btn {
+    color: var(--text, #333);
+    border-color: rgba(102,126,234,0.35);
+  }
+  body:not(.dark):not([data-theme=dark]) .nab-btn:hover {
+    background: rgba(102,126,234,0.12);
+  }
+  body:not(.dark):not([data-theme=dark]) .nab-btn.primary {
+    color: #fff; background: var(--accent-btn, #4056c8);
+    border-color: var(--accent-btn, #4056c8);
+  }
+  body:not(.dark):not([data-theme=dark]) .nab-btn.primary:hover {
+    background: rgba(102,126,234,0.95);
+  }
+  body:not(.dark):not([data-theme=dark]) .nab-btn.on {
+    background: rgba(102,126,234,0.2);
+  }
+  body:not(.dark):not([data-theme=dark]) .nab-progress-fill {
+    background: var(--accent, #667eea);
+  }
+  body:not(.dark):not([data-theme=dark]) .nab-field textarea,
+  body:not(.dark):not([data-theme=dark]) .nab-char-card textarea,
+  body:not(.dark):not([data-theme=dark]) .nab-param input,
+  body:not(.dark):not([data-theme=dark]) .nab-param select,
+  body:not(.dark):not([data-theme=dark]) .nab-config-row input[type="text"],
+  body:not(.dark):not([data-theme=dark]) .nab-config-row input[type="password"],
+  body:not(.dark):not([data-theme=dark]) .nab-config-row select,
+  body:not(.dark):not([data-theme=dark]) .bridge-sed-bar input {
+    color: var(--text, #222);
+    background: var(--nab-surface);
+  }
+  body:not(.dark):not([data-theme=dark]) .nab-conn-text,
+  body:not(.dark):not([data-theme=dark]) h3,
+  body:not(.dark):not([data-theme=dark]) .nab-char-card label,
+  body:not(.dark):not([data-theme=dark]) .nab-vibe-drop,
+  body:not(.dark):not([data-theme=dark]) .nab-ref-drop,
+  body:not(.dark):not([data-theme=dark]) summary {
+    color: var(--text, #222);
+  }
+  body:not(.dark):not([data-theme=dark]) .nab-param label,
+  body:not(.dark):not([data-theme=dark]) .bridge-toolbar-hint,
+  body:not(.dark):not([data-theme=dark]) .nab-vibe-params .nab-param span,
+  body:not(.dark):not([data-theme=dark]) .nab-ref-card .nab-param span,
+  body:not(.dark):not([data-theme=dark]) .nab-inpaint-size-label {
+    color: var(--muted, #666);
+  }
+  body:not(.dark):not([data-theme=dark]) .bridge-ac-dropdown {
+    background: rgba(255,255,255,0.98);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  }
+  body:not(.dark):not([data-theme=dark]) .bridge-ac-item:hover,
+  body:not(.dark):not([data-theme=dark]) .bridge-ac-item.active {
+    background: rgba(102,126,234,0.1);
+  }
+</style>

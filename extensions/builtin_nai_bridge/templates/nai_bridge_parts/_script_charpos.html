@@ -1,0 +1,71 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+
+  // -- Character Position Picker ------------------------------------
+  // Per-character 5x5 grid for center coordinate selection.
+  // AI's Choice (default) = do not send center => use_coords=false.
+
+  function nabRenderPosGrid(gridEl) {
+    gridEl.innerHTML = "";
+    for (var row = 0; row < 5; row++) {
+      for (var col = 0; col < 5; col++) {
+        var cell = document.createElement("div");
+        cell.className = "nab-charpos-cell";
+        cell.setAttribute("data-col", col);
+        cell.setAttribute("data-row", row);
+        if (col === 2 && row === 2) cell.classList.add("selected");
+        cell.addEventListener("click", function() { nabSelectPosCell(this); });
+        gridEl.appendChild(cell);
+      }
+    }
+  }
+
+  function nabSelectPosCell(cell) {
+    var grid = cell.parentElement;
+    grid.querySelectorAll(".nab-charpos-cell").forEach(function(c) {
+      c.classList.remove("selected");
+    });
+    cell.classList.add("selected");
+    var card = grid.closest(".nab-char-card");
+    card.setAttribute("data-pos-x", (parseInt(cell.getAttribute("data-col")) / 4).toFixed(2));
+    card.setAttribute("data-pos-y", (parseInt(cell.getAttribute("data-row")) / 4).toFixed(2));
+  }
+
+  window.nabToggleCharAI = function(checkbox) {
+    var card = checkbox.closest(".nab-char-card");
+    var gridWrap = card.querySelector(".nab-charpos-grid-wrap");
+    if (checkbox.checked) {
+      gridWrap.style.display = "none";
+      card.removeAttribute("data-pos-x");
+      card.removeAttribute("data-pos-y");
+    } else {
+      gridWrap.style.display = "";
+      // Set default center position
+      card.setAttribute("data-pos-x", "0.50");
+      card.setAttribute("data-pos-y", "0.50");
+    }
+  };
+
+  window.nabInitCharPos = function(card) {
+    var grid = card.querySelector(".nab-charpos-grid");
+    if (grid) nabRenderPosGrid(grid);
+  };
+
+  window.nabGetCharPos = function(card) {
+    var cb = card.querySelector(".nab-charpos-ai");
+    if (cb && cb.checked) return null;
+    var x = parseFloat(card.getAttribute("data-pos-x"));
+    var y = parseFloat(card.getAttribute("data-pos-y"));
+    if (isNaN(x) || isNaN(y)) return null;
+    return { x: x, y: y };
+  };
+
+    // If receivePrompt() executed before this script,
+    // Retroactively initialize character cards with uninitialized grids
+  (function() {
+    var cards = document.querySelectorAll(".nab-char-card .nab-charpos-grid");
+    for (var i = 0; i < cards.length; i++) {
+      if (!cards[i].hasChildNodes()) nabRenderPosGrid(cards[i]);
+    }
+  })();
+</script>

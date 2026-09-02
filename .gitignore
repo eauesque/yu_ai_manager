@@ -1,0 +1,641 @@
+# Tag Database .gitignore
+
+# ========================
+# Temporary Working Directory
+# ========================
+tmp/
+
+# ========================
+# Agent Memory (agentmemory MCP)
+# ========================
+.agents/**
+!.agents/
+!.agents/yu-workflow.yaml
+
+# ========================
+# Claude Code
+# ========================
+.claude/settings.local.json
+.claude/worktrees/
+# .claude/commands はプロジェクト固有スラッシュコマンドとして git 管理対象
+# agent-env.html/json: ノード別固定情報(node.mcp_user_level 等)へ環境差分を吸収したため git 追跡・全ノード共有に戻した
+.claude/agent-outputs/**
+!.claude/agent-outputs/
+!.claude/agent-outputs/*/
+!.claude/agent-outputs/*/.gitkeep
+.claude/session-state/**
+!.claude/session-state/
+!.claude/session-state/.gitkeep
+.claude/backups/**
+!.claude/backups/
+!.claude/backups/.gitkeep
+crates/.claude/backups/**
+!crates/.claude/backups/
+
+# 会話ログ・セッション状態は「任意の深さ」で除外すること。
+# 上の規則は .claude/ と crates/.claude/ しか覆はず、セッションの cwd が
+# 深い階層へ移つた際に hook が書いた crates/yu-server/src/.claude/backups/ を
+# 取り零した（2026-08-06、124MB の会話ログが staging に入り GitHub の
+# 100MB 制限で弾かれて発覚）。gitignore は追跡済ファイルを外さぬ故、
+# 規則より前に commit された分は git rm --cached を要する。
+**/.claude/backups/**
+**/.claude/session-state/**
+**/.claude/*.jsonl
+.codex/*
+!.codex/config.toml
+!.codex/hooks.json
+.mcp.json
+
+# ========================
+# ai-coreutils (yu)
+# ========================
+# .yu/ai-coreutils.toml と .yu/yu-workflows.yaml は CLAUDE.md が @ 参照する
+# プロジェクト指示なので追跡対象。workflows/ 配下は aihelp の機械生成物
+# (AI_COREUTILS_COMMAND_HELP_V1) で、binary 更新ごとに差分が出るため除外する。
+.yu/workflows/
+
+# ========================
+# Database Files
+# ========================
+*.db
+*.db-wal
+*.db-shm
+*.db-journal
+*_BACKUP.db
+*_BACKUP.db-*
+
+# ========================
+# Scan Cache
+# ========================
+core/scan_state.json
+
+# ========================
+# Python
+# ========================
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+release/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.pytest-local/
+cover/
+
+# Translations
+*.mo
+*.pot
+
+# Django stuff:
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+
+# Flask stuff:
+instance/
+.webassets-cache
+
+# Scrapy stuff:
+.scrapy
+
+# Sphinx documentation
+docs/_build/
+
+# PyBuilder
+.pybuilder/
+target/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# IPython
+profile_default/
+ipython_config.py
+
+# pyenv
+.python-version
+
+# pipenv
+Pipfile.lock
+
+# poetry
+poetry.lock
+
+# pdm
+.pdm.toml
+
+# PEP 582
+__pypackages__/
+
+# Celery stuff
+celerybeat-schedule
+celerybeat.pid
+
+# SageMath parsed files
+*.sage.py
+
+# Environments
+.env
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Spyder project settings
+.spyderproject
+.spyproject
+
+# Rope project settings
+.ropeproject
+
+# mkdocs documentation
+/site
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# ========================
+# IDEs and Editors
+# ========================
+# VSCode
+.vscode/
+.vscode
+*.code-workspace
+
+# PyCharm
+.idea/
+.idea
+*.iml
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+.vim/
+
+# Emacs
+*~
+\#*\#
+.\#*
+
+# ========================
+# OS Files
+# ========================
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# Shell / local user dotfiles
+.bash_profile
+.bashrc
+.profile
+.zprofile
+.zshrc
+.gitconfig
+.ripgreprc
+.gitmodules
+
+# ========================
+# Tag Database Specific
+# ========================
+# Cache directories
+cache/
+!src/ts/cache/
+*.cache
+
+# Temporary files
+temp/
+tmp/
+*.tmp
+
+# User configuration (keep example)
+config.json
+/config.toml
+config_test.json
+launch-args.txt
+.onnx_extra
+.uv_fw_cdhash*
+# Project-scoped uv binary (downloaded by scripts/bootstrap_uv.{ps1,sh})
+/bin/
+!config.json.example
+!launch-args.txt.example
+
+# Logs
+*.log
+logs/
+!crates/*/src/logs/
+
+# Test data
+test_images/
+test_data/
+sample_images/
+
+# Runtime data (DB, secrets, persistent state)
+data/
+# Exception: the secret_store golden fixture. Its keys are test-only material
+# that encrypts the literal "python-fixture-secret" and protect nothing — but
+# without them committed, the Rust↔Python decryption test is unrunnable on any
+# machine but the one that generated it. Regenerate with
+# scripts/internal/gen_secret_store_fixture.py.
+!crates/yu-server/tests/fixtures/secret_store/data/
+!crates/yu-server/tests/fixtures/secret_store/data/**
+# hash_backfill_state.json is written at the repo root by
+# core/scan/hash_backfill.py's _state_path() (two dirs up from core/scan/),
+# not under core/ — the old pattern here never matched it.
+/hash_backfill_state.json
+# Node identity must never be shared across machines (mDNS self-detection
+
+# Local clone / accidental top-level files
+rpi-clone/
+HEAD
+config
+!config/
+!config/settings_schema.json
+/.git/hooks/
+objects
+refs
+# filters by node_id, so duplicated ids cause peers to mutually ignore each other)
+data/node_id.txt
+
+# Local Playwright artifacts
+llm-router-*.png
+
+# Private data
+private/
+personal/
+
+# Backup files
+backup/
+*.bak
+config.json.bak.*
+
+# Development files
+dev/
+scratch/
+experiments/
+
+# Output files (from exports)
+output/
+exports/
+
+# ========================
+# Git specific
+# ========================
+# Merge files
+*.orig
+
+# ========================
+# Project specific temporary files
+# ========================
+# Old/archived versions
+archive_old/
+old_versions/
+
+# TODO lists with personal info
+TODO_PERSONAL.md
+NOTES_PRIVATE.md
+
+# Screenshots with potential personal data
+screenshots_private/
+
+# Test databases
+test.db
+test_*.db
+demo.db
+
+# Performance test results
+benchmark_results/
+perf_*.json
+
+# ========================
+# Docker (for future)
+# ========================
+# Docker volumes
+.docker/
+# User-specific compose override (generated by tools/gen-compose.sh)
+docker-compose.override.yml
+
+# ========================
+# Documentation builds
+# ========================
+docs/_build/
+docs/.doctrees/
+
+# ========================
+# CI/CD
+# ========================
+.github/workflows/secrets.yml
+
+# ========================
+# Large files (optional - uncomment if needed)
+# ========================
+# *.zip
+# *.tar.gz
+# *.rar
+# *.7z
+
+# ========================
+# Sensitive data
+# ========================
+# API keys
+.env.local
+.env.production
+secrets/
+*.key
+*.pem
+# Exception: bundled Ed25519 update signing public keys (intentionally tracked)
+!security/update_signing_pubkey.pem
+!security/update_signing_pubkey_previous.pem
+# Exception: secret_store golden fixture key (test-only; see the data/ rule above)
+!crates/yu-server/tests/fixtures/secret_store/data/secret.key
+
+# User data
+user_uploads/
+user_data/
+
+# ========================
+# Allow specific files
+# ========================
+# Keep example configs
+!config.json.example
+!.env.example
+
+# Keep documentation
+!docs/
+!*.md
+
+# Keep GitHub templates
+!.github/
+
+# ========================
+# Node.js / TypeScript (追加 2026-02-24)
+# ========================
+node_modules/
+# pnpm local content-addressable store (created when the global store is on a different FS)
+.pnpm-store/
+# ui/default/static/dist/ is generated by the launcher/build pipeline.
+# Do not edit or commit generated bundle chunks; start.sh/start.bat rebuilds
+# them from src/ts when the app detects a missing or stale bundle.
+ui/default/static/dist/
+# gateway-page.js and *.js.map are build artifacts generated from src/ts/
+# Do not commit; user builds locally (same policy as dist/).
+ui/default/static/js/gateway-page.js
+ui/default/static/js/*.js.map
+ui/custom/
+*.tsbuildinfo
+
+# ========================
+# Runtime / Generated (追加 2026-02-15)
+# ========================
+# テストレポート・ログ
+reports/
+screenshots/
+/*.png
+/*.jpg
+/*.jpeg
+
+# アップロードされたテスト画像
+uploads/
+
+# nightjobタスク（個人メモ）
+nightjob_tasks/
+
+# Dockerデバッグ用
+Dockerfile.debug
+Dockerfile.playwright
+docker-compose.debug.yml
+requirements.debug.txt
+
+# 旧テスト
+tests/test_webui_browser.py
+
+# Startup auto-install stamp
+.pip_stamp
+
+# ========================
+# 不要な一時ファイル・開発履歴 (追加 2026-02-25)
+# ========================
+# 誤生成ファイル
+None
+nul
+tagdb.sqlite3
+
+# サーバー / アプリログ
+server_out.log
+server_err.log
+yu-ai-manager.log
+
+# 一時コミットメッセージ
+COMMIT_MSG.txt
+
+# 壊れた設定ファイル
+config.json.broken
+
+# デバッグレポート出力
+debug_report_*.txt
+
+# npm lockfile (node_modules もignore済み)
+package-lock.json
+
+# ========================
+# Tauri (追加 2026-03-03)
+# ========================
+src-tauri/target/
+src-tauri/gen/
+tauri-app/
+src-tauri/bundle/*
+!src-tauri/bundle/.gitkeep
+src-tauri/bundle.zip
+# fast mode: yu-server staged next to the exe by scripts/prepare-tauri-bundle.py
+src-tauri/yu-server
+src-tauri/yu-server.exe
+
+# 開発時の一時デバッグ/分析ドキュメント
+DEBUG_CLAUDE_v271.md
+DEBUG_PLAYBOOK.md
+FEEDBACK_ANALYSIS.md
+
+# 旧ドキュメントアーカイブ
+archive/
+
+# ========================
+# Docker Hailo wheel (追加 2026-03-04)
+# ========================
+docker/hailo_wheel/*.whl
+pytest-of-*/
+.playwright-mcp/
+
+# Claude Code scheduled tasks lock file
+.claude/scheduled_tasks.lock
+
+# Escape trigger hardening log
+.claude/escape-log.jsonl
+
+# Git worktrees
+.worktrees/
+.superpowers/
+
+# MarkDownSharpEditor preview temp files
+# 前セッション crash 時に残る `<docname>_<32hex>.html` 形式のプレビューを除外
+*_[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f].html
+tests/fixtures/naiv4vibe/
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+/playwright/.auth/
+*.pytest_bak
+
+# SudachiDict 由来カタカナ辞書（開発専用・各ノードでローカル生成・公開版同梱不要）
+# 生成手順: .claude/scripts/README-katakana-dict.md 参照
+/.claude/data/katakana_dict.txt
+/.claude/data/*.tsv
+.codex-tmp/
+
+# Serena (code intelligence tool) — local project config
+.serena/
+
+# fastembed model cache (generated at runtime by memory crates)
+.fastembed_cache/
+
+# ========================
+# Session artifacts — MUST stay last
+# ========================
+# `!*.md` above (the "Keep documentation" block) un-ignores every .md in the
+# tree, and gitignore resolves by LAST matching rule, so it silently defeated
+# the `.claude/agent-outputs/**` rule near the top of this file: `git add -A`
+# would have swept in 69 subagent report files. Re-assert the ignore here,
+# after the negation, and keep these rules at the end of the file.
+.claude/agent-outputs/**
+!.claude/agent-outputs/
+!.claude/agent-outputs/*/
+!.claude/agent-outputs/*/.gitkeep
+
+# Conversation transcripts and hook-written backups at any depth. A 125MB
+# transcript once reached a commit this way because the session cwd had drifted
+# and the hook wrote into crates/yu-server/src/.claude/backups/.
+**/.claude/backups/**
+**/.claude/session-state/**
+**/.claude/*.jsonl
+
+# Local settings backups written by tooling next to the (already ignored)
+# settings.local.json. Without this, `git add -A` sweeps them into a commit.
+.claude/settings.local.json.bak*
+
+# Other agents' scratch worktrees. These hold partial copies of this very repo,
+# so a blind `git add -A` commits a stale duplicate of crates/ under them.
+.claire/
+
+# Runtime databases. `gateway.sqlite` is created in the repo root by the local
+# gateway and was committed once by an over-broad `git add -A`.
+gateway.sqlite
+gateway.sqlite-wal
+gateway.sqlite-shm
+
+# Groups index cache. `GroupsIndexCache` writes this into its cache_dir, which
+# lands under crates/yu-server/ when the parity harness runs from there.
+groups_index.json
+
+# Prebuilt PDFium, fetched by scripts/fetch_pdfium.sh (pinned release + sha256).
+# Not committed: ~7.3 MB per platform, and the script makes it reproducible.
+vendor/pdfium/
+
+# fast mode: project-local Rust toolchain (scripts/internal/rust_toolchain.py)
+.rust-toolchain/
+
+# CocoIndex Code (ccc) local index.
+/.cocoindex_code/

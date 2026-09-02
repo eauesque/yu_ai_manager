@@ -1,0 +1,223 @@
+/*
+ * Atelier System (γ) — Story page editorial retrofit
+ *
+ * Story is a long-form timeline of the user's tagging journey. The Fraunces
+ * variable serif fits the storytelling tone — pull display sizes up for
+ * h1 / h2 and let timeline events read like diary entries.
+ *
+ * Scoped under body.theme-atelier-{light,dark} so classic / dark themes keep
+ * the existing pages/story.css presentation untouched.
+ */
+
+/* ----- Page title ----- */
+
+body.theme-atelier-light .container > .story-header h1,
+body.theme-atelier-dark .container > .story-header h1,
+body.theme-atelier-light main#main-content > header h1,
+body.theme-atelier-dark main#main-content > header h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h1), "wght" 400;
+  font-size: clamp(40px, 6vw, 72px);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  margin: 8px 0 24px;
+}
+
+/* Demote the emoji glyph next to the title so it doesn't out-weigh
+ * the serif display. */
+body.theme-atelier-light main#main-content > header h1 [aria-hidden="true"],
+body.theme-atelier-dark main#main-content > header h1 [aria-hidden="true"] {
+  font-size: 0.6em;
+  vertical-align: middle;
+  margin-right: 0.2em;
+  opacity: 0.7;
+}
+
+/* ----- Summary card ----- */
+
+body.theme-atelier-light .summary,
+body.theme-atelier-dark .summary {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: var(--shadow-sm);
+  padding: 24px 28px;
+  font-family: var(--font-body);
+}
+
+body.theme-atelier-light .summary h2,
+body.theme-atelier-dark .summary h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h2), "wght" 500;
+  font-size: 32px;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--text);
+  margin: 0 0 16px;
+}
+
+/* The "Trophies" sub-heading is intentionally small (sized inline). Override
+ * with an UI-grade label so it reads as a metadata caption. */
+body.theme-atelier-light .summary h2[style*="font-size:14px"],
+body.theme-atelier-dark .summary h2[style*="font-size:14px"] {
+  font-family: var(--font-ui);
+  font-size: 11px !important;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted) !important;
+}
+
+body.theme-atelier-light .summary p,
+body.theme-atelier-dark .summary p {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 400;
+  font-size: 16px;
+  line-height: 1.55;
+}
+
+body.theme-atelier-light .summary-stat,
+body.theme-atelier-dark .summary-stat {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+}
+
+body.theme-atelier-light .summary-stat-value,
+body.theme-atelier-dark .summary-stat-value {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h2), "wght" 500;
+  font-size: 36px;
+  line-height: 1;
+  color: var(--text);
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+body.theme-atelier-light .summary-stat-label,
+body.theme-atelier-dark .summary-stat-label {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-top: 6px;
+}
+
+/* ----- Timeline events ----- */
+
+body.theme-atelier-light .event,
+body.theme-atelier-dark .event {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-sm);
+  padding: 20px;
+  transition: box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+body.theme-atelier-light .event:hover,
+body.theme-atelier-dark .event:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+body.theme-atelier-light .event-icon,
+body.theme-atelier-dark .event-icon {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  font-size: 20px;
+}
+
+body.theme-atelier-light .event-date,
+body.theme-atelier-dark .event-date {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light .event-title,
+body.theme-atelier-dark .event-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 500;
+  font-size: 22px;
+  line-height: 1.25;
+  color: var(--text);
+  margin: 4px 0 0;
+}
+
+body.theme-atelier-light .event-description,
+body.theme-atelier-dark .event-description {
+  font-family: var(--font-body);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 400;
+  font-size: 16px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  margin-top: 10px;
+}
+
+/* Soften the event-type left-border accents so they feel curated rather
+ * than alert-y. We keep the same hue but let the surrounding chrome carry
+ * less contrast. */
+body.theme-atelier-light .event[class*=" milestone_"],
+body.theme-atelier-light .event[class*=" peak_"],
+body.theme-atelier-light .event[class*=" first_"],
+body.theme-atelier-light .event[class*=" productivity_"],
+body.theme-atelier-light .event[class*=" new_source"],
+body.theme-atelier-light .event[class*=" tag_diversity"],
+body.theme-atelier-dark .event[class*=" milestone_"],
+body.theme-atelier-dark .event[class*=" peak_"],
+body.theme-atelier-dark .event[class*=" first_"],
+body.theme-atelier-dark .event[class*=" productivity_"],
+body.theme-atelier-dark .event[class*=" new_source"],
+body.theme-atelier-dark .event[class*=" tag_diversity"] {
+  border-left-width: 3px;
+}
+
+/* ----- Load-more button ----- */
+
+body.theme-atelier-light .story-load-more,
+body.theme-atelier-dark .story-load-more {
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  border: 1px dashed var(--border);
+  background: var(--surface);
+  color: var(--accent-tool);
+  border-radius: 8px;
+  padding: 16px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+body.theme-atelier-light .story-load-more:hover,
+body.theme-atelier-dark .story-load-more:hover {
+  background: var(--surface-raised);
+  border-color: var(--accent-tool);
+  color: var(--accent-tool);
+}
+
+body.theme-atelier-light .story-load-more:focus-visible,
+body.theme-atelier-dark .story-load-more:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+}
+
+/* ----- Loading text ----- */
+
+body.theme-atelier-light .loading,
+body.theme-atelier-dark .loading {
+  font-family: var(--font-body);
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 14px;
+}

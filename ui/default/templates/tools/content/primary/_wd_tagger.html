@@ -1,0 +1,159 @@
+<!-- WD-Tagger Auto-Tagging -->
+<details class="tool-item" id="tool-wd-tagger">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.wd_tagger">🏷️ WD-Tagger (Danbooru Auto-Tag)</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+  <p data-i18n="tools.wd_tagger_desc">Automatically tag images using WD-Tagger ONNX models. Targets images without AI metadata (meta_source=unknown).</p>
+
+  <!-- Model status -->
+  <div id="wtModelStatus"></div>
+
+  <!-- Engine type selection -->
+  <div>
+    <label class="tool-label" for="wtEngineType" data-i18n="tools.wt_engine_type">Engine Type:</label>
+    <select class="tool-select" id="wtEngineType" data-action="toolsPageApi.wtToggleEngineUI" data-action-event="change">
+      <option value="onnx" data-i18n="tools.wt_engine_onnx">ONNX (local inference)</option>
+      <option value="vlm" data-i18n="tools.wt_engine_vlm">VLM (Vision LLM)</option>
+      <option value="both" data-i18n="tools.wt_engine_both">ONNX + VLM (two-stage)</option>
+    </select>
+  </div>
+
+  <!-- ONNX settings (shown for onnx/both) -->
+  <div id="wtOnnxSection">
+    <!-- Model selection -->
+    <div>
+      <label class="tool-label" for="wtModel" data-i18n="tools.wt_model">Model:</label>
+      <div>
+        <select class="tool-select" id="wtModel"></select>
+        <button class="btn btn-secondary" data-action="toolsPageApi.wtDownloadModel" id="wtDownloadBtn">
+          <span aria-hidden="true">📥</span> <span data-i18n="tools.wt_download">Download</span>
+        </button>
+      </div>
+      <div id="wtActiveModelLabel">
+        <span data-i18n="tools.wt_active_model_label">Active model</span>: <span id="wtActiveModelValue" data-i18n="tools.wt_active_model_none">(none)</span>
+      </div>
+    </div>
+
+    <!-- Thresholds -->
+    <div>
+      <div>
+        <label class="tool-label" for="wtGeneralThreshold" data-i18n="tools.wt_general_threshold">General Threshold:</label>
+        <div>
+          <input class="tool-input" type="range" id="wtGeneralThreshold" min="0.1" max="0.9" step="0.05" value="0.35"
+                 data-mirror-target="wtGeneralVal"
+                >
+          <span id="wtGeneralVal">0.35</span>
+        </div>
+      </div>
+      <div>
+        <label class="tool-label" for="wtCharThreshold" data-i18n="tools.wt_char_threshold">Character Threshold:</label>
+        <div>
+          <input class="tool-input" type="range" id="wtCharThreshold" min="0.1" max="0.99" step="0.05" value="0.85"
+                 data-mirror-target="wtCharVal"
+                >
+          <span id="wtCharVal">0.85</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- VLM settings (shown for vlm/both) -->
+  <div id="wtVlmSection">
+    <div>
+      <label class="tool-label" for="wtVlmUrl" data-i18n="tools.wt_vlm_url">VLM Server URL:</label>
+      <div>
+        <input class="tool-input" type="text" id="wtVlmUrl" value="http://localhost:11434" placeholder="http://localhost:11434"
+              >
+        <button class="btn btn-secondary" data-action="toolsPageApi.wtTestVlm" id="wtVlmTestBtn">
+          <span data-i18n="tools.wt_vlm_test">Test Connection</span>
+        </button>
+      </div>
+      <div id="wtVlmTestResult"></div>
+    </div>
+
+    <div>
+      <label class="tool-label" for="wtVlmModel" data-i18n="tools.wt_vlm_model">VLM Model:</label>
+      <select class="tool-select" id="wtVlmModel">
+        <option value="" data-i18n="tools.wt_vlm_select_model">Select model...</option>
+      </select>
+    </div>
+
+    <div>
+      <label class="tool-label" for="wtVlmTimeout" data-i18n="tools.wt_vlm_timeout">VLM Timeout (sec):</label>
+      <input class="tool-input" type="number" id="wtVlmTimeout" min="10" max="300" value="60"
+            >
+    </div>
+  </div>
+
+  <!-- Options -->
+  <div class="checkbox-group">
+    <label class="tool-label">
+      <input class="tool-input" type="checkbox" id="wtWriteXmp" checked aria-label="Write XMP">
+      <span data-i18n="tools.wt_write_xmp">Write XMP metadata to files</span>
+    </label>
+  </div>
+  <div class="checkbox-group">
+    <label class="tool-label">
+      <input class="tool-input" type="checkbox" id="wtNsfwFilter" aria-label="NSFW filter">
+      <span data-i18n="tools.wt_nsfw_filter">Filter NSFW tags</span>
+    </label>
+  </div>
+
+  <!-- Untagged count -->
+  <div id="wtUntaggedInfo"></div>
+
+  <!-- Stats -->
+  <div id="wtStats"></div>
+
+  <!-- Batch options -->
+  <div>
+    <label class="tool-label" for="wtBatchRoot" data-i18n="tools.wt_batch_folder">Tag folder:</label>
+    <select class="tool-select" id="wtBatchRoot">
+      <option value="" data-i18n="tools.all_folders">All folders</option>
+    </select>
+  </div>
+
+  <div>
+    <label class="tool-label" for="wtBatchLimit" data-i18n="tools.wt_batch_limit">Limit:</label>
+    <select class="tool-select" id="wtBatchLimit">
+      <option value="0" data-i18n="tools.wt_limit_all">All untagged</option>
+      <option value="10">10</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+      <option value="500">500</option>
+    </select>
+  </div>
+
+  <!-- Actions -->
+  <div class="tool-actions">
+    <button class="btn btn-primary" data-action="toolsPageApi.wtRunBatch">
+      <span aria-hidden="true">🏷️</span> <span data-i18n="tools.wt_batch">Batch Tag (untagged)</span>
+    </button>
+    <button class="btn btn-secondary" data-action="toolsPageApi.wtSaveConfig">
+      <svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-save"/></svg> <span data-i18n="tools.save">Save</span>
+    </button>
+  </div>
+
+  <!-- Progress -->
+  <div id="wtProgress" style="display:none">
+    <div>
+      <span id="wtProgressLabel">Processing...</span>
+      <span>
+        <span id="wtProgressPct">0%</span>
+        <button id="wtCancelBtn" data-action="toolsPageApi.wtCancelBatch" class="btn btn-small"
+               
+                data-i18n="tools.cancel">Cancel</button>
+      </span>
+    </div>
+    <div>
+      <div id="wtProgressBar"></div>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div id="wtResult" class="result-box"></div>
+  </div>
+</details>

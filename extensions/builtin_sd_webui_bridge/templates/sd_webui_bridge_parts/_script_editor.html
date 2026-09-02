@@ -1,0 +1,317 @@
+<script nonce="{{ csp_nonce }}">
+/* ── SD WebUI Bridge: PromptSyntaxWidget + Autocomplete + Vim Edit + Sed ── */
+(function() {
+  "use strict";
+
+  var _sdwbPosEditor = null;
+  var _sdwbNegEditor = null;
+  var _sdwbAcEnabled = true;
+  var _sdwbPosAc = null;
+  var _sdwbNegAc = null;
+  var _sdwbPosLinter = null;
+  var _sdwbNegLinter = null;
+
+  // -- Track active textarea (insertion target for WC browser/sed/dedup) --
+  var _sdwbActiveTextarea = null;
+  var _sdwbActiveGetSet = null; // {get, set} for sed/dedup — follows focus (pos or neg)
+  var _sdwbWcOriginalParent = null;
+
+  function _sdwbTrackFocus(ta, getVal, setVal) {
+    ta.addEventListener("focus", function() {
+      _sdwbActiveTextarea = ta;
+      if (getVal && setVal) _sdwbActiveGetSet = { get: getVal, set: setVal };
+      _sdwbRelocateWcBrowser(ta);
+    });
+  }
+
+  /**
+   * Move WC browser panel next to the focused textarea's
+   * sdwb-prompt-with-wc container (like NAI bridge).
+   */
+  function _sdwbRelocateWcBrowser(ta) {
+    var wcEl = document.getElementById("sdwbWcBrowser");
+    if (!wcEl) return;
+    if (!_sdwbWcOriginalParent) {
+      _sdwbWcOriginalParent = wcEl.parentNode;
+    }
+    var container = ta.closest(".sdwb-prompt-with-wc");
+    if (!container) container = _sdwbWcOriginalParent;
+    if (wcEl.parentNode === container) return;
+    container.appendChild(wcEl);
+  }
+
+  function _sdwbInitEditors() {
+    var posWrap = document.getElementById("sdwbPromptWrap");
+    var negWrap = document.getElementById("sdwbNegativeWrap");
+    if (!posWrap || !negWrap) return;
+
+    var posEl = posWrap.querySelector("textarea");
+    var negEl = negWrap.querySelector("textarea");
+    var posVal = posEl ? posEl.value : "";
+    var negVal = negEl ? negEl.value : "";
+
+    if (typeof PromptSyntaxWidget !== "undefined" && PromptSyntaxWidget.createEditor) {
+      try {
+        _sdwbPosEditor = PromptSyntaxWidget.createEditor(posWrap, {
+          value: posVal,
+          placeholder: "1girl, masterpiece, best quality",
+          rows: 4, showSyntaxBar: true, showErrors: true,
+        });
+        _sdwbNegEditor = PromptSyntaxWidget.createEditor(negWrap, {
+          value: negVal,
+          placeholder: "lowres, bad anatomy, worst quality",
+          rows: 2, showSyntaxBar: true, showErrors: true,
+        });
+      } catch (_e) { _sdwbPosEditor = null; _sdwbNegEditor = null; }
+    }
+
+    var posTa = _sdwbPosEditor ? _sdwbPosEditor.getTextarea() : posWrap.querySelector("textarea");
+    var negTa = _sdwbNegEditor ? _sdwbNegEditor.getTextarea() : negWrap.querySelector("textarea");
+
+    // Restore id/name so that <label for="..."> keeps working after
+    // PromptSyntaxWidget replaces the original textarea.
+    if (posTa) { posTa.id = "sdwbPrompt"; posTa.name = "sdwbPrompt"; }
+    if (negTa) { negTa.id = "sdwbNegative"; negTa.name = "sdwbNegative"; }
+
+    // Track textarea focus (for WC browser relocation + insertion target)
+    if (posTa) {
+      _sdwbActiveTextarea = posTa;
+      _sdwbActiveGetSet = { get: function() { return window._sdwbGetPrompt(); }, set: function(v) { window._sdwbSetPrompt(v); } };
+      _sdwbTrackFocus(posTa,
+        function() { return window._sdwbGetPrompt(); },
+        function(v) { window._sdwbSetPrompt(v); });
+    }
+    if (negTa) {
+      _sdwbTrackFocus(negTa,
+        function() { return window._sdwbGetNegative(); },
+        function(v) { window._sdwbSetNegative(v); });
+    }
+
+    if (typeof BridgeAutocomplete !== "undefined") {
+      var _acOpts = { bridgeBase: "/ext/sd-webui" };
+      if (posTa) _sdwbPosAc = BridgeAutocomplete.attach(posTa, _acOpts);
+      if (negTa) _sdwbNegAc = BridgeAutocomplete.attach(negTa, _acOpts);
+    }
+
+    if (typeof PromptLinter !== "undefined") {
+      if (posTa) _sdwbPosLinter = PromptLinter.attach(posTa, { syntaxMode: "sd", hasSyntaxWidget: !!_sdwbPosEditor });
+      if (negTa) _sdwbNegLinter = PromptLinter.attach(negTa, { syntaxMode: "sd", hasSyntaxWidget: !!_sdwbNegEditor });
+    }
+
+    if (typeof keyboardPowerVimEdit !== "undefined") {
+      [posTa, negTa].forEach(function(ta) {
+        if (!ta) return;
+        ta.addEventListener("keydown", function(e) {
+          if (e.altKey && !e.ctrlKey && !e.metaKey) keyboardPowerVimEdit.handleVimNavigation(e, ta);
+          if (e.ctrlKey && !e.altKey && !e.metaKey) keyboardPowerVimEdit.handleCtrlShortcuts(e, ta);
+        });
+      });
+    }
+
+    if (typeof BridgeSed !== "undefined") {
+      var sedInput = document.getElementById("sdwbSedInput");
+      if (sedInput) {
+        BridgeSed.attach({
+          input: sedInput,
+          getInput: function() { return _sdwbActiveGetSet ? _sdwbActiveGetSet.get() : window._sdwbGetPrompt(); },
+          setInput: function(v) { if (_sdwbActiveGetSet) _sdwbActiveGetSet.set(v); else window._sdwbSetPrompt(v); },
+          toast: function(msg) { _sdwbSedToast(msg); },
+        });
+      }
+    }
+
+    if (typeof BridgeDedup !== "undefined") {
+      var _sdwbDedup = BridgeDedup.attach({
+        getInput: function() { return _sdwbActiveGetSet ? _sdwbActiveGetSet.get() : window._sdwbGetPrompt(); },
+        setInput: function(v) { if (_sdwbActiveGetSet) _sdwbActiveGetSet.set(v); else window._sdwbSetPrompt(v); },
+        toast: function(msg) { _sdwbDedupToast(msg); },
+      });
+      window._sdwbDedupFirst = function() { _sdwbDedup.runFirst(); };
+      window._sdwbDedupLast  = function() { _sdwbDedup.runLast();  };
+      var _btnFirst = document.getElementById("sdwbBtnDedupFirst");
+      var _btnLast  = document.getElementById("sdwbBtnDedupLast");
+      if (_btnFirst) _btnFirst.addEventListener("click", window._sdwbDedupFirst);
+      if (_btnLast)  _btnLast.addEventListener("click", window._sdwbDedupLast);
+    }
+  }
+
+  function _sdwbDedupToast(msg) {
+    var el = document.getElementById("sdwbDedupToast");
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = "";
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.style.display = "none"; }, 3000);
+  }
+
+  function _sdwbSedToast(msg) {
+    var el = document.getElementById("sdwbSedToast");
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = "";
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.style.display = "none"; }, 3000);
+  }
+
+  window._sdwbToggleDedup = function() {
+    var bar = document.getElementById("sdwbDedupBar");
+    if (bar) bar.style.display = bar.style.display === "none" ? "" : "none";
+  };
+
+  window._sdwbToggleSed = function() {
+    var bar = document.getElementById("sdwbSedBar");
+    if (!bar) return;
+    bar.style.display = bar.style.display === "none" ? "" : "none";
+    if (bar.style.display !== "none") {
+      var si = document.getElementById("sdwbSedInput");
+      if (si) { si.focus(); si.select(); }
+    }
+  };
+
+  window._sdwbToggleAc = function() {
+    _sdwbAcEnabled = !_sdwbAcEnabled;
+    var btn = document.getElementById("sdwbAcToggle");
+    if (btn) btn.classList.toggle("on", _sdwbAcEnabled);
+    if (_sdwbPosAc && _sdwbPosAc.setEnabled) _sdwbPosAc.setEnabled(_sdwbAcEnabled);
+    if (_sdwbNegAc && _sdwbNegAc.setEnabled) _sdwbNegAc.setEnabled(_sdwbAcEnabled);
+  };
+
+  var _sdwbWcEnabled = false;
+  var _sdwbWcBrowser = null;
+
+  function _sdwbInsertWildcard(name) {
+    var ta = _sdwbActiveTextarea
+           || (_sdwbPosEditor ? _sdwbPosEditor.getTextarea() : null)
+           || document.getElementById("sdwbPrompt");
+    if (!ta) return;
+    var tag = "__" + name + "__";
+    var start = ta.selectionStart;
+    var val = ta.value;
+    var needComma = start > 0 && !/[,\s]$/.test(val.substring(0, start));
+    var insert = (needComma ? ", " : "") + tag;
+    ta.value = val.substring(0, start) + insert + val.substring(ta.selectionEnd);
+    var newPos = start + insert.length;
+    ta.selectionStart = ta.selectionEnd = newPos;
+    ta.focus();
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function _sdwbInitWcBrowser() {
+    var el = document.getElementById("sdwbWcBrowser");
+    if (el && typeof BridgeWildcardBrowser !== "undefined") {
+      _sdwbWcBrowser = BridgeWildcardBrowser.create({
+        container: el,
+        onInsert: _sdwbInsertWildcard,
+      });
+    }
+  }
+
+  window._sdwbToggleWc = function() {
+    _sdwbWcEnabled = !_sdwbWcEnabled;
+    var btn = document.getElementById("sdwbWcToggle");
+    if (btn) btn.classList.toggle("on", _sdwbWcEnabled);
+    if (_sdwbWcEnabled) {
+      if (typeof BridgeWildcardCache !== "undefined") BridgeWildcardCache.fetch();
+      if (_sdwbWcBrowser) _sdwbWcBrowser.show();
+    } else {
+      if (_sdwbWcBrowser) _sdwbWcBrowser.hide();
+    }
+  };
+  window._sdwbIsWcEnabled = function() { return _sdwbWcEnabled; };
+
+  window._sdwbGetPrompt = function() {
+    if (_sdwbPosEditor && _sdwbPosEditor.getValue) return _sdwbPosEditor.getValue();
+    var el = document.getElementById("sdwbPrompt");
+    return el ? el.value : "";
+  };
+  window._sdwbSetPrompt = function(val) {
+    if (_sdwbPosEditor && _sdwbPosEditor.setValue) { _sdwbPosEditor.setValue(val); return; }
+    var el = document.getElementById("sdwbPrompt");
+    if (el) el.value = val;
+  };
+  window._sdwbGetNegative = function() {
+    if (_sdwbNegEditor && _sdwbNegEditor.getValue) return _sdwbNegEditor.getValue();
+    var el = document.getElementById("sdwbNegative");
+    return el ? el.value : "";
+  };
+  window._sdwbSetNegative = function(val) {
+    if (_sdwbNegEditor && _sdwbNegEditor.setValue) { _sdwbNegEditor.setValue(val); return; }
+    var el = document.getElementById("sdwbNegative");
+    if (el) el.value = val;
+  };
+
+    // bridge-app.js is type="module", so it runs after normal inline scripts.
+    // Delay initialization of all bridge-app.js derived modules until DOMContentLoaded.
+  function _sdwbInitAllBridgeModules() {
+    // Editors (Autocomplete, Sed, Vim)
+    _sdwbInitEditors();
+
+    // Wildcard browser
+    _sdwbInitWcBrowser();
+
+    // Prompt Library
+    if (typeof BridgePromptLibrary !== "undefined") {
+      BridgePromptLibrary.attach({
+        prefix: "sdwb",
+        getPrompt: function() { return window._sdwbGetPrompt(); },
+        setPrompt: function(v) { window._sdwbSetPrompt(v); },
+        getNegative: function() { return window._sdwbGetNegative(); },
+        setNegative: function(v) { window._sdwbSetNegative(v); },
+        getParams: function() {
+          return {
+            steps: document.getElementById("sdwbSteps").value,
+            sampler: document.getElementById("sdwbSampler").value,
+            cfg_scale: document.getElementById("sdwbCfg").value,
+            seed: document.getElementById("sdwbSeed").value,
+            model_name: ""
+          };
+        },
+        toolbarSelector: ".bridge-editor-toolbar",
+        syntaxMode: "nai_to_sd"
+      });
+    }
+
+    // Quality Presets
+    if (typeof BridgeQualityPresets !== "undefined") {
+      BridgeQualityPresets.attach({
+        prefix: "sdwb",
+        bridgeType: "sd",
+        getPrompt: function() { return window._sdwbGetPrompt(); },
+        setPrompt: function(v) { window._sdwbSetPrompt(v); },
+        getNegative: function() { return window._sdwbGetNegative(); },
+        setNegative: function(v) { window._sdwbSetNegative(v); },
+        toolbarSelector: ".bridge-editor-toolbar"
+      });
+    }
+
+    // Result panel (2-column layout with history)
+    var _BRP = typeof BridgeResultPanel !== "undefined" ? BridgeResultPanel
+             : typeof BridgeGenThumbnails !== "undefined" ? BridgeGenThumbnails
+             : null;
+    if (_BRP) {
+      window._sdwbThumbStrip = _BRP.attach({
+        prefix: "sdwb",
+        containerSelector: ".brp-container",
+        actions: [
+          {
+            label: "\u2192 img2img",
+            title: "\u3053\u306e\u753b\u50cf\u3092 img2img \u306e\u30bd\u30fc\u30b9\u306b\u30bb\u30c3\u30c8",
+            onClick: function(b64) { window._sdwbSetImg2ImgBase64(b64); }
+          },
+          {
+            label: "\u2192 NAI img2img",
+            title: "NAI Bridge \u306e img2img \u306b\u9001\u308b",
+            onClick: function(b64) { window._sdwbSendImg2ImgTo("nai", b64); }
+          }
+        ]
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", _sdwbInitAllBridgeModules);
+  } else {
+    setTimeout(_sdwbInitAllBridgeModules, 0);
+  }
+})();
+</script>

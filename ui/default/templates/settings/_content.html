@@ -1,0 +1,66 @@
+<main id="main-content" class="tools-layout settings-layout" style="padding-top:60px;">
+  <aside class="tools-sidebar">
+    <nav id="settingsSidebarNav"
+         class="tools-sidebar-nav"
+         role="tablist"
+         aria-orientation="vertical"
+         aria-label="Settings categories">
+      <button type="button"
+              class="tools-sidebar-item tools-sidebar-item--active"
+              data-settings-cat="cat-server"
+              role="tab" aria-selected="true"
+              id="sidebar-item-cat-server"
+              aria-controls="cat-server">
+        <span data-i18n="settings.cat.server">サーバー</span>
+      </button>
+      <button type="button"
+              class="tools-sidebar-item"
+              data-settings-cat="cat-scan"
+              role="tab" aria-selected="false"
+              id="sidebar-item-cat-scan"
+              aria-controls="cat-scan">
+        <span data-i18n="settings.cat.scan">スキャン</span>
+      </button>
+      <button type="button"
+              class="tools-sidebar-item"
+              data-settings-cat="cat-tagging"
+              role="tab" aria-selected="false"
+              id="sidebar-item-cat-tagging"
+              aria-controls="cat-tagging">
+        <span data-i18n="settings.cat.tagging">タグ付け</span>
+      </button>
+      <button type="button"
+              class="tools-sidebar-item"
+              data-settings-cat="cat-appearance"
+              role="tab" aria-selected="false"
+              id="sidebar-item-cat-appearance"
+              aria-controls="cat-appearance">
+        <span data-i18n="settings.cat.appearance">外観</span>
+      </button>
+      <button type="button"
+              class="tools-sidebar-item"
+              data-settings-cat="cat-auth"
+              role="tab" aria-selected="false"
+              id="sidebar-item-cat-auth"
+              aria-controls="cat-auth">
+        <span data-i18n="settings.cat.auth">認証&amp;連携</span>
+      </button>
+      <button type="button"
+              class="tools-sidebar-item"
+              data-settings-cat="cat-dev"
+              role="tab" aria-selected="false"
+              id="sidebar-item-cat-dev"
+              aria-controls="cat-dev">
+        <span data-i18n="settings.cat.dev">開発</span>
+      </button>
+    </nav>
+  </aside>
+  <div class="tools-main">
+    {% include "settings/content/_cat_server.html" %}
+    {% include "settings/content/_cat_scan.html" %}
+    {% include "settings/content/_cat_tagging.html" %}
+    {% include "settings/content/_cat_appearance.html" %}
+    {% include "settings/content/_cat_auth.html" %}
+    {% include "settings/content/_cat_dev.html" %}
+  </div>
+</main>

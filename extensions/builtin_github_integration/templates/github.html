@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GitHub Integration</title>
+  <link rel="stylesheet" href="/static/css/base/base-theme.css">
+  {% include "github_parts/_style.html" %}
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+    {% include "github_parts/_body.html" %}
+  </main>
+  {% include "github_parts/_script_i18n.html" %}
+  {% include "github_parts/_script.html" %}
+  {% include "github_parts/_script_issues.html" %}
+  {% include "github_parts/_script_pulls.html" %}
+  {% include "github_parts/_script_settings.html" %}
+  <script nonce="{{ csp_nonce }}">_ghubApplyI18n();</script>
+</body>
+</html>

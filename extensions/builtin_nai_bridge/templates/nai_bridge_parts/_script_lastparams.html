@@ -1,0 +1,252 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+  (function () {
+    function $(id) { return document.getElementById(id); }
+
+    var _nabLastParamsConfig = {
+      storageKey: "nab_last_params",
+      getParams: function() {
+        var params = {
+          prompt: (typeof _nabGetPrompt === "function" ? _nabGetPrompt() : $("nabPrompt").value),
+          negative: (typeof _nabGetNegative === "function" ? _nabGetNegative() : $("nabNegative").value),
+          model: $("nabModel").value,
+          sampler: $("nabSampler").value,
+          noise_schedule: $("nabNoiseSchedule").value,
+          steps: $("nabSteps").value,
+          scale: $("nabScale").value,
+          cfg_rescale: $("nabCfgRescale").value,
+          width: $("nabWidth").value,
+          height: $("nabHeight").value,
+          seed: $("nabSeed").value,
+          batch_count: $("nabBatchCount").value,
+          quality_toggle: $("nabQualityToggle").checked ? "1" : "0",
+          uc_preset: $("nabUcPreset").value,
+          mode: $("nabMode") ? $("nabMode").value : "anime",
+          dyn_threshold: $("nabDynThreshold").checked ? "1" : "0",
+          uncond_scale: $("nabUncondScale").value,
+          variety_boost: $("nabVarietyBoost").checked ? "1" : "0",
+          image_format: $("nabImageFormat").value,
+        };
+        var chars = (typeof window._nabCollectCharacters === "function")
+          ? window._nabCollectCharacters() : [];
+        if (chars.length > 0) params.characters = JSON.stringify(chars);
+        // Vibe transfer slider values (image is user-uploaded, not stored)
+        var vibeStrengthEl = $("nabVibeStrength");
+        var vibeInfoEl = $("nabVibeInfoExtracted");
+        if (vibeStrengthEl) params.vibe_strength = vibeStrengthEl.value;
+        if (vibeInfoEl) params.vibe_info_extracted = vibeInfoEl.value;
+        // Reference cards slider values (images not stored, but N cards with their sliders)
+        if (typeof window.nabCollectReferences === "function") {
+          var refs = window.nabCollectReferences();
+          if (refs.length > 0) {
+            params.ref_params = JSON.stringify(
+              refs.map(function(r) {
+                return {info: r.information_extracted, strength: r.strength};
+              })
+            );
+          }
+        }
+        // Sweep scalar fields (X/Y/Z + macros editor knobs + defer save)
+        var sweepIds = [
+          "nabSweepEnabled", "nabSweepParam",
+          "nabSweepMin", "nabSweepMax", "nabSweepMode", "nabSweepCount", "nabSweepStep",
+          "nabSweepMacrosSharedCount", "nabSweepMacrosPadShort",
+          "nabSweepYEnabled", "nabSweepYParam",
+          "nabSweepYMin", "nabSweepYMax", "nabSweepYMode", "nabSweepYCount", "nabSweepYStep",
+          "nabSweepYMacrosSharedCount", "nabSweepYMacrosPadShort",
+          "nabSweepZEnabled", "nabSweepZParam",
+          "nabSweepZMin", "nabSweepZMax", "nabSweepZMode", "nabSweepZCount", "nabSweepZStep",
+          "nabSweepZMacrosSharedCount", "nabSweepZMacrosPadShort",
+          "nabSweepDeferSave",
+        ];
+        sweepIds.forEach(function(id) {
+          var el = $(id);
+          if (!el) return;
+          if (el.type === "checkbox") params["sw_" + id] = el.checked ? "1" : "0";
+          else params["sw_" + id] = el.value;
+        });
+        // Macros slot state (canonical model lives in _nabMacroSlots, see _script_sweep.html)
+        try {
+          if (window._nabMacroSlots) {
+            ["x", "y", "z"].forEach(function(ax) {
+              if (window._nabMacroSlots[ax]) {
+                params["sw_macros_" + ax] = JSON.stringify(window._nabMacroSlots[ax]);
+              }
+            });
+          }
+        } catch (_e) {}
+        return params;
+      },
+      setParams: function(p) {
+        if (p.prompt != null) {
+          if (typeof _nabSetPrompt === "function") _nabSetPrompt(p.prompt);
+          else $("nabPrompt").value = p.prompt;
+        }
+        if (p.negative != null) {
+          if (typeof _nabSetNegative === "function") _nabSetNegative(p.negative);
+          else $("nabNegative").value = p.negative;
+        }
+        if (p.model != null) $("nabModel").value = p.model;
+        if (p.sampler != null) $("nabSampler").value = p.sampler;
+        if (p.noise_schedule != null) $("nabNoiseSchedule").value = p.noise_schedule;
+        if (p.steps != null) $("nabSteps").value = p.steps;
+        if (p.scale != null) $("nabScale").value = p.scale;
+        if (p.cfg_rescale != null) $("nabCfgRescale").value = p.cfg_rescale;
+        // Switch to Custom preset so W/H are respected
+        if (p.width != null || p.height != null) {
+          $("nabResPreset").value = "custom";
+        }
+        if (p.width != null) $("nabWidth").value = p.width;
+        if (p.height != null) $("nabHeight").value = p.height;
+        if (p.seed != null) $("nabSeed").value = p.seed;
+        if (p.batch_count != null) $("nabBatchCount").value = p.batch_count;
+        else if (p.samples != null) $("nabBatchCount").value = p.samples;
+        if (p.quality_toggle != null) $("nabQualityToggle").checked = p.quality_toggle === "1";
+        if (p.uc_preset != null) $("nabUcPreset").value = p.uc_preset;
+        if (p.mode != null && $("nabMode")) $("nabMode").value = p.mode;
+        // Model and uc_preset are both restored above; re-sync so a V5-only
+        // UC preset is not left selected under a non-V5 model.
+        if (typeof window.nabSyncUcPresetOptions === "function") {
+          window.nabSyncUcPresetOptions();
+        }
+        if (p.dyn_threshold != null) $("nabDynThreshold").checked = p.dyn_threshold === "1";
+        if (p.uncond_scale != null) $("nabUncondScale").value = p.uncond_scale;
+        if (p.variety_boost != null) $("nabVarietyBoost").checked = p.variety_boost === "1";
+        if (p.image_format != null) $("nabImageFormat").value = p.image_format;
+        // Restore vibe transfer slider values
+        if (p.vibe_strength != null) {
+          var vibeStrEl = $("nabVibeStrength");
+          if (vibeStrEl) {
+            vibeStrEl.value = p.vibe_strength;
+            vibeStrEl.dispatchEvent(new Event("input", {bubbles: true}));
+          }
+        }
+        if (p.vibe_info_extracted != null) {
+          var vibeInfoEl2 = $("nabVibeInfoExtracted");
+          if (vibeInfoEl2) {
+            vibeInfoEl2.value = p.vibe_info_extracted;
+            vibeInfoEl2.dispatchEvent(new Event("input", {bubbles: true}));
+          }
+        }
+        // Restore reference card slider values (images not restored; user must re-upload)
+        if (p.ref_params) {
+          try {
+            var refData = JSON.parse(p.ref_params);
+            if (Array.isArray(refData) && typeof window.nabAddReference === "function") {
+              refData.forEach(function(r) {
+                window.nabAddReference();
+                var cards = typeof window.nabGetRefCards === "function"
+                  ? window.nabGetRefCards() : [];
+                var card = cards[cards.length - 1];
+                if (!card) return;
+                var infoEl = card.querySelector(".nab-ref-info");
+                var strEl = card.querySelector(".nab-ref-strength");
+                if (infoEl) {
+                  infoEl.value = r.info != null ? r.info : 1.0;
+                  infoEl.dispatchEvent(new Event("input", {bubbles: true}));
+                }
+                if (strEl) {
+                  strEl.value = r.strength != null ? r.strength : 0.6;
+                  strEl.dispatchEvent(new Event("input", {bubbles: true}));
+                }
+              });
+              if (refData.length > 0) {
+                var refSec = $("nabRefSection");
+                if (refSec) refSec.open = true;
+              }
+            }
+          } catch (_e) {}
+        }
+        // Restore character prompts
+        if (p.characters) {
+          try {
+            var chars = JSON.parse(p.characters);
+            if (Array.isArray(chars) && chars.length > 0
+                && typeof window._nabSetCharacters === "function") {
+              window._nabSetCharacters(chars);
+              $("nabCharSection").open = true;
+            }
+          } catch (_e) {}
+        }
+        if (typeof window.nabUpdateCost === "function") window.nabUpdateCost();
+        // Sweep scalar fields
+        var sweepIds = [
+          "nabSweepEnabled", "nabSweepParam",
+          "nabSweepMin", "nabSweepMax", "nabSweepMode", "nabSweepCount", "nabSweepStep",
+          "nabSweepMacrosSharedCount", "nabSweepMacrosPadShort",
+          "nabSweepYEnabled", "nabSweepYParam",
+          "nabSweepYMin", "nabSweepYMax", "nabSweepYMode", "nabSweepYCount", "nabSweepYStep",
+          "nabSweepYMacrosSharedCount", "nabSweepYMacrosPadShort",
+          "nabSweepZEnabled", "nabSweepZParam",
+          "nabSweepZMin", "nabSweepZMax", "nabSweepZMode", "nabSweepZCount", "nabSweepZStep",
+          "nabSweepZMacrosSharedCount", "nabSweepZMacrosPadShort",
+          "nabSweepDeferSave",
+        ];
+        sweepIds.forEach(function(id) {
+          var key = "sw_" + id;
+          if (p[key] == null) return;
+          var el = $(id);
+          if (!el) return;
+          if (el.type === "checkbox") el.checked = p[key] === "1" || p[key] === true;
+          else el.value = p[key];
+        });
+        // Restore macros slot state, then re-render and sync visibility.
+        // _nabMacroSlots is a top-level var in _script_sweep.html so it is on window.
+        try {
+          if (window._nabMacroSlots) {
+            ["x", "y", "z"].forEach(function(ax) {
+              var raw = p["sw_macros_" + ax];
+              if (raw == null) return;
+              var arr = JSON.parse(raw);
+              if (Array.isArray(arr) && arr.length > 0) {
+                window._nabMacroSlots[ax] = arr;
+                if (typeof window._sweepRenderMacros === "function") {
+                  window._sweepRenderMacros(ax);
+                }
+              }
+            });
+            if (typeof window._sweepApplyMacrosVisibility === "function") {
+              window._sweepApplyMacrosVisibility();
+            }
+          }
+        } catch (_e) {
+          console.warn("[nab/lastparams] sweep macros restore failed:", _e);
+        }
+        // Open sweep section if it was enabled
+        if (p.sw_nabSweepEnabled === "1") {
+          var sec = $("nabSweepSection");
+          if (sec) sec.open = true;
+        }
+        // Trigger sweep estimate re-render
+        if (typeof window._nabSweepUpdateEstimate === "function") {
+          try { window._nabSweepUpdateEstimate(); } catch (_e) {}
+        }
+      },
+    };
+    window._nabLastParamsConfig = _nabLastParamsConfig;
+
+    window.nabSaveLastParams = function() {
+      if (window.BridgeLastParams) window.BridgeLastParams.save(_nabLastParamsConfig);
+    };
+
+    window.nabRestoreLast = function() {
+      if (!window.BridgeLastParams) return;
+      if (window.BridgeLastParams.restore(_nabLastParamsConfig)) {
+        var btn = $("nabRestoreBtn");
+        if (btn) { btn.textContent = "🔄 OK!"; setTimeout(function() { btn.textContent = window.tr('nai_bridge.restore_btn', '🔄 前回'); }, 800); }
+      }
+    };
+
+    window.nabClearPrompts = function() {
+      var ids = ["nabPrompt", "nabNegative"];
+      ids.forEach(function(id) {
+        var ta = $(id);
+        if (!ta || !ta.value) return;
+        ta.focus();
+        ta.select();
+        // Use execCommand so the clear is undoable with Ctrl+Z
+        document.execCommand("insertText", false, "");
+      });
+    };
+  })();
+</script>

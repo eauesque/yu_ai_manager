@@ -1,0 +1,43 @@
+{% extends "_base.html" %}
+{% set active = "stats" %}
+{% block title %}Stats — YU AI Manager{% endblock %}
+
+{% block head %}
+<script nonce="{{ csp_nonce }}" src="/static/vendor/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<h1 style="font-size:1.4rem; margin-bottom:20px;">Statistics</h1>
+
+<!-- Stat cards -->
+<div class="stat-cards" id="statCards">
+  <div class="stat-card">
+    <div class="stat-value" id="statFiles">-</div>
+    <div class="stat-label">Total Files</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="statTags">-</div>
+    <div class="stat-label">Total Tags</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-value" id="statSources">-</div>
+    <div class="stat-label">Sources</div>
+  </div>
+</div>
+
+<!-- Timeline chart -->
+<div class="chart-wrap">
+  <div class="chart-title">Monthly Timeline</div>
+  <canvas id="timelineChart" height="200"></canvas>
+</div>
+
+<!-- Top tags -->
+<div class="chart-wrap">
+  <div class="chart-title">Top 20 Tags</div>
+  <div id="topTags" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ csp_nonce }}">document.addEventListener('DOMContentLoaded', function() { MinUI.initStats(); });</script>
+{% endblock %}

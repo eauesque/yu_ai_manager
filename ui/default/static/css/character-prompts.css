@@ -1,0 +1,6 @@
+/* character-prompts.css — compatibility wrapper for templates loading character styles directly.
+   Flattened: all leaf files listed here. */
+@import url("./character/character-prompts-section.css");
+@import url("./character/character-prompts-cards.css");
+@import url("./character/character-prompts-negative.css");
+@import url("./character/character-position-grid.css");

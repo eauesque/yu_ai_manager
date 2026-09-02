@@ -1,0 +1,16 @@
+/* Regex cheat sheet vars */
+:root {
+  --cheat-bg: rgba(255, 255, 255, 0.92);
+  --cheat-header-bg: rgba(250, 250, 250, 0.92);
+  --cheat-text: #111;
+  --cheat-muted: #555;
+  --cheat-chip-bg: rgba(0, 0, 0, 0.06);
+}
+
+body.dark {
+  --cheat-bg: rgba(20, 24, 32, 0.9);
+  --cheat-header-bg: rgba(28, 34, 46, 0.92);
+  --cheat-text: #e8eefc;
+  --cheat-muted: rgba(232, 238, 252, 0.72);
+  --cheat-chip-bg: rgba(255, 255, 255, 0.1);
+}

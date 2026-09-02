@@ -1,0 +1,299 @@
+<style>
+/* GitHub Integration — prefix: ghub-
+ * Uses base-theme.css variables: --bg, --card, --text, --muted, --border,
+ * --accent, --bg-card, --bg-input, --bg-hover, --btn-bg, --btn-text
+ */
+.ghub-wrap {
+  max-width: 1100px; margin: 0 auto;
+  padding: calc(var(--nav-h, 50px) + 16px) 16px 32px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+.ghub-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.ghub-header h1 { font-size: 1.4rem; margin: 0; display: flex; align-items: center; gap: 8px; }
+.ghub-header select {
+  padding: 6px 32px 6px 10px; border-radius: 8px;
+  background: var(--bg-input); color: var(--text);
+  border: 1px solid var(--border); font-size: 0.9rem;
+}
+
+/* Tabs */
+.ghub-tabs {
+  display: flex; gap: 2px; border-bottom: 2px solid var(--border);
+  margin-bottom: 16px; overflow-x: auto;
+}
+.ghub-tab {
+  padding: 10px 18px; cursor: pointer; border: none; background: none;
+  color: var(--muted); font-size: 0.9rem; font-weight: 500;
+  border-bottom: 2px solid transparent; margin-bottom: -2px;
+  white-space: nowrap; transition: color 0.15s, border-color 0.15s;
+}
+.ghub-tab:hover { color: var(--text); }
+.ghub-tab.active {
+  color: var(--accent); border-bottom-color: var(--accent);
+}
+.ghub-tab .ghub-badge {
+  display: inline-block; min-width: 18px; height: 18px; line-height: 18px;
+  padding: 0 5px; margin-left: 6px; border-radius: 10px; font-size: 0.75rem;
+  background: var(--accent); color: var(--bg); font-weight: 600;
+}
+.ghub-panel { display: none; }
+.ghub-panel.active { display: block; }
+
+/* Cards */
+.ghub-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 14px 16px; margin-bottom: 10px;
+  transition: border-color 0.15s;
+}
+.ghub-card:hover { border-color: var(--accent); }
+.ghub-card-title {
+  font-weight: 600; font-size: 0.95rem; margin-bottom: 6px;
+  display: flex; align-items: center; gap: 8px;
+}
+.ghub-card-title a {
+  color: var(--text); text-decoration: none;
+}
+.ghub-card-title a:hover { color: var(--accent); }
+.ghub-card-meta {
+  font-size: 0.8rem; color: var(--muted);
+  display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+}
+.ghub-card-body {
+  font-size: 0.85rem; color: var(--muted);
+  margin-top: 8px; line-height: 1.5;
+  max-height: 120px; overflow: hidden; position: relative;
+}
+
+/* Labels / Badges */
+.ghub-label {
+  display: inline-block; padding: 2px 8px; border-radius: 12px;
+  font-size: 0.72rem; font-weight: 500;
+  background: var(--bg-hover); color: var(--text);
+}
+.ghub-priority-high { background: var(--error, #d32f2f); color: #fff; }
+.ghub-priority-medium { background: #e77c00; color: #fff; }
+.ghub-priority-low { background: var(--success, #2e7d32); color: #fff; }
+.ghub-state-open { color: var(--success, #2e7d32); }
+.ghub-state-closed { color: var(--error, #d32f2f); }
+.ghub-state-merged { color: #9333ea; }
+.ghub-state-draft { color: var(--muted); }
+
+/* Dashboard stats */
+.ghub-stats-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px; margin-bottom: 20px;
+}
+.ghub-stat-card {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: 10px; padding: 16px; text-align: center;
+}
+.ghub-stat-value { font-size: 1.8rem; font-weight: 700; color: var(--accent); }
+.ghub-stat-label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
+
+/* Toolbar */
+.ghub-toolbar {
+  display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap; align-items: center;
+}
+.ghub-toolbar select, .ghub-toolbar input {
+  padding: 6px 10px; border-radius: 8px; font-size: 0.85rem;
+  background: var(--bg-input); color: var(--text);
+  border: 1px solid var(--border);
+}
+.ghub-btn {
+  padding: 7px 16px; border-radius: 8px; border: none; cursor: pointer;
+  font-size: 0.85rem; font-weight: 500; transition: opacity 0.15s;
+}
+.ghub-btn:hover { opacity: 0.85; }
+.ghub-btn-primary { background: var(--accent); color: #fff; }
+.ghub-btn-secondary { background: var(--btn-bg); color: var(--btn-text); border: 1px solid var(--border); }
+.ghub-btn-danger { background: var(--error, #d32f2f); color: #fff; }
+.ghub-btn-small { padding: 8px 12px; font-size: 0.8rem; min-height: 36px; }
+
+/* Notification item */
+.ghub-notif { display: flex; gap: 10px; align-items: flex-start; }
+.ghub-notif-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--accent); margin-top: 6px; flex-shrink: 0;
+}
+.ghub-notif-dot.read { background: var(--border); }
+.ghub-notif-content { flex: 1; min-width: 0; }
+.ghub-notif-type {
+  font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.5px;
+  color: var(--muted);
+}
+
+/* Loading / Empty */
+.ghub-loading, .ghub-empty {
+  text-align: center; padding: 40px; color: var(--muted);
+}
+.ghub-loading::after {
+  content: ""; display: inline-block; width: 20px; height: 20px;
+  border: 2px solid var(--border); border-top-color: var(--accent);
+  border-radius: 50%; animation: ghub-spin 0.6s linear infinite;
+  margin-left: 8px; vertical-align: middle;
+}
+@keyframes ghub-spin { to { transform: rotate(360deg); } }
+
+/* Diff stats */
+.ghub-diff-add { color: var(--success, #2e7d32); }
+.ghub-diff-del { color: var(--error, #d32f2f); }
+.ghub-file-list { font-size: 0.82rem; }
+.ghub-file-item {
+  padding: 6px 0; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+}
+
+/* Form */
+.ghub-form-group { margin-bottom: 14px; }
+.ghub-form-group label {
+  display: block; font-size: 0.85rem; font-weight: 500;
+  margin-bottom: 4px; color: var(--text);
+}
+.ghub-form-group input, .ghub-form-group textarea, .ghub-form-group select {
+  width: 100%; padding: 8px 12px; border-radius: 8px; font-size: 0.9rem;
+  background: var(--bg-input); color: var(--text);
+  border: 1px solid var(--border); box-sizing: border-box;
+}
+.ghub-form-group textarea { min-height: 100px; resize: vertical; font-family: inherit; }
+
+/* Detail panel */
+.ghub-detail-overlay {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(0,0,0,0.6); display: none;
+}
+.ghub-detail-overlay.active { display: flex; align-items: center; justify-content: center; }
+.ghub-detail-panel {
+  background: var(--bg); border-radius: 14px;
+  width: min(800px, calc(100vw - 32px)); max-height: calc(100vh - 64px);
+  overflow-y: auto; padding: 24px; position: relative;
+}
+.ghub-detail-close {
+  position: absolute; top: 8px; right: 8px;
+  background: none; border: none; color: var(--muted);
+  font-size: 1.4rem; cursor: pointer;
+  min-width: 44px; min-height: 44px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 8px; transition: background 0.15s;
+}
+.ghub-detail-close:hover { background: var(--bg-hover); }
+
+/* Section header */
+.ghub-section-header {
+  font-size: 0.85rem; font-weight: 600; color: var(--muted);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  margin: 20px 0 10px; padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+/* Release card */
+.ghub-release-tag {
+  display: inline-block; padding: 2px 10px; border-radius: 6px;
+  background: var(--accent); color: #fff;
+  font-weight: 600; font-size: 0.85rem;
+}
+
+/* Tab scroll fade hint (mobile) */
+.ghub-tabs {
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
+  -webkit-mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 85%, transparent 100%);
+}
+.ghub-tabs::-webkit-scrollbar { display: none; }
+.ghub-tabs.ghub-scrolled-end {
+  -webkit-mask-image: linear-gradient(to left, #000 85%, transparent 100%);
+  mask-image: linear-gradient(to left, #000 85%, transparent 100%);
+}
+.ghub-tabs.ghub-scrolled-mid {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 85%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 8%, #000 85%, transparent 100%);
+}
+
+/* Account card responsive */
+.ghub-acc-header {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 8px; flex-wrap: wrap;
+}
+.ghub-acc-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* Focus visible (WCAG 2.4.7) — Safari/WebKit fallback: use :focus
+ * then undo on browsers that support :focus-visible for non-keyboard focus */
+.ghub-tab:focus,
+.ghub-btn:focus,
+.ghub-card[tabindex]:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.ghub-tab:focus:not(:focus-visible),
+.ghub-btn:focus:not(:focus-visible),
+.ghub-card[tabindex]:focus:not(:focus-visible) {
+  outline: none;
+}
+.ghub-tab:focus-visible,
+.ghub-btn:focus-visible,
+.ghub-card[tabindex]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.ghub-header select:focus,
+.ghub-toolbar select:focus,
+.ghub-toolbar input:focus,
+.ghub-form-group input:focus,
+.ghub-form-group textarea:focus,
+.ghub-form-group select:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.ghub-header select:focus:not(:focus-visible),
+.ghub-toolbar select:focus:not(:focus-visible),
+.ghub-toolbar input:focus:not(:focus-visible),
+.ghub-form-group input:focus:not(:focus-visible),
+.ghub-form-group textarea:focus:not(:focus-visible),
+.ghub-form-group select:focus:not(:focus-visible) {
+  outline: none;
+}
+.ghub-header select:focus-visible,
+.ghub-toolbar select:focus-visible,
+.ghub-toolbar input:focus-visible,
+.ghub-form-group input:focus-visible,
+.ghub-form-group textarea:focus-visible,
+.ghub-form-group select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+.ghub-detail-close:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.ghub-detail-close:focus:not(:focus-visible) {
+  outline: none;
+}
+.ghub-detail-close:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Dark mode: improve primary button contrast (white on --accent #60a5fa = 2.54:1)
+ * Use a darker shade of blue for AA compliance (4.5:1+) */
+body.dark .ghub-btn-primary {
+  background: #3b82f6;
+  color: #fff;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .ghub-wrap { padding-left: 10px; padding-right: 10px; }
+  .ghub-tabs { gap: 0; }
+  .ghub-tab { padding: 8px 12px; font-size: 0.82rem; }
+  .ghub-stats-grid { grid-template-columns: repeat(2, 1fr); }
+  .ghub-acc-header { flex-direction: column; align-items: flex-start; }
+  .ghub-acc-actions { align-self: flex-end; }
+  .ghub-toolbar { gap: 6px; }
+  .ghub-toolbar select { max-width: 130px; }
+}
+.ghub-use-global {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.82rem; color: var(--text-muted, #888);
+  margin-bottom: 4px; cursor: pointer;
+}
+.ghub-use-global input { margin: 0; }
+</style>

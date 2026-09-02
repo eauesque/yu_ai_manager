@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "categories": [
+    {
+      "id": "library",
+      "icon": "📚",
+      "labelKey": "tauri_shell.category.library",
+      "tabs": [
+        {"id": "search",  "labelKey": "tauri_shell.tab.search",  "url": "/",        "mount": "eager"},
+        {"id": "inspect", "labelKey": "tauri_shell.tab.inspect", "url": "/inspect", "mount": "lazy"}
+      ]
+    },
+    {
+      "id": "generate",
+      "icon": "🎨",
+      "labelKey": "tauri_shell.category.generate",
+      "tabs": [
+        {"id": "nai-bridge",     "labelKey": "tauri_shell.tab.nai_bridge",     "url": "/ext/nai-bridge/",    "mount": "lazy"},
+        {"id": "comfyui-bridge", "labelKey": "tauri_shell.tab.comfyui_bridge", "url": "/ext/comfyui-bridge/","mount": "lazy"},
+        {"id": "a1111-bridge",   "labelKey": "tauri_shell.tab.a1111_bridge",   "url": "/ext/sd-webui/",      "mount": "lazy"}
+      ]
+    },
+    {
+      "id": "ai",
+      "icon": "🤖",
+      "labelKey": "tauri_shell.category.ai",
+      "tabs": [
+        {"id": "llm-router", "labelKey": "tauri_shell.tab.llm_router", "url": "/llm-router", "mount": "lazy"}
+      ]
+    },
+    {
+      "id": "system",
+      "icon": "⚙️",
+      "labelKey": "tauri_shell.category.system",
+      "tabs": [
+        {"id": "fleet-admin", "labelKey": "tauri_shell.tab.fleet_admin", "url": "/lan-cowork",  "mount": "lazy"},
+        {"id": "extensions",  "labelKey": "tauri_shell.tab.extensions",  "url": "/extensions", "mount": "lazy"},
+        {"id": "settings",    "labelKey": "tauri_shell.tab.settings",    "url": "/settings",   "mount": "eager"}
+      ]
+    }
+  ],
+  "bridgeTargets": {
+    "nai":     {"category": "generate", "tab": "nai-bridge"},
+    "comfyui": {"category": "generate", "tab": "comfyui-bridge"},
+    "a1111":   {"category": "generate", "tab": "a1111-bridge"}
+  }
+}

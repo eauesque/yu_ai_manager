@@ -1,0 +1,13 @@
+{# Settings tabs aggregator. Each partial holds a related cluster of tab-content
+   panels so individual files stay under the 500-line soft limit:
+     - _tab_data_ingest.html         scan / parser / remote FS
+     - _tab_extensions_appearance.html  extensions / appearance + sound
+     - _tab_apikeys_dev.html         api keys + MCP / json / logs / ui / tagdict
+     - _tab_sns_secrets.html         SNS share + secrets management
+   The maintenance tab keeps its existing dedicated partial. #}
+    {% include "settings/content/_tab_data_ingest.html" %}
+    {% include "settings/content/_tab_extensions_appearance.html" %}
+    {% include "settings/content/_tab_apikeys_dev.html" %}
+    {% include "settings/content/_tab_gateway_keys.html" %}
+    {% include "settings/content/_tab_sns_secrets.html" %}
+    {% include "settings/content/_tab_maintenance.html" %}

@@ -1,0 +1,310 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  'use strict';
+
+  var API = '/ext/freeze-pullback';
+  var pollTimer = null;
+  var ffmpegOk = false;
+  var imageLoaded = false;
+  var focusStart = null;  // {x, y} normalized
+  var focusEnd = null;
+
+    // ── Waypoint state ─────────────────────────────────
+  var waypoints = [];   // [{x, y, scale, dwell, transition, easing}, ...]
+  var wpMode = false;   // whether in waypoint mode
+
+
+  // ── DOM refs ───────────────────────────────────────────
+  var elWarning, elFileId, elLoadBtn, elGenerateBtn, elCancelBtn;
+  var elDirection;
+  var elHold, elPull, elFps, elScaleStart, elScaleEnd, elEasing, elVignette;
+  var elFormat, elOutW, elOutH;
+  var elPlaceholder, elCanvasContainer, elCanvas, elFocusNote;
+  var elMarkerStart, elMarkerEnd;
+  var elProgress, elProgressFill, elProgressText;
+  var elGallery, elGalleryList;
+  var elPlayerOverlay, elPlayer, elPlayerImg, elPlayerClose;
+  var elPreviewArea;
+  var elErrorMsg;
+    // Waypoint UI elements
+  var elMode, elSimplePanel, elWaypointPanel, elWaypointList;
+  var elWpClearAll, elWpPath, elWpMarkers;
+  var elWpTotalTime, elWpTimeWarning;
+  var elTimingSimple;
+
+  function init() {
+    elWarning = document.getElementById('fpbWarning');
+    elFileId = document.getElementById('fpbFileId');
+    elLoadBtn = document.getElementById('fpbLoadBtn');
+    elGenerateBtn = document.getElementById('fpbGenerateBtn');
+    elCancelBtn = document.getElementById('fpbCancelBtn');
+    elDirection = document.getElementById('fpbDirection');
+    elHold = document.getElementById('fpbHold');
+    elPull = document.getElementById('fpbPull');
+    elFps = document.getElementById('fpbFps');
+    elScaleStart = document.getElementById('fpbScaleStart');
+    elScaleEnd = document.getElementById('fpbScaleEnd');
+    elEasing = document.getElementById('fpbEasing');
+    elVignette = document.getElementById('fpbVignette');
+    elFormat = document.getElementById('fpbFormat');
+    elOutW = document.getElementById('fpbOutW');
+    elOutH = document.getElementById('fpbOutH');
+    elPlaceholder = document.getElementById('fpbPlaceholder');
+    elCanvasContainer = document.getElementById('fpbCanvasContainer');
+    elCanvas = document.getElementById('fpbCanvas');
+    elFocusNote = document.getElementById('fpbFocusNote');
+    elMarkerStart = document.getElementById('fpbMarkerStart');
+    elMarkerEnd = document.getElementById('fpbMarkerEnd');
+    elProgress = document.getElementById('fpbProgress');
+    elProgressFill = document.getElementById('fpbProgressFill');
+    elProgressText = document.getElementById('fpbProgressText');
+    elGallery = document.getElementById('fpbGallery');
+    elGalleryList = document.getElementById('fpbGalleryList');
+    elPlayerOverlay = document.getElementById('fpbPlayerOverlay');
+    elPlayer = document.getElementById('fpbPlayer');
+    elPlayerImg = document.getElementById('fpbPlayerImg');
+    elPlayerClose = document.getElementById('fpbPlayerClose');
+    elPreviewArea = document.getElementById('fpbPreviewArea');
+    elErrorMsg = document.getElementById('fpbErrorMsg');
+        // Waypoint DOM
+    elMode = document.getElementById('fpbMode');
+    elSimplePanel = document.getElementById('fpbSimplePanel');
+    elWaypointPanel = document.getElementById('fpbWaypointPanel');
+    elWaypointList = document.getElementById('fpbWaypointList');
+    elWpClearAll = document.getElementById('fpbWpClearAll');
+    elWpPath = document.getElementById('fpbWpPath');
+    elWpMarkers = document.getElementById('fpbWpMarkers');
+    elWpTotalTime = document.getElementById('fpbWpTotalTime');
+    elWpTimeWarning = document.getElementById('fpbWpTimeWarning');
+    elTimingSimple = document.getElementById('fpbTimingSimple');
+
+        // Event listeners
+    elLoadBtn.addEventListener('click', loadImage);
+    elGenerateBtn.addEventListener('click', startGenerate);
+    elCancelBtn.addEventListener('click', cancelGenerate);
+    elCanvas.addEventListener('click', onCanvasClick);
+    elPlayerClose.addEventListener('click', closePlayer);
+
+        // Mode switching
+    elMode.addEventListener('change', onModeChange);
+        // Delete all waypoints
+    elWpClearAll.addEventListener('click', function() {
+      waypoints = [];
+      renderWaypointList();
+      updateWaypointMarkers();
+      updateGenerateBtn();
+    });
+    elPlayerOverlay.addEventListener('click', function(e) {
+      if (e.target === elPlayerOverlay) closePlayer();
+    });
+
+        // Close player with Escape
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape' && elPlayerOverlay.classList.contains('visible')) {
+        closePlayer();
+      }
+    });
+
+        // Auto-adjust scale defaults/constraints when Direction changes
+    elDirection.addEventListener('change', function() {
+      var startVal = parseFloat(elScaleStart.value);
+      var endVal = parseFloat(elScaleEnd.value);
+      if (this.value === 'zoom_in') {
+                // zoom_in: start < end required. Relax start min to 1.0
+        elScaleStart.min = '1.0';
+        elScaleEnd.max = '5.0';
+        if (startVal >= endVal) {
+          elScaleStart.value = '1.0';
+          elScaleEnd.value = '2.0';
+        }
+      } else {
+                // zoom_out: start > end required
+        elScaleStart.min = '1.2';
+        elScaleEnd.max = '4.9';
+        if (startVal <= endVal) {
+          elScaleStart.value = '2.0';
+          elScaleEnd.value = '1.0';
+        }
+      }
+    });
+
+        // ffmpeg check
+    checkFfmpeg();
+        // Output list
+    loadOutputs();
+        // Check job status (for page reload recovery)
+    checkStatus();
+
+        // Get file_id from URL parameter and auto-load
+    var urlParams = new URLSearchParams(window.location.search);
+    var urlFileId = urlParams.get('file_id');
+    if (urlFileId) {
+      elFileId.value = urlFileId;
+            // Load after ffmpeg check completes
+      setTimeout(function() { loadImage(); }, 300);
+    }
+  }
+
+    // ── ffmpeg check ────────────────────────────────────
+  function checkFfmpeg() {
+    fetch(API + '/api/check')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        ffmpegOk = data.ffmpeg_available;
+        if (!ffmpegOk) {
+          elWarning.classList.add('visible');
+          elGenerateBtn.disabled = true;
+        }
+      })
+      .catch(function(e) {
+        console.error('FPB: ffmpeg check error', e);
+      });
+  }
+
+    // ── Load image ──────────────────────────────────────
+  function loadImage() {
+    var fileId = parseInt(elFileId.value, 10);
+    if (!fileId || fileId < 1) {
+      showError('File ID を入力してください');
+      return;
+    }
+    clearError();
+
+    fetch(API + '/api/thumbnail/' + fileId)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (!data.ok) {
+          showError(data.error || 'Image not found (ID: ' + fileId + ')');
+          return;
+        }
+                // Auto-apply source resolution to output size when returned
+        if (data.width && data.height) {
+          var sw = Math.min(data.width, 3840);
+          var sh = Math.min(data.height, 2160);
+                    // Round to even (H.264 requirement)
+          sw = sw - (sw % 2);
+          sh = sh - (sh % 2);
+          if (sw >= 256) elOutW.value = sw;
+          if (sh >= 256) elOutH.value = sh;
+        }
+        var imgUrl = '/api/thumbnail/' + fileId;
+        var img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = function() {
+          clearError();
+          showCanvas(img);
+        };
+        img.onerror = function() {
+          showError('Failed to load image thumbnail (ID: ' + fileId + ')');
+        };
+        img.src = imgUrl;
+      })
+      .catch(function(e) {
+        console.error('FPB: load image error', e);
+        showError('Image load failed');
+      });
+  }
+
+  function showCanvas(img) {
+    var maxW = elPreviewArea.clientWidth - 40;
+    var maxH = elPreviewArea.clientHeight - 80;
+    var scale = Math.min(1, maxW / img.naturalWidth, maxH / img.naturalHeight);
+    var w = Math.round(img.naturalWidth * scale);
+    var h = Math.round(img.naturalHeight * scale);
+
+    elCanvas.width = w;
+    elCanvas.height = h;
+    elCanvas._naturalW = img.naturalWidth;
+    elCanvas._naturalH = img.naturalHeight;
+    elCanvas._scale = scale;
+
+    var ctx = elCanvas.getContext('2d');
+    ctx.drawImage(img, 0, 0, w, h);
+    elCanvas._imgData = img;
+
+    elPlaceholder.style.display = 'none';
+    elCanvasContainer.style.display = 'inline-block';
+    elFocusNote.style.display = 'block';
+
+        // Reset focus
+    focusStart = { x: 0.5, y: 0.5 };
+    focusEnd = null;
+    updateMarkers();
+
+    imageLoaded = true;
+    updateGenerateBtn();
+  }
+
+    // ── Canvas click (focus setting / waypoint addition) ──
+  function onCanvasClick(e) {
+    if (!imageLoaded) return;
+    var rect = elCanvas.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / rect.width;
+    var y = (e.clientY - rect.top) / rect.height;
+    x = Math.max(0, Math.min(1, x));
+    y = Math.max(0, Math.min(1, y));
+
+    if (wpMode) {
+            // Waypoint mode: click to add point
+      var wp = {
+        x: x,
+        y: y,
+        scale: 2.0,
+        dwell: 1.5,
+        transition: waypoints.length === 0 ? 0 : 2.0,
+        easing: elEasing.value
+      };
+      waypoints.push(wp);
+      renderWaypointList();
+      updateWaypointMarkers();
+      updateGenerateBtn();
+      return;
+    }
+
+        // Simple mode: existing focus settings
+    if (e.shiftKey) {
+      focusEnd = { x: x, y: y };
+      updateFocusNote(true);
+    } else {
+      focusStart = { x: x, y: y };
+      updateFocusNote(!!focusEnd);
+    }
+    updateMarkers();
+  }
+
+  function updateMarkers() {
+    if (focusStart) {
+      elMarkerStart.style.display = 'block';
+      elMarkerStart.style.left = (focusStart.x * 100) + '%';
+      elMarkerStart.style.top = (focusStart.y * 100) + '%';
+    } else {
+      elMarkerStart.style.display = 'none';
+    }
+    if (focusEnd) {
+      elMarkerEnd.style.display = 'block';
+      elMarkerEnd.style.left = (focusEnd.x * 100) + '%';
+      elMarkerEnd.style.top = (focusEnd.y * 100) + '%';
+    } else {
+      elMarkerEnd.style.display = 'none';
+    }
+  }
+
+  function updateFocusNote(interpolated) {
+    if (elFocusNote) {
+      elFocusNote.textContent = interpolated
+        ? 'Focus: interpolated (start \u2192 end, no tracking)'
+        : 'Focus: static (no tracking)';
+    }
+  }
+
+
+  {% include "freeze_pullback/_script_generate.html" %}
+
+  // ── Init ──────────────────────────────────────────────
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>

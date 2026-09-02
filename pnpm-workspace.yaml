@@ -1,0 +1,18 @@
+packages:
+  - "."
+
+allowBuilds:
+  esbuild: true
+  protobufjs: false
+  sharp: false
+
+# Pin bare-url to avoid ERR_PNPM_MINIMUM_RELEASE_AGE_VIOLATION (2.4.4 was too new)
+overrides:
+  bare-url: "2.4.3"
+  # Unbounded ">=7.28.0" let pnpm jump to undici 8.x, whose internal file
+  # layout jsdom's require('undici/lib/handler/wrap-handler.js') doesn't
+  # match (jsdom@29 depends on undici ^7.25.0) - breaks every jsdom-based
+  # vitest test. Keep the CVE-driven minimum but stay on the 7.x line.
+  undici: ">=7.28.0 <8.0.0"
+  nanoid: "^3.3.17"
+  postcss: "^8.5.23"

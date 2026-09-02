@@ -1,0 +1,13 @@
+[Unit]
+Description=yu AI Manager server
+After=network.target
+
+[Service]
+EnvironmentFile=%h/.config/yu/server.env
+ExecStartPre=/bin/sh -c 'test "$YU_DB_KEY" != "REPLACE_WITH_A_GENERATED_SECRET"'
+ExecStart=%h/.local/bin/yu-server --db ${YU_DB} --db-key ${YU_DB_KEY}
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

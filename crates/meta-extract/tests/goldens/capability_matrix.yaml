@@ -1,0 +1,74 @@
+# Capability gaps - per-(parser, field) skip rules consumed by conformance.rs.
+# Any field mismatch NOT listed here causes cargo test to FAIL.
+# Adding entries here is a reviewable change (do not add to hide bugs).
+#
+# IMPORTANT: a skip entry uses field + parser keys, where "all" is a wildcard.
+# Never combine field: "all" with parser: "all" — that disables ALL conformance
+# checking (every mismatch becomes skip-allowed) and makes the suite pass
+# vacuously. Format-not-covered notes (e.g. WebP) belong in `notes:` below,
+# which conformance.rs does NOT read.
+notes:
+  - id: webp-entry-absent
+    reason: >
+      Rust meta-extract has no WebP container entry point (read_png_text_chunks is
+      PNG-only; read_exif_tags covers EXIF but not WebP tEXt chunks).
+      Conformance is PNG-path only by fixture selection. WebP parity is a separate
+      Rust task. This is documentation only — NOT a field skip rule (encoding it as
+      field/parser "all" would mask every mismatch).
+gaps:
+  - id: params-representation-asymmetric
+    field: params
+    parser: "all"
+    reason: >
+      Rust MetaResult.params holds raw key/value strings (e.g. steps="28").
+      Python ExtractedMetadata has no direct params field at the on_scan_file_impl
+      level; params appear in the payload layer after label mapping.
+      Direct comparison is not meaningful without a per-parser raw<->raw mapping table.
+      Tracked for future raw-to-raw mapping work.
+
+  - id: a1111-raw-meta-asymmetric
+    field: raw_meta
+    parser: a1111
+    reason: >
+      R-2 fix (confirmed from main): Representation is non-symmetric, not Both-None.
+      Python builtin_a1111 on_scan_file_impl (extensions/builtin_a1111/a1111_parser_hooks.py)
+      sets raw_meta_json=None - A1111 parameters blob is not separately stored.
+      Rust a1111.rs (crates/meta-extract/src/a1111.rs L69) sets
+      raw_meta=Some(raw.to_string()) - the full parameters text blob is captured.
+      Python=None / Rust=Some(full text) - asymmetric representation.
+      M-1 tag_source mapping aligns the positive field; raw_meta is skip-allowed
+      here because the Python-side stores nothing equivalent to the Rust raw capture.
+      Tracked for future raw<->raw mapping work.
+
+  # M-2 fix: nai_v3 and nai_v4 raw_meta are structurally asymmetric.
+  # Python returns a wrapper JSON object; Rust returns a bare comment string.
+  # Canonical-sort normalization cannot bridge the outer-structure mismatch.
+  # These are registered here so conformance.rs skips them instead of failing.
+  - id: nai-v3-raw-meta-wrapper-asymmetric
+    field: raw_meta
+    parser: nai_v3
+    reason: >
+      Python builtin_novelai_v3 novelai_v3_parse_builders.py build_png_result sets
+      raw_meta_json = json.dumps({"Comment": comment, "Description": description})
+      - a wrapper JSON object containing both chunks.
+      Rust novelai_v3.rs raw_meta holds the bare Comment string only.
+      The outer structure difference cannot be resolved by key-sort normalization.
+      Representation non-symmetric; tracked for future raw<->raw mapping work.
+      Spec L30-37 responsibility boundary: this is a known representation gap,
+      not a semantic bug.
+
+  - id: nai-v4-raw-meta-wrapper-asymmetric
+    field: raw_meta
+    parser: nai_v4
+    reason: >
+      Confirmed from main (Should-fix: corrected source attribution).
+      Extraction logic lives in core/extract_core/novelai_v4_extract_source.py
+      (build_default_raw_meta_json) and core/extract_core/novelai_v4_extract_parse.py
+      (parse_v4_data). The on_scan_file hook is in
+      extensions/builtin_novelai_v4/novelai_v4.py.
+      build_default_raw_meta_json sets raw_meta_json =
+      json.dumps({"Comment": ..., "Description": ..., "Software": "NovelAI",
+      "Source": ...}) - a wrapper JSON object with four keys.
+      Rust novelai_v4.rs raw_meta holds the bare Comment string only.
+      The outer structure difference cannot be resolved by key-sort normalization.
+      Representation non-symmetric; tracked for future raw<->raw mapping work.

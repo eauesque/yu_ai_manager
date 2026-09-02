@@ -1,0 +1,503 @@
+  // ── Generate / Cancel ─────────────────────────────────
+  function startGenerate() {
+    var fileId = parseInt(elFileId.value, 10);
+    if (!fileId || !imageLoaded || !ffmpegOk) return;
+        // Cannot generate with fewer than 2 waypoints
+    if (wpMode && waypoints.length < 2) return;
+
+    var body = {
+      file_id: fileId,
+      fps: parseInt(elFps.value, 10) || 30,
+      output_format: elFormat.value,
+      out_width: parseInt(elOutW.value, 10) || 1280,
+      out_height: parseInt(elOutH.value, 10) || 720,
+      easing: elEasing.value,
+      vignette: elVignette.checked,
+    };
+
+    if (wpMode && waypoints.length >= 2) {
+            // Waypoint mode: send waypoints array
+      body.waypoints = waypoints.map(function(wp) {
+        return {
+          x: wp.x,
+          y: wp.y,
+          scale: wp.scale,
+          dwell: wp.dwell,
+          transition: wp.transition,
+          easing: wp.easing
+        };
+      });
+    } else {
+            // Simple mode: existing parameters
+      body.hold_seconds = parseFloat(elHold.value) || 2.0;
+      body.pull_seconds = parseFloat(elPull.value) || 5.0;
+      body.scale_start = parseFloat(elScaleStart.value) || 2.0;
+      body.scale_end = parseFloat(elScaleEnd.value) || 1.0;
+      body.direction = elDirection.value;
+      body.focus_start = focusStart ? [focusStart.x, focusStart.y] : [0.5, 0.5];
+      if (focusEnd) {
+        body.focus_end = [focusEnd.x, focusEnd.y];
+      }
+    }
+
+    elGenerateBtn.disabled = true;
+    elCancelBtn.style.display = '';
+
+    fetch(API + '/api/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+      },
+      body: JSON.stringify(body),
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (!data.ok) {
+        showError(data.error || 'Failed to start');
+        elGenerateBtn.disabled = false;
+        elCancelBtn.style.display = 'none';
+        return;
+      }
+      showProgress(true);
+      startPolling();
+    })
+    .catch(function(e) {
+      console.error('FPB: generate error', e);
+      elGenerateBtn.disabled = false;
+      elCancelBtn.style.display = 'none';
+    });
+  }
+
+  function cancelGenerate() {
+    fetch(API + '/api/cancel', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function() {
+      stopPolling();
+      showProgress(false);
+      elGenerateBtn.disabled = false;
+      elCancelBtn.style.display = 'none';
+    })
+    .catch(function(e) {
+      console.error('FPB: cancel error', e);
+    });
+  }
+
+    // ── Polling ────────────────────────────────────────
+  function startPolling() {
+    stopPolling();
+    pollTimer = setInterval(pollStatus, 500);
+  }
+
+  function stopPolling() {
+    if (pollTimer) {
+      clearInterval(pollTimer);
+      pollTimer = null;
+    }
+  }
+
+  function pollStatus() {
+    fetch(API + '/api/status')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      updateProgress(data);
+      if (!data.running) {
+        stopPolling();
+        showProgress(false);
+        elGenerateBtn.disabled = false;
+        elCancelBtn.style.display = 'none';
+        if (data.error) {
+          showError(data.error);
+        } else if (data.phase === 'complete') {
+          loadOutputs();
+        }
+        updateGenerateBtn();
+      }
+    })
+    .catch(function(e) {
+      console.error('FPB: poll error', e);
+    });
+  }
+
+  function checkStatus() {
+    fetch(API + '/api/status')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.running) {
+        showProgress(true);
+        updateProgress(data);
+        elGenerateBtn.disabled = true;
+        elCancelBtn.style.display = '';
+        startPolling();
+      }
+    })
+    .catch(function() {});
+  }
+
+  // ── Progress UI ───────────────────────────────────────
+  function showProgress(visible) {
+    if (visible) {
+      elProgress.classList.add('visible');
+    } else {
+      elProgress.classList.remove('visible');
+    }
+  }
+
+  function updateProgress(data) {
+    elProgressFill.style.width = (data.percent || 0) + '%';
+    elProgressText.textContent = data.message || data.detail || '';
+  }
+
+    // ── Generate button state management ───────────────────────────
+  function updateGenerateBtn() {
+    if (wpMode) {
+            // Waypoint mode: requires 2+ points
+      elGenerateBtn.disabled = !ffmpegOk || !imageLoaded || waypoints.length < 2;
+    } else {
+      elGenerateBtn.disabled = !ffmpegOk || !imageLoaded;
+    }
+  }
+
+    // ── Output list ──────────────────────────────────────────
+  function loadOutputs() {
+    fetch(API + '/api/outputs')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      renderGallery(data.outputs || []);
+    })
+    .catch(function(e) {
+      console.error('FPB: load outputs error', e);
+    });
+  }
+
+  function renderGallery(outputs) {
+    if (!outputs.length) {
+      elGalleryList.innerHTML = '<div style="color:var(--fg-muted,#888);font-size:13px;padding:8px 0">No videos generated yet</div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < outputs.length; i++) {
+      var o = outputs[i];
+      var size = formatSize(o.size_bytes || 0);
+      var dur = o.duration ? (o.duration.toFixed(1) + 's') : '';
+      var fmt = (o.format || 'mp4').toUpperCase();
+      html += '<div class="fpb-gallery-item" data-file="' + escHtml(o.filename) + '">'
+        + '<div class="fpb-gallery-item-info">'
+        + '<div class="fpb-gallery-item-name">' + escHtml(o.filename) + '</div>'
+        + '<div class="fpb-gallery-item-meta">'
+        + '<span class="fpb-format-badge">' + fmt + '</span> '
+        + size + (dur ? ' / ' + dur : '') + '</div>'
+        + '</div>'
+        + '<div class="fpb-gallery-item-actions">'
+        + '<button class="fpb-btn fpb-btn-sm fpb-play-btn" data-file="' + escHtml(o.filename) + '">Play</button>'
+        + '<button class="fpb-btn fpb-btn-sm fpb-btn-danger fpb-delete-btn" data-file="' + escHtml(o.filename) + '">Del</button>'
+        + '</div>'
+        + '</div>';
+    }
+    elGalleryList.innerHTML = html;
+
+        // Play button
+    var playBtns = elGalleryList.querySelectorAll('.fpb-play-btn');
+    for (var j = 0; j < playBtns.length; j++) {
+      playBtns[j].addEventListener('click', function(e) {
+        e.stopPropagation();
+        openPlayer(this.getAttribute('data-file'));
+      });
+    }
+
+        // Delete button
+    var delBtns = elGalleryList.querySelectorAll('.fpb-delete-btn');
+    for (var k = 0; k < delBtns.length; k++) {
+      delBtns[k].addEventListener('click', function(e) {
+        e.stopPropagation();
+        deleteOutput(this.getAttribute('data-file'));
+      });
+    }
+
+        // Row click = Play
+    var items = elGalleryList.querySelectorAll('.fpb-gallery-item');
+    for (var m = 0; m < items.length; m++) {
+      items[m].addEventListener('click', function() {
+        openPlayer(this.getAttribute('data-file'));
+      });
+    }
+  }
+
+  function deleteOutput(filename) {
+    if (!confirm('Delete ' + filename + '?')) return;
+    fetch(API + '/api/outputs/' + encodeURIComponent(filename), {
+      method: 'DELETE',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.ok) loadOutputs();
+    })
+    .catch(function(e) {
+      console.error('FPB: delete error', e);
+    });
+  }
+
+  // ── Video / Image player ─────────────────────────────
+  function _isImageFormat(filename) {
+    return /\.(gif|png|webp)$/i.test(filename);
+  }
+
+  function openPlayer(filename) {
+    var url = API + '/api/outputs/' + encodeURIComponent(filename);
+    if (_isImageFormat(filename)) {
+            // Display GIF / APNG with <img>
+      elPlayer.style.display = 'none';
+      elPlayerImg.src = url;
+      elPlayerImg.style.display = '';
+    } else {
+            // Play MP4 with <video>
+      elPlayerImg.style.display = 'none';
+      elPlayer.style.display = '';
+      elPlayer.src = url;
+      elPlayer.play();
+    }
+    elPlayerOverlay.classList.add('visible');
+  }
+
+  function closePlayer() {
+    elPlayer.pause();
+    elPlayer.src = '';
+    elPlayer.style.display = '';
+    elPlayerImg.src = '';
+    elPlayerImg.style.display = 'none';
+    elPlayerOverlay.classList.remove('visible');
+  }
+
+  // ── Helpers ───────────────────────────────────────────
+  function formatSize(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  function showError(msg) {
+    if (!elErrorMsg) return;
+    elErrorMsg.textContent = msg;
+    elErrorMsg.className = 'fpb-error-msg';
+    elErrorMsg.style.display = '';
+  }
+
+  function clearError() {
+    if (!elErrorMsg) return;
+    elErrorMsg.style.display = 'none';
+    elErrorMsg.textContent = '';
+  }
+
+  function escHtml(s) {
+    var el = document.createElement('span');
+    el.textContent = s;
+    return el.innerHTML;
+  }
+
+    // ── Mode switching ─────────────────────────────────────
+  function onModeChange() {
+    wpMode = (elMode.value === 'waypoint');
+    if (wpMode) {
+      elSimplePanel.style.display = 'none';
+      elWaypointPanel.style.display = '';
+      if (elTimingSimple) elTimingSimple.style.display = 'none';
+            // Hide Simple mode markers
+      elMarkerStart.style.display = 'none';
+      elMarkerEnd.style.display = 'none';
+      elFocusNote.textContent = 'Waypoint Tour: 画像をクリックしてポイントを追加';
+    } else {
+      elSimplePanel.style.display = '';
+      elWaypointPanel.style.display = 'none';
+      if (elTimingSimple) elTimingSimple.style.display = '';
+            // Hide waypoint markers and paths
+      updateWaypointMarkers();
+            // Restore Simple mode markers
+      updateMarkers();
+      updateFocusNote(!!focusEnd);
+    }
+        // Toggle waypoint marker display
+    if (wpMode) {
+      updateWaypointMarkers();
+    } else {
+      clearWaypointMarkers();
+    }
+    updateGenerateBtn();
+  }
+
+    // ── Waypoint marker display ─────────────────────────
+  function updateWaypointMarkers() {
+    if (!elWpMarkers || !elWpPath) return;
+        // Delete all markers and regenerate
+    elWpMarkers.innerHTML = '';
+        // Clear SVG paths
+    while (elWpPath.firstChild) {
+      elWpPath.removeChild(elWpPath.firstChild);
+    }
+
+    if (!wpMode || waypoints.length === 0) return;
+
+        // Create markers for each waypoint
+    for (var i = 0; i < waypoints.length; i++) {
+      var wp = waypoints[i];
+      var marker = document.createElement('div');
+      marker.className = 'fpb-wp-marker';
+      marker.setAttribute('data-wp-idx', String(i));
+      marker.style.left = (wp.x * 100) + '%';
+      marker.style.top = (wp.y * 100) + '%';
+      var numSpan = document.createElement('span');
+      numSpan.className = 'fpb-wp-marker-num';
+      numSpan.textContent = String(i + 1);
+      marker.appendChild(numSpan);
+      elWpMarkers.appendChild(marker);
+    }
+
+        // Connect points with dotted SVG paths
+    if (waypoints.length >= 2) {
+      elWpPath.setAttribute('viewBox', '0 0 100 100');
+      elWpPath.setAttribute('preserveAspectRatio', 'none');
+      var pathD = '';
+      for (var j = 0; j < waypoints.length; j++) {
+        var px = waypoints[j].x * 100;
+        var py = waypoints[j].y * 100;
+        pathD += (j === 0 ? 'M' : 'L') + px + ' ' + py;
+      }
+      var pathEl = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathEl.setAttribute('d', pathD);
+      pathEl.setAttribute('fill', 'none');
+      pathEl.setAttribute('stroke', 'rgba(96,165,250,0.6)');
+      pathEl.setAttribute('stroke-width', '0.4');
+      pathEl.setAttribute('stroke-dasharray', '1.2 0.8');
+      pathEl.setAttribute('vector-effect', 'non-scaling-stroke');
+      elWpPath.appendChild(pathEl);
+    }
+  }
+
+    // Clear waypoint markers and paths
+  function clearWaypointMarkers() {
+    if (elWpMarkers) elWpMarkers.innerHTML = '';
+    if (elWpPath) {
+      while (elWpPath.firstChild) {
+        elWpPath.removeChild(elWpPath.firstChild);
+      }
+    }
+  }
+
+    // ── Waypoint list (sidebar) display ──────────────
+  function renderWaypointList() {
+    if (!elWaypointList) return;
+    elWaypointList.innerHTML = '';
+
+    for (var i = 0; i < waypoints.length; i++) {
+      (function(idx) {
+        var wp = waypoints[idx];
+        var row = document.createElement('div');
+        row.className = 'fpb-wp-item';
+
+                // Number badge
+        var numBadge = document.createElement('span');
+        numBadge.className = 'fpb-wp-item-num';
+        numBadge.textContent = String(idx + 1);
+        row.appendChild(numBadge);
+
+                // Coordinate display
+        var coordSpan = document.createElement('span');
+        coordSpan.className = 'fpb-wp-item-coord';
+        coordSpan.textContent = '(' + wp.x.toFixed(2) + ', ' + wp.y.toFixed(2) + ')';
+        row.appendChild(coordSpan);
+
+        // Scale
+        var scaleLbl = document.createElement('label');
+        scaleLbl.textContent = 'S:';
+        row.appendChild(scaleLbl);
+        var scaleInput = document.createElement('input');
+        scaleInput.type = 'number';
+        scaleInput.min = '1.0';
+        scaleInput.max = '5.0';
+        scaleInput.step = '0.1';
+        scaleInput.value = String(wp.scale);
+        scaleInput.addEventListener('change', function() {
+          waypoints[idx].scale = parseFloat(this.value) || 2.0;
+          updateTotalTime();
+        });
+        row.appendChild(scaleInput);
+
+        // Dwell
+        var dwellLbl = document.createElement('label');
+        dwellLbl.textContent = 'D:';
+        row.appendChild(dwellLbl);
+        var dwellInput = document.createElement('input');
+        dwellInput.type = 'number';
+        dwellInput.min = '0';
+        dwellInput.max = '10';
+        dwellInput.step = '0.5';
+        dwellInput.value = String(wp.dwell);
+        dwellInput.addEventListener('change', function() {
+          waypoints[idx].dwell = parseFloat(this.value) || 0;
+          updateTotalTime();
+        });
+        row.appendChild(dwellInput);
+
+                // Transition (hidden for first WP)
+        if (idx > 0) {
+          var transLbl = document.createElement('label');
+          transLbl.textContent = 'T:';
+          row.appendChild(transLbl);
+          var transInput = document.createElement('input');
+          transInput.type = 'number';
+          transInput.min = '0.5';
+          transInput.max = '10';
+          transInput.step = '0.5';
+          transInput.value = String(wp.transition);
+          transInput.addEventListener('change', function() {
+            waypoints[idx].transition = parseFloat(this.value) || 2.0;
+            updateTotalTime();
+          });
+          row.appendChild(transInput);
+        }
+
+                // Delete button
+        var delBtn = document.createElement('button');
+        delBtn.className = 'fpb-wp-item-del';
+        delBtn.textContent = '\u00d7';
+        delBtn.title = '削除';
+        delBtn.addEventListener('click', function() {
+          waypoints.splice(idx, 1);
+                    // Fix first WP transition to 0
+          if (waypoints.length > 0) {
+            waypoints[0].transition = 0;
+          }
+          renderWaypointList();
+          updateWaypointMarkers();
+          updateGenerateBtn();
+        });
+        row.appendChild(delBtn);
+
+        elWaypointList.appendChild(row);
+      })(i);
+    }
+
+    updateTotalTime();
+  }
+
+    // ── Calculate and display total time ─────────────────────────────────
+  function updateTotalTime() {
+    if (!elWpTotalTime) return;
+    var total = 0;
+    for (var i = 0; i < waypoints.length; i++) {
+      total += (waypoints[i].dwell || 0);
+      if (i > 0) {
+        total += (waypoints[i].transition || 0);
+      }
+    }
+    elWpTotalTime.textContent = '合計: ' + total.toFixed(1) + '秒';
+
+        // 30 second exceeded warning
+    if (elWpTimeWarning) {
+      elWpTimeWarning.style.display = total > 30 ? '' : 'none';
+    }
+  }
+  // (end of _script_generate.html)

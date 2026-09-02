@@ -1,0 +1,30 @@
+[package]
+name    = "yu-infer-shim"
+version = "0.1.0"
+edition = "2021"
+
+# The sidecar implementation lives in the `hailo-infer` repository. This crate
+# exists only so that `cargo build` still produces a `yu-infer` binary next to
+# `yu-server`: `yu-server` spawns the sidecar by resolving
+# `current_exe().parent().join("yu-infer")`, so the binary has to come out of
+# this workspace's own target directory rather than a dependency's.
+[[bin]]
+name = "yu-infer"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+yu-infer           = { workspace = true }
+tokio              = { workspace = true }
+tracing-subscriber = { workspace = true }
+
+# Forwarded to infer-core/ort through the upstream crate. Keep in sync with the
+# matching lists in yu-server/Cargo.toml and the upstream yu-infer manifest.
+[features]
+cuda     = ["yu-infer/cuda"]
+rocm     = ["yu-infer/rocm"]
+directml = ["yu-infer/directml"]
+coreml   = ["yu-infer/coreml"]
+openvino = ["yu-infer/openvino"]

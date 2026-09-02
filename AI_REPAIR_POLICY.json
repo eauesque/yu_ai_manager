@@ -1,0 +1,140 @@
+{
+  "policy_version": 2,
+  "policy_revision": 2,
+  "policy_generated_at": "2026-05-18T22:00:00Z",
+  "ai_is_deploy_actor": false,
+  "deploy_path": "AI emits suggested.patch only. A human reviewer promotes it into a signed update.zip (Phase 4, Ed25519). No direct apply path exists.",
+  "bundle_integrity": {
+    "manifest_sha256_required": true,
+    "abort_status_on_mismatch": "bundle_tampered",
+    "scope": "integrity_only",
+    "rationale": "SHA-256 manifest check detects (a) accidental corruption, (b) third-party file modification without manifest rewrite, (c) AI hallucinating files not in the bundle. It does NOT detect a user-fabricated self-consistent malicious bundle. Bundle authenticity is the Ed25519 gate's responsibility at the update.zip step (Phase 4), not here. Acceptable under ai_is_deploy_actor=false."
+  },
+  "reviewer_gate": {
+    "forbidden_paths_check": "scripts/review_suggested_patch.py",
+    "required_before_update_zip_promotion": true,
+    "emit_pass_artifact": "review_pass.json",
+    "class_aware_check": "scripts/review_suggested_patch.py --meta suggested_patch.meta.json"
+  },
+  "signer_gate": {
+    "signer_script": "tools/update/sign_update_zip.py",
+    "requires_review_pass_artifact": true,
+    "review_pass_max_age_seconds": 604800,
+    "rejects_on": [
+      "missing review_pass.json",
+      "stale reviewed_at (> 7 days)",
+      "patch_sha256 mismatch against unsigned zip patch.diff",
+      "policy_version / policy_revision mismatch",
+      "reviewer_gate_script_sha256 mismatch (reviewer script was modified after review)",
+      "status != 'pass'"
+    ],
+    "rationale": "Without a valid review_pass.json artifact, the signer cannot produce a signed update.zip. This is the structural closure of the forbidden_paths gate — reviewer enforcement is no longer dependent on operator memory."
+  },
+  "class_declaration": {
+    "file": "suggested_patch.meta.json",
+    "schema": {"repair_class": "<one of auto_apply_allowed | approval_required category names | 'needs_human_design'>"},
+    "enforced_classes": ["cache_clear"],
+    "rationale": "AI declares which auto_apply_allowed (or approval_required) category the patch falls under. The reviewer gate runs class-specific allow-list checks (currently cache_clear must touch only cache_clear_allowlist paths). Other classes inherit the forbidden_paths check only."
+  },
+  "auto_apply_allowed": [
+    "dist_rebuild",
+    "uv_sync",
+    "cache_clear",
+    "missing_example_config_seed",
+    "log_improvement",
+    "null_guard",
+    "i18n_key_addition"
+  ],
+  "auto_apply_preconditions": {
+    "dist_rebuild": "TypeScript/frontend sources unchanged. Deterministic pnpm run build output only. Reviewer reproduces the build before promotion.",
+    "uv_sync": "uv lock --check returns exit 0 against the proposed uv.lock. No git reference allowed. Demote to approval_required if integrity cannot be verified.",
+    "cache_clear": "Touches only paths in cache_clear_allowlist. Any path outside the allowlist forces demotion to approval_required.",
+    "missing_example_config_seed": "Copy from a .example file only. Do not overwrite existing config.",
+    "log_improvement": "Log message strings only. Do not touch i18n keys, log levels, or log targets.",
+    "null_guard": "Single statement of form 'if <expr> is None: return <const>' or 'if <expr> is None: raise <NamedException>(...)'. No new elif/else/for/while/nested branching. No change to existing return values on the non-None path.",
+    "i18n_key_addition": "Only new keys. Must not modify or remove existing keys. Must not affect API response shape."
+  },
+  "cache_clear_allowlist": [
+    "ui/default/static/dist/",
+    "ui/default/static/js/gateway-page.js",
+    "ui/default/static/js/*.js.map",
+    "**/*.tsbuildinfo",
+    "**/__pycache__/",
+    ".pytest_cache/",
+    ".mypy_cache/",
+    ".pyre/",
+    ".pytype/",
+    ".ruff_cache/",
+    "node_modules/.vite/",
+    "node_modules/.cache/",
+    ".eslintcache"
+  ],
+  "approval_required": [
+    "db_migration",
+    "dependency_addition",
+    "security_change",
+    "api_contract_change",
+    "user_data_mutation",
+    "gpu_stack_change"
+  ],
+  "forbidden": [
+    "disable_auth",
+    "disable_csrf",
+    "delete_user_data",
+    "log_secrets",
+    "remove_failing_tests",
+    "broad_refactor_without_request",
+    "modify_ai_instructions",
+    "modify_repair_policy",
+    "modify_ci_pipeline",
+    "modify_trinity_docs",
+    "modify_signing_material",
+    "touch_security_boundary"
+  ],
+  "forbidden_paths": {
+    "modify_ai_instructions": [
+      "CLAUDE.md",
+      "docs/development/arch-constraints.yaml",
+      "docs/development/hailo-constraints.yaml",
+      "AGENTS.md",
+      ".claude/rules/**",
+      ".claude/agents/**",
+      ".claude/hooks/**",
+      ".claude/scripts/**"
+    ],
+    "modify_repair_policy": [
+      "AI_REPAIR_POLICY.md",
+      "AI_REPAIR_POLICY.json"
+    ],
+    "modify_ci_pipeline": [
+      ".github/workflows/**",
+      ".githooks/**",
+      "scripts/pre_push_check.py",
+      "scripts/post_restart_apply.py",
+      "scripts/release/**"
+    ],
+    "modify_trinity_docs": [
+      "COVENANT.md",
+      "CLASSICAL.md",
+      "PRIVACY.md"
+    ],
+    "modify_signing_material": [
+      "security/update_signing_pubkey.pem",
+      "security/update_signing_pubkey_previous.pem",
+      "core/repair/update_package/verify.py",
+      "core/repair/update_package/apply.py"
+    ],
+    "touch_security_boundary": [
+      "core/web/request_hooks.py",
+      "routes/gateway_*.py",
+      "core/gateway/auth/**",
+      "apikey_auth*.py"
+    ]
+  },
+  "expected_output": {
+    "REPAIR_REPORT.md": "Machine-verified facts and AI claims visually separated per template",
+    "suggested.patch": "AI-generated patch. Must not be named patch.diff.",
+    "test_result.txt": "Verbatim test runner output only. AI must not edit, summarize, paraphrase, or fabricate. Write single token NO_TESTS_RUN if no test was run.",
+    "rollback_instructions.md": "Human-readable rollback steps"
+  }
+}

@@ -1,0 +1,113 @@
+[package]
+name    = "yu-server"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "yu-server"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+lan-cowork         = { workspace = true }
+axum               = { workspace = true }
+tower              = { workspace = true }
+sqlx               = { workspace = true }
+tokio              = { workspace = true }
+serde              = { workspace = true }
+serde_json         = { workspace = true }
+serde_yml          = { workspace = true }
+reqwest            = { workspace = true }
+url                = { workspace = true }
+tracing            = { workspace = true }
+tracing-subscriber = { workspace = true }
+thiserror          = { workspace = true }
+clap               = { workspace = true }
+sha2               = { workspace = true }
+hmac               = { workspace = true }
+pbkdf2             = { workspace = true }
+scrypt             = { workspace = true }
+rand               = { workspace = true }
+tower-sessions     = { workspace = true }
+hex                = { workspace = true }
+openssl            = { workspace = true }
+base64             = { workspace = true }
+indexmap           = { workspace = true }
+urlencoding        = { workspace = true }
+tower-http         = { workspace = true }
+minijinja          = { workspace = true }
+bytes              = "1"
+chrono             = { workspace = true }
+uuid               = { version = "1", features = ["v4"] }
+futures-util       = { workspace = true }
+multer             = { workspace = true }
+auth-core          = { path = "../auth-core" }
+tagdb-core         = { path = "../tagdb-core" }
+infer-core         = { workspace = true }
+scan-core          = { path = "../scan-core" }
+meta-extract       = { path = "../meta-extract" }
+xmp-core           = { path = "../xmp-core" }
+regex              = { workspace = true } # sd_nai conversion + prompt_syntax analyze patterns
+tempfile           = { workspace = true }
+tokio-util         = { version = "0.7", features = ["io"] }
+zip                = { version = "2", default-features = false, features = ["deflate"] } # /api/download/batch-zip (MIT OR Apache-2.0)
+encoding_rs        = "0.8" # ZIP filename fallback decoding (Apache-2.0)
+# Optional codecs (bzip2, flate2, brotli, lz4, zstd, aes256) are deliberately excluded.
+# Decompression codecs are deliberately enabled; Python cannot fall back without the 7z CLI.
+# AES-256 is deliberately excluded: encrypted archives need a password we do not have.
+sevenz-rust2       = { version = "0.21", default-features = false, features = ["bzip2", "brotli", "deflate", "lz4", "ppmd", "zstd"] } # Apache-2.0, pure Rust
+# MIT OR Apache-2.0 binding; vendors UnRAR C++ which permits reading and bundling but forbids
+# RAR-compatible compression (not GPL/LGPL/AGPL). Requires a C++ compiler in addition to this workspace's C toolchain.
+unrar              = "0.5"
+zstd               = "0.13.3"
+async-trait        = "0.1"
+image              = { workspace = true }
+avif-rust          = { workspace = true }
+resvg              = { workspace = true }
+# MIT OR Apache-2.0; dynamically binds vendored or system PDFium, never statically links it.
+pdfium-render      = { version = "0.9", default-features = false, features = ["pdfium_latest", "image_latest", "thread_safe"] }
+font8x8             = "0.3" # tiny bitmap labels for MJPEG overlays (MIT)
+dotenvy            = { workspace = true }
+toml               = { workspace = true }
+dirs               = "5"
+notify             = { workspace = true }
+tokio-cron-scheduler = { workspace = true }
+hostname           = "0.4"
+rfd                = { version = "0.15", optional = true, features = ["xdg-portal"] }
+unicode-normalization = "0.1" # NFKC for wd_tag_dict.tag_name_normalized (MIT OR Apache-2.0)
+caseless           = "0.2" # full Unicode case folding for wd_tag_dict.tag_name_normalized (MIT OR Apache-2.0)
+roxmltree          = "0.20" # read-only XMP packet parsing for WD-Tagger XMP write (MIT OR Apache-2.0)
+half               = "2.7" # float16 vectors.db storage (MIT OR Apache-2.0)
+socket2            = "0.6" # UDP discovery socket, AF_INET reuse-before-bind (MIT OR Apache-2.0)
+
+[target.'cfg(unix)'.dependencies]
+libc = { workspace = true }
+usearch = "2.26.0" # native ANN index (Apache-2.0), numkong SIMD kernel enabled
+
+[target.'cfg(windows)'.dependencies]
+windows-sys = { version = "0.61", features = [
+    "Win32_Foundation",
+    "Win32_Security",
+    "Win32_Security_Authorization",
+    "Win32_Storage_FileSystem",
+    "Win32_System_Threading",
+] }
+# numkong (usearch's default SIMD kernel) passes "-std:c99" to cl.exe, which MSVC does not
+# support and hard-fails the build; disable it on Windows only, other platforms keep SIMD.
+usearch = { version = "2.26.0", default-features = false }
+
+[dev-dependencies]
+lan-cowork = { workspace = true, features = ["test-seams"] }
+sevenz-rust2 = { version = "0.21", default-features = false, features = ["bzip2", "brotli", "compress", "deflate", "lz4", "ppmd", "zstd"] }
+
+[features]
+default = ["python-backend"]
+python-backend = []
+native-dialog = ["dep:rfd"]
+cuda     = ["infer-core/cuda"]
+rocm     = ["infer-core/rocm"]
+directml = ["infer-core/directml"]
+coreml   = ["infer-core/coreml"]
+openvino = ["infer-core/openvino"]

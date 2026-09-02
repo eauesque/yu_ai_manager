@@ -1,0 +1,21 @@
+{
+  "name": "builtin-annotations",
+  "version": "1.0.0",
+  "description": "File annotation storage, search, and batch operations",
+  "type": "general",
+  "category": "metadata",
+  "entry": "annotations_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/api/annotations",
+  "nav": {
+    "label": "Notes",
+    "icon": "📝",
+    "href": "/api/annotations/notes"
+  },
+  "core_shim": "annotations_core",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

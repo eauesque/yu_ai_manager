@@ -1,0 +1,376 @@
+{# _cat_auth.html — cat-auth panel: API keys + Gateway keys + SNS + Secrets; no save bar #}
+<section id="cat-auth" data-settings-panel="cat-auth"
+         role="tabpanel" aria-labelledby="sidebar-item-cat-auth"
+         aria-hidden="true" style="display:none">
+  <h2 class="settings-cat-heading">
+    <span data-i18n="settings.cat.auth">認証&amp;連携</span>
+  </h2>
+
+  <!-- API Keys + MCP -->
+  <div data-project-root="{{ project_root }}" data-python-exe="{{ python_executable }}">
+    <!-- Key List -->
+    <div class="settings-section">
+      <h2><span aria-hidden="true">🔑</span> <span data-i18n="settings.apikeys_title">API Keys</span></h2>
+      <p style="font-size:13px;color:var(--muted);" data-i18n="settings.apikeys_desc">Manage API keys for external integrations (MCP Server, scripts, agents). Keys use Bearer authentication.</p>
+      <div id="apikeysList" style="margin-top:12px;font-size:13px;color:var(--muted);">Loading...</div>
+    </div>
+
+    <!-- Create Key -->
+    <div class="settings-section">
+      <h2><span aria-hidden="true">➕</span> <span data-i18n="settings.apikeys_create_title">Create New Key</span></h2>
+      <div class="setting-item">
+        <label class="setting-label" for="ak-label">
+          <span data-i18n="settings.apikeys_label">Label</span>
+          <small data-i18n="settings.apikeys_label_hint">Descriptive name (e.g. "Claude Desktop", "Night Curation Agent")</small>
+        </label>
+        <div class="setting-input">
+          <input type="text" id="ak-label" placeholder="My API Key" data-i18n-placeholder="settings.apikeys_label_placeholder" maxlength="100">
+        </div>
+      </div>
+      <div style="padding:10px 0;">
+        <label class="setting-label" style="margin-bottom:8px;">
+          <span data-i18n="settings.apikeys_scopes">Scopes (optional)</span>
+          <small data-i18n="settings.apikeys_scopes_hint">Leave all unchecked for full access</small>
+        </label>
+        <div id="ak-scopes" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:6px;">
+          <label class="ak-scope-chip"><input type="checkbox" name="ak-scope" value="read" aria-label="Scope: read"> <span data-i18n="settings.scope_read">read</span></label>
+          <label class="ak-scope-chip"><input type="checkbox" name="ak-scope" value="rate" aria-label="Scope: rate"> <span data-i18n="settings.scope_rate">rate</span></label>
+          <label class="ak-scope-chip"><input type="checkbox" name="ak-scope" value="tag.write" aria-label="Scope: tag.write"> <span data-i18n="settings.scope_tag_write">tag.write</span></label>
+          <label class="ak-scope-chip"><input type="checkbox" name="ak-scope" value="collection.write" aria-label="Scope: collection.write"> <span data-i18n="settings.scope_collection_write">collection.write</span></label>
+          <label class="ak-scope-chip"><input type="checkbox" name="ak-scope" value="annotate" aria-label="Scope: annotate"> <span data-i18n="settings.scope_annotate">annotate</span></label>
+          <label class="ak-scope-chip"><input type="checkbox" name="ak-scope" value="scan" aria-label="Scope: scan"> <span data-i18n="settings.scope_scan">scan</span></label>
+          <label class="ak-scope-chip"><input type="checkbox" name="ak-scope" value="admin" aria-label="Scope: admin"> <span data-i18n="settings.scope_admin">admin</span></label>
+        </div>
+      </div>
+      <button data-action="settingsPageApi.createApiKey" class="btn-save" style="margin-top:8px;"><span data-i18n="settings.apikeys_create_btn">Create Key</span></button>
+      <!-- One-time key display -->
+      <div id="ak-created" style="display:none;margin-top:12px;padding:12px 16px;border-radius:8px;border:1px solid rgba(243,156,18,0.45);background:rgba(243,156,18,0.08);">
+        <div style="font-size:12px;color:#f39c12;margin-bottom:6px;font-weight:600;" data-i18n="settings.apikeys_created_warn">This key will only be shown once. Copy it now.</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <code id="ak-created-key" style="flex:1;font-size:13px;word-break:break-all;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid rgba(128,128,128,0.2);color:var(--text);"></code>
+          <button data-action="settingsPageApi.copyCreatedKey" style="padding:6px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:var(--bg);color:var(--text);cursor:pointer;font-size:12px;white-space:nowrap;" data-i18n="common.copy">Copy</button>
+        </div>
+        <div style="margin-top:8px;font-size:12px;color:var(--muted);">
+          <span data-i18n="settings.apikeys_mcp_updated">↓ MCP スニペットをこのキーで自動更新しました</span>
+          — <a href="#mcp-snippet-section" data-action="settingsPageApi.scrollToMcpSnippet" style="color:var(--accent);cursor:pointer;text-decoration:underline;" data-i18n="settings.apikeys_mcp_jump">スニペットを確認</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- MCP Connection Snippet -->
+    <div id="mcp-snippet-section" class="settings-section">
+      <h2><span aria-hidden="true">🤖</span> <span data-i18n="settings.mcp_title">MCP Server (Claude Desktop)</span></h2>
+      <p style="font-size:13px;color:var(--muted);" data-i18n="settings.mcp_desc">Copy the snippet below into your claude_desktop_config.json to connect Claude Desktop to this manager.</p>
+      <div style="margin-top:12px;display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px;">
+        <button type="button" class="mcp-mode-tab active" data-mode="stdio" data-action="settingsPageApi.switchMcpMode" data-action-arg="stdio"
+                style="padding:8px 16px;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;">
+          Local (stdio)</button>
+        <button type="button" class="mcp-mode-tab" data-mode="http" data-action="settingsPageApi.switchMcpMode" data-action-arg="http"
+                style="padding:8px 16px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:600;">
+          LAN (HTTP/SSE)</button>
+      </div>
+      <div style="margin-top:8px;">
+        <label class="setting-label" style="margin-bottom:6px;">
+          <span data-i18n="settings.mcp_key_select">API Key for MCP</span>
+          <small data-i18n="settings.mcp_key_select_hint">Select an existing key or leave empty for session auth</small>
+        </label>
+        <select id="mcp-key-select" data-action="settingsPageApi.updateMcpSnippet" data-action-event="change" aria-label="API Key for MCP" style="width:100%;max-width:360px;padding:6px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+          <option value="" data-i18n="settings.mcp_no_apikey">-- No API Key (session auth) --</option>
+        </select>
+      </div>
+      <div style="margin-top:12px;position:relative;">
+        <pre id="mcp-snippet" style="padding:12px 16px;border-radius:8px;border:1px solid rgba(128,128,128,0.2);background:var(--bg);color:var(--text);font-size:12px;font-family:monospace;overflow-x:auto;white-space:pre;line-height:1.5;margin:0;"></pre>
+        <button data-action="settingsPageApi.copyMcpSnippet" style="position:absolute;top:8px;right:8px;padding:4px 10px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:var(--card);color:var(--text);cursor:pointer;font-size:11px;" data-i18n="common.copy">Copy</button>
+      </div>
+      <div id="mcp-lan-notice" style="display:none;margin-top:10px;padding:10px 14px;border-radius:8px;border:1px solid rgba(52,152,219,0.3);background:rgba(52,152,219,0.06);font-size:12px;color:var(--muted);">
+        <span style="color:#3498db;font-weight:600;">LAN MCP:</span>
+        <span data-i18n="settings.mcp_lan_notice">API key is required for connections from other machines on the LAN. Select an API key from the dropdown above.</span>
+      </div>
+      <p style="font-size:11px;color:var(--muted);margin-top:8px;">
+        <span data-i18n="settings.mcp_path_hint">File location: <code>%APPDATA%\Claude\claude_desktop_config.json</code> (Windows) / <code>~/Library/Application Support/Claude/claude_desktop_config.json</code> (macOS)</span>
+      </p>
+    </div>
+
+    <!-- MCP Tool Browser -->
+    <div class="settings-section" id="mcp-tools-section">
+      <h2><span data-i18n="settings.mcp_tools_title">MCP ツール一覧</span></h2>
+      <p style="font-size:13px;color:var(--muted);" data-i18n="settings.mcp_tools_desc">利用可能なMCPツールをカテゴリ別に表示します。</p>
+      <div style="margin-top:8px;">
+        <button type="button" id="loadMcpToolsBtn" data-action="settingsPageApi.loadMcpTools"
+          style="padding:5px 14px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:none;color:var(--text);cursor:pointer;font-size:12px;"
+          data-i18n="settings.mcp_tools_load">ツール一覧を読み込む</button>
+      </div>
+      <div id="mcpToolsPanel" style="margin-top:10px;"></div>
+    </div>
+  </div>
+
+  <!-- Gateway API Keys -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">🔐</span> <span data-i18n="settings.tab_gateway_keys">Gateway APIキー</span></h2>
+    <p style="font-size:13px;color:var(--muted);" data-i18n="gateway_keys.desc">Gateway APIキーを管理します。</p>
+    <div id="gatewayKeysList" style="margin-top:12px;font-size:13px;color:var(--muted);">Loading...</div>
+  </div>
+  <div class="settings-section">
+    <h2><span aria-hidden="true">➕</span> <span data-i18n="gateway_keys.create_section_title">新しいキーを作成</span></h2>
+    <div class="setting-item">
+      <label class="setting-label" for="gk-label">
+        <span data-i18n="gateway_keys.label_field">ラベル</span>
+      </label>
+      <div class="setting-input">
+        <input type="text" id="gk-label" data-i18n-placeholder="gateway_keys.label_placeholder" maxlength="100">
+      </div>
+      <div id="gk-id-preview" style="font-size:12px;color:var(--muted);margin-top:4px;">
+        ID: <code id="gk-id-value"></code>
+        <span id="gk-id-error" style="color:var(--error,#e74c3c);display:none;" data-i18n="gateway_keys.slug_empty_error"></span>
+        <span id="gk-id-exists-error" style="color:var(--error,#e74c3c);display:none;" data-i18n="gateway_keys.id_exists_error"></span>
+      </div>
+    </div>
+    <div style="padding:10px 0;">
+      <label class="setting-label" style="margin-bottom:8px;">
+        <span data-i18n="gateway_keys.scopes_label">スコープ</span>
+        <small id="gk-scope-hint" style="color:var(--error,#e74c3c);display:none;" data-i18n="gateway_keys.scope_hint"></small>
+      </label>
+      <div id="gk-scopes" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;">
+        <span class="gk-scope-group-label" style="width:100%;font-size:10px;font-weight:bold;color:var(--muted);text-transform:uppercase;margin-top:4px;">LLM</span>
+        <button type="button" class="gk-scope-badge" data-scope="llm:chat" aria-pressed="false">llm:chat</button>
+        <button type="button" class="gk-scope-badge" data-scope="llm:messages" aria-pressed="false">llm:messages</button>
+        <button type="button" class="gk-scope-badge" data-scope="llm:models" aria-pressed="false">llm:models</button>
+        <span class="gk-scope-group-label" style="width:100%;font-size:10px;font-weight:bold;color:var(--muted);text-transform:uppercase;margin-top:4px;">Stable Diffusion</span>
+        <button type="button" class="gk-scope-badge" data-scope="sd:generate" aria-pressed="false">sd:generate</button>
+        <button type="button" class="gk-scope-badge" data-scope="sd:query" aria-pressed="false">sd:query</button>
+        <button type="button" class="gk-scope-badge" data-scope="sd:admin" aria-pressed="false">sd:admin</button>
+        <span class="gk-scope-group-label" style="width:100%;font-size:10px;font-weight:bold;color:var(--muted);text-transform:uppercase;margin-top:4px;">ComfyUI</span>
+        <button type="button" class="gk-scope-badge" data-scope="comfy:generate" aria-pressed="false">comfy:generate</button>
+        <button type="button" class="gk-scope-badge" data-scope="comfy:query" aria-pressed="false">comfy:query</button>
+        <span class="gk-scope-group-label" style="width:100%;font-size:10px;font-weight:bold;color:var(--muted);text-transform:uppercase;margin-top:4px;">Memory</span>
+        <button type="button" class="gk-scope-badge" data-scope="memory:read" aria-pressed="false">memory:read</button>
+        <button type="button" class="gk-scope-badge" data-scope="memory:write" aria-pressed="false">memory:write</button>
+        <button type="button" class="gk-scope-badge" data-scope="memory:admin" aria-pressed="false">memory:admin</button>
+        <span class="gk-scope-group-label" style="width:100%;font-size:10px;font-weight:bold;color:var(--muted);text-transform:uppercase;margin-top:4px;">Headroom</span>
+        <button type="button" class="gk-scope-badge" data-scope="headroom:read" aria-pressed="false">headroom:read</button>
+        <button type="button" class="gk-scope-badge" data-scope="headroom:admin" aria-pressed="false">headroom:admin</button>
+        <span class="gk-scope-group-label" style="width:100%;font-size:10px;font-weight:bold;color:var(--muted);text-transform:uppercase;margin-top:4px;">Other</span>
+        <button type="button" class="gk-scope-badge" data-scope="node:status" aria-pressed="false">node:status</button>
+        <span class="gk-scope-group-label" style="width:100%;font-size:10px;font-weight:bold;color:var(--error,#e74c3c);text-transform:uppercase;margin-top:8px;" data-i18n="gateway_keys.wildcard_group"></span>
+        <button type="button" class="gk-scope-badge gk-scope-wildcard" data-scope="*" aria-pressed="false" style="border-color:var(--error,#e74c3c);">* 全許可</button>
+      </div>
+      <div id="gk-wildcard-warning" style="display:none;margin-top:8px;padding:8px 12px;border-radius:6px;border:1px solid rgba(231,76,60,0.4);background:rgba(231,76,60,0.08);font-size:12px;">
+        <span>⚠️</span> <span data-i18n="gateway_keys.wildcard_warning"></span>
+        <label style="display:block;margin-top:6px;">
+          <input type="checkbox" id="gk-wildcard-confirm">
+          <span data-i18n="gateway_keys.wildcard_confirm"></span>
+        </label>
+      </div>
+    </div>
+    <button id="gk-create-btn" data-action="settingsPageApi.createGatewayKey" class="btn-save" style="margin-top:8px;" disabled>
+      <span data-i18n="gateway_keys.create_button">作成</span>
+    </button>
+    <div id="gk-created" style="display:none;margin-top:12px;padding:12px 16px;border-radius:8px;border:1px solid rgba(243,156,18,0.45);background:rgba(243,156,18,0.08);">
+      <div style="font-size:12px;color:#f39c12;margin-bottom:6px;font-weight:600;" data-i18n="gateway_keys.secret_notice"></div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <code id="gk-created-secret" style="flex:1;font-size:13px;word-break:break-all;padding:6px 10px;background:var(--bg);border-radius:6px;border:1px solid rgba(128,128,128,0.2);color:var(--text);"></code>
+        <button data-action="settingsPageApi.copyGatewaySecret" style="padding:6px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:var(--bg);color:var(--text);cursor:pointer;font-size:12px;white-space:nowrap;" data-i18n="gateway_keys.copy_button"></button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SNS Share -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">📤</span> <span data-i18n="settings.sns_title">SNS Share</span></h2>
+    <p style="font-size:13px;color:var(--muted);" data-i18n="settings.sns_desc">Configure SNS sharing for X (Twitter) and Bluesky.</p>
+    <div id="snsSettingsContainer">
+      <h3 style="margin-top:16px;margin-bottom:8px;font-size:14px;color:var(--text);" data-i18n="settings.sns_bluesky_title">Bluesky</h3>
+      <div class="setting-item">
+        <label class="setting-label" for="cfg-sns-bsky-handle">
+          <span data-i18n="settings.sns_bsky_handle">Handle</span>
+          <small data-i18n="settings.sns_bsky_handle_hint">e.g. user.bsky.social</small>
+        </label>
+        <div class="setting-input">
+          <input type="text" id="cfg-sns-bsky-handle" placeholder="user.bsky.social" data-i18n-placeholder="settings.sns_bsky_handle_placeholder" maxlength="200">
+        </div>
+      </div>
+      <form autocomplete="off" data-no-submit="1" class="setting-item">
+        <label class="setting-label" for="cfg-sns-bsky-password">
+          <span data-i18n="settings.sns_bsky_password">App Password</span>
+          <small data-i18n="settings.sns_bsky_password_hint">Generate at bsky.app > Settings > App Passwords</small>
+        </label>
+        <div class="setting-input">
+          <input type="password" id="cfg-sns-bsky-password" placeholder="xxxx-xxxx-xxxx-xxxx" data-i18n-placeholder="settings.sns_bsky_password_placeholder" maxlength="200" autocomplete="new-password">
+        </div>
+      </form>
+      <div style="margin-top:8px;display:flex;align-items:center;gap:10px;">
+        <button type="button" data-action="settingsPageApi.testBskyConnection"
+                style="padding:8px 14px;min-height:36px;border:1px solid #0085ff;border-radius:6px;background:transparent;color:#0085ff;cursor:pointer;font-size:12px;"
+                data-i18n="settings.sns_bsky_test">Test Connection</button>
+        <span id="sns-bsky-test-status" style="font-size:12px;color:var(--muted);"></span>
+      </div>
+      <h3 style="margin-top:20px;margin-bottom:8px;font-size:14px;color:var(--text);border-top:1px solid var(--border);padding-top:16px;">
+        <span data-i18n="settings.sns_template_title">Post Template</span>
+      </h3>
+      <div class="setting-item">
+        <label class="setting-label" for="cfg-sns-template">
+          <span data-i18n="settings.sns_template">Template</span>
+          <small data-i18n="settings.sns_template_hint">Available: {positive}, {positive_short}, {negative_short}, {model}, {seed}, {steps}, {cfg}, {sampler}, {size}, {tags}, {filename}</small>
+        </label>
+        <div class="setting-input" style="width:100%;">
+          <textarea id="cfg-sns-template" rows="3"
+                    style="width:100%;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;font-family:monospace;resize:vertical;box-sizing:border-box;"
+                    placeholder="{positive_short}&#10;&#10;Model: {model}&#10;#AIart"
+                    data-i18n-placeholder="settings.sns_template_placeholder"></textarea>
+        </div>
+      </div>
+      <button data-action="settingsPageApi.saveSnsSettings" class="btn-save" style="margin-top:12px;">
+        <span data-i18n="common.save">Save</span>
+      </button>
+      <!-- Bluesky Monitor -->
+      <h3 style="margin-top:24px;margin-bottom:8px;font-size:14px;color:var(--text);border-top:1px solid var(--border);padding-top:16px;">
+        <span data-i18n="settings.bsky_monitor_title">Bluesky Monitor</span>
+      </h3>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;" data-i18n="settings.bsky_monitor_desc">Monitor Bluesky mentions, replies, and other notifications. Configure triage criteria and auto-response templates.</p>
+      <div class="setting-item">
+        <label class="setting-label" for="cfg-bsky-poll-interval">
+          <span data-i18n="settings.bsky_poll_interval">Poll Interval (minutes)</span>
+        </label>
+        <div class="setting-input">
+          <select id="cfg-bsky-poll-interval">
+            <option value="15">15</option>
+            <option value="30" selected>30</option>
+            <option value="60">60</option>
+            <option value="120">120</option>
+          </select>
+        </div>
+      </div>
+      <div class="setting-item" style="flex-direction:row;align-items:center;gap:16px;">
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="cfg-bsky-auto-dismiss-follow" checked>
+          <span data-i18n="settings.bsky_auto_dismiss_follow">Auto-dismiss follows</span>
+        </label>
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="cfg-bsky-auto-dismiss-like" checked>
+          <span data-i18n="settings.bsky_auto_dismiss_like">Auto-dismiss likes</span>
+        </label>
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="cfg-bsky-auto-dismiss-repost" checked>
+          <span data-i18n="settings.bsky_auto_dismiss_repost">Auto-dismiss reposts</span>
+        </label>
+      </div>
+      <div class="setting-item" style="flex-direction:row;align-items:center;gap:16px;margin-top:4px;">
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="cfg-bsky-auto-respond">
+          <span data-i18n="settings.bsky_auto_respond">Enable auto-response</span>
+        </label>
+        <label style="font-size:13px;display:flex;align-items:center;gap:6px;">
+          <input type="checkbox" id="cfg-bsky-notify-connect" checked>
+          <span data-i18n="settings.bsky_notify_connect">Notify on MCP connect</span>
+        </label>
+      </div>
+      <h4 style="margin-top:16px;margin-bottom:6px;font-size:13px;color:var(--text);" data-i18n="settings.bsky_triage_title">Triage Prompts</h4>
+      <div class="setting-item">
+        <label class="setting-label" for="cfg-bsky-triage-mention">
+          <span data-i18n="settings.bsky_triage_mention">Mentions</span>
+        </label>
+        <div class="setting-input" style="width:100%;">
+          <textarea id="cfg-bsky-triage-mention" rows="4" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:12px;font-family:monospace;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label class="setting-label" for="cfg-bsky-triage-reply">
+          <span data-i18n="settings.bsky_triage_reply">Replies</span>
+        </label>
+        <div class="setting-input" style="width:100%;">
+          <textarea id="cfg-bsky-triage-reply" rows="3" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:12px;font-family:monospace;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label class="setting-label" for="cfg-bsky-triage-quote">
+          <span data-i18n="settings.bsky_triage_quote">Quotes</span>
+        </label>
+        <div class="setting-input" style="width:100%;">
+          <textarea id="cfg-bsky-triage-quote" rows="3" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:12px;font-family:monospace;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+      </div>
+      <h4 style="margin-top:16px;margin-bottom:6px;font-size:13px;color:var(--text);" data-i18n="settings.bsky_response_title">Auto-Response Templates</h4>
+      <div class="setting-item">
+        <label class="setting-label" for="cfg-bsky-response-mention">
+          <span data-i18n="settings.bsky_response_mention">Mention Response</span>
+        </label>
+        <div class="setting-input" style="width:100%;">
+          <textarea id="cfg-bsky-response-mention" rows="2" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:12px;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+      </div>
+      <div class="setting-item">
+        <label class="setting-label" for="cfg-bsky-response-reply">
+          <span data-i18n="settings.bsky_response_reply">Reply Response</span>
+        </label>
+        <div class="setting-input" style="width:100%;">
+          <textarea id="cfg-bsky-response-reply" rows="2" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:12px;resize:vertical;box-sizing:border-box;"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:12px;">
+        <button data-action="settingsPageApi.saveBskyMonitorSettings" class="btn-save">
+          <span data-i18n="settings.bsky_save_monitor">Save Monitor Settings</span>
+        </button>
+        <button data-action="settingsPageApi.bskyPollNow" style="padding:8px 14px;min-height:36px;border:1px solid #0085ff;border-radius:6px;background:transparent;color:#0085ff;cursor:pointer;font-size:12px;">
+          <span data-i18n="settings.bsky_poll_now">Poll Now</span>
+        </button>
+        <span id="bsky-monitor-status" style="font-size:12px;color:var(--muted);align-self:center;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Secrets Management -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">🔐</span> <span data-i18n="settings.secrets_title">Secret Key Management</span></h2>
+    <p style="font-size:13px;color:var(--muted);" data-i18n="settings.secrets_desc">Manage the encryption key used to protect sensitive settings (PIN, API keys, etc.).</p>
+    <h3 style="margin-top:16px;margin-bottom:8px;font-size:14px;" data-i18n="settings.encryption_key_backend">Encryption Key Backend</h3>
+    <div id="secretsStatusArea" style="font-size:13px;">Loading...</div>
+    <h3 style="margin-top:20px;margin-bottom:8px;font-size:14px;border-top:1px solid var(--border,#333);padding-top:16px;" data-i18n="settings.onepassword_title">1Password CLI</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.onepassword_desc">Link secrets to 1Password for dynamic retrieval via op read. Requires 1Password CLI installed and signed in.</p>
+    <div id="opStatusArea" style="font-size:13px;">Loading...</div>
+    <h3 style="margin-top:20px;margin-bottom:8px;font-size:14px;border-top:1px solid var(--border,#333);padding-top:16px;" data-i18n="settings.bitwarden_title">Bitwarden CLI</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.bitwarden_desc">Link secrets to Bitwarden for dynamic retrieval via bw CLI. Requires Bitwarden CLI installed and unlocked.</p>
+    <div id="bwStatusArea" style="font-size:13px;">Loading...</div>
+    <h3 style="margin-top:20px;margin-bottom:8px;font-size:14px;border-top:1px solid var(--border,#333);padding-top:16px;" data-i18n="settings.secret_settings_overview">Secret Settings</h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.secret_settings_overview_desc">Overview of all secret settings and their current storage source.</p>
+    <div id="secretSettingsOverview" style="font-size:13px;">Loading...</div>
+    <h3 style="margin-top:20px;margin-bottom:8px;font-size:14px;border-top:1px solid var(--border,#333);padding-top:16px;">
+      <span data-i18n="settings.secrets_export_title">Export Key</span>
+    </h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.secrets_export_desc">Export the encryption key protected with a password. Use this to back up or transfer to another machine.</p>
+    <form autocomplete="off" data-no-submit="1" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input type="password" id="secretsExportPassword" placeholder="Password (min 8 chars)" autocomplete="new-password" aria-label="Export password"
+             style="flex:1;min-width:200px;max-width:300px;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+      <button data-action="settingsPageApi.exportSecrets" class="btn btn-secondary" style="white-space:nowrap;">
+        <span data-i18n="settings.secrets_export_btn">Export</span>
+      </button>
+    </form>
+    <div id="secretsExportResult" style="margin-top:6px;font-size:12px;"></div>
+    <h3 style="margin-top:20px;margin-bottom:8px;font-size:14px;border-top:1px solid var(--border,#333);padding-top:16px;">
+      <span data-i18n="settings.secrets_import_title">Import Key</span>
+    </h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.secrets_import_desc">Import a previously exported encryption key. All encrypted settings will be decryptable after import.</p>
+    <form autocomplete="off" data-no-submit="1" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input type="file" id="secretsImportFile" accept=".json" aria-label="Import key file"
+             style="flex:1;min-width:200px;max-width:300px;font-size:13px;">
+      <input type="password" id="secretsImportPassword" placeholder="Password" autocomplete="new-password" aria-label="Import password"
+             style="flex:1;min-width:150px;max-width:250px;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+      <button data-action="settingsPageApi.importSecrets" class="btn btn-secondary" style="white-space:nowrap;">
+        <span data-i18n="settings.secrets_import_btn">Import</span>
+      </button>
+    </form>
+    <div id="secretsImportResult" style="margin-top:6px;font-size:12px;"></div>
+    <h3 style="margin-top:20px;margin-bottom:8px;font-size:14px;border-top:1px solid var(--border,#333);padding-top:16px;">
+      <span data-i18n="settings.secrets_rotate">Rotate Encryption Key</span>
+    </h3>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.secrets_rotate_desc">Generate a new encryption key. Back up your current key first.</p>
+    <form autocomplete="off" data-no-submit="1" style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+      <input type="text" id="secretsRotateConfirm" placeholder="ROTATE" autocomplete="off" aria-label="Rotate confirmation"
+             style="flex:1;min-width:160px;max-width:240px;padding:8px 12px;border-radius:6px;border:1px solid rgba(239,68,68,0.4);background:var(--bg);color:var(--text);font-size:13px;">
+      <button data-action="settingsPageApi.rotateSecrets" class="btn btn-secondary" style="white-space:nowrap;border-color:rgba(239,68,68,0.5);color:#ef4444;">
+        <span data-i18n="settings.secrets_rotate_btn">Rotate Key</span>
+      </button>
+    </form>
+    <p style="font-size:11px;color:var(--muted);margin-top:4px;" data-i18n="settings.secrets_rotate_confirm">Type ROTATE to confirm. This is irreversible.</p>
+    <div id="secretsRotateResult" style="margin-top:6px;font-size:12px;"></div>
+  </div>
+</section>

@@ -1,0 +1,133 @@
+<!-- Archive Cleanup -->
+<details class="tool-item" id="tool-archive-cleanup">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.archive_cleanup">&#x1F4E6; Archive Cleanup</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+  <p data-i18n="tools.archive_cleanup_desc">Detect zip/7z archives that have matching extracted folders. Compare contents and delete one side.</p>
+
+  <div class="atelier-form-row">
+    <input class="tool-input" type="text" id="acPath" name="acPath" aria-label="Archive cleanup directory path" data-i18n-placeholder="tools.ac_path_placeholder" placeholder="Directory path (e.g. D:\Downloads)"
+           data-action-enter="toolsPageApi.acScan">
+    <button type="button" class="btn btn-secondary atelier-btn-ghost" data-action="toolsPageApi.acPickFolder">
+      <span aria-hidden="true">&#x1F4C2;</span> <span data-i18n="tools.ac_browse">Browse</span>
+    </button>
+  </div>
+
+  <div>
+    <label class="tool-label">
+      <input class="tool-input" type="checkbox" id="acRecursive" aria-label="Recursive cleanup">
+      <span data-i18n="tools.ac_recursive">Include subdirectories</span>
+    </label>
+  </div>
+
+  <div class="tool-actions">
+    <button type="button" class="btn btn-primary atelier-btn-primary" data-action="toolsPageApi.acScan">
+      <span aria-hidden="true">&#x1F50D;</span> <span data-i18n="tools.ac_scan">Scan Pairs</span>
+    </button>
+    <button type="button" class="btn btn-danger atelier-btn-danger" data-action="toolsPageApi.acExecute" id="acExecuteBtn" disabled>
+      <span aria-hidden="true">&#x1F5D1;</span> <span data-i18n="tools.ac_execute">Execute Cleanup</span>
+    </button>
+    <button type="button" class="btn btn-secondary atelier-btn-ghost" data-action="toolsPageApi.acLlmVerifyAll">
+      <span data-i18n="tools.ac_llm_verify_all">LLM Verify All (<100%)</span>
+    </button>
+  </div>
+
+  <div id="acResult"></div>
+
+  <!-- LLM Settings (collapsible) -->
+  <details class="atelier-fieldset" data-action-toggle="toolsPageApi.acLoadLlmConfig">
+    <summary>
+      <span data-i18n="tools.ac_llm_settings">LLM Verification Settings</span>
+    </summary>
+    <div class="atelier-fieldset-body">
+      <div class="atelier-fieldset-engine">
+        <label class="tool-label" for="acLlmEngine" data-i18n="tools.ac_llm_engine_label">Engine:</label>
+        <select class="tool-select" id="acLlmEngine" name="acLlmEngine" data-action="toolsPageApi.acOnLlmEngineChange" data-action-event="change">
+          <option value="ollama">Ollama</option>
+          <option value="claude_api">Claude API</option>
+          <option value="openai">OpenAI</option>
+          <option value="openai_compat">OpenAI Compatible</option>
+        </select>
+      </div>
+
+      <!-- Claude fields -->
+      <div id="acLlmClaudeFields">
+        <div class="atelier-form-row atelier-form-row--labeled">
+          <label class="tool-label"><span data-i18n="tools.ac_llm_api_key">API Key:</span>
+            <form autocomplete="off" data-no-submit="1"><input class="tool-input" type="password" id="acLlmApiKey" name="acLlmApiKey" aria-label="Claude API Key"></form>
+          </label>
+          <label class="tool-label"><span data-i18n="tools.ac_llm_model">Model:</span>
+            <select class="tool-select" id="acLlmModel" name="acLlmModel" aria-label="Claude Model">
+              <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
+              <option value="claude-opus-4-6">claude-opus-4-6</option>
+              <option value="claude-haiku-4-5">claude-haiku-4-5</option>
+              <option value="claude-sonnet-4-5">claude-sonnet-4-5</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- Ollama fields -->
+      <div id="acLlmOllamaFields">
+        <div class="atelier-form-row atelier-form-row--labeled">
+          <label class="tool-label"><span data-i18n="tools.ac_llm_url">URL:</span>
+            <input class="tool-input" type="text" id="acLlmOllamaUrl" name="acLlmOllamaUrl" placeholder="http://localhost:11434">
+          </label>
+          <label class="tool-label"><span data-i18n="tools.ac_llm_model">Model:</span>
+            <span>
+              <select class="tool-select" id="acLlmOllamaModel" name="acLlmOllamaModel"></select>
+              <button type="button" class="btn btn-secondary atelier-btn-ghost" data-action="toolsPageApi.acRefreshModels" title="Refresh model list" data-i18n-title="tools.ac_llm_refresh_models">&#x21BB;</button>
+            </span>
+          </label>
+          <span id="acLlmOllamaModelStatus"></span>
+        </div>
+      </div>
+
+      <!-- OpenAI fields -->
+      <div id="acLlmOpenaiFields">
+        <div class="atelier-form-row atelier-form-row--labeled">
+          <label class="tool-label"><span data-i18n="tools.ac_llm_api_key">API Key:</span>
+            <form autocomplete="off" data-no-submit="1"><input class="tool-input" type="password" id="acLlmOpenaiApiKey" name="acLlmOpenaiApiKey" aria-label="OpenAI API Key"></form>
+          </label>
+          <label class="tool-label"><span data-i18n="tools.ac_llm_model">Model:</span>
+            <select class="tool-select" id="acLlmOpenaiModel" name="acLlmOpenaiModel" aria-label="OpenAI Model">
+              <option value="gpt-4o-mini">gpt-4o-mini</option>
+              <option value="gpt-4o">gpt-4o</option>
+              <option value="gpt-4-turbo">gpt-4-turbo</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <!-- OpenAI-compat fields -->
+      <div id="acLlmOpenaiCompatFields">
+        <div class="atelier-form-row atelier-form-row--labeled">
+          <label class="tool-label"><span data-i18n="tools.ac_llm_url">URL:</span>
+            <input class="tool-input" type="text" id="acLlmOpenaiCompatUrl" name="acLlmOpenaiCompatUrl" placeholder="http://localhost:1234">
+          </label>
+          <label class="tool-label"><span data-i18n="tools.ac_llm_api_key">API Key:</span>
+            <form autocomplete="off" data-no-submit="1"><input class="tool-input" type="password" id="acLlmOpenaiCompatApiKey" name="acLlmOpenaiCompatApiKey" aria-label="OpenAI Compatible API Key"></form>
+          </label>
+          <label class="tool-label"><span data-i18n="tools.ac_llm_model">Model:</span>
+            <span>
+              <select class="tool-select" id="acLlmOpenaiCompatModel" name="acLlmOpenaiCompatModel"></select>
+              <button type="button" class="btn btn-secondary atelier-btn-ghost" data-action="toolsPageApi.acRefreshModels" title="Refresh model list" data-i18n-title="tools.ac_llm_refresh_models">&#x21BB;</button>
+            </span>
+          </label>
+          <span id="acLlmOpenaiCompatModelStatus"></span>
+        </div>
+      </div>
+
+      <div class="atelier-form-row">
+        <button type="button" class="btn btn-primary atelier-btn-primary" data-action="toolsPageApi.acSaveLlmConfig">
+          <span data-i18n="tools.ac_llm_save">Save</span>
+        </button>
+        <span id="acLlmConfigStatus"></span>
+      </div>
+    </div>
+  </details>
+  </div>
+</details>

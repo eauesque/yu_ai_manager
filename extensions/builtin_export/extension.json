@@ -1,0 +1,15 @@
+{
+  "name": "builtin-export",
+  "version": "1.0.0",
+  "description": "Export hooks for record transformation during CSV/data export",
+  "type": "general",
+  "category": "library",
+  "entry": "export_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "export_core",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

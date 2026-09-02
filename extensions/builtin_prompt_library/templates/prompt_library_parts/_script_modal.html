@@ -1,0 +1,324 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  "use strict";
+
+  var PL = window.PL;
+  var $ = PL._$;
+  var esc = PL._esc;
+  var apiFetch = PL._apiFetch;
+  var showToast = PL._showToast;
+
+  function customAlert(message) {
+    if (typeof window.customAlert === "function") return window.customAlert(message);
+    showToast(message);
+    return Promise.resolve();
+  }
+
+  function customConfirm(message, options) {
+    if (typeof window.customConfirm === "function") return window.customConfirm(message, options);
+    return Promise.resolve(false);
+  }
+
+  // -- Characters state (read-only pass-through) --
+  var _editCharacters = null;
+
+  // -- Folder/Tag assignment state --
+  var _assignFolderIds = [];
+  var _assignTagIds = [];
+
+  // -- Open modal --
+  function openModal(data) {
+    data = data || {};
+    $("plEditId").value = data.id || "";
+    $("plModalTitle").textContent = data.id ? window.tr('prompt_library.edit_prompt', 'Edit Prompt') : window.tr('prompt_library.save_prompt', 'Save Prompt');
+    $("plFieldTitle").value = data.title || "";
+    $("plFieldPositive").value = data.positive || "";
+    $("plFieldNegative").value = data.negative || "";
+    $("plFieldSeed").value = data.seed || "";
+    $("plFieldSteps").value = data.steps || "";
+    $("plFieldSampler").value = data.sampler || "";
+    $("plFieldCfg").value = data.cfg_scale || "";
+    $("plFieldModel").value = data.model_name || "";
+    $("plFieldMemo").value = data.memo || "";
+
+    // Show/hide characters (read-only)
+    var chars = data.characters || [];
+    _editCharacters = chars.length > 0 ? chars : null;
+    var cWrap = $("plFieldCharsWrap");
+    if (cWrap) {
+      if (chars.length > 0) {
+        cWrap.style.display = "";
+        var cEl = $("plFieldChars");
+        if (cEl) {
+          var COLORS = ['#4a90d9','#e06060','#50b860','#d0a040','#9b59b6','#e67e22'];
+          var cHtml = "";
+          for (var ci = 0; ci < chars.length; ci++) {
+            var ch = chars[ci];
+            var color = COLORS[ci % COLORS.length];
+            cHtml += '<div class="pl-modal-char-card">';
+            cHtml += '<div class="pl-modal-char-header">';
+            cHtml += '<span class="pl-modal-char-num" style="color:' + color + '">#' + (ci + 1) + '</span>';
+            if (ch.center) {
+              // Mini grid
+              var col = Math.min(4, Math.floor(ch.center.x * 5));
+              var row = Math.min(4, Math.floor(ch.center.y * 5));
+              var ak = row + "-" + col;
+              cHtml += '<span class="pl-mini-grid">';
+              for (var gr = 0; gr < 5; gr++) {
+                for (var gc = 0; gc < 5; gc++) {
+                  var active = (gr + "-" + gc) === ak;
+                  cHtml += '<span class="pl-mini-cell' + (active ? ' active' : '') + '"'
+                    + (active ? ' style="background:' + color + '"' : '') + '></span>';
+                }
+              }
+              cHtml += '</span>';
+            } else {
+              cHtml += '<span class="pl-char-pos-ai">AI</span>';
+            }
+            cHtml += '</div>';
+            cHtml += '<div class="pl-modal-char-prompt">' + esc(ch.prompt || "") + '</div>';
+            if (ch.negative) {
+              cHtml += '<div class="pl-modal-char-neg"><span class="pl-char-neg-label">' + window.tr('prompt_library.neg_label', 'Neg:') + '</span> ' + esc(ch.negative) + '</div>';
+            }
+            cHtml += '</div>';
+          }
+          cEl.innerHTML = cHtml;
+        }
+      } else {
+        cWrap.style.display = "none";
+      }
+    }
+
+    // Show/hide folder+tag assignment (edit only)
+    var fWrap = $("plFieldFoldersWrap");
+    var tWrap = $("plFieldTagsWrap");
+    if (fWrap) fWrap.style.display = data.id ? "" : "none";
+    if (tWrap) tWrap.style.display = data.id ? "" : "none";
+    if (data.id) _loadAssignUI(data);
+
+    $("plModalOverlay").classList.remove("hidden");
+    $("plFieldTitle").focus();
+  }
+
+  function closeModal() {
+    $("plModalOverlay").classList.add("hidden");
+  }
+
+  function collectForm() {
+    return {
+      title: $("plFieldTitle").value.trim(),
+      positive: $("plFieldPositive").value.trim(),
+      negative: $("plFieldNegative").value.trim(),
+      seed: $("plFieldSeed").value.trim(),
+      steps: $("plFieldSteps").value.trim(),
+      sampler: $("plFieldSampler").value.trim(),
+      cfg_scale: $("plFieldCfg").value.trim(),
+      model_name: $("plFieldModel").value.trim(),
+      memo: $("plFieldMemo").value.trim(),
+    };
+  }
+
+  function savePrompt() {
+    var data = collectForm();
+    if (!data.title) {
+      customAlert(window.tr('prompt_library.title_required', 'Title is required.'));
+      $("plFieldTitle").focus();
+      return;
+    }
+    if (_editCharacters) {
+      data.characters = _editCharacters;
+    }
+    var editId = $("plEditId").value;
+    var method = editId ? "PUT" : "POST";
+    var path = editId ? "/prompts/" + editId : "/prompts";
+
+    apiFetch(path, { method: method, body: data }).then(function(res) {
+      if (!res.ok) {
+        customAlert(res.error || window.tr('prompt_library.save_failed', 'Save failed'));
+        return;
+      }
+      if (editId) {
+        _saveAssignments(editId).then(function() {
+          closeModal();
+          PL._loadList();
+          if (typeof PLSidebar !== "undefined") {
+            PLSidebar.loadFolders();
+            PLSidebar.loadTags();
+          }
+        });
+      } else {
+        closeModal();
+        PL._loadList();
+      }
+    });
+  }
+
+  function editPrompt(id) {
+    apiFetch("/prompts/" + id).then(function(res) {
+      if (!res.ok || !res.prompt) return;
+      openModal(res.prompt);
+    });
+  }
+
+  function copyPrompt(id) {
+    apiFetch("/prompts/" + id).then(function(res) {
+      if (!res.ok || !res.prompt) return;
+      var text = res.prompt.positive || "";
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+          showToast(window.tr('prompt_library.copied', 'Copied to clipboard'));
+        });
+      }
+    });
+  }
+
+  async function deletePrompt(id) {
+    if (!(await customConfirm(window.tr('prompt_library.confirm_delete', 'Delete this prompt?'), { danger: true }))) return;
+    apiFetch("/prompts/" + id, { method: "DELETE" }).then(function(res) {
+      if (!res.ok) {
+        customAlert(res.error || window.tr('prompt_library.delete_failed', 'Delete failed'));
+        return;
+      }
+      PL._loadList();
+      if (typeof PLSidebar !== "undefined") {
+        PLSidebar.loadFolders();
+        PLSidebar.loadTags();
+      }
+    });
+  }
+
+  // -- Folder/Tag assignment UI --
+  function _loadAssignUI(data) {
+    _assignFolderIds = (data.folder_ids || []).slice();
+    _assignTagIds = (data.tags || []).map(function(t) {
+      return typeof t === "object" ? t.id : t;
+    });
+
+    apiFetch("/folders").then(function(res) {
+      if (!res.ok) return;
+      var container = $("plFieldFolders");
+      if (!container) return;
+      var folders = res.folders || [];
+      var html = "";
+      for (var i = 0; i < folders.length; i++) {
+        var f = folders[i];
+        var active = _assignFolderIds.indexOf(f.id) !== -1 ? " active" : "";
+        html += '<span class="pl-assign-chip' + active + '" data-fid="' + f.id +
+                '" data-action="PLModal.toggleFolder" data-action-arg="' + f.id + '" data-action-this="1">' +
+                esc(f.name) + '</span>';
+      }
+      container.innerHTML = html ||
+        '<span style="color:var(--muted,#888);font-size:12px;">' + window.tr('prompt_library.no_folders', 'No folders') + '</span>';
+    });
+
+    apiFetch("/tags").then(function(res) {
+      if (!res.ok) return;
+      var container = $("plFieldTags");
+      if (!container) return;
+      var tags = res.tags || [];
+      var html = "";
+      for (var i = 0; i < tags.length; i++) {
+        var t = tags[i];
+        var active = _assignTagIds.indexOf(t.id) !== -1 ? " active" : "";
+        html += '<span class="pl-assign-chip' + active + '" data-tid="' + t.id +
+                '" data-action="PLModal.toggleTag" data-action-arg="' + t.id + '" data-action-this="1">' +
+                esc(t.name) + '</span>';
+      }
+      container.innerHTML = html ||
+        '<span style="color:var(--muted,#888);font-size:12px;">' + window.tr('prompt_library.no_tags', 'No tags') + '</span>';
+    });
+  }
+
+  function toggleFolder(fid, el) {
+    var idx = _assignFolderIds.indexOf(fid);
+    if (idx === -1) {
+      _assignFolderIds.push(fid);
+      el.classList.add("active");
+    } else {
+      _assignFolderIds.splice(idx, 1);
+      el.classList.remove("active");
+    }
+  }
+
+  function toggleTag(tid, el) {
+    var idx = _assignTagIds.indexOf(tid);
+    if (idx === -1) {
+      _assignTagIds.push(tid);
+      el.classList.add("active");
+    } else {
+      _assignTagIds.splice(idx, 1);
+      el.classList.remove("active");
+    }
+  }
+
+  function _saveAssignments(pid) {
+    return apiFetch("/prompts/" + pid).then(function(res) {
+      if (!res.ok || !res.prompt) return;
+      var current = res.prompt.folder_ids || [];
+      var promises = [];
+
+      // Folders: add new assignments
+      for (var i = 0; i < _assignFolderIds.length; i++) {
+        if (current.indexOf(_assignFolderIds[i]) === -1) {
+          promises.push(apiFetch("/prompts/" + pid + "/folder", {
+            method: "POST", body: { folder_id: _assignFolderIds[i] }
+          }));
+        }
+      }
+      // Folders: remove old assignments
+      for (var j = 0; j < current.length; j++) {
+        if (_assignFolderIds.indexOf(current[j]) === -1) {
+          promises.push(apiFetch("/prompts/" + pid + "/folder", {
+            method: "DELETE", body: { folder_id: current[j] }
+          }));
+        }
+      }
+
+      // Tags: replace all
+      promises.push(apiFetch("/prompts/" + pid + "/tags", {
+        method: "POST", body: { tag_ids: _assignTagIds }
+      }));
+
+      return Promise.all(promises);
+    });
+  }
+
+  // -- Events --
+  $("plNewBtn").addEventListener("click", function() { openModal(); });
+  $("plModalCancel").addEventListener("click", closeModal);
+  $("plModalSave").addEventListener("click", savePrompt);
+
+  $("plModalOverlay").addEventListener("click", function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  document.addEventListener("keydown", function(e) {
+    if (e.key !== "Escape") return;
+    var plOverlay = $("plModalOverlay");
+    if (plOverlay && !plOverlay.classList.contains("hidden")) {
+      closeModal();
+      return;
+    }
+    var folderOverlay = $("plFolderModalOverlay");
+    if (folderOverlay && !folderOverlay.classList.contains("hidden")) {
+      folderOverlay.classList.add("hidden");
+      return;
+    }
+    var tagOverlay = $("plTagModalOverlay");
+    if (tagOverlay && !tagOverlay.classList.contains("hidden")) {
+      tagOverlay.classList.add("hidden");
+      return;
+    }
+  });
+
+  // -- Extend public API --
+  PL.edit = editPrompt;
+  PL.copy = copyPrompt;
+  PL.del = deletePrompt;
+
+  window.PLModal = {
+    toggleFolder: toggleFolder,
+    toggleTag: toggleTag,
+  };
+})();
+</script>

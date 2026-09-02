@@ -1,0 +1,88 @@
+<div class="cheat-body" id="regexCheatScroller">
+
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_or">OR (match either)</b></div>
+        <code>cat|dog</code>
+        <div class="cheat-note" data-i18n="cheat.i_or_n">Matches "cat" or "dog"</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_word">Word boundary</b></div>
+        <code>\b1girl\b</code>
+        <div class="cheat-note" data-i18n="cheat.i_word_n">Excludes "12girls" etc.</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_group">Group</b></div>
+        <code>(masterpiece|best quality)</code>
+        <div class="cheat-note" data-i18n="cheat.i_group_n">Matches any of the alternatives</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_error">Common error</b></div>
+        <code>(</code> / <code>[</code> <span data-i18n="cheat.i_error_desc">unclosed bracket</span>
+        <div class="cheat-note" data-i18n="cheat.i_error_n">If in trouble, turn off "Regex"</div>
+      </div>
+
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_and">AND (both match)</b></div>
+        <code>(?=.*cat)(?=.*dog)</code>
+        <div class="cheat-note" data-i18n="cheat.i_and_n">Contains both "cat" and "dog" (any order)</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_exclude">Exclude (NOT)</b></div>
+        <code>^(?!.*nsfw).*</code>
+        <div class="cheat-note" data-i18n="cheat.i_exclude_n">Excludes lines containing "nsfw"</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_tag_match">Match as comma-separated tag</b></div>
+        <code>(?:^|,\s*)cat(?:,|$)</code>
+        <div class="cheat-note" data-i18n="cheat.i_tag_match_n">Matches "cat" as a standalone tag (avoids "category" etc.)</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_greedy">Any char (greedy)</b></div>
+        <code>1girl.*smile</code>
+        <div class="cheat-note" data-i18n="cheat.i_greedy_n">"smile" appears anywhere after "1girl"</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_lazy">Any char (lazy)</b></div>
+        <code>\(.*?\)</code>
+        <div class="cheat-note" data-i18n="cheat.i_lazy_n">Shortest match inside parentheses</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_whitespace">Whitespace tolerance</b></div>
+        <code>cat\s*\|\s*dog</code>
+        <div class="cheat-note" data-i18n="cheat.i_whitespace_n">Allows spaces around "cat|dog"</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_anchor">Start/End anchor</b></div>
+        <code>^masterpiece|quality$</code>
+        <div class="cheat-note" data-i18n="cheat.i_anchor_n">Starts with "masterpiece" or ends with "quality"</div>
+      </div>
+      <div class="cheat-item">
+        <div><b data-i18n="cheat.i_escape">Escape (literal symbols)</b></div>
+        <code>\.|\(|\)|\[|\]</code>
+        <div class="cheat-note" data-i18n="cheat.i_escape_n">Treat . ( ) [ ] as literal characters</div>
+      </div>
+<div class="cheat-item">
+  <div><b data-i18n="cheat.i_neg_lookahead">Exclude (negative lookahead)</b></div>
+  <code>^(?!.*\bnsfw\b).*</code>
+  <div class="cheat-note" data-i18n="cheat.i_neg_lookahead_n">Excludes lines containing "nsfw" (as tag or text)</div>
+</div>
+
+<div class="cheat-item">
+  <div><b data-i18n="cheat.i_and_not">AND + NOT</b></div>
+  <code>^(?=.*\b1girl\b)(?!.*\bnsfw\b).*</code>
+  <div class="cheat-note" data-i18n="cheat.i_and_not_n">Contains "1girl" but not "nsfw"</div>
+</div>
+
+<div class="cheat-item">
+  <div><b data-i18n="cheat.i_tag_exclude">Exclude as comma-separated tag</b></div>
+  <code>^(?=.*(?:^|,\s*)1girl(?:\s*,|$))(?!.*(?:^|,\s*)nsfw(?:\s*,|$)).*</code>
+  <div class="cheat-note" data-i18n="cheat.i_tag_exclude_n">Excludes "nsfw" only as a standalone tag (keeps "nsfw123")</div>
+</div>
+
+<div class="cheat-item">
+  <div><b data-i18n="cheat.i_lookbehind">Lookbehind</b></div>
+  <code>(?&lt;=artist:\s*)[^,\n]+</code>
+  <div class="cheat-note" data-i18n="cheat.i_lookbehind_n">Captures text right after "artist:" (some browsers only)</div>
+</div>
+
+    </div>

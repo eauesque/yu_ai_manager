@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title>YU AI Manager</title>
+  <link rel="stylesheet" href="/static/tauri_shell/shell.css">
+  <link rel="stylesheet" href="/static/css/nav/ext-launcher.css?v=20260310">
+</head>
+<body class="tauri_shell">
+  <nav id="category-bar" role="tablist" aria-orientation="vertical"></nav>
+  <nav id="tab-bar" role="tablist" aria-orientation="horizontal">
+    <div id="shell-tab-utils">
+      <button id="navExtBtn" class="shell-util-btn" type="button" title="Extensions (E)" aria-label="Extensions">🧩</button>
+    </div>
+  </nav>
+  <main id="shell-iframe-container"></main>
+  <!-- i18n: tr-shim fallback (synchronous), then load the full i18n runtime -->
+  <script nonce="{{ csp_nonce }}">/* tr-shim: immediate fallback before module loads */
+if(typeof window.tr!=='function'){window.tr=function(p,a,b){var fn=window.adaptiveRuntime&&window.adaptiveRuntime.tr;if(typeof fn==='function')return fn(p,a,b);return typeof a==='string'?a:typeof b==='string'?b:String(p||'')}}</script>
+  <script nonce="{{ csp_nonce }}" type="importmap">{"imports":{"yu-api":"/static/dist/extension-api.js"}}</script>
+  <script nonce="{{ csp_nonce }}" src="/static/dist/nav.js" type="module"></script>
+  <script nonce="{{ csp_nonce }}" src="/static/tauri_shell/toast.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/static/tauri_shell/shell.js" type="module"></script>
+</body>
+</html>

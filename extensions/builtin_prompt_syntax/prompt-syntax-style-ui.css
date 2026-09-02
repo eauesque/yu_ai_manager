@@ -1,0 +1,31 @@
+/** prompt-syntax styles — bars/errors/tooltip */
+
+.ps-syntax-bar {
+  display: flex; align-items: center; gap: 8px;
+  padding: 4px 10px; font-size: 11px;
+  border-top: 1px solid rgba(128,128,128,0.15);
+  background: rgba(128,128,128,0.03);
+}
+.ps-syntax-badge { padding: 1px 8px; border-radius: 10px; font-weight: 600; font-size: 10px; color: var(--text, #e0e0e0); }
+.ps-syntax-badge.nai             { background: rgba(180,120,255,0.2); color: #c084fc; }
+.ps-syntax-badge.sd              { background: rgba(80,220,140,0.2); color: #66dda0; }
+.ps-syntax-badge.dynamic_prompts { background: rgba(255,220,80,0.2); color: #fde047; }
+.ps-syntax-badge.mixed           { background: rgba(255,107,107,0.2); color: #ff6b6b; }
+.ps-syntax-badge.unknown         { background: #4a4a4a; color: #f0f0f0; }
+
+.ps-error-list  { padding: 4px 10px; font-size: 11px; }
+.ps-error-item  { padding: 2px 0; display: flex; align-items: center; gap: 6px; }
+.ps-error-item.warning { color: #ffbb33; }
+.ps-error-item.error   { color: #ff6b6b; }
+.ps-error-icon  { font-size: 12px; }
+
+.ps-tooltip {
+  position: absolute; bottom: 100%; left: 8px; margin-bottom: 4px;
+  padding: 6px 10px; border-radius: 6px;
+  background: #1e1e3a; border: 1px solid rgba(102,126,234,0.4);
+  color: #d4d4d4; font-size: 11px; line-height: 1.5;
+  max-width: 360px; pointer-events: none; z-index: 100;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  white-space: nowrap;
+}
+.ps-tooltip b { color: #7cacff; font-weight: 600; }

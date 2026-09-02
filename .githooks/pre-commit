@@ -1,0 +1,38 @@
+#!/bin/sh
+# Tracked pre-commit hook. Install once with:
+#   git config core.hooksPath .githooks
+
+# Detect Python binary (cross-platform: uv .venv / Windows venv / Unix venv / uv / python3)
+if [ -x .venv/Scripts/python.exe ]; then
+    PYBIN=".venv/Scripts/python"
+elif [ -x .venv/bin/python ]; then
+    PYBIN=".venv/bin/python"
+elif [ -x venv/Scripts/python.exe ]; then
+    PYBIN="venv/Scripts/python"
+elif [ -x venv/bin/python ]; then
+    PYBIN="venv/bin/python"
+elif command -v uv >/dev/null 2>&1; then
+    PYBIN="uv run python"
+else
+    PYBIN="python3"
+fi
+
+# 1) Ruff check on staged Python files only (xargs batches to avoid ARG_MAX).
+#    Auto-fix locally with: $PYBIN -m ruff check --fix .
+STAGED=$(git diff --cached --name-only --diff-filter=ACM | grep '\.py$')
+if [ -n "$STAGED" ]; then
+    if ! echo "$STAGED" | xargs $PYBIN -m ruff check ; then
+        echo "" >&2
+        echo "[pre-commit] ruff check failed." >&2
+        echo "[pre-commit] Run: $PYBIN -m ruff check --fix ." >&2
+        echo "[pre-commit] Then re-stage and re-commit." >&2
+        exit 1
+    fi
+fi
+
+# 2) Version sync check — always runs to catch VERSION bumped without syncing.
+$PYBIN scripts/sync_version.py --check || {
+    echo "" >&2
+    echo "Version mismatch detected. Run: $PYBIN scripts/sync_version.py" >&2
+    exit 1
+}

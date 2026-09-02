@@ -1,0 +1,210 @@
+  // -- Samplers / Schedulers / Models refresh ---------------------
+
+  window.cfbRefreshAssets = function() {
+    var btn = document.querySelector('[data-action="cfbRefreshAssets"]');
+    if (btn) btn.disabled = true;
+    postJSON("/api/refresh-assets", {}).then(function(d) {
+      if (btn) btn.disabled = false;
+      if (!d || !d.ok) {
+        window.showToast(window.tr('comfyui_bridge.refresh_assets_failed', 'Refresh failed') + ": " + ((d && d.error) || "unknown"), true);
+        return;
+      }
+      var results = d.results || {};
+      var ok = [];
+      var skipped = [];
+      Object.keys(results).forEach(function(k) {
+        var r = results[k];
+        if (r && r.ok) ok.push(k + "(" + (r.count || 0) + ")");
+        else skipped.push(k);
+      });
+      var msg = window.tr('comfyui_bridge.refresh_assets_done', 'Refreshed') + ": " + (ok.length ? ok.join(", ") : "(none)");
+      if (skipped.length) msg += " — " + window.tr('comfyui_bridge.refresh_assets_skipped', 'unsupported') + ": " + skipped.join(", ");
+      window.showToast(msg);
+      // Re-fetch the local dropdown lists so the UI reflects the new on-disk
+      // set without requiring the user to also click Refresh Models etc.
+      if (window.cfbLoadModels) window.cfbLoadModels();
+      if (window.cfbLoadVaes) window.cfbLoadVaes();
+      if (window.cfbLoadDiffusionModels) window.cfbLoadDiffusionModels();
+      if (window.cfbLoadTextEncoders) window.cfbLoadTextEncoders();
+      if (window.cfbLoadDiscovery) window.cfbLoadDiscovery();
+    }).catch(function(e) {
+      if (btn) btn.disabled = false;
+      window.showToast(window.tr('comfyui_bridge.refresh_assets_failed', 'Refresh failed') + ": " + e.message, true);
+    });
+  };
+
+  window.cfbLoadSamplers = function() {
+    getJSON("/api/samplers").then(function(d) {
+      if (!d.ok) return;
+      var samplers = d.samplers || [];
+      if (!samplers.length) return;
+      var selects = [$("cfbSampler"), $("cfbCfgSampler")];
+      selects.forEach(function(sel) {
+        var cur = sel.value;
+        sel["innerHTML"] = "";
+        samplers.forEach(function(s) {
+          var opt = document.createElement("option");
+          opt.textContent = s; opt.value = s;
+          sel.appendChild(opt);
+        });
+        if (samplers.indexOf(cur) >= 0) {
+          sel.value = cur;
+        } else if (cur) {
+          // Preserve a value that isn't in the server list (e.g. restored from last params)
+          var opt = document.createElement("option");
+          opt.value = cur; opt.textContent = cur;
+          sel.appendChild(opt);
+          sel.value = cur;
+        }
+      });
+    }).catch(function() {});
+  };
+
+  window.cfbLoadSchedulers = function() {
+    getJSON("/api/schedulers").then(function(d) {
+      if (!d.ok) return;
+      var schedulers = d.schedulers || [];
+      if (!schedulers.length) return;
+      var selects = [$("cfbScheduler"), $("cfbCfgScheduler")];
+      selects.forEach(function(sel) {
+        var cur = sel.value;
+        sel["innerHTML"] = "";
+        schedulers.forEach(function(s) {
+          var opt = document.createElement("option");
+          opt.textContent = s; opt.value = s;
+          sel.appendChild(opt);
+        });
+        if (schedulers.indexOf(cur) >= 0) {
+          sel.value = cur;
+        } else if (cur) {
+          // Preserve a value that isn't in the server list
+          var opt = document.createElement("option");
+          opt.value = cur; opt.textContent = cur;
+          sel.appendChild(opt);
+          sel.value = cur;
+        }
+      });
+    }).catch(function() {});
+  };
+
+  window.cfbLoadModels = function() {
+    getJSON("/api/models").then(function(d) {
+      if (!d.ok) return;
+      var models = d.models || [];
+      var sel = $("cfbModel");
+      var cur = sel.value;
+      sel["innerHTML"] = "";
+      if (!models.length) {
+        var opt = document.createElement("option");
+        opt.value = ""; opt.textContent = window.tr('comfyui_bridge.no_models_found', '(No models found)');
+        sel.appendChild(opt);
+        return;
+      }
+      models.forEach(function(m) {
+        var opt = document.createElement("option");
+        opt.textContent = m; opt.value = m;
+        sel.appendChild(opt);
+      });
+      if (models.indexOf(cur) >= 0) {
+        sel.value = cur;
+      } else if (cur) {
+        // Preserve a model set by bridge/last-params even if not in the server list
+        var opt = document.createElement("option");
+        opt.value = cur; opt.textContent = cur;
+        sel.appendChild(opt);
+        sel.value = cur;
+      }
+    }).catch(function() {});
+  };
+
+  // -- Extended model list loaders -------------------------------
+  // Populate selects while preserving any leading placeholder option
+  // ("(None)", "(Use Checkpoint instead)", ...) so users can revert.
+
+  function _clearSelectKeepPlaceholder(sel) {
+    var placeholder = null;
+    if (sel.options.length > 0 && sel.options[0].value === "") {
+      placeholder = sel.options[0];
+    }
+    while (sel.firstChild) sel.removeChild(sel.firstChild);
+    if (placeholder) sel.appendChild(placeholder);
+  }
+
+  function _populateWithPlaceholder(selectId, items) {
+    var sel = $(selectId);
+    if (!sel) return;
+    var cur = sel.value;
+    _clearSelectKeepPlaceholder(sel);
+    items.forEach(function(name) {
+      var opt = document.createElement("option");
+      opt.textContent = name;
+      opt.value = name;
+      sel.appendChild(opt);
+    });
+    if (cur && items.indexOf(cur) >= 0) sel.value = cur;
+  }
+
+  window.cfbLoadVaes = function() {
+    getJSON("/api/discovery/models?type=vae").then(function(d) {
+      if (!d.ok) return;
+      _populateWithPlaceholder("cfbVae", d.models || []);
+      // Re-run auto-detect after list is populated (page-load race)
+      var diff = ($("cfbDiffusionModel") || {}).value || "";
+      if (diff) _cfbAutoDetectVae();
+    }).catch(function() {});
+  };
+
+  window.cfbLoadDiffusionModels = function() {
+    getJSON("/api/diffusion-models").then(function(d) {
+      if (!d.ok) return;
+      _populateWithPlaceholder("cfbDiffusionModel", d.models || []);
+    }).catch(function() {});
+  };
+
+  window.cfbLoadTextEncoders = function() {
+    getJSON("/api/text-encoders").then(function(d) {
+      if (!d.ok) return;
+      var encoders = d.encoders || [];
+      _populateWithPlaceholder("cfbTextEncoder1", encoders);
+      _populateWithPlaceholder("cfbTextEncoder2", encoders);
+    }).catch(function() {});
+  };
+
+  window.cfbLoadClipTypes = function() {
+    getJSON("/api/clip-types").then(function(d) {
+      if (!d.ok) return;
+      _populateWithPlaceholder("cfbClipType", d.clip_types || []);
+    }).catch(function() {});
+  };
+
+  window.cfbLoadWeightDtypes = function() {
+    getJSON("/api/weight-dtypes").then(function(d) {
+      if (!d.ok) return;
+      var sel = $("cfbWeightDtype");
+      if (!sel) return;
+      var dtypes = d.weight_dtypes || [];
+      var cur = sel.value;
+      while (sel.firstChild) sel.removeChild(sel.firstChild);
+      dtypes.forEach(function(v) {
+        var opt = document.createElement("option");
+        opt.value = v; opt.textContent = v;
+        sel.appendChild(opt);
+      });
+      // Restore previous selection or default to "default"
+      sel.value = (dtypes.indexOf(cur) >= 0) ? cur : (dtypes.indexOf("default") >= 0 ? "default" : (dtypes[0] || ""));
+    }).catch(function() {});
+  };
+
+  window.cfbLoadControlnets = function() {
+    getJSON("/api/controlnets").then(function(d) {
+      if (!d.ok) return;
+      _populateWithPlaceholder("cfbControlnetModel", d.models || []);
+    }).catch(function() {});
+  };
+
+  window.cfbLoadUpscaleModels = function() {
+    getJSON("/api/upscale-models").then(function(d) {
+      if (!d.ok) return;
+      _populateWithPlaceholder("cfbUpscaleModel", d.models || []);
+    }).catch(function() {});
+  };

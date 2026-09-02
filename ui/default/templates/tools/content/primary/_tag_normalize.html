@@ -1,0 +1,27 @@
+    <!-- Tag normalization -->
+    <details class="tool-item" id="tool-tag-normalize">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.tag_normalize">🏷️ Tag Normalization</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.tag_normalize_desc">Unify tag spacing/punctuation and merge duplicate tags.</p>
+
+      <div class="stat-row">
+        <span data-i18n="tools.tags_before">Tags before normalization:</span>
+        <span id="tagsBeforeNormalize">-</span>
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn btn-secondary" data-action="toolsPageApi.previewNormalize">
+          <span aria-hidden="true">👁️</span> <span data-i18n="tools.preview">Preview</span>
+        </button>
+        <button class="btn btn-primary" data-action="toolsPageApi.executeNormalize">
+          <span aria-hidden="true">✨</span> <span data-i18n="tools.execute">Execute</span>
+        </button>
+      </div>
+
+      <div id="normalizeResult" class="result-box"></div>
+      </div>
+</details>

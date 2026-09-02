@@ -1,0 +1,143 @@
+{# _cat_dev.html — cat-dev panel: server logs + JSON editor + DB maintenance #}
+<section id="cat-dev" data-settings-panel="cat-dev"
+         role="tabpanel" aria-labelledby="sidebar-item-cat-dev"
+         aria-hidden="true" style="display:none">
+  <h2 class="settings-cat-heading">
+    <span data-i18n="settings.cat.dev">開発</span>
+  </h2>
+
+  <!-- Server Logs -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">📋</span> <span data-i18n="settings.logs_title">Server Logs</span></h2>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <select id="logLevelFilter" data-action="settingsPageApi.onLogLevelChange" data-action-event="change" aria-label="Log level filter" style="padding:5px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--card);color:var(--text);font-size:12px;">
+        <option value="" selected>ALL</option>
+        <option value="DEBUG">DEBUG</option>
+        <option value="INFO">INFO</option>
+        <option value="WARNING">WARNING</option>
+        <option value="ERROR">ERROR</option>
+      </select>
+      <input type="text" id="logSearchInput" data-action="settingsPageApi.onLogSearchInput" data-action-event="input" placeholder="Filter text..." aria-label="Log text filter"
+             style="flex:1;min-width:120px;max-width:300px;padding:5px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:12px;">
+      <button data-action="settingsPageApi.toggleLogPause" id="logPauseBtn"
+              style="padding:5px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;"
+              data-i18n="settings.logs_pause">Pause</button>
+      <button data-action="settingsPageApi.clearLogDisplay"
+              style="padding:5px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;"
+              data-i18n="settings.logs_clear">Clear</button>
+      <button data-action="settingsPageApi.copyLogDisplay"
+              style="padding:5px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;"
+              data-i18n="settings.logs_copy">Copy</button>
+      <button data-action="settingsPageApi.downloadLogDisplay"
+              style="padding:5px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;"
+              data-i18n="settings.logs_download">Download</button>
+      <span id="logStatus" style="font-size:11px;color:var(--muted);margin-left:auto;"></span>
+    </div>
+    <div id="logContent" class="log-container"></div>
+  </div>
+
+  <!-- Rust Native Logs -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">⚡</span> Rust Native Logs</h2>
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;">
+      <select id="nativeLogLevelFilter" data-action="settingsPageApi.onNativeLogLevelChange" data-action-event="change" aria-label="Native log level filter" style="padding:5px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--card);color:var(--text);font-size:12px;">
+        <option value="" selected>ALL</option>
+        <option value="TRACE">TRACE</option>
+        <option value="DEBUG">DEBUG</option>
+        <option value="INFO">INFO</option>
+        <option value="WARN">WARN</option>
+        <option value="ERROR">ERROR</option>
+      </select>
+      <input type="text" id="nativeLogSearchInput" data-action="settingsPageApi.onNativeLogSearchInput" data-action-event="input" placeholder="Filter text..." aria-label="Native log text filter"
+             style="flex:1;min-width:120px;max-width:300px;padding:5px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:12px;">
+      <button data-action="settingsPageApi.toggleNativeLogPause" id="nativeLogPauseBtn"
+              style="padding:5px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;">Pause</button>
+      <button data-action="settingsPageApi.clearNativeLog"
+              style="padding:5px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;">Clear</button>
+      <span id="nativeLogStatus" style="font-size:11px;color:var(--muted);margin-left:auto;"></span>
+    </div>
+    <div id="nativeLogContent" class="log-container"></div>
+  </div>
+
+  <!-- JSON Direct Editor -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">📝</span> <span data-i18n="settings.json_title">config.json Direct Edit</span></h2>
+    <div style="padding:8px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);border-radius:6px;margin-bottom:10px;font-size:12px;color:var(--text);">
+      ⚠️ <strong data-i18n="settings.json_advanced_label">上級者向け</strong>: <span data-i18n="settings.json_advanced_desc">不正な JSON を保存するとアプリが起動しなくなる可能性があります。</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.json_desc">For advanced users. Edit and save JSON directly.</p>
+    <textarea id="jsonEditor" class="json-editor" spellcheck="false" aria-label="config.json editor" data-json-enhance data-json-schema="config"></textarea>
+    <div style="margin-top:8px;display:flex;gap:8px;">
+      <button data-action="settingsPageApi.saveJsonDirect" class="btn-save"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-save"/></svg> <span data-i18n="settings.json_save">Save JSON</span></button>
+      <button data-action="settingsPageApi.loadConfig" style="padding:8px 16px;border:1px solid rgba(128,128,128,0.3);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-refresh"/></svg> <span data-i18n="settings.json_reload">Reload</span></button>
+    </div>
+  </div>
+
+  <!-- Legacy Config Migration -->
+  <div id="legacyMigrationSection" class="settings-section" hidden>
+    <h2><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-refresh"/></svg> <span data-i18n="settings.legacy_migration_title">Legacy config migration</span></h2>
+    <p data-i18n="settings.legacy_migration_desc">Settings remain only in the old config.json file.</p>
+    <p><strong data-i18n="settings.legacy_migration_keys">Settings to import</strong>: <span id="legacyMigrationKeys"></span></p>
+    <div style="margin-top:8px;display:flex;gap:8px;">
+      <button type="button" data-action="settingsPageApi.runLegacyMigration" class="btn-save"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-save"/></svg> <span data-i18n="settings.legacy_migration_run">Import settings</span></button>
+    </div>
+    <p id="legacyMigrationResult" hidden></p>
+  </div>
+
+  <!-- TOML Direct Editor -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">📝</span> <span data-i18n="settings.toml_title">config.toml Direct Edit</span></h2>
+    <div style="padding:8px 12px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.35);border-radius:6px;margin-bottom:10px;font-size:12px;color:var(--text);">
+      ⚠️ <strong data-i18n="settings.json_advanced_label">上級者向け</strong>: <span data-i18n="settings.toml_advanced_desc">不正な TOML を保存するとアプリが起動しなくなる可能性があります。</span>
+    </div>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.toml_desc">For advanced users. Edit and save TOML directly.</p>
+    <textarea id="tomlEditor" class="json-editor" spellcheck="false" aria-label="config.toml editor" data-toml-enhance></textarea>
+    <div style="margin-top:8px;display:flex;gap:8px;">
+      <button data-action="settingsPageApi.saveTomlDirect" class="btn-save"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-save"/></svg> <span data-i18n="settings.toml_save">Save TOML</span></button>
+      <button data-action="settingsPageApi.loadTomlConfig" style="padding:8px 16px;border:1px solid rgba(128,128,128,0.3);border-radius:8px;background:transparent;color:var(--text);cursor:pointer;"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-refresh"/></svg> <span data-i18n="settings.toml_reload">Reload</span></button>
+    </div>
+  </div>
+
+  <!-- DB Maintenance -->
+  <div class="settings-section">
+    <h2><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-wrench"/></svg> <span data-i18n="settings.maintenance_title">DB メンテナンス</span></h2>
+    <div style="margin-bottom:16px;">
+      <h3 style="font-size:13px;margin-bottom:8px;" data-i18n="settings.db_stats_title">DB 統計</h3>
+      <div id="dbStatsPanel" style="font-size:12px;color:var(--muted);">読み込み中...</div>
+      <button type="button" data-action="settingsPageApi.loadDbStats" id="refreshDbStatsBtn"
+        style="margin-top:8px;padding:4px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:4px;background:none;color:var(--text);cursor:pointer;font-size:12px;"
+        data-i18n="settings.refresh">更新</button>
+    </div>
+    <div style="margin-bottom:16px;padding:12px;border:1px solid rgba(128,128,128,0.15);border-radius:8px;">
+      <div style="font-weight:600;font-size:13px;margin-bottom:4px;" data-i18n="settings.vacuum_title">VACUUM（DB 最適化）</div>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 8px 0;" data-i18n="settings.vacuum_desc">フラグメントを解消してDBファイルを縮小します。数十秒かかる場合があります。</p>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button type="button" id="vacuumBtn" data-action="settingsPageApi.runVacuum"
+          style="padding:5px 14px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:none;color:var(--text);cursor:pointer;font-size:12px;"
+          data-i18n="settings.vacuum_run">VACUUM 実行</button>
+        <span id="vacuumResult" style="font-size:12px;"></span>
+      </div>
+    </div>
+    <div style="margin-bottom:16px;padding:12px;border:1px solid rgba(128,128,128,0.15);border-radius:8px;">
+      <div style="font-weight:600;font-size:13px;margin-bottom:4px;" data-i18n="settings.analyze_title">ANALYZE（クエリ最適化）</div>
+      <p style="font-size:12px;color:var(--muted);margin:0 0 8px 0;" data-i18n="settings.analyze_desc">クエリプランナーの統計を更新します。検索が遅いと感じたら実行してください。</p>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <button type="button" id="analyzeBtn" data-action="settingsPageApi.runAnalyze"
+          style="padding:5px 14px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:none;color:var(--text);cursor:pointer;font-size:12px;"
+          data-i18n="settings.analyze_run">ANALYZE 実行</button>
+        <span id="analyzeResult" style="font-size:12px;"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Save bar (used by CategorySaver for config fields + saveJsonDirect() for status) -->
+  <div class="settings-save-bar">
+    <button type="button" id="save-btn-cat-dev" class="btn btn-primary">
+      <span data-i18n="settings.save">保存</span>
+    </button>
+    <span id="save-status-cat-dev" class="save-status"></span>
+    <span id="save-hint-cat-dev" class="save-hint" hidden>
+      <span data-i18n="settings.unsaved_hint">未保存の変更があります</span>
+    </span>
+  </div>
+</section>

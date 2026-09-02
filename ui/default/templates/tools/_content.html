@@ -1,0 +1,90 @@
+  {% include "tools/content/primary/_header_intro.html" %}
+
+<div class="tools-layout">
+  <aside class="tools-sidebar">
+    <nav class="tools-sidebar-nav" id="toolsSidebarNav">
+      <div class="tools-sidebar-label" data-i18n="tools.sidebar.label">ツール</div>
+      <a class="tools-sidebar-item tools-sidebar-item--active" href="#toolsCatSearch" data-cat="search">
+        <div class="tools-sidebar-item__label" data-i18n="tools.sidebar.cat_search">🔍 検索</div>
+        <div class="tools-sidebar-item__sub" data-i18n="tools.sidebar.cat_search_desc">Cross / File / Chat</div>
+      </a>
+      <a class="tools-sidebar-item" href="#toolsCatAi" data-cat="ai">
+        <div class="tools-sidebar-item__label" data-i18n="tools.sidebar.cat_ai">🤖 AI 解析</div>
+        <div class="tools-sidebar-item__sub" data-i18n="tools.sidebar.cat_ai_desc">Analysis / WD / OCR…</div>
+      </a>
+      <a class="tools-sidebar-item" href="#toolsCatOrganize" data-cat="organize">
+        <div class="tools-sidebar-item__label" data-i18n="tools.sidebar.cat_organize">🗂️ 整理</div>
+        <div class="tools-sidebar-item__sub" data-i18n="tools.sidebar.cat_organize_desc">重複 / タグ / アーカイブ…</div>
+      </a>
+      <a class="tools-sidebar-item" href="#toolsCatMaintenance" data-cat="maintenance">
+        <div class="tools-sidebar-item__label" data-i18n="tools.sidebar.cat_maintenance">🔧 メンテナンス</div>
+        <div class="tools-sidebar-item__sub" data-i18n="tools.sidebar.cat_maintenance_desc">キャッシュ / DB / ログ…</div>
+      </a>
+      <a class="tools-sidebar-item" href="#toolsCatSystem" data-cat="system">
+        <div class="tools-sidebar-item__label" data-i18n="tools.sidebar.cat_system">⚙️ システム / 連携</div>
+        <div class="tools-sidebar-item__sub" data-i18n="tools.sidebar.cat_system_desc">スキャン / MCP / Webhooks…</div>
+      </a>
+    </nav>
+  </aside>
+
+  <main class="tools-main">
+    <section class="tools-category-panel" id="toolsCatSearch">
+      <h2 class="tools-category-heading" data-i18n="tools.sidebar.cat_search">🔍 検索</h2>
+      <div class="tools-accordion">
+        {% include "tools/content/primary/_cross_search.html" %}
+        {% include "tools/content/primary/_file_search.html" %}
+        {% include "tools/content/primary/_chatlog_search.html" %}
+      </div>
+    </section>
+
+    <section class="tools-category-panel" id="toolsCatAi">
+      <h2 class="tools-category-heading" data-i18n="tools.sidebar.cat_ai">🤖 AI 解析</h2>
+      <div class="tools-accordion">
+        {% include "tools/content/primary/_ai_analysis.html" %}
+        {% include "tools/content/primary/_wd_tagger.html" %}
+        {% include "tools/content/primary/_ocr_advanced.html" %}
+        {% include "tools/content/primary/_video_analysis.html" %}
+        {% include "hailo_semantic_search/_semantic_ui.html" ignore missing %}
+        {% include "hailo_yolo_detect/_yolo_detect_ui.html" ignore missing %}
+        {% include "hailo_genai/_genai_ui.html" ignore missing %}
+      </div>
+    </section>
+
+    <section class="tools-category-panel" id="toolsCatOrganize">
+      <h2 class="tools-category-heading" data-i18n="tools.sidebar.cat_organize">🗂️ 整理</h2>
+      <div class="tools-accordion">
+        {% include "tools/content/primary/_duplicates.html" %}
+        {% include "tools/content/primary/_tag_normalize.html" %}
+        {% include "tools/content/primary/_archive_cleanup.html" %}
+        {% include "tools/content/primary/_lora_projects.html" %}
+      </div>
+    </section>
+
+    <section class="tools-category-panel" id="toolsCatMaintenance">
+      <h2 class="tools-category-heading" data-i18n="tools.sidebar.cat_maintenance">🔧 メンテナンス</h2>
+      <div class="tools-accordion">
+        {% include "tools/content/primary/_thumbnail_cache.html" %}
+        {% include "tools/content/primary/_database_backup.html" %}
+        {% include "tools/content/primary/_debug_log_viewer.html" %}
+        {% include "tools/content/secondary/_db_info.html" %}
+        {% include "tools/content/secondary/_groups_manager.html" %}
+        {% include "tools/content/primary/_system_update.html" %}
+      </div>
+    </section>
+
+    <section class="tools-category-panel" id="toolsCatSystem">
+      <h2 class="tools-category-heading" data-i18n="tools.sidebar.cat_system">⚙️ システム / 連携</h2>
+      <div class="tools-accordion">
+        {% include "tools/content/secondary/_scan.html" %}
+        {% include "tools/content/secondary/_startup_mode.html" %}
+        {% include "tools/content/secondary/_shutdown_server.html" %}
+        {% include "tools/content/secondary/_extensions_and_close.html" %}
+        {% include "tools/content/primary/_mcp_connections.html" %}
+        {% include "tools/content/primary/_webhooks.html" %}
+        {% include "tools/content/primary/_prompt_convert.html" %}
+      </div>
+    </section>
+  </main>
+</div>
+
+{% include "tools/content/_server_dir_modal.html" %}

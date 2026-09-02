@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Privacy Policy — yu_ai_manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f1eb;
+    --bg-2: #ebe8e0;
+    --ink: #111111;
+    --ink-2: #2a2a2a;
+    --mute: #6b6b66;
+    --mute-2: #9c9a92;
+    --rule: #1111111a;
+    --rule-strong: #11111130;
+    --accent: #1a47ff;
+    --warn: #d4441a;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --cond: 'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
+  }
+  html[data-theme="dark"] {
+    --bg: #0d0d0e; --bg-2: #141416;
+    --ink: #f1efe9; --ink-2: #dcd9d1;
+    --mute: #8a8880; --mute-2: #55534c;
+    --rule: #ffffff14; --rule-strong: #ffffff2e;
+    --accent: #7aa6ff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; background: var(--bg); }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-weight: 400;
+    line-height: 1.6; min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  ul { list-style: none; }
+
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 3;
+    opacity: .035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .sysbar {
+    position: sticky; top: 0; z-index: 40;
+    background: var(--ink); color: var(--bg);
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .04em;
+  }
+  .sysbar-inner {
+    max-width: 1440px; margin: 0 auto;
+    padding: 0 clamp(1rem, 3vw, 3rem);
+    display: flex; align-items: center; gap: 2rem;
+    height: 28px;
+  }
+  .sysbar-dot { width: 7px; height: 7px; border-radius: 50%; background: #6dd66d; flex: none; }
+  .sysbar-metric b { color: #fff; font-weight: 500; }
+  .sysbar .right { margin-left: auto; opacity: .6; }
+  @media (max-width: 640px) { .sysbar-metric:nth-of-type(n+3) { display: none; } .sysbar .right { display:none; } }
+
+  header.chrome {
+    border-bottom: 1px solid var(--rule);
+    background: var(--bg);
+    position: sticky; top: 28px; z-index: 30;
+  }
+  .chrome-inner {
+    max-width: 1440px; margin: 0 auto;
+    padding: 1rem clamp(1rem, 3vw, 3rem);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .brand {
+    display: flex; align-items: baseline; gap: .6rem;
+    font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--ink);
+  }
+  .brand .mark { width: 10px; height: 10px; background: var(--ink); transform: rotate(45deg); margin-right: .25rem; display:inline-block; }
+  .brand em { color: var(--mute); font-style: normal; font-weight: 400; }
+  .back {
+    font-family: var(--mono); font-size: 12px; color: var(--mute);
+    transition: color .2s;
+  }
+  .back:hover { color: var(--accent); text-decoration: none; }
+
+  main {
+    max-width: 1440px; margin: 0 auto;
+    padding: clamp(3rem, 7vw, 6rem) clamp(1rem, 3vw, 3rem) 4rem;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+  }
+
+  .page-head { grid-column: 1 / -1; margin-bottom: 2.5rem; }
+  .meta {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--mute);
+    display: flex; align-items: center; gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .meta .num { color: var(--ink); font-weight: 500; }
+  .meta .rule { flex: 1; height: 1px; background: var(--rule-strong); }
+
+  h1.display {
+    font-family: var(--cond);
+    font-weight: 700;
+    font-size: clamp(3rem, 9vw, 8rem);
+    line-height: 0.92; letter-spacing: -0.03em;
+    margin-bottom: 1.5rem;
+  }
+  h1.display .accent { color: var(--accent); font-style: italic; font-weight: 600; }
+
+  .page-sub {
+    font-family: var(--mono); font-size: 12px;
+    color: var(--mute);
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 1rem;
+  }
+  .page-sub b { color: var(--ink); font-weight: 500; }
+
+  /* TOC */
+  aside.toc {
+    grid-column: 1 / span 3;
+    font-family: var(--mono);
+    position: sticky;
+    top: 100px;
+    align-self: start;
+  }
+  aside.toc h4 {
+    font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+    color: var(--mute); margin-bottom: 1rem;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid var(--rule-strong);
+    font-weight: 500;
+  }
+  aside.toc ol {
+    list-style: none; counter-reset: toc;
+    font-size: 12px;
+  }
+  aside.toc ol li {
+    counter-increment: toc;
+    padding: .4rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+  aside.toc ol li a {
+    color: var(--mute); display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: .5rem; align-items: baseline;
+    transition: color .2s;
+  }
+  aside.toc ol li a::before {
+    content: counter(toc, decimal-leading-zero);
+    color: var(--mute-2); font-size: 10px;
+  }
+  aside.toc ol li a:hover, aside.toc ol li a.active { color: var(--ink); text-decoration: none; }
+  aside.toc ol li a.active { font-weight: 500; }
+
+  .content {
+    grid-column: 5 / -1;
+  }
+
+  .highlight {
+    border-left: 3px solid var(--accent);
+    background: var(--bg-2);
+    padding: 1.5rem 1.75rem;
+    font-family: var(--cond);
+    font-weight: 500;
+    font-size: clamp(1.15rem, 1.8vw, 1.45rem);
+    line-height: 1.35;
+    color: var(--ink);
+    margin-bottom: 3rem;
+    letter-spacing: -0.005em;
+  }
+  .highlight em { color: var(--mute); font-style: normal; display: block; margin-top: .4rem; font-size: .85em; font-family: var(--mono); font-weight: 400; letter-spacing: 0; }
+
+  article.section {
+    padding: 2rem 0;
+    border-top: 1px solid var(--rule-strong);
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  article.section .num {
+    font-family: var(--mono);
+    font-size: 11px; letter-spacing: .1em; color: var(--mute);
+    padding-top: .3rem;
+  }
+  article.section h2 {
+    font-family: var(--cond);
+    font-size: clamp(1.35rem, 2vw, 1.75rem);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+    line-height: 1.15;
+  }
+  article.section p {
+    font-size: .95rem;
+    color: var(--ink-2);
+    margin-bottom: 1rem;
+    max-width: 680px;
+  }
+  article.section ul {
+    margin: 1rem 0 1.5rem;
+    border-top: 1px solid var(--rule);
+  }
+  article.section ul li {
+    padding: .65rem 0;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    color: var(--ink-2);
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    gap: .5rem;
+  }
+  article.section ul { counter-reset: li; }
+  article.section ul li::before {
+    content: counter(li, decimal-leading-zero);
+    counter-increment: li;
+    color: var(--mute-2);
+    font-size: 10px;
+    padding-top: 2px;
+  }
+
+  code {
+    font-family: var(--mono);
+    font-size: .9em;
+    color: var(--accent);
+    background: var(--bg-2);
+    padding: 0.12em 0.5em;
+    border: 1px solid var(--rule-strong);
+  }
+
+  .pill {
+    display: inline-block;
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .15em; text-transform: uppercase;
+    padding: 3px 8px;
+    background: var(--ink); color: var(--bg);
+    margin-right: .5rem; margin-bottom: .3rem;
+  }
+  .pill.ghost { background: transparent; color: var(--mute); border: 1px solid var(--rule-strong); }
+
+  @media (max-width: 900px) {
+    aside.toc { grid-column: 1 / -1; position: static; margin-bottom: 2rem; }
+    .content { grid-column: 1 / -1; }
+    article.section { grid-template-columns: 1fr; gap: .75rem; }
+  }
+
+  footer {
+    background: var(--ink);
+    color: var(--bg);
+    margin-top: 4rem;
+  }
+  .footer-inner {
+    max-width: 1440px; margin: 0 auto;
+    padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 3vw, 3rem) 1.5rem;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    font-family: var(--mono); font-size: 11px;
+    color: color-mix(in oklab, var(--bg) 60%, transparent);
+  }
+  .footer-inner a { color: color-mix(in oklab, var(--bg) 85%, transparent); }
+  .footer-inner a:hover { color: #fff; text-decoration: none; }
+
+  ::selection { background: var(--accent); color: #fff; }
+
+  /* Tweaks */
+  .tweaks {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 80;
+    background: var(--bg); border: 1px solid var(--ink);
+    padding: .9rem 1rem; font-family: var(--mono); font-size: 11px;
+    display: none; width: 220px;
+  }
+  .tweaks.on { display: block; }
+  .tweaks h5 { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; margin-bottom: .85rem; display: flex; justify-content: space-between; }
+  .tweaks h5 .x { cursor: pointer; color: var(--mute); }
+  .tweaks .two { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--rule-strong); }
+  .tweaks .two button { padding: .5rem; border-right: 1px solid var(--rule-strong); color: var(--mute); background:none; cursor:pointer; font: inherit; }
+  .tweaks .two button:last-child { border-right: 0; }
+  .tweaks .two button.on { background: var(--ink); color: var(--bg); }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<div class="sysbar">
+  <div class="sysbar-inner">
+    <span class="sysbar-dot"></span>
+    <span class="sysbar-metric">PAGE <b>PRIVACY</b></span>
+    <span class="sysbar-metric">UPDATED <b>2026-04-18</b></span>
+    <span class="right">§ LEGAL</span>
+  </div>
+</div>
+
+<header class="chrome">
+  <div class="chrome-inner">
+    <a href="index.html" class="brand">
+      <span class="mark"></span>yu_ai_manager <em>/ by eauesque</em>
+    </a>
+    <a href="index.html" class="back">← back to home</a>
+  </div>
+</header>
+
+<main>
+  <div class="page-head">
+    <div class="meta">
+      <span class="num">§</span><span>LEGAL · PRIVACY POLICY</span><span class="rule"></span><span>doc 01</span>
+    </div>
+    <h1 class="display">Privacy,<br/><span class="accent">verifiable.</span></h1>
+    <div class="page-sub">
+      <span>Last updated <b>2026-04-18</b></span>
+      <span>Document <b>PRIV‑001</b></span>
+      <span>Jurisdiction <b>source-available</b></span>
+      <span>Telemetry <b>none</b></span>
+    </div>
+  </div>
+
+  <aside class="toc" aria-label="table of contents">
+    <h4>On this page</h4>
+    <ol>
+      <li><a href="#s1">Data collection</a></li>
+      <li><a href="#s2">Local storage</a></li>
+      <li><a href="#s3">Network activity</a></li>
+      <li><a href="#s4">Third‑party services</a></li>
+      <li><a href="#s5">Microsoft Store</a></li>
+      <li><a href="#s6">Open source</a></li>
+      <li><a href="#s7">Contact</a></li>
+    </ol>
+  </aside>
+
+  <div class="content">
+    <div class="highlight">
+      yu_ai_manager does not collect, transmit, or store any personal data.
+      <em>All processing occurs locally on your device.</em>
+    </div>
+
+    <article class="section" id="s1">
+      <div class="num">§ 01</div>
+      <div>
+        <h2>Data collection</h2>
+        <p>yu_ai_manager does not collect any personal information. The application operates entirely on your local machine. No data is sent to external servers by the application itself.</p>
+        <span class="pill">no collection</span>
+        <span class="pill ghost">no analytics</span>
+        <span class="pill ghost">no crash reports</span>
+      </div>
+    </article>
+
+    <article class="section" id="s2">
+      <div class="num">§ 02</div>
+      <div>
+        <h2>Local storage</h2>
+        <p>The application stores the following data locally on your device only:</p>
+        <ul>
+          <li>Image library metadata (file paths, tags, ratings) in a local SQLite database</li>
+          <li>Application configuration and preferences</li>
+          <li>AI analysis results generated on your device</li>
+          <li>Prompt library entries you create</li>
+        </ul>
+        <p>This data never leaves your device and is under your full control. You may delete it at any time by removing the application data directory.</p>
+      </div>
+    </article>
+
+    <article class="section" id="s3">
+      <div class="num">§ 03</div>
+      <div>
+        <h2>Network activity</h2>
+        <p>yu_ai_manager may make network connections in the following cases, all initiated by you:</p>
+        <ul>
+          <li>Connections to AI inference servers you configure (local network only by default)</li>
+          <li>Connections to external APIs (Stable Diffusion WebUI, NovelAI, etc.) that you explicitly configure</li>
+          <li>mDNS / Bonjour discovery on your local network for peer inference nodes</li>
+        </ul>
+        <p>No telemetry, analytics, or crash reporting data is transmitted. The application does not &ldquo;phone home.&rdquo;</p>
+      </div>
+    </article>
+
+    <article class="section" id="s4">
+      <div class="num">§ 04</div>
+      <div>
+        <h2>Third‑party services</h2>
+        <p>If you configure the application to connect to third‑party services (e.g., NovelAI, OpenAI‑compatible APIs), those services operate under their own privacy policies. yu_ai_manager does not control or mediate that data flow.</p>
+      </div>
+    </article>
+
+    <article class="section" id="s5">
+      <div class="num">§ 05</div>
+      <div>
+        <h2>Microsoft Store</h2>
+        <p>Purchase and distribution through the Microsoft Store is subject to Microsoft's privacy policy. The Store may collect purchase information as per their standard terms. This is outside the scope of yu_ai_manager itself.</p>
+      </div>
+    </article>
+
+    <article class="section" id="s6">
+      <div class="num">§ 06</div>
+      <div>
+        <h2>Open source</h2>
+        <p>The complete source code for yu_ai_manager is available at <a href="https://github.com/eauesque/yu_ai_manager">github.com/eauesque/yu_ai_manager</a> under the MIT License. You are free to audit the code to verify these claims.</p>
+        <p>In practice: <code>git clone</code> the repository and ask any AI assistant to review it. Network activity, data collection, and telemetry — or the absence thereof — are verifiable in minutes. We encourage this.</p>
+      </div>
+    </article>
+
+    <article class="section" id="s7">
+      <div class="num">§ 07</div>
+      <div>
+        <h2>Contact</h2>
+        <p>Questions regarding this policy may be directed via the GitHub repository linked above.</p>
+      </div>
+    </article>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 eauesque · MIT License</span>
+    <span><a href="index.html">yu_ai_manager</a> · <a href="bugreport.html">bug report</a> · <a href="https://github.com/eauesque/yu_ai_manager">github</a></span>
+  </div>
+</footer>
+
+<div class="tweaks" id="tweaks">
+  <h5>Tweaks <span class="x" id="tweaks-close">×</span></h5>
+  <div class="tweak">
+    <label style="display:block;font-size:10px;letter-spacing:.05em;color:var(--mute);margin-bottom:.35rem;">Theme</label>
+    <div class="two" id="t-theme">
+      <button class="on" data-v="light">light</button>
+      <button data-v="dark">dark</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const TWEAKS = /*EDITMODE-BEGIN*/{ "theme": "light" }/*EDITMODE-END*/;
+function applyTweaks(t) {
+  document.documentElement.dataset.theme = t.theme;
+  document.querySelectorAll('#t-theme button').forEach(b => b.classList.toggle('on', b.dataset.v === t.theme));
+}
+applyTweaks(TWEAKS);
+document.getElementById('t-theme').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  TWEAKS.theme = b.dataset.v; applyTweaks(TWEAKS);
+  try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: TWEAKS.theme } }, '*'); } catch(_) {}
+});
+document.getElementById('tweaks-close').addEventListener('click', () => {
+  document.getElementById('tweaks').classList.remove('on');
+  try { window.parent.postMessage({ type: '__deactivate_edit_mode' }, '*'); } catch(_) {}
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === '__activate_edit_mode') document.getElementById('tweaks').classList.add('on');
+  if (t === '__deactivate_edit_mode') document.getElementById('tweaks').classList.remove('on');
+});
+try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch(_) {}
+
+// TOC scroll-spy
+const links = [...document.querySelectorAll('aside.toc a')];
+const sections = links.map(a => document.querySelector(a.getAttribute('href')));
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      links.forEach(l => l.classList.remove('active'));
+      const i = sections.indexOf(e.target);
+      if (i >= 0) links[i].classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -55% 0px' });
+sections.forEach(s => s && spy.observe(s));
+</script>
+
+</body>
+</html>

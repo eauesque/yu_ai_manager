@@ -1,0 +1,58 @@
+{# _cat_tagging.html — cat-tagging panel: tagger servers + tag dictionary #}
+<section id="cat-tagging" data-settings-panel="cat-tagging"
+         role="tabpanel" aria-labelledby="sidebar-item-cat-tagging"
+         aria-hidden="true" style="display:none">
+  <h2 class="settings-cat-heading">
+    <span data-i18n="settings.cat.tagging">タグ付け</span>
+  </h2>
+
+  <!-- Tagger Server Registry -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">🏷️</span> <span data-i18n="settings.tsr_title">Tagger Server Registry</span></h2>
+    <p style="font-size:13px;color:var(--muted);" data-i18n="settings.tsr_desc">Manage distributed tag inference servers (Hailo Remote, ONNX Local, etc.). Supports parallel batch tagging with work-stealing.</p>
+    <div class="alert alert-info" role="note" style="margin:10px 0;padding:10px;border-left:3px solid #4a90e2;background:rgba(74,144,226,0.08);">
+      <span data-i18n="settings.tsr_mesh_redirect">分散推論のピアごと有効/無効設定は</span>
+      <a href="/mesh-inference" data-i18n="settings.tsr_mesh_redirect_link">分散推論マトリクス</a>
+      <span data-i18n="settings.tsr_mesh_redirect_suffix">で管理します。</span>
+    </div>
+    <div id="tsrContainer" style="margin-top:12px;">Loading...</div>
+  </div>
+
+  <!-- Tag Dictionary -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">📖</span> <span data-i18n="settings.tagdict_title">Tag Dictionary</span></h2>
+    <p style="font-size:13px;color:var(--muted);" data-i18n="settings.tagdict_desc">Local Danbooru tag dictionary for offline autocomplete with category colors.</p>
+    <div id="tagDictStats" style="margin-top:12px;font-size:13px;color:var(--muted);">Loading...</div>
+  </div>
+  <div class="settings-section">
+    <h2><span aria-hidden="true">📥</span> <span data-i18n="settings.tagdict_import_title">Import CSV</span></h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.tagdict_import_desc">Upload a CSV file (a1111-sd-webui-tagcomplete format: tag_name,category,post_count,aliases).</p>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <input type="file" id="tagDictFile" accept=".csv,.txt" aria-label="Tag dictionary CSV file" style="font-size:13px;color:var(--text);">
+      <button data-action="settingsPageApi.importTagDictCsv" class="btn-save" style="padding:8px 16px;" data-i18n="settings.tagdict_import_btn">Import</button>
+    </div>
+    <div id="tagDictImportStatus" style="display:none;margin-top:8px;font-size:12px;"></div>
+  </div>
+  <div class="settings-section">
+    <h2><span aria-hidden="true">🔍</span> <span data-i18n="settings.tagdict_search_title">Test Search</span></h2>
+    <input type="text" id="tagDictSearch" data-action="settingsPageApi.onTagDictSearchInput" data-action-event="input" placeholder="e.g. 1girl, blue_eyes" data-i18n-placeholder="settings.tagdict_search_placeholder" aria-label="Tag dictionary search"
+           style="width:100%;max-width:400px;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+    <div id="tagDictSearchResults" style="margin-top:8px;"></div>
+  </div>
+  <div class="settings-section">
+    <button data-action="settingsPageApi.clearTagDict" style="padding:8px 16px;border:1px solid rgba(204,68,68,0.5);border-radius:8px;background:rgba(204,68,68,0.1);color:#cc4444;cursor:pointer;font-size:13px;">
+      <svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-trash"/></svg> <span data-i18n="settings.tagdict_clear_btn">Clear Dictionary</span>
+    </button>
+  </div>
+
+  <!-- Save bar -->
+  <div class="settings-save-bar">
+    <button type="button" id="save-btn-cat-tagging" class="btn btn-primary">
+      <span data-i18n="settings.save">保存</span>
+    </button>
+    <span id="save-status-cat-tagging" class="save-status"></span>
+    <span id="save-hint-cat-tagging" class="save-hint" hidden>
+      <span data-i18n="settings.unsaved_hint">未保存の変更があります</span>
+    </span>
+  </div>
+</section>

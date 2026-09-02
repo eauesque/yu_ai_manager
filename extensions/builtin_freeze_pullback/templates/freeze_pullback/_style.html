@@ -1,0 +1,9 @@
+{# Freeze & Pull-back styles — split into 3 partials to keep each file under
+   the 500-line soft limit. Order: layout → content → waypoint (overlays last
+   so z-index/positioning rules win where rules collide).
+   CSS 変数は base-theme.css のアプリテーマを継承:
+     --bg, --card, --text, --muted, --border, --accent,
+     --btn-bg, --btn-text, --btn-hover, --shadow #}
+{% include "freeze_pullback/_style_layout.html" %}
+{% include "freeze_pullback/_style_content.html" %}
+{% include "freeze_pullback/_style_waypoint.html" %}

@@ -1,0 +1,32 @@
+/* base-icons.css — SVG sprite icon defaults.
+ * Sprite lives at /static/img/icons/icons.svg.
+ * Helper: icon(name, opts?) in src/ts/shared/icon.ts.
+ * Toggle pattern: replace <use href> between #icon-foo and #icon-foo-filled,
+ * or swap a class that flips the underlying symbol via JS.
+ */
+
+.icon {
+  /* Sized to the inherited font-size by default; callers can override
+   * with width/height attributes or a more specific selector. */
+  width: 1em;
+  height: 1em;
+  /* Vertically center within text/button content. */
+  vertical-align: -0.125em;
+  /* fill is not applied by default — Lucide icons are stroke-based and
+   * inherit stroke="currentColor" from the symbol. Filled variants set
+   * fill="currentColor" on the symbol itself. */
+  flex-shrink: 0;
+  /* Prevent pointer events on the icon swallowing button clicks. */
+  pointer-events: none;
+}
+
+/* Convenience size modifiers. */
+.icon-sm { width: 0.875em; height: 0.875em; }
+.icon-lg { width: 1.25em;  height: 1.25em; }
+.icon-xl { width: 1.5em;   height: 1.5em; }
+
+/* Favorite star: amber when active, neutral otherwise. The toggle logic
+ * swaps the <use href> between #icon-star and #icon-star-filled in JS. */
+.icon-star-toggle.is-active {
+  color: #ffd700;
+}

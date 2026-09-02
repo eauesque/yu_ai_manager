@@ -1,0 +1,175 @@
+/*
+ * Atelier System (γ) — Foundation Tokens
+ *
+ * Opt-in additive theme. Apply via:
+ *   document.body.classList.add("theme-atelier-light")
+ *   document.body.classList.add("theme-atelier-dark")
+ *
+ * Existing themes (light / dark / theme-retro / theme-glow) untouched.
+ */
+
+/* ----- Web fonts (self-hosted, Latin Extended subset) ----- */
+
+@font-face {
+  font-family: "Fraunces";
+  src: url("/static/fonts/atelier/Fraunces-VariableFont.subset.woff2")
+    format("woff2-variations"),
+       url("/static/fonts/atelier/Fraunces-VariableFont.subset.woff2")
+    format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Inter";
+  src: url("/static/fonts/atelier/Inter-VariableFont.subset.woff2")
+    format("woff2-variations"),
+       url("/static/fonts/atelier/Inter-VariableFont.subset.woff2")
+    format("woff2");
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("/static/fonts/atelier/JetBrainsMono-VariableFont.subset.woff2")
+    format("woff2-variations"),
+       url("/static/fonts/atelier/JetBrainsMono-VariableFont.subset.woff2")
+    format("woff2");
+  font-weight: 100 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ----- Atelier light ----- */
+
+body.theme-atelier-light {
+  /* warm chrome (background + surface) */
+  --bg: #f4ede1;
+  --surface: #ede4d3;
+  --surface-raised: #e6dac4;
+  --border: #d8ccb6;
+  --table-head: var(--surface-raised);  /* #e6dac4 — WCAG AA: ~11:1 vs --text #2a2620 */
+
+  /* neutral canvas (image-display areas, kept separate from warm chrome) */
+  --canvas: #d4d4d2;
+  --canvas-raised: #c8c8c6;
+
+  /* text scale */
+  --text: #2a2620;
+  --text-muted: #635948;
+  --text-faint: #7a6e5e; /* eyebrow only — verified 3:1 on surface-raised */
+
+  /* dual-tier accents */
+  --accent-warm: #c9a063; /* decorative / atmosphere */
+  --accent-tool: #2f5c8a; /* action / focus */
+  --accent: var(--accent-tool); /* legacy alias for components reading --accent */
+  /* Accent text sitting ON an accent-tinted surface (the active sidebar item's
+   * rgba(88,166,255,.10) fill). Was referenced but never defined, so it always
+   * fell back to a dark-theme literal and landed at 1.52:1 on this background.
+   * Measured 5.55:1 here; nothing softer clears AA's 4.5 (#3a6d9e is 4.34), so
+   * in the light theme it deliberately equals --accent-tool and the hierarchy
+   * against the label is carried by size and weight instead. */
+  --accent-muted: #2f5c8a;
+
+  /* legacy aliases — main.css and many components read --card / --muted directly,
+   * so atelier needs to redefine them or panels stay white in dark mode. */
+  --card: var(--surface);
+  --muted: var(--text-muted);
+  /* Referenced in 72 places across the extension templates and defined
+   * nowhere, so every one of them fell back to a hardcoded dark-theme grey
+   * (#aaa / #888). On this light canvas that is how the SD WebUI bridge's
+   * "(0 LoRA)" badge failed AA contrast. Aliased to --text-muted so the whole
+   * set tracks the theme instead of assuming a dark one. */
+  --text-secondary: var(--text-muted);
+
+  /* shadow / glass */
+  --shadow-sm: 0 1px 2px rgba(42, 38, 32, 0.08);
+  --shadow-md: 0 4px 16px rgba(42, 38, 32, 0.12);
+  --glass-bg: rgba(255, 255, 255, 0.55);
+  --glass-border: rgba(42, 38, 32, 0.10);
+
+  /* fonts */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  /* Fraunces optical-size axis values per role */
+  --opsz-h1: 96;
+  --opsz-h2: 48;
+  --opsz-h3: 24;
+  --opsz-body: 14;
+  --opsz-eyebrow: 11;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+/* ----- Atelier dark ----- */
+
+body.theme-atelier-dark {
+  --bg: #1c1814;
+  --surface: #25201a;
+  --surface-raised: #2f2920;
+  --border: #3a3228;
+  --table-head: var(--surface-raised);  /* #2f2920 — WCAG AA: ~12:1 vs --text #ede4d3 */
+
+  --canvas: #1a1a1a;
+  --canvas-raised: #222222;
+
+  --text: #ede4d3;
+  --text-muted: #a89880;
+  --text-faint: #8c7f6e; /* eyebrow only — verified 3:1 on surface-raised */
+
+  --accent-warm: #d4a96e;
+  --accent-tool: #5a8fc5;
+  --accent: var(--accent-tool);
+  /* See the light variant. On the active item's tint (rgb(34,38,44) once
+   * composited) --accent-tool itself measures 4.46:1 -- under AA, and never
+   * caught because the a11y suite only ever loads the light theme. #7aa8d4
+   * measures 6.06:1. */
+  --accent-muted: #7aa8d4;
+
+  /* legacy aliases (see light variant comment) */
+  --card: var(--surface);
+  --muted: var(--text-muted);
+  --text-secondary: var(--text-muted);
+
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.5);
+  --glass-bg: rgba(37, 32, 26, 0.6);
+  --glass-border: rgba(237, 228, 211, 0.08);
+
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+
+  --opsz-h1: 96;
+  --opsz-h2: 48;
+  --opsz-h3: 24;
+  --opsz-body: 14;
+  --opsz-eyebrow: 11;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+/* ----- Reduced motion granularity -----
+ * Keep opacity transitions (essential for legibility cues) but cancel
+ * transform/animation so vestibular-sensitive users don't get motion. */
+
+@media (prefers-reduced-motion: reduce) {
+  body.theme-atelier-light *,
+  body.theme-atelier-dark * {
+    animation-duration: 0.001s !important;
+    animation-iteration-count: 1 !important;
+    transition-property: opacity, color, background-color, border-color !important;
+    transition-duration: 0.15s !important;
+  }
+}

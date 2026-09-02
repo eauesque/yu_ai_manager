@@ -1,0 +1,38 @@
+    <div class="cheat-header"><span data-i18n="cheat.header_title">Search Help</span><div class="right"><button class="close" type="button" data-action="dockApi.closeRegexCheatDock" data-i18n-aria-label="common.close" aria-label="Close">×</button></div></div>
+    <div class="cheat-resize-handle" id="cheatResizeHandle" data-i18n-aria-label="cheat.resize" aria-label="Resize"></div>
+    <div class="cheat-controls" role="region" data-i18n-aria-label="cheat.controls" aria-label="Controls">
+      <div class="cheat-controls-left">
+        <b data-i18n="cheat.controls">Controls</b>
+        <span class="cheat-controls-line">
+          <code>Ctrl</code>+<code>/</code> <span data-i18n="cheat.kb_toggle_help">Toggle help</span> /
+          <code>Ctrl</code>+<code>Alt</code>+<code>R</code> <span data-i18n="cheat.kb_toggle_regex">Toggle regex</span> /
+          <code>Alt</code>+<code>←</code>/<code>→</code> <span data-i18n="cheat.kb_move">Move</span> /
+          <code>Alt</code>+<code>Home</code>/<code>End</code> <span data-i18n="cheat.kb_start_end">Start/End</span> /
+          <code>Alt</code>+<code>PageUp</code>/<code>PageDown</code> <span data-i18n="cheat.kb_page">Page</span> /
+          <code>Alt</code>+<code>Shift</code>+<code>←</code>/<code>→</code> <span data-i18n="cheat.kb_fine">Fine</span> /
+          <code>Ctrl</code>+<code>Alt</code>+<code>O</code> <span data-i18n="cheat.kb_detail_toggle">Toggle details</span> / <code>Esc</code> <span data-i18n="cheat.kb_close">Close</span>
+        </span>
+      </div>
+      <button class="cheat-controls-toggle" type="button" data-action="dockApi.toggleCheatKbDetails" aria-expanded="false" aria-controls="cheatKbDetails"><span data-i18n="cheat.details_btn">Details</span> ▸</button>
+    </div>
+    <div class="cheat-controls-details is-collapsed" id="cheatKbDetails" data-i18n-aria-label="cheat.kb_ops" aria-label="Keyboard controls">
+      <div class="cheat-guide">
+        <div class="cheat-guide-title"><b data-i18n="cheat.guide_title">Quick Guide</b></div>
+        <ul class="cheat-guide-list">
+          <li data-i18n="cheat.guide_1">When "Regex" is ON, the search input is interpreted as a regular expression (e.g. cat|dog).</li>
+          <li data-i18n="cheat.guide_2">If unsure, turn it OFF to return to normal search.</li>
+          <li data-i18n="cheat.guide_3">Copy examples directly and paste into the search field to try.</li>
+        </ul>
+      </div>
+
+      <table class="cheat-kb-table">
+        <tr><td class="d" data-i18n="cheat.kbt_toggle_help">Toggle help</td><td class="k"><code>Ctrl</code>+<code>/</code></td></tr>
+        <tr><td class="d" data-i18n="cheat.kbt_toggle_regex">Toggle regex</td><td class="k"><code>Ctrl</code>+<code>Alt</code>+<code>R</code></td></tr>
+        <tr><td class="d" data-i18n="cheat.kbt_detail_toggle">Toggle details</td><td class="k"><code>Ctrl</code>+<code>Alt</code>+<code>O</code></td></tr>
+        <tr><td class="d" data-i18n="cheat.kbt_col_move">Column move</td><td class="k"><code>Alt</code>+<code>←</code>/<code>→</code></td></tr>
+        <tr><td class="d" data-i18n="cheat.kbt_start_end">Start/End</td><td class="k"><code>Alt</code>+<code>Home</code>/<code>End</code></td></tr>
+        <tr><td class="d" data-i18n="cheat.kbt_page_move">Page move</td><td class="k"><code>Alt</code>+<code>PageUp</code>/<code>PageDown</code></td></tr>
+        <tr><td class="d" data-i18n="cheat.kbt_fine_move">Fine move</td><td class="k"><code>Alt</code>+<code>Shift</code>+<code>←</code>/<code>→</code></td></tr>
+        <tr><td class="d" data-i18n="cheat.kbt_close">Close</td><td class="k"><code>Esc</code></td></tr>
+      </table>
+    </div>

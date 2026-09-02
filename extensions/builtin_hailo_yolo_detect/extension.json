@@ -1,0 +1,81 @@
+{
+  "name": "builtin-hailo-yolo-detect",
+  "version": "1.0.0",
+  "description": "Hailo-10H YOLO Object Detection",
+  "type": "ui_widget",
+  "category": "ai",
+  "entry": "hailo_yolo_detect.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/hailo-yolo",
+  "nav": {
+    "label": "YOLO",
+    "icon": "\ud83d\udd0d"
+  },
+  "core_shim": "hailo_yolo_core",
+  "config": {
+    "enabled": true,
+    "priority": 51
+  },
+  "config_schema": {
+    "backend": {
+      "type": "select",
+      "options": ["auto", "hailo", "onnx", "opencv_dnn"],
+      "default": "auto",
+      "label": "Backend",
+      "description": "Inference backend. 'auto' detects the best available."
+    },
+    "auto_detect_on_scan": {
+      "type": "bool",
+      "default": false,
+      "label": "Auto-detect on scan",
+      "description": "Automatically run object detection after scan completes"
+    },
+    "model": {
+      "type": "string",
+      "default": "yolov8n",
+      "label": "YOLO model",
+      "description": "YOLO model variant (yolov8n, yolov11n, yolov5m)"
+    },
+    "confidence_threshold": {
+      "type": "float",
+      "default": 0.25,
+      "label": "Confidence threshold",
+      "range": [
+        0.05,
+        0.95
+      ],
+      "description": "Minimum confidence score for detections (0.05-0.95)"
+    },
+    "batch_size": {
+      "type": "int",
+      "default": 16,
+      "label": "Batch size",
+      "range": [
+        1,
+        64
+      ],
+      "description": "Number of files to process per batch"
+    },
+    "video_frame_interval": {
+      "type": "float",
+      "default": 2.0,
+      "label": "Video frame interval (sec)",
+      "range": [
+        0.5,
+        10.0
+      ],
+      "description": "Seconds between extracted video frames"
+    },
+    "stream_max_sources": {
+      "type": "int",
+      "default": 4,
+      "label": "Max stream sources",
+      "range": [
+        1,
+        8
+      ],
+      "description": "Maximum number of simultaneous stream sources"
+    }
+  }
+}

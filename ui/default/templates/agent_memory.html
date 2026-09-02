@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YU AI Manager - Agent Memory</title>
+  <link rel="stylesheet" href="static/css/main.css?v=20260215">
+  <link rel="stylesheet" href="static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260225">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tokens.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-components.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-index.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tool-tokens.css?v=20260525">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tool-components.css?v=20260525">
+  <link rel="stylesheet" href="static/css/pages/agent_memory.css?v=20260606">
+</head>
+<body class="atelier-tool" data-1p-ignore data-lpignore="true">
+  {% include "_nav.html" %}
+
+  <div id="amOfflineBanner" class="am-offline-banner" hidden role="alert" aria-live="polite"></div>
+
+  <main id="main-content" class="am-page">
+    <h1 class="am-page-title">🧠 Agent Memory</h1>
+
+    <nav class="am-tabs" role="tablist" aria-label="Agent Memory タブ">
+      <button class="am-tab-btn active" role="tab" aria-selected="true"
+              aria-controls="amTabHealth" data-tab="amTabHealth">Health</button>
+      <button class="am-tab-btn" role="tab" aria-selected="false"
+              aria-controls="amTabSessions" data-tab="amTabSessions">Sessions</button>
+      <button class="am-tab-btn" role="tab" aria-selected="false"
+              aria-controls="amTabMemories" data-tab="amTabMemories">Memories</button>
+      <button class="am-tab-btn" role="tab" aria-selected="false"
+              aria-controls="amTabGraph" data-tab="amTabGraph">Graph</button>
+      <button class="am-tab-btn" role="tab" aria-selected="false"
+              aria-controls="amTabAudit" data-tab="amTabAudit">Audit</button>
+    </nav>
+
+    <!-- Tab: Health -->
+    <section id="amTabHealth" class="am-tab-panel" role="tabpanel">
+      <div class="am-card">
+        <h2>サーバー状態</h2>
+        <div id="amHealthStatus" class="am-status-row">—</div>
+        <div id="amHealthVersion" class="am-meta-row"></div>
+        <div id="amHealthUptime" class="am-meta-row"></div>
+      </div>
+      <div class="am-card">
+        <h2>統計</h2>
+        <div id="amHealthStats"></div>
+      </div>
+      <div class="am-card">
+        <h2>プロジェクト</h2>
+        <div id="amHealthProfile"></div>
+      </div>
+      <div class="am-actions">
+        <button id="amHealthRefresh" type="button" class="secondary-btn">リフレッシュ</button>
+      </div>
+    </section>
+
+    <!-- Tab: Sessions -->
+    <section id="amTabSessions" class="am-tab-panel" hidden role="tabpanel">
+      <div class="am-actions">
+        <button id="amSessionsRefresh" type="button" class="secondary-btn">リフレッシュ</button>
+      </div>
+      <div id="amSessionsContent" class="am-table-wrap">
+        <p class="am-placeholder">タブを選択するとロードされます</p>
+      </div>
+    </section>
+
+    <!-- Tab: Memories -->
+    <section id="amTabMemories" class="am-tab-panel" hidden role="tabpanel">
+      <div class="am-actions">
+        <select id="amMemoriesFilter" class="am-select">
+          <option value="">すべて</option>
+          <option value="semantic">semantic</option>
+          <option value="episodic">episodic</option>
+          <option value="procedural">procedural</option>
+        </select>
+        <input id="amMemoriesSearch" type="search" class="am-search"
+               placeholder="検索…" aria-label="メモリ検索">
+        <button id="amMemoriesRefresh" type="button" class="secondary-btn">リフレッシュ</button>
+      </div>
+      <div id="amMemoriesContent" class="am-table-wrap">
+        <p class="am-placeholder">タブを選択するとロードされます</p>
+      </div>
+    </section>
+
+    <!-- Tab: Graph -->
+    <section id="amTabGraph" class="am-tab-panel" hidden role="tabpanel">
+      <div id="amGraphStats" class="am-card"></div>
+      <p id="amGraphTruncNote" class="am-note" hidden>上位 150 件のみ表示</p>
+      <div id="amGraphContainer" class="am-graph-container" style="display:none;"></div>
+      <p id="amGraphPlaceholder" class="am-placeholder">グラフデータがありません</p>
+      <div class="am-actions">
+        <button id="amGraphRefresh" type="button" class="secondary-btn">リフレッシュ</button>
+      </div>
+    </section>
+
+    <!-- Tab: Audit -->
+    <section id="amTabAudit" class="am-tab-panel" hidden role="tabpanel">
+      <div class="am-actions">
+        <button id="amAuditRefresh" type="button" class="secondary-btn">リフレッシュ</button>
+      </div>
+      <div id="amAuditContent" class="am-table-wrap">
+        <p class="am-placeholder">タブを選択するとロードされます</p>
+      </div>
+    </section>
+  </main>
+
+  <script nonce="{{ csp_nonce }}" src="/static/js/vendor/vis-network-9.1.9.min.js"></script>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/agent-memory-app.js?v={{ dist_v }}"></script>
+</body>
+</html>

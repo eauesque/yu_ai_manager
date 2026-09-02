@@ -1,0 +1,15 @@
+{
+  "name": "builtin-lan-share",
+  "version": "1.0.0",
+  "description": "LAN collection sharing with time-limited token authentication",
+  "type": "general",
+  "category": "library",
+  "entry": "lan_share_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "lan_share",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

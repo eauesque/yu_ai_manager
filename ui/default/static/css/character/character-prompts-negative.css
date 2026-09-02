@@ -1,0 +1,32 @@
+/* Character-specific negative prompts */
+.char-negative-prompt {
+  margin-top: 8px;
+  padding: 6px 10px;
+  background: rgba(255, 59, 48, 0.08);
+  border-left: 2px solid #ff3b30;
+  border-radius: 3px;
+  font-size: 12px;
+}
+
+.char-negative-label {
+  font-weight: 600;
+  color: #ff3b30;
+  margin-right: 4px;
+}
+
+.char-negative-text {
+  color: var(--text);
+  font-family: 'Consolas', 'Monaco', monospace;
+}
+
+body.dark .char-negative-prompt {
+  background: rgba(255, 59, 48, 0.12);
+}
+
+body.dark .char-negative-label {
+  color: #ff6b6b;
+}
+
+body.dark .char-negative-text {
+  color: #e0e0e0;
+}

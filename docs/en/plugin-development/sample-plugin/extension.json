@@ -1,0 +1,33 @@
+{
+  "name": "sample-plugin",
+  "version": "1.0.0",
+  "description": "Sample Plugin -- copy this to extensions/ to get started",
+  "author": "YU AI Manager",
+  "type": "general",
+  "entry": "sample_plugin.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/sample",
+  "nav": {
+    "label": "Sample",
+    "icon": "🔌"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 900
+  },
+  "config_schema": {
+    "greeting": {
+      "type": "string",
+      "default": "Hello, World!",
+      "label": "Greeting Message",
+      "description": "Message displayed on the sample page"
+    },
+    "show_timestamp": {
+      "type": "boolean",
+      "default": true,
+      "label": "Show Timestamp",
+      "description": "Display current server time"
+    }
+  }
+}

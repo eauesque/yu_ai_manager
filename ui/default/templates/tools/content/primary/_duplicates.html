@@ -1,0 +1,49 @@
+    <!-- Duplicate file detection -->
+    <details class="tool-item" id="tool-duplicates">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.duplicates">🔍 Duplicate File Detection</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.duplicates_desc">Detect identical files or visually similar images.</p>
+
+      <div>
+        <label class="tool-label" for="duplicateMethod" data-i18n="tools.detect_method">Detection Method:</label>
+        <select class="tool-select" id="duplicateMethod">
+          <option value="hash" data-i18n="tools.method_hash">Exact match (file hash)</option>
+          <option value="phash" data-i18n="tools.method_phash">Similar images (perceptual hash / pHash)</option>
+          <option value="size" data-i18n="tools.method_size">Same size (simple, no hash needed)</option>
+        </select>
+      </div>
+
+      <div id="hashStats"></div>
+
+      <div class="checkbox-group">
+        <label class="tool-label">
+          <input class="tool-input" type="checkbox" id="crossDirectoryOnly" aria-label="Cross-directory only">
+          <span data-i18n="tools.cross_dir_only">Show only duplicates in different directories</span>
+        </label>
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn btn-primary" data-action="toolsPageApi.findDuplicates">
+          <span aria-hidden="true">🔍</span> <span data-i18n="tools.find_duplicates">Find Duplicates</span>
+        </button>
+        <button class="btn btn-secondary" data-action="toolsPageApi.computeHashes" id="computeHashesBtn">
+          <span aria-hidden="true">#️⃣</span> <span data-i18n="tools.compute_hashes">Compute Hashes</span>
+        </button>
+      </div>
+      <div class="tool-actions">
+        <span data-i18n="tools.destructive_zone">⚠️ 破壊的操作</span>
+        <button class="btn btn-danger" data-action="toolsPageApi.deleteDuplicates" id="deleteDuplicatesBtn" disabled>
+          <svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-trash"/></svg> <span data-i18n="tools.delete_duplicates_db">Delete Duplicates (DB)</span>
+        </button>
+        <button class="btn btn-danger btn-danger-hard" data-action="toolsPageApi.deleteDuplicatesHard" id="deleteDuplicatesHardBtn" disabled>
+          <span aria-hidden="true">⚠️</span> <span data-i18n="tools.delete_files_too">Delete actual files too</span>
+        </button>
+      </div>
+
+      <div id="duplicatesResult" class="result-box"></div>
+      </div>
+</details>

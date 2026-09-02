@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="s2t.title">Speech to Text</title>
+  <link rel="stylesheet" href="/static/css/main.css?v=20260307">
+  <link rel="stylesheet" href="/static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260307">
+  {% include "speech_to_text/_style.html" %}
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main class="s2t-main" id="main-content">
+    <h1 data-i18n="s2t.title">Speech to Text</h1>
+
+    <!-- Backend Status -->
+    <div class="s2t-card">
+      <h2 data-i18n="s2t.backend_status">Backend Status</h2>
+      <div id="s2t-backends" class="s2t-status-grid" aria-label="Available backends" data-i18n-aria-label="s2t.available_backends_aria"></div>
+      <div id="s2t-active" class="s2t-active-info"></div>
+      <div id="s2t-models" style="margin-top:12px;"></div>
+    </div>
+
+    <!-- Upload -->
+    <div class="s2t-card">
+      <h2 data-i18n="s2t.audio_transcription">Audio Transcription</h2>
+      <div id="s2t-drop" class="s2t-upload" role="button" tabindex="0"
+           aria-label="Upload audio file for transcription" data-i18n-aria-label="s2t.upload_aria">
+        <p id="s2t-drop-label" data-i18n="s2t.drop_label">WAV/audio file to transcribe</p>
+        <p class="s2t-upload-hint" data-i18n="s2t.click_or_drag">Click or drag &amp; drop</p>
+        <input type="file" id="s2t-file" accept="audio/*,video/*" style="display:none;"
+               aria-label="Select audio file" data-i18n-aria-label="s2t.select_audio_aria">
+      </div>
+      <div class="s2t-controls">
+        <label for="s2t-lang" data-i18n="s2t.language_label">Language:</label>
+        <select id="s2t-lang">
+          <option value="ja" data-i18n="s2t.lang_japanese">Japanese</option>
+          <option value="en" data-i18n="s2t.lang_english">English</option>
+          <option value="zh" data-i18n="s2t.lang_chinese">Chinese</option>
+          <option value="ko" data-i18n="s2t.lang_korean">Korean</option>
+          <option value="fr" data-i18n="s2t.lang_french">French</option>
+          <option value="es" data-i18n="s2t.lang_spanish">Spanish</option>
+          <option value="pt" data-i18n="s2t.lang_portuguese">Portuguese</option>
+          <option value="it" data-i18n="s2t.lang_italian">Italian</option>
+          <option value="de" data-i18n="s2t.lang_german">German</option>
+          <option value="ru" data-i18n="s2t.lang_russian">Russian</option>
+          <option value="custom" data-i18n="s2t.lang_custom">Other (custom code)</option>
+        </select>
+        <input type="text" id="s2tCustomLang" name="s2t_custom_lang"
+               class="s2t-custom-lang" style="display:none;"
+               aria-label="Custom language code" data-i18n-aria-label="s2t.custom_lang_aria"
+               placeholder="e.g. ca, el, th, vi..." data-i18n-placeholder="s2t.lang_custom_placeholder" maxlength="10">
+        <button id="s2t-btn" class="btn btn-primary" disabled
+                aria-label="Transcribe audio" data-i18n-aria-label="s2t.transcribe_aria" aria-describedby="s2t-btn-hint" data-i18n="s2t.transcribe">Transcribe</button>
+        <span id="s2t-btn-hint" class="s2t-upload-hint" style="display:none;" data-i18n="s2t.select_file_first">Select a file first</span>
+        <span id="s2t-loading" style="display:none;" role="status" aria-live="polite">
+          <span class="s2t-spinner" aria-hidden="true"></span> <span data-i18n="s2t.processing">Processing...</span>
+        </span>
+      </div>
+    </div>
+
+    <!-- Result -->
+    <div class="s2t-card" id="s2t-result-card" style="display:none;">
+      <h2><span data-i18n="s2t.result">Result</span> <span id="s2t-backend-name" class="s2t-badge s2t-badge-active"></span></h2>
+      <div id="s2t-text" class="s2t-result" role="region" aria-live="polite" aria-label="Transcription result" data-i18n-aria-label="s2t.transcription_result_aria"></div>
+      <details class="s2t-segments">
+        <summary data-i18n="s2t.segments">Segments</summary>
+        <div id="s2t-segs"></div>
+      </details>
+    </div>
+
+    <!-- Batch Transcription -->
+    <div class="s2t-card">
+      <h2 data-i18n="s2t.batch_transcription">Batch Transcription</h2>
+      <p style="font-size:13px;color:var(--text-muted,#6b7280);margin-bottom:12px;" data-i18n="s2t.batch_description">
+        Transcribe multiple registered video/audio files at once. Enter file IDs (comma-separated) or leave empty to process recent media files.
+      </p>
+      <div class="s2t-controls" style="margin-top:0;">
+        <label for="s2t-batch-ids" data-i18n="s2t.file_ids_label">File IDs:</label>
+        <input type="text" id="s2t-batch-ids" class="s2t-text-input" placeholder="e.g. 1,2,3 (empty = auto)" data-i18n-placeholder="s2t.file_ids_placeholder"
+               style="flex:1;min-width:160px;max-width:300px;">
+        <label for="s2t-batch-lang" data-i18n="s2t.batch_language_label">Language:</label>
+        <select id="s2t-batch-lang">
+          <option value="ja" data-i18n="s2t.lang_japanese">Japanese</option>
+          <option value="en" data-i18n="s2t.lang_english">English</option>
+          <option value="zh" data-i18n="s2t.lang_chinese">Chinese</option>
+          <option value="ko" data-i18n="s2t.lang_korean">Korean</option>
+          <option value="fr" data-i18n="s2t.lang_french">French</option>
+          <option value="es" data-i18n="s2t.lang_spanish">Spanish</option>
+          <option value="pt" data-i18n="s2t.lang_portuguese">Portuguese</option>
+          <option value="it" data-i18n="s2t.lang_italian">Italian</option>
+          <option value="de" data-i18n="s2t.lang_german">German</option>
+          <option value="ru" data-i18n="s2t.lang_russian">Russian</option>
+          <option value="custom" data-i18n="s2t.lang_custom">Other (custom code)</option>
+        </select>
+        <input type="text" id="s2tBatchCustomLang" name="s2t_batch_custom_lang"
+               class="s2t-custom-lang" style="display:none;"
+               aria-label="Custom language code for batch" data-i18n-aria-label="s2t.custom_lang_batch_aria"
+               placeholder="e.g. ca, el, th, vi..." data-i18n-placeholder="s2t.lang_custom_placeholder" maxlength="10">
+        <button id="s2t-batch-btn" class="btn btn-primary" aria-label="Start batch transcription" data-i18n-aria-label="s2t.batch_start_aria" data-i18n="s2t.batch_start">Batch Start</button>
+      </div>
+      <div id="s2t-batch-progress" style="display:none;margin-top:12px;">
+        <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
+          <span id="s2t-batch-label" data-i18n="s2t.processing">Processing...</span>
+          <span id="s2t-batch-pct">0%</span>
+        </div>
+        <div style="height:6px;border-radius:3px;background:rgba(128,128,128,0.2);overflow:hidden;">
+          <div id="s2t-batch-bar" style="height:100%;width:0%;background:var(--primary,#3b82f6);border-radius:3px;transition:width 0.3s;"></div>
+        </div>
+      </div>
+      <div id="s2t-batch-result" style="margin-top:8px;font-size:13px;"></div>
+    </div>
+
+    <!-- Live Stream Transcription -->
+    <div class="s2t-card">
+      <h2 data-i18n="s2t.stream_title">ライブ文字起こし</h2>
+      <div class="s2t-controls" style="margin-top:0;">
+        <input type="text" id="s2tStreamUrl" name="s2t_stream_url" class="s2t-text-input"
+               aria-label="Stream URL or file path" data-i18n-aria-label="s2t.stream_url_aria"
+               data-i18n-placeholder="s2t.stream_url_placeholder"
+               placeholder="ストリームURL (HTTP/RTSP) またはファイルパス"
+               style="flex:1;min-width:200px;">
+        <label for="s2tStreamLang" data-i18n="s2t.language_label">Language:</label>
+        <select id="s2tStreamLang" name="s2t_stream_lang">
+          <option value="ja" data-i18n="s2t.lang_japanese">Japanese</option>
+          <option value="en" data-i18n="s2t.lang_english">English</option>
+          <option value="zh" data-i18n="s2t.lang_chinese">Chinese</option>
+          <option value="ko" data-i18n="s2t.lang_korean">Korean</option>
+          <option value="fr" data-i18n="s2t.lang_french">French</option>
+          <option value="es" data-i18n="s2t.lang_spanish">Spanish</option>
+          <option value="pt" data-i18n="s2t.lang_portuguese">Portuguese</option>
+          <option value="it" data-i18n="s2t.lang_italian">Italian</option>
+          <option value="de" data-i18n="s2t.lang_german">German</option>
+          <option value="ru" data-i18n="s2t.lang_russian">Russian</option>
+          <option value="custom" data-i18n="s2t.lang_custom">Other (custom code)</option>
+        </select>
+        <input type="text" id="s2tStreamCustomLang" name="s2t_stream_custom_lang"
+               class="s2t-custom-lang" style="display:none;"
+               aria-label="Custom language code for stream" data-i18n-aria-label="s2t.custom_lang_stream_aria"
+               placeholder="e.g. ca, el, th, vi..." data-i18n-placeholder="s2t.lang_custom_placeholder" maxlength="10">
+        <label for="s2tStreamModelSize" data-i18n="s2t.model_size_label">Model:</label>
+        <select id="s2tStreamModelSize" name="s2t_stream_model_size">
+          <option value="tiny" data-i18n="s2t.model_tiny">tiny (fastest)</option>
+          <option value="base" selected data-i18n="s2t.model_base">base</option>
+          <option value="small" data-i18n="s2t.model_small">small</option>
+          <option value="medium" data-i18n="s2t.model_medium">medium (most accurate)</option>
+        </select>
+        <label for="s2tStreamMode" data-i18n="s2t.stream_mode_label">Mode:</label>
+        <select id="s2tStreamMode" name="s2t_stream_mode">
+          <option value="chunk" data-i18n="s2t.mode_chunk">チャンク (安定)</option>
+          <option value="live" data-i18n="s2t.mode_live">ライブ (低遅延)</option>
+        </select>
+        <button id="s2tStreamStartBtn" class="btn btn-primary" data-i18n="s2t.stream_start">開始</button>
+        <button id="s2tStreamStopBtn" class="btn btn-danger" style="display:none" data-i18n="s2t.stream_stop">停止</button>
+      </div>
+      <div style="margin-top:8px;font-size:13px;color:var(--text-muted,#6b7280);">
+        <span id="s2tStreamStatus"></span>
+      </div>
+      <video id="s2tStreamVideo" name="s2t_stream_video" controls muted playsinline preload="none"
+             style="display:none; width:100%; max-width:640px; border-radius:8px; margin-top:8px;"
+             aria-label="Stream video preview" data-i18n-aria-label="s2t.stream_video_aria"></video>
+      <!-- Fallback for RTSP: MJPEG via server relay -->
+      <img id="s2tStreamVideoMjpeg" name="s2t_stream_video_mjpeg"
+           style="display:none; width:100%; max-width:640px; border-radius:8px; margin-top:8px;"
+           alt="Stream video preview" data-i18n-alt="s2t.stream_video_aria">
+      <audio id="s2tStreamAudio" name="s2t_stream_audio" controls
+             style="width:100%;margin-top:8px;display:none;"
+             aria-label="Stream audio playback" data-i18n-aria-label="s2t.stream_audio_aria"></audio>
+      <div id="s2tStreamSubtitles" class="s2t-subtitles"></div>
+      <div style="margin-top:8px;">
+        <button id="s2tStreamCopyBtn" class="btn btn-secondary" style="display:none" data-i18n="s2t.stream_copy_transcript">テキストをコピー</button>
+        <button id="s2tStreamExportTxt" class="btn btn-secondary" style="display:none" data-i18n="s2t.stream_export_txt">TXT 保存</button>
+        <button id="s2tStreamExportSrt" class="btn btn-secondary" style="display:none" data-i18n="s2t.stream_export_srt">SRT 保存</button>
+      </div>
+      <div id="s2tLlmSection" style="display:none; margin-top:12px; padding-top:12px; border-top:1px solid var(--border,#e5e7eb);">
+        <label for="s2tLlmMode" data-i18n="s2t.llm_mode_label">LLM処理:</label>
+        <select id="s2tLlmMode" name="s2t_llm_mode">
+          <option value="refine" data-i18n="s2t.llm_refine">整形・校正</option>
+          <option value="translate" data-i18n="s2t.llm_translate">翻訳</option>
+          <option value="summarize" data-i18n="s2t.llm_summarize">要約</option>
+        </select>
+        <select id="s2tLlmTargetLang" name="s2t_llm_target_lang" style="display:none;">
+          <option value="en">English</option>
+          <option value="ja">日本語</option>
+          <option value="zh">中文</option>
+          <option value="ko">한국어</option>
+          <option value="fr">Français</option>
+          <option value="de">Deutsch</option>
+          <option value="es">Español</option>
+        </select>
+        <button id="s2tLlmBtn" class="btn btn-primary" data-i18n="s2t.llm_process">実行</button>
+        <div id="s2tLlmResult" class="s2t-subtitles" style="display:none; margin-top:8px;"></div>
+        <button id="s2tLlmCopyBtn" class="btn btn-secondary" style="display:none; margin-top:4px;" data-i18n="s2t.stream_copy_transcript">テキストをコピー</button>
+      </div>
+    </div>
+
+    <!-- Status announcer for screen readers -->
+    <div id="s2t-announce" class="sr-only" role="status" aria-live="polite" aria-atomic="true"
+         style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0;"></div>
+  </main>
+
+  {% include "speech_to_text/_script.html" %}
+  {% include "speech_to_text/_script_stream.html" %}
+</body>
+</html>

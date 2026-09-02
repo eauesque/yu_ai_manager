@@ -1,0 +1,19 @@
+{
+  "description": "Codex lifecycle hooks for yu_ai_manager.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "uv run --quiet python \"$(git rev-parse --show-toplevel)/scripts/sync_agent_env.py\" --register >/dev/null",
+            "commandWindows": "pwsh -NoProfile -NonInteractive -Command \"$root = git rev-parse --show-toplevel; uv run --quiet python (Join-Path $root 'scripts/sync_agent_env.py') --register *> $null; exit $LASTEXITCODE\"",
+            "timeout": 15,
+            "statusMessage": "Syncing agent environment"
+          }
+        ]
+      }
+    ]
+  }
+}

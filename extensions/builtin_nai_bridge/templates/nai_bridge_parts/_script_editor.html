@@ -1,0 +1,531 @@
+<script nonce="{{ csp_nonce }}">
+/* ── NAI Bridge: PromptSyntaxWidget + Autocomplete + Vim Edit + Sed ── */
+(function() {
+  "use strict";
+
+  var _nabPosEditor = null;
+  var _nabNegEditor = null;
+  var _nabAcEnabled = true;
+  var _nabPosAc = null;
+  var _nabNegAc = null;
+  var _nabPosLinter = null;
+  var _nabNegLinter = null;
+
+    // -- Track active textarea (insertion target for WC browser/sed) --
+  var _nabActiveTextarea = null; // last focused textarea
+
+  var _nabActiveGetSet = null;   // {get, set} for sed
+
+    // Expose to window (for testing/external access)
+  window._nabActiveGetSet = null;
+
+    // Default parent for WC browser (beside main prompt)
+  var _nabWcOriginalParent = null;
+
+  function _nabTrackFocus(ta, getVal, setVal) {
+    ta.addEventListener("focus", function() {
+      _nabActiveTextarea = ta;
+      _nabActiveGetSet = { get: getVal, set: setVal };
+      window._nabActiveGetSet = _nabActiveGetSet;
+            // Move WC browser next to the focused textarea
+      _nabRelocateWcBrowser(ta);
+    });
+  }
+
+  /**
+   * WC ブラウザパネルをアクティブな textarea の隣の
+   * nab-prompt-with-wc コンテナに移動する。
+   */
+  function _nabRelocateWcBrowser(ta) {
+    var wcEl = document.getElementById("nabWcBrowser");
+    if (!wcEl) return;
+        // Record default parent on first call
+    if (!_nabWcOriginalParent) {
+      _nabWcOriginalParent = wcEl.parentNode;
+    }
+        // Find nab-prompt-with-wc container for the textarea
+    var container = ta.closest(".nab-prompt-with-wc");
+    if (!container) container = _nabWcOriginalParent;
+        // Do nothing if already in the correct parent
+    if (wcEl.parentNode === container) return;
+    container.appendChild(wcEl);
+  }
+
+  function _nabInitEditors() {
+    var posWrap = document.getElementById("nabPromptWrap");
+    var negWrap = document.getElementById("nabNegativeWrap");
+    if (!posWrap || !negWrap) return;
+
+    var posEl = posWrap.querySelector("textarea");
+    var negEl = negWrap.querySelector("textarea");
+    var posVal = posEl ? posEl.value : "";
+    var negVal = negEl ? negEl.value : "";
+
+    if (typeof PromptSyntaxWidget !== "undefined" && PromptSyntaxWidget.createEditor) {
+      try {
+        _nabPosEditor = PromptSyntaxWidget.createEditor(posWrap, {
+          value: posVal,
+          placeholder: "1girl, masterpiece, best quality",
+          rows: 4, showSyntaxBar: true, showErrors: true,
+        });
+        _nabNegEditor = PromptSyntaxWidget.createEditor(negWrap, {
+          value: negVal,
+          placeholder: "lowres, bad anatomy, worst quality",
+          rows: 2, showSyntaxBar: true, showErrors: true,
+        });
+      } catch (_e) { _nabPosEditor = null; _nabNegEditor = null; }
+    }
+
+    var posTa = _nabPosEditor ? _nabPosEditor.getTextarea() : posWrap.querySelector("textarea");
+    var negTa = _nabNegEditor ? _nabNegEditor.getTextarea() : negWrap.querySelector("textarea");
+
+    // Restore id/name so that getElementById() and <label for="..."> keep
+    // working after PromptSyntaxWidget replaces the original textarea.
+    if (posTa) { posTa.id = "nabPrompt"; posTa.name = "nabPrompt"; }
+    if (negTa) { negTa.id = "nabNegative"; negTa.name = "nabNegative"; }
+
+    if (typeof BridgeAutocomplete !== "undefined") {
+      if (posTa) _nabPosAc = BridgeAutocomplete.attach(posTa);
+      if (negTa) _nabNegAc = BridgeAutocomplete.attach(negTa);
+    }
+
+    if (typeof PromptLinter !== "undefined") {
+      if (posTa) _nabPosLinter = PromptLinter.attach(posTa, { syntaxMode: "nai", hasSyntaxWidget: !!_nabPosEditor });
+      if (negTa) _nabNegLinter = PromptLinter.attach(negTa, { syntaxMode: "nai", hasSyntaxWidget: !!_nabNegEditor });
+    }
+
+        // Track main prompt focus
+    if (posTa) {
+      _nabActiveTextarea = posTa; // default active
+
+      _nabActiveGetSet = { get: function() { return window._nabGetPrompt(); }, set: function(v) { window._nabSetPrompt(v); } };
+      window._nabActiveGetSet = _nabActiveGetSet;
+      _nabTrackFocus(posTa,
+        function() { return window._nabGetPrompt(); },
+        function(v) { window._nabSetPrompt(v); });
+    }
+    if (negTa) {
+      _nabTrackFocus(negTa,
+        function() { return window._nabGetNegative(); },
+        function(v) { window._nabSetNegative(v); });
+    }
+
+    if (typeof keyboardPowerVimEdit !== "undefined") {
+      [posTa, negTa].forEach(function(ta) {
+        if (!ta) return;
+        ta.addEventListener("keydown", function(e) {
+          if (e.altKey && !e.ctrlKey && !e.metaKey) {
+            keyboardPowerVimEdit.handleVimNavigation(e, ta);
+          }
+          if (e.ctrlKey && !e.altKey && !e.metaKey) {
+            keyboardPowerVimEdit.handleCtrlShortcuts(e, ta);
+          }
+        });
+      });
+    }
+
+    if (typeof BridgeSed !== "undefined") {
+      var sedInput = document.getElementById("nabSedInput");
+      if (sedInput) {
+        BridgeSed.attach({
+          input: sedInput,
+          getInput: function() { return _nabActiveGetSet ? _nabActiveGetSet.get() : window._nabGetPrompt(); },
+          setInput: function(v) { if (_nabActiveGetSet) _nabActiveGetSet.set(v); else window._nabSetPrompt(v); },
+          toast: function(msg) { _nabSedToast(msg); },
+        });
+      }
+    }
+
+    if (typeof BridgeDedup !== "undefined") {
+      var _nabDedup = BridgeDedup.attach({
+        getInput: function() { return _nabActiveGetSet ? _nabActiveGetSet.get() : window._nabGetPrompt(); },
+        setInput: function(v) { if (_nabActiveGetSet) _nabActiveGetSet.set(v); else window._nabSetPrompt(v); },
+        toast: function(msg) { _nabDedupToast(msg); },
+      });
+      window._nabDedupFirst = function() { _nabDedup.runFirst(); };
+      window._nabDedupLast  = function() { _nabDedup.runLast();  };
+    }
+  }
+
+  function _nabSedToast(msg) {
+    var el = document.getElementById("nabSedToast");
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = "";
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.style.display = "none"; }, 3000);
+  }
+
+  function _nabDedupToast(msg) {
+    var el = document.getElementById("nabDedupToast");
+    if (!el) return;
+    el.textContent = msg;
+    el.style.display = "";
+    clearTimeout(el._timer);
+    el._timer = setTimeout(function() { el.style.display = "none"; }, 3000);
+  }
+
+  window._nabToggleSed = function() {
+    var bar = document.getElementById("nabSedBar");
+    if (!bar) return;
+    bar.style.display = bar.style.display === "none" ? "" : "none";
+    if (bar.style.display !== "none") {
+      var si = document.getElementById("nabSedInput");
+      if (si) { si.focus(); si.select(); }
+    }
+  };
+
+  window._nabToggleDedup = function() {
+    var bar = document.getElementById("nabDedupBar");
+    if (bar) bar.style.display = bar.style.display === "none" ? "" : "none";
+  };
+
+  window._nabToggleAc = function() {
+    _nabAcEnabled = !_nabAcEnabled;
+        // Sync button state across both toolbars
+    document.querySelectorAll(".nab-ac-toggle").forEach(function(b) {
+      b.classList.toggle("on", _nabAcEnabled);
+    });
+    if (_nabPosAc && _nabPosAc.setEnabled) _nabPosAc.setEnabled(_nabAcEnabled);
+    if (_nabNegAc && _nabNegAc.setEnabled) _nabNegAc.setEnabled(_nabAcEnabled);
+        // Also link character card autocomplete
+    document.querySelectorAll(".nab-char-card").forEach(function(card) {
+      if (card._charAcInstances) {
+        card._charAcInstances.forEach(function(ac) {
+          if (ac && ac.setEnabled) ac.setEnabled(_nabAcEnabled);
+        });
+      }
+    });
+  };
+
+  var _nabWcEnabled = false;
+  var _nabWcBrowser = null;
+
+  function _nabInsertWildcard(name) {
+    var ta = _nabActiveTextarea
+           || (_nabPosEditor ? _nabPosEditor.getTextarea() : null)
+           || document.getElementById("nabPrompt");
+    if (!ta) return;
+    var tag = "__" + name + "__";
+    var start = ta.selectionStart;
+    var val = ta.value;
+    var needComma = start > 0 && !/[,\s]$/.test(val.substring(0, start));
+    var insert = (needComma ? ", " : "") + tag;
+    ta.value = val.substring(0, start) + insert + val.substring(ta.selectionEnd);
+    var newPos = start + insert.length;
+    ta.selectionStart = ta.selectionEnd = newPos;
+    ta.focus();
+    ta.dispatchEvent(new Event("input", { bubbles: true }));
+  }
+
+  function _nabInitWcBrowser() {
+    var el = document.getElementById("nabWcBrowser");
+    if (el && typeof BridgeWildcardBrowser !== "undefined") {
+      _nabWcBrowser = BridgeWildcardBrowser.create({
+        container: el,
+        onInsert: _nabInsertWildcard,
+      });
+    }
+  }
+
+  window._nabToggleWc = function() {
+    _nabWcEnabled = !_nabWcEnabled;
+        // Sync button state across both toolbars
+    document.querySelectorAll(".nab-wc-toggle").forEach(function(b) {
+      b.classList.toggle("on", _nabWcEnabled);
+    });
+    if (_nabWcEnabled) {
+      if (typeof BridgeWildcardCache !== "undefined") BridgeWildcardCache.fetch();
+      if (_nabWcBrowser) _nabWcBrowser.show();
+    } else {
+      if (_nabWcBrowser) _nabWcBrowser.hide();
+    }
+  };
+  window._nabIsWcEnabled = function() { return _nabWcEnabled; };
+
+  window._nabGetPrompt = function() {
+    if (_nabPosEditor && _nabPosEditor.getValue) return _nabPosEditor.getValue();
+    var el = document.getElementById("nabPrompt");
+    return el ? el.value : "";
+  };
+  window._nabSetPrompt = function(val) {
+    if (_nabPosEditor && _nabPosEditor.setValue) { _nabPosEditor.setValue(val); return; }
+    var el = document.getElementById("nabPrompt");
+    if (el) el.value = val;
+  };
+  window._nabGetNegative = function() {
+    if (_nabNegEditor && _nabNegEditor.getValue) return _nabNegEditor.getValue();
+    var el = document.getElementById("nabNegative");
+    return el ? el.value : "";
+  };
+  window._nabSetNegative = function(val) {
+    if (_nabNegEditor && _nabNegEditor.setValue) { _nabNegEditor.setValue(val); return; }
+    var el = document.getElementById("nabNegative");
+    if (el) el.value = val;
+  };
+
+    // -- Apply input assistance to character card textareas --
+  window._nabEnhanceCharCard = function(card) {
+    if (card._charEnhanced) return;
+    card._charEnhanced = true;
+
+    var posWrap = card.querySelector(".nab-char-pos-wrap");
+    var negWrap = card.querySelector(".nab-char-neg-wrap");
+    if (!posWrap || !negWrap) return;
+
+    var posTa = posWrap.querySelector("textarea");
+    var negTa = negWrap.querySelector("textarea");
+    var posVal = posTa ? posTa.value : "";
+    var negVal = negTa ? negTa.value : "";
+
+        // PromptSyntaxWidget (syntax highlighting)
+    if (typeof PromptSyntaxWidget !== "undefined" && PromptSyntaxWidget.createEditor) {
+      try {
+        card._charPosEditor = PromptSyntaxWidget.createEditor(posWrap, {
+          value: posVal, placeholder: "1girl, blonde hair, ...",
+          rows: 2, showSyntaxBar: false, showErrors: true,
+        });
+        card._charNegEditor = PromptSyntaxWidget.createEditor(negWrap, {
+          value: negVal, placeholder: "lowres, bad anatomy",
+          rows: 1, showSyntaxBar: false, showErrors: true,
+        });
+      } catch (_e) { /* widget 未対応時はフォールバック */ }
+    }
+
+        // Update textarea reference (widget may have replaced it)
+    posTa = card._charPosEditor ? card._charPosEditor.getTextarea() : posWrap.querySelector("textarea");
+    negTa = card._charNegEditor ? card._charNegEditor.getTextarea() : negWrap.querySelector("textarea");
+
+        // BridgeAutocomplete (tag completion)
+    if (typeof BridgeAutocomplete !== "undefined") {
+      card._charAcInstances = [];
+      if (posTa) card._charAcInstances.push(BridgeAutocomplete.attach(posTa));
+      if (negTa) card._charAcInstances.push(BridgeAutocomplete.attach(negTa));
+            // Reflect current AC enabled/disabled state
+      if (!_nabAcEnabled) {
+        card._charAcInstances.forEach(function(ac) {
+          if (ac && ac.setEnabled) ac.setEnabled(false);
+        });
+      }
+    }
+
+        // Track character card textarea focus (insertion target for sed/WC)
+    if (posTa) {
+      _nabTrackFocus(posTa,
+        function() { return (card._charPosEditor ? card._charPosEditor.getValue() : posTa.value); },
+        function(v) { if (card._charPosEditor) card._charPosEditor.setValue(v); else posTa.value = v; posTa.dispatchEvent(new Event("input", {bubbles:true})); });
+    }
+    if (negTa) {
+      _nabTrackFocus(negTa,
+        function() { return (card._charNegEditor ? card._charNegEditor.getValue() : negTa.value); },
+        function(v) { if (card._charNegEditor) card._charNegEditor.setValue(v); else negTa.value = v; negTa.dispatchEvent(new Event("input", {bubbles:true})); });
+    }
+
+        // Vim-style keyboard shortcuts
+    if (typeof keyboardPowerVimEdit !== "undefined") {
+      [posTa, negTa].forEach(function(ta) {
+        if (!ta) return;
+        ta.addEventListener("keydown", function(e) {
+          if (e.altKey && !e.ctrlKey && !e.metaKey) {
+            keyboardPowerVimEdit.handleVimNavigation(e, ta);
+          }
+          if (e.ctrlKey && !e.altKey && !e.metaKey) {
+            keyboardPowerVimEdit.handleCtrlShortcuts(e, ta);
+          }
+        });
+      });
+    }
+
+        // Per-card sed: track which textarea was last focused within this card
+    var cardGetSet = {
+      get: function() { return card._charPosEditor ? card._charPosEditor.getValue() : (posTa ? posTa.value : ""); },
+      set: function(v) {
+        if (card._charPosEditor) card._charPosEditor.setValue(v);
+        else if (posTa) { posTa.value = v; posTa.dispatchEvent(new Event("input", {bubbles: true})); }
+      }
+    };
+    if (posTa) {
+      posTa.addEventListener("focus", function() {
+        cardGetSet.get = function() { return card._charPosEditor ? card._charPosEditor.getValue() : posTa.value; };
+        cardGetSet.set = function(v) { if (card._charPosEditor) card._charPosEditor.setValue(v); else { posTa.value = v; posTa.dispatchEvent(new Event("input", {bubbles: true})); } };
+      });
+    }
+    if (negTa) {
+      negTa.addEventListener("focus", function() {
+        cardGetSet.get = function() { return card._charNegEditor ? card._charNegEditor.getValue() : negTa.value; };
+        cardGetSet.set = function(v) { if (card._charNegEditor) card._charNegEditor.setValue(v); else { negTa.value = v; negTa.dispatchEvent(new Event("input", {bubbles: true})); } };
+      });
+    }
+    var charSedBtn = card.querySelector(".nab-char-sed-btn");
+    var charSedBar = card.querySelector(".nab-char-sed-bar");
+    var charSedInput = card.querySelector(".nab-char-sed-input");
+    var charSedToast = card.querySelector(".nab-char-sed-toast");
+    if (charSedBtn && charSedBar) {
+      charSedBtn.addEventListener("click", function() {
+        charSedBar.style.display = charSedBar.style.display === "none" ? "" : "none";
+        if (charSedBar.style.display !== "none" && charSedInput) {
+          charSedInput.focus(); charSedInput.select();
+        }
+      });
+    }
+    if (typeof BridgeSed !== "undefined" && charSedInput) {
+      BridgeSed.attach({
+        input: charSedInput,
+        getInput: function() { return cardGetSet.get(); },
+        setInput: function(v) { cardGetSet.set(v); },
+        toast: function(msg) {
+          if (!charSedToast) return;
+          charSedToast.textContent = msg;
+          charSedToast.style.display = "";
+          clearTimeout(charSedToast._timer);
+          charSedToast._timer = setTimeout(function() { charSedToast.style.display = "none"; }, 3000);
+        }
+      });
+    }
+    var charDedupBtn = card.querySelector(".nab-char-dedup-btn");
+    var charDedupBar = card.querySelector(".nab-char-dedup-bar");
+    var charDedupToast = card.querySelector(".nab-char-dedup-toast");
+    if (charDedupBtn && charDedupBar) {
+      charDedupBtn.addEventListener("click", function() {
+        charDedupBar.style.display = charDedupBar.style.display === "none" ? "" : "none";
+      });
+    }
+    if (typeof BridgeDedup !== "undefined" && charDedupBar) {
+      var charDedup = BridgeDedup.attach({
+        getInput: function() { return cardGetSet.get(); },
+        setInput: function(v) { cardGetSet.set(v); },
+        toast: function(msg) {
+          if (!charDedupToast) return;
+          charDedupToast.textContent = msg;
+          charDedupToast.style.display = "";
+          clearTimeout(charDedupToast._timer);
+          charDedupToast._timer = setTimeout(function() { charDedupToast.style.display = "none"; }, 3000);
+        }
+      });
+      var charDedupFirstBtn = card.querySelector(".nab-char-dedup-first");
+      var charDedupLastBtn = card.querySelector(".nab-char-dedup-last");
+      if (charDedupFirstBtn) charDedupFirstBtn.addEventListener("click", function() { charDedup.runFirst(); });
+      if (charDedupLastBtn) charDedupLastBtn.addEventListener("click", function() { charDedup.runLast(); });
+    }
+
+    // Per-card WC invoker: focus this card's positive textarea (so inserts
+    // target it) and show the shared wildcard browser. If WC is already open
+    // and already targeting this card's textarea, a second click closes it.
+    var charWcBtn = card.querySelector(".nab-char-wc-btn");
+    if (charWcBtn) {
+      charWcBtn.addEventListener("click", function() {
+        var wcOn = typeof window._nabIsWcEnabled === "function"
+                   && window._nabIsWcEnabled();
+        var alreadyTargeting = wcOn && posTa && _nabActiveTextarea === posTa;
+        if (alreadyTargeting) {
+          if (typeof window._nabToggleWc === "function") window._nabToggleWc();
+          return;
+        }
+        if (posTa) posTa.focus();
+        if (!wcOn && typeof window._nabToggleWc === "function") {
+          window._nabToggleWc();
+        }
+        if (posTa) setTimeout(function() { posTa.focus(); }, 0);
+      });
+    }
+
+    // Per-card Clear: wipe this card's positive and negative prompts.
+    // Use execCommand("insertText") so that Ctrl+Z can restore the text.
+    var charClearBtn = card.querySelector(".nab-char-clear-btn");
+    if (charClearBtn) {
+      charClearBtn.addEventListener("click", function() {
+        [posTa, negTa].forEach(function(ta) {
+          if (!ta || !ta.value) return;
+          ta.focus();
+          ta.select();
+          document.execCommand("insertText", false, "");
+        });
+      });
+    }
+  };
+
+    // bridge-app.js is type="module", so it runs after normal inline scripts.
+    // Delay initialization of all bridge-app.js derived modules until DOMContentLoaded.
+  function _nabInitAllBridgeModules() {
+    _nabInitEditors();
+    _nabInitWcBrowser();
+
+        // Also apply input assistance to character cards added before page load
+    document.querySelectorAll(".nab-char-card").forEach(function(card) {
+      if (typeof window._nabEnhanceCharCard === "function") {
+        window._nabEnhanceCharCard(card);
+      }
+    });
+
+    if (typeof BridgePromptLibrary !== "undefined") {
+      BridgePromptLibrary.attach({
+        prefix: "nab",
+        getPrompt: function() { return window._nabGetPrompt(); },
+        setPrompt: function(v) { window._nabSetPrompt(v); },
+        getNegative: function() { return window._nabGetNegative(); },
+        setNegative: function(v) { window._nabSetNegative(v); },
+        getParams: function() {
+          return {
+            steps: document.getElementById("nabSteps").value,
+            sampler: document.getElementById("nabSampler").value,
+            cfg_scale: document.getElementById("nabScale").value,
+            seed: document.getElementById("nabSeed").value,
+            model_name: document.getElementById("nabModel").value
+          };
+        },
+        getCharacters: function() {
+          return typeof window._nabCollectCharacters === "function"
+            ? window._nabCollectCharacters() : [];
+        },
+        setCharacters: function(chars) {
+          if (typeof window._nabSetCharacters === "function") {
+            window._nabSetCharacters(chars);
+          }
+        },
+        toolbarSelector: ".bridge-editor-toolbar",
+        syntaxMode: "sd_to_nai"
+      });
+    }
+
+    if (typeof BridgeQualityPresets !== "undefined") {
+      BridgeQualityPresets.attach({
+        prefix: "nab",
+        bridgeType: "nai",
+        getPrompt: function() { return window._nabGetPrompt(); },
+        setPrompt: function(v) { window._nabSetPrompt(v); },
+        getNegative: function() { return window._nabGetNegative(); },
+        setNegative: function(v) { window._nabSetNegative(v); },
+        toolbarSelector: ".bridge-editor-toolbar"
+      });
+    }
+
+    var _BRP = typeof BridgeResultPanel !== "undefined" ? BridgeResultPanel
+             : typeof BridgeGenThumbnails !== "undefined" ? BridgeGenThumbnails
+             : null;
+    if (_BRP) {
+      window._nabThumbStrip = _BRP.attach({
+        prefix: "nab",
+        containerSelector: ".brp-container",
+        actions: [
+          {
+            label: window.tr('nai_bridge.action_to_img2img', '\u2192 img2img'),
+            title: window.tr('nai_bridge.action_to_img2img_title', '\u3053\u306e\u753b\u50cf\u3092 img2img \u306e\u30bd\u30fc\u30b9\u306b\u30bb\u30c3\u30c8'),
+            onClick: function(b64) { window._nabSetImg2ImgBase64(b64); }
+          },
+          {
+            label: window.tr('nai_bridge.action_to_sd_img2img', '\u2192 SD img2img'),
+            title: window.tr('nai_bridge.action_to_sd_img2img_title', 'SD WebUI Bridge \u306e img2img \u306b\u9001\u308b'),
+            onClick: function(b64) { window._nabSendImg2ImgTo("sd", b64); }
+          }
+        ]
+      });
+    }
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", _nabInitAllBridgeModules);
+  } else {
+    setTimeout(_nabInitAllBridgeModules, 0);
+  }
+})();
+</script>

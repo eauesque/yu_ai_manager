@@ -1,0 +1,166 @@
+/*
+ * Atelier System (γ) — help.html
+ *
+ * help has no pages/help.css — atelier-tool-components covers buttons /
+ * tool-section styles, so we only need the layout + sidebar polish here.
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool.
+ */
+
+/* ----- Sidebar ----- */
+
+body.theme-atelier-light.atelier-tool .help-sidebar,
+body.theme-atelier-dark.atelier-tool .help-sidebar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light.atelier-tool .help-sidebar a,
+body.theme-atelier-dark.atelier-tool .help-sidebar a {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  color: var(--text);
+  text-decoration: none;
+}
+
+body.theme-atelier-light.atelier-tool .help-sidebar a:hover,
+body.theme-atelier-dark.atelier-tool .help-sidebar a:hover {
+  color: var(--accent-tool);
+}
+
+body.theme-atelier-light.atelier-tool .help-sidebar a.active,
+body.theme-atelier-dark.atelier-tool .help-sidebar a.active {
+  color: var(--accent-tool);
+  font-weight: 600;
+}
+
+body.theme-atelier-light.atelier-tool .help-cat-header,
+body.theme-atelier-dark.atelier-tool .help-cat-header {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ----- Content ----- */
+
+body.theme-atelier-light.atelier-tool .help-content,
+body.theme-atelier-dark.atelier-tool .help-content {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .help-content h1,
+body.theme-atelier-dark.atelier-tool .help-content h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 28px;
+  letter-spacing: -0.005em;
+  margin: 0 0 var(--space-4);
+}
+
+body.theme-atelier-light.atelier-tool .help-content h2,
+body.theme-atelier-dark.atelier-tool .help-content h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 22px;
+  margin-top: var(--space-5);
+  margin-bottom: var(--space-2);
+}
+
+body.theme-atelier-light.atelier-tool .help-content h3,
+body.theme-atelier-dark.atelier-tool .help-content h3 {
+  font-family: var(--font-ui);
+  font-size: 16px;
+  font-weight: 600;
+  margin-top: var(--space-4);
+  margin-bottom: var(--space-2);
+}
+
+body.theme-atelier-light.atelier-tool .help-content code,
+body.theme-atelier-dark.atelier-tool .help-content code,
+body.theme-atelier-light.atelier-tool .help-content pre,
+body.theme-atelier-dark.atelier-tool .help-content pre {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+body.theme-atelier-light.atelier-tool .help-content code,
+body.theme-atelier-dark.atelier-tool .help-content code {
+  padding: 1px 6px;
+}
+
+body.theme-atelier-light.atelier-tool .help-content pre,
+body.theme-atelier-dark.atelier-tool .help-content pre {
+  padding: var(--space-3);
+}
+
+/* ----- Breadcrumb / search ----- */
+
+body.theme-atelier-light.atelier-tool .help-breadcrumb,
+body.theme-atelier-dark.atelier-tool .help-breadcrumb {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  margin-bottom: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .help-breadcrumb a,
+body.theme-atelier-dark.atelier-tool .help-breadcrumb a {
+  color: var(--accent-tool);
+  text-decoration: none;
+}
+
+body.theme-atelier-light.atelier-tool .help-breadcrumb a:hover,
+body.theme-atelier-dark.atelier-tool .help-breadcrumb a:hover {
+  text-decoration: underline;
+}
+
+body.theme-atelier-light.atelier-tool .help-search-bar input,
+body.theme-atelier-dark.atelier-tool .help-search-bar input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+}
+
+body.theme-atelier-light.atelier-tool .help-search-bar input:focus-visible,
+body.theme-atelier-dark.atelier-tool .help-search-bar input:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 1px;
+  border-color: var(--accent-tool);
+}
+
+body.theme-atelier-light.atelier-tool .help-search-results,
+body.theme-atelier-dark.atelier-tool .help-search-results {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light.atelier-tool .help-search-results .sr-cat,
+body.theme-atelier-dark.atelier-tool .help-search-results .sr-cat {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+body.theme-atelier-light.atelier-tool .help-search-results .snippet,
+body.theme-atelier-dark.atelier-tool .help-search-results .snippet {
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}

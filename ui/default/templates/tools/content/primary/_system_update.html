@@ -1,0 +1,83 @@
+<!-- System self-update check and apply -->
+<details class="tool-item" id="tool-system-update">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.system_update">&#x1F504; System Update</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+  <p data-i18n="tools.system_update_desc">Check for and apply updates to yu and installed extensions.</p>
+
+  <!-- Current info -->
+  <div>
+    <span data-i18n="tools.update_version">Version:</span>
+    <code id="updateCurrentVer">...</code>
+    <span id="updateInstallBadge">...</span>
+  </div>
+
+  <!-- Check result -->
+  <div id="updateCheckResult"></div>
+
+  <!-- Progress steps -->
+  <div id="updateProgress">
+    <div id="updateSteps"></div>
+  </div>
+
+  <!-- Buttons -->
+  <div class="atelier-form-row">
+    <button class="btn btn-secondary atelier-btn-ghost" data-action="toolsPageApi.checkForUpdate">
+      <span data-i18n="tools.check_update">Check for Updates</span>
+    </button>
+    <button class="btn btn-primary atelier-btn-primary" id="applyUpdateBtn" data-action="toolsPageApi.applySystemUpdate">
+      <span data-i18n="tools.apply_update">Update Now</span>
+    </button>
+  </div>
+
+  <!-- Docker hint -->
+  <div id="dockerUpdateHint">
+    <span data-i18n="tools.docker_update_hint">Update your Docker container:</span>
+    <code id="dockerPullCmd"></code>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- Unified Update Manager: system + extensions combined view  -->
+  <!-- ========================================================= -->
+  <div id="unifiedUpdateSection">
+    <h3>
+      <span data-i18n="tools.unified_update_title">Update Manager</span>
+      <span id="unifiedSummaryBadge"></span>
+    </h3>
+
+    <!-- Unified check button -->
+    <div class="atelier-form-row">
+      <button class="btn btn-secondary atelier-btn-ghost" data-action="toolsPageApi.checkUnifiedUpdates">
+        <span data-i18n="tools.unified_check">Check All Updates</span>
+      </button>
+      <button class="btn btn-primary atelier-btn-primary" id="unifiedApplyAllBtn" data-action="toolsPageApi.applyUnifiedUpdates">
+        <span data-i18n="tools.unified_apply_all">Update All</span>
+      </button>
+    </div>
+
+    <!-- Unified update table -->
+    <div id="unifiedUpdateTable">
+      <table class="atelier-table atelier-table--bordered">
+        <thead>
+          <tr>
+            <th data-i18n="tools.unified_col_name">Name</th>
+            <th data-i18n="tools.unified_col_version">Version</th>
+            <th data-i18n="tools.unified_col_source">Source</th>
+            <th data-i18n="tools.unified_col_status">Status</th>
+            <th data-i18n="tools.unified_col_action">Action</th>
+          </tr>
+        </thead>
+        <tbody id="unifiedUpdateBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Unified progress -->
+    <div id="unifiedProgress">
+      <div id="unifiedSteps"></div>
+    </div>
+  </div>
+  </div>
+</details>

@@ -1,0 +1,35 @@
+# MCP/non-interactive execution has no approval UI, so any policy other
+# than "never" (on-request, on-failure) hangs the moment an approval
+# prompt is needed. approval_policy is pinned to "never" for that reason.
+# The real security boundary is sandbox_mode (workspace-write: no writes
+# outside the repo, no network); actions beyond it fail closed instead of
+# hanging. Do not change sandbox_mode to danger-full-access.
+# Project-scoped .codex/config.toml only takes effect for repos marked
+# trust_level = "trusted" — that trust decision is the human approval gate.
+sandbox_mode = "workspace-write"
+approval_policy = "never"
+
+[features]
+# --- Headroom init features ---
+hooks = true
+# --- end Headroom init features ---
+
+# Resolve lean-ctx through PATH. setup-ai-tools.ps1/setup-dev-tools.sh install
+# the platform-appropriate launcher, keeping this shared config portable.
+#
+# approval: MCP/non-interactive runs have no approval UI, so every tool is
+# pre-approved here. "approve" is the permissive value --
+# `requires_mcp_tool_approval_for_mode` returns false for it (codex-rs
+# core/src/mcp_tool_call.rs). Do NOT use "prompt": it always requires
+# approval and would hang a headless run.
+#
+# Compression is left ON. Callers that need verbatim source must ask for it
+# per call -- ctx_read(mode="full") for edit-ready text, ctx_shell(raw=true)
+# for exact command output. Forcing LEAN_CTX_RAW=1 here would defeat the
+# point of the tool for every other read.
+[mcp_servers.lean-ctx]
+command = "lean-ctx"
+args = []
+startup_timeout_sec = 30.0
+tool_timeout_sec = 120.0
+default_tools_approval_mode = "approve"

@@ -1,0 +1,568 @@
+/* Collections Sidebar — left panel on search page */
+
+.collections-sidebar {
+  width: 220px;
+  min-width: 220px;
+  position: sticky;
+  top: 62px;
+  max-height: calc(100vh - 74px);
+  overflow-y: auto;
+  background: var(--card);
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.collections-sidebar.cs-collapsed {
+  width: 40px;
+  min-width: 40px;
+}
+
+.collections-sidebar.cs-collapsed .cs-body {
+  display: none;
+}
+
+.collections-sidebar.cs-collapsed .cs-title {
+  display: none;
+}
+
+/* Header */
+.cs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border, rgba(128,128,128,0.2));
+  gap: 4px;
+}
+
+.cs-title {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cs-collapse-btn {
+  background: none;
+  border: none;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  border-radius: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.cs-collapse-btn:hover {
+  background: var(--btn-hover);
+}
+
+/* Body */
+.cs-body {
+  padding: 6px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* List items */
+.cs-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.cs-item {
+  display: flex;
+  align-items: center;
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  gap: 6px;
+  transition: background 0.1s;
+  position: relative;
+}
+
+.cs-item:hover {
+  background: rgba(128,128,128,0.1);
+}
+
+.cs-item.active {
+  background: var(--accent-bg, rgba(74,158,255,0.12));
+  border-left: 3px solid var(--accent, #4a9eff);
+  padding-left: 7px;
+}
+
+.cs-item-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.cs-item-count {
+  font-size: 11px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+/* Action icons (edit/delete) — visible on hover */
+.cs-actions {
+  display: flex;
+  gap: 2px;
+  opacity: 0;
+  transition: opacity 0.15s;
+  flex-shrink: 0;
+}
+
+.cs-item:hover .cs-actions {
+  opacity: 1;
+}
+
+/* Touch devices: always show action buttons (no hover available) */
+@media (hover: none) {
+  .cs-actions { opacity: 1; }
+}
+
+.cs-action-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  padding: 1px 3px;
+  border-radius: 3px;
+  color: var(--muted, #888);
+  line-height: 1;
+}
+
+.cs-action-btn:hover {
+  background: rgba(128,128,128,0.15);
+  color: var(--text);
+}
+
+.cs-action-btn.cs-delete:hover {
+  color: #e55;
+}
+
+/* Hide delete for default collection (id=1) */
+.cs-item[data-id="1"] .cs-delete {
+  display: none;
+}
+
+/* Inline rename input */
+.cs-rename-input {
+  flex: 1;
+  min-width: 0;
+  padding: 2px 4px;
+  border: 1px solid var(--accent, #4a9eff);
+  border-radius: 4px;
+  background: var(--bg-input, var(--bg, #1a1a1a));
+  color: inherit;
+  font-size: 13px;
+  outline: none;
+}
+
+/* Add new collection row */
+.cs-add {
+  display: flex;
+  gap: 4px;
+  margin-top: 8px;
+  padding: 0 4px;
+}
+
+.cs-add-input {
+  flex: 1;
+  min-width: 0;
+  padding: 4px 6px;
+  border: 1px solid var(--border, rgba(128,128,128,0.3));
+  border-radius: 4px;
+  background: var(--bg-input, var(--bg, #1a1a1a));
+  color: inherit;
+  font-size: 12px;
+}
+
+.cs-add-input:focus {
+  border-color: var(--accent, #4a9eff);
+}
+.cs-add-input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.cs-add-btn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent, #4a9eff);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.cs-add-btn:hover {
+  opacity: 0.85;
+}
+
+/* Save current search button */
+.cs-save-search-btn {
+  display: block;
+  width: calc(100% - 8px);
+  margin: 6px 4px 4px;
+  padding: 5px 8px;
+  border: 1px solid var(--border, rgba(128,128,128,0.3));
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 12px;
+  text-align: center;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cs-save-search-btn:hover {
+  background: rgba(128,128,128,0.1);
+  color: var(--text);
+  border-color: var(--accent, #4a9eff);
+}
+
+/* Smart collection visual distinction */
+.cs-item.cs-smart .cs-item-name {
+  font-style: italic;
+  color: var(--accent, #2563eb);
+}
+.cs-item.cs-smart {
+  border-left: 2px solid var(--accent, #2563eb);
+}
+
+/* UNION multi-check */
+.cs-union-check {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  cursor: pointer;
+  accent-color: var(--accent, #4a9eff);
+  margin: 0;
+}
+
+.cs-union-btns {
+  display: flex;
+  gap: 4px;
+  padding: 4px 6px;
+}
+
+.cs-union-btn {
+  flex: 1;
+  padding: 5px 8px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent, #4a9eff);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: opacity 0.15s;
+}
+
+.cs-union-btn:hover {
+  opacity: 0.85;
+}
+
+.cs-union-clear-btn {
+  padding: 5px 8px;
+  border: 1px solid var(--border, rgba(128,128,128,0.3));
+  border-radius: 4px;
+  background: transparent;
+  color: var(--muted, #888);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+
+.cs-union-clear-btn:hover {
+  background: var(--btn-hover);
+  color: var(--text);
+}
+
+/* ====== Sidebar tabs (Collections / Folders) ====== */
+.cs-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border, rgba(128,128,128,0.2));
+  flex-shrink: 0;
+}
+
+.cs-tab {
+  flex: 1;
+  padding: 6px 0;
+  text-align: center;
+  font-size: 12px;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--muted, #888);
+  transition: color 0.15s, border-color 0.15s;
+}
+
+.cs-tab:hover {
+  color: var(--text);
+}
+
+.cs-tab.active {
+  border-bottom-color: var(--accent, #4a9eff);
+  color: var(--text);
+  font-weight: 600;
+}
+
+.cs-tab-panel {
+  display: none;
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+}
+
+.cs-tab-panel.active {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Hide tabs + panels when sidebar collapsed */
+.cs-collapsed .cs-tabs,
+.cs-collapsed .cs-tab-panel {
+  display: none;
+}
+
+/* ====== Folder tree ====== */
+.ft-filter {
+  padding: 4px 6px;
+  flex-shrink: 0;
+}
+
+.ft-filter input {
+  width: 100%;
+  padding: 4px 6px;
+  border: 1px solid var(--border, rgba(128,128,128,0.3));
+  border-radius: 4px;
+  background: var(--bg-input, var(--bg, #1a1a1a));
+  color: inherit;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.ft-filter input:focus {
+  border-color: var(--accent, #4a9eff);
+}
+.ft-filter input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+.ft-tree {
+  padding: 2px 4px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
+.ft-node {
+  display: flex;
+  align-items: center;
+  padding: 3px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  gap: 4px;
+  transition: background 0.1s;
+  border-left: 3px solid transparent;
+}
+
+.ft-node:hover {
+  background: rgba(128,128,128,0.1);
+}
+
+.ft-node.active {
+  background: var(--accent-bg, rgba(74,158,255,0.12));
+  border-left-color: var(--accent, #4a9eff);
+}
+
+.ft-toggle {
+  cursor: pointer;
+  user-select: none;
+  color: var(--muted, #888);
+  width: 14px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.ft-arrow {
+  display: inline-block;
+  font-size: 10px;
+  transition: transform 0.15s;
+}
+
+.ft-arrow.open {
+  transform: rotate(90deg);
+}
+
+.ft-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.ft-count {
+  font-size: 11px;
+  opacity: 0.5;
+  flex-shrink: 0;
+}
+
+.ft-children {
+  padding-left: 14px;
+}
+
+.ft-children.collapsed {
+  display: none;
+}
+
+/* "/ (All)" root node — visual separator from child folders */
+.ft-all-node {
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border, rgba(128,128,128,0.15));
+  padding-bottom: 5px;
+}
+
+.ft-footer {
+  padding: 4px 8px;
+  font-size: 11px;
+  color: var(--muted, #888);
+  flex-shrink: 0;
+  border-top: 1px solid var(--border, rgba(128,128,128,0.2));
+}
+
+/* ====== Mobile: FAB + bottom drawer ====== */
+
+/* FAB trigger (only visible on mobile) */
+.cs-mobile-fab {
+  display: none;
+  position: fixed;
+  bottom: 16px;
+  left: 16px;
+  z-index: 900;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent, #4a9eff);
+  color: #fff;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  transition: transform 0.15s;
+}
+
+.cs-mobile-fab:active {
+  transform: scale(0.92);
+}
+
+/* Backdrop overlay */
+.cs-drawer-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 950;
+  background: rgba(0,0,0,0.5);
+}
+
+.cs-drawer-backdrop.open {
+  display: block;
+}
+
+/* Bottom drawer container */
+.cs-drawer {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 960;
+  max-height: 70vh;
+  background: var(--card, #1e1e1e);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.3);
+  transform: translateY(100%);
+  transition: transform 0.25s ease;
+  overflow: hidden;
+  flex-direction: column;
+}
+
+.cs-drawer.open {
+  display: flex;
+  transform: translateY(0);
+}
+
+/* Drag handle */
+.cs-drawer-handle {
+  width: 40px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--muted, #666);
+  margin: 8px auto 4px;
+  flex-shrink: 0;
+}
+
+/* Drawer body: reuses the sidebar content */
+.cs-drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 12px;
+}
+
+/* Responsive: convert sidebar to drawer on mobile */
+@media (max-width: 720px) {
+  .collections-sidebar {
+    display: none;
+  }
+
+  .cs-mobile-fab {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+/* Export format dropdown */
+.cs-export-dropdown {
+  position: fixed;
+  z-index: 9000;
+  background: var(--bg, #fff);
+  border: 1px solid var(--border, rgba(128,128,128,0.3));
+  border-radius: 6px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+  min-width: 130px;
+  padding: 4px 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.cs-export-dropdown-item {
+  background: none;
+  border: none;
+  padding: 7px 14px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.cs-export-dropdown-item:hover {
+  background: var(--btn-hover, rgba(128,128,128,0.12));
+}

@@ -1,0 +1,2 @@
+"""TagDB core compatibility package."""
+

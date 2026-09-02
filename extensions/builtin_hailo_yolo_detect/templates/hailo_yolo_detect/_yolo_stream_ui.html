@@ -1,0 +1,417 @@
+<style>
+.ys-sources{margin-bottom:18px}
+.ys-add-form{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.ys-add-form input{flex:1;min-width:100px;padding:6px 10px;border:1px solid var(--border-color,#ccc);border-radius:4px;background:var(--input-bg,#fff);color:var(--text-primary,#333)}
+.ys-source-list{display:flex;flex-direction:column;gap:6px}
+.ys-source-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid var(--border-color,#ddd);border-radius:6px;background:var(--card-bg,#fafafa)}
+.ys-source-item .ys-name{font-weight:600;min-width:80px}
+.ys-source-item .ys-url{flex:1;color:var(--text-secondary,#666);font-size:.85rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ys-source-item .ys-state{font-size:.8rem;padding:2px 8px;border-radius:10px;background:var(--bg-muted,#eee);color:var(--text-secondary,#666)}
+.ys-source-item .ys-state[data-state="active"],
+.ys-source-item .ys-state[data-state="connecting"],
+.ys-source-item .ys-state[data-state="reconnecting"]{background:#d4edda;color:#155724}
+.ys-preview{margin-top:16px}
+.ys-preview-bar{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.ys-preview-bar select{flex:1;padding:6px 10px;border:1px solid var(--border-color,#ccc);border-radius:4px;background:var(--input-bg,#fff);color:var(--text-primary,#333)}
+.ys-mjpeg-wrap{position:relative;background:#000;border-radius:6px;overflow:hidden;min-height:120px;display:flex;align-items:center;justify-content:center}
+.ys-mjpeg-wrap img{max-width:100%;display:block}
+.ys-status-line{margin-top:6px;font-size:.85rem;color:var(--text-secondary,#666)}
+.ys-no-sources{padding:12px;text-align:center;color:var(--text-secondary,#888)}
+.ys-camera-list{margin-top:8px;font-size:.9rem}
+.ys-camera-list div{padding:4px 0}
+.ys-rules{margin-top:16px}
+.ys-rule-form{display:flex;flex-direction:column;gap:6px;padding:8px}
+.ys-rule-item{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border-color,#eee)}
+.ys-rule-item .ys-rule-name{font-weight:600;min-width:80px}
+.ys-rule-item .ys-rule-classes{flex:1;font-size:.85rem;color:var(--text-secondary,#666)}
+.ys-rule-actions-check{display:flex;gap:12px;flex-wrap:wrap}
+.ys-rule-actions-check label{font-size:.85rem}
+</style>
+
+<div class="tool-section" id="yoloStreamSection">
+  <h2>&#x1F3A5; <span data-i18n="yolo_stream.heading">ライブストリーム</span></h2>
+
+  <div class="ys-sources">
+    <h3 data-i18n="yolo_stream.sources">ストリームソース</h3>
+    <div class="ys-add-form">
+      <input id="ys-input-id" type="text" placeholder="ID" data-i18n-placeholder="yolo_stream.source_id">
+      <input id="ys-input-url" type="text" placeholder="URL / カメラ番号" data-i18n-placeholder="yolo_stream.source_url">
+      <input id="ys-input-name" type="text" placeholder="名前" data-i18n-placeholder="yolo_stream.source_name">
+      <button class="btn btn-primary btn-sm" data-action="ys-add-source" data-i18n="yolo_stream.add_source">ソース追加</button>
+      <button class="btn btn-secondary btn-sm" data-action="ys-detect-cameras" data-i18n="yolo_stream.detect_cameras">USB カメラ検出</button>
+    </div>
+    <div id="ys-camera-list" class="ys-camera-list" hidden></div>
+    <div id="ys-source-list" class="ys-source-list">
+      <div class="ys-no-sources" data-i18n="yolo_stream.no_sources">ソースが登録されていません</div>
+    </div>
+  </div>
+
+  <div class="ys-preview">
+    <h3 data-i18n="yolo_stream.preview">プレビュー</h3>
+    <div class="ys-preview-bar">
+      <select id="ys-source-select" name="ys-source-select">
+        <option value="" data-i18n="yolo_stream.select_source">ソースを選択</option>
+      </select>
+      <button class="btn btn-sm" data-action="ys-pip" data-i18n="yolo_stream.pip">PiP</button>
+    </div>
+    <div class="ys-mjpeg-wrap">
+      <img id="ys-mjpeg" alt="MJPEG preview">
+    </div>
+    <div id="ys-status-line" class="ys-status-line"></div>
+  </div>
+  <canvas id="ys-pip-canvas" hidden></canvas>
+  <video id="ys-pip-video" hidden></video>
+
+  <!-- Rules Management -->
+  <div class="ys-rules">
+    <h3 data-i18n="yolo_stream.rules">検出ルール</h3>
+    <div id="ys-rules-list"></div>
+    <details class="ys-rule-add">
+      <summary data-i18n="yolo_stream.add_rule">ルール追加</summary>
+      <div class="ys-rule-form">
+        <input id="ys-rule-id" placeholder="rule1" class="ys-input">
+        <input id="ys-rule-name" placeholder="人物検知" class="ys-input">
+        <input id="ys-rule-classes" placeholder="person,car,dog" class="ys-input">
+        <label data-i18n="yolo_stream.confidence">信頼度: <input id="ys-rule-conf" type="number" min="0.1" max="1.0" step="0.05" value="0.7" class="ys-input ys-input-sm"></label>
+        <label data-i18n="yolo_stream.cooldown">クールダウン: <input id="ys-rule-cooldown" type="number" min="0" max="3600" value="60" class="ys-input ys-input-sm"> 秒</label>
+        <div class="ys-rule-actions-check">
+          <label><input type="checkbox" id="ys-rule-act-snapshot" checked> <span data-i18n="yolo_stream.act_snapshot">スナップショット</span></label>
+          <label><input type="checkbox" id="ys-rule-act-sse" checked> <span data-i18n="yolo_stream.act_sse">SSE 通知</span></label>
+          <label><input type="checkbox" id="ys-rule-act-mcp"> <span data-i18n="yolo_stream.act_mcp">MCP イベント</span></label>
+          <label><input type="checkbox" id="ys-rule-act-record"> <span data-i18n="yolo_stream.act_record">録画</span></label>
+        </div>
+        <button class="btn btn-primary btn-sm" data-action="ys-add-rule" data-i18n="yolo_stream.add_rule">追加</button>
+      </div>
+    </details>
+  </div>
+</div>
+
+<script nonce="{{ csp_nonce }}">
+(function() {
+  const API = '/ext/hailo-yolo/api/stream';
+  const section = document.getElementById('yoloStreamSection');
+  const srcList = document.getElementById('ys-source-list');
+  const srcSelect = document.getElementById('ys-source-select');
+  const mjpegImg = document.getElementById('ys-mjpeg');
+  const statusLine = document.getElementById('ys-status-line');
+  const cameraListEl = document.getElementById('ys-camera-list');
+  let statusTimer = null, currentStreamId = null;
+  function tr(key, fb) { return (window.tr ? window.tr(key) : null) || fb; }
+  async function apiFetch(path, opts) {
+    opts = Object.assign({}, opts);
+    opts.headers = Object.assign({'X-Requested-With': 'XMLHttpRequest'}, opts.headers);
+    return (await fetch(API + path, opts)).json();
+  }
+  function clearChildren(el) { while (el.firstChild) el.removeChild(el.firstChild); }
+
+  async function ysLoadSources() {
+    const data = await apiFetch('/sources');
+    const sources = data.sources || [];
+    clearChildren(srcList);
+    clearChildren(srcSelect);
+
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = tr('yolo_stream.select_source', 'Select source');
+    srcSelect.appendChild(defaultOpt);
+
+    if (sources.length === 0) {
+      const empty = document.createElement('div');
+      empty.className = 'ys-no-sources';
+      empty.setAttribute('data-i18n', 'yolo_stream.no_sources');
+      empty.textContent = tr('yolo_stream.no_sources', 'No sources registered');
+      srcList.appendChild(empty); return;
+    }
+    sources.forEach(function(s) {
+      var item = document.createElement('div');
+      item.className = 'ys-source-item';
+      var name = document.createElement('span');
+      name.className = 'ys-name'; name.textContent = s.name || s.id;
+      var url = document.createElement('span');
+      url.className = 'ys-url'; url.textContent = s.url;
+      var state = document.createElement('span');
+      state.className = 'ys-state'; state.dataset.state = s.state; state.textContent = s.state;
+      function mkBtn(cls, action, label) {
+        var b = document.createElement('button');
+        b.className = cls; b.dataset.action = action; b.dataset.id = s.id;
+        b.textContent = label; return b;
+      }
+      var btnStart = mkBtn('btn btn-sm btn-primary', 'ys-start', tr('yolo_stream.start', 'Start'));
+      var btnStop = mkBtn('btn btn-sm btn-secondary', 'ys-stop', tr('yolo_stream.stop', 'Stop'));
+      var btnTest = mkBtn('btn btn-sm', 'ys-test', tr('yolo_stream.test', 'Test'));
+      var btnRemove = mkBtn('btn btn-sm btn-danger', 'ys-remove', tr('yolo_stream.remove', 'Remove'));
+      item.append(name, url, state, btnStart, btnStop, btnTest, btnRemove);
+      srcList.appendChild(item);
+
+      // Select option
+      var opt = document.createElement('option');
+      opt.value = s.id;
+      opt.textContent = (s.name || s.id) + (['active', 'connecting', 'reconnecting'].includes(s.state) ? ' \u25CF' : '');
+      srcSelect.appendChild(opt);
+    });
+  }
+
+  async function ysAddSource() {
+    var id = document.getElementById('ys-input-id').value.trim();
+    var url = document.getElementById('ys-input-url').value.trim();
+    var name = document.getElementById('ys-input-name').value.trim();
+    if (!id || !url) return;
+    await apiFetch('/sources', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: id, url: url, name: name || id})
+    });
+    document.getElementById('ys-input-id').value = '';
+    document.getElementById('ys-input-url').value = '';
+    document.getElementById('ys-input-name').value = '';
+    await ysLoadSources();
+  }
+
+  async function ysRemoveSource(id) {
+    await apiFetch('/sources/' + encodeURIComponent(id), {method: 'DELETE'});
+    if (currentStreamId === id) ysStopMjpeg();
+    await ysLoadSources();
+  }
+
+  async function ysStartSource(id) {
+    await apiFetch('/sources/' + encodeURIComponent(id) + '/start', {method: 'POST'});
+    ysStartMjpeg(id);
+    await ysLoadSources();
+  }
+
+  async function ysStopSource(id) {
+    await apiFetch('/sources/' + encodeURIComponent(id) + '/stop', {method: 'POST'});
+    if (currentStreamId === id) ysStopMjpeg();
+    await ysLoadSources();
+  }
+
+  // The listed URL is masked, so echoing it back would test the mask. The server
+  // falls back to the stored URL when the body carries none.
+  async function ysTestConnection(id) {
+    var res = await apiFetch('/sources/' + encodeURIComponent(id) + '/test', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({})
+    });
+    var msg = res.ok
+      ? tr('yolo_stream.connection_ok', 'Connection OK')
+      : tr('yolo_stream.connection_failed', 'Connection failed');
+    statusLine.textContent = id + ': ' + msg +
+      (res.resolution ? ' (' + res.resolution.width + 'x' + res.resolution.height + ')' : '');
+  }
+
+  async function ysDetectCameras() {
+    cameraListEl.hidden = false;
+    clearChildren(cameraListEl);
+    cameraListEl.textContent = tr('yolo_stream.detecting', 'Detecting cameras...');
+    try {
+      var data = await apiFetch('/devices');
+      var devices = data.devices || [];
+      clearChildren(cameraListEl);
+      if (data.error) {
+        cameraListEl.textContent = tr('yolo_stream.detect_error', 'Detection error') + ': ' + data.error;
+        return;
+      }
+      if (devices.length === 0) {
+        cameraListEl.textContent = tr('yolo_stream.no_cameras', 'No USB cameras found');
+        return;
+      }
+      devices.forEach(function(d) {
+        var row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.alignItems = 'center';
+        row.style.gap = '8px';
+        var info = document.createElement('span');
+        info.textContent = '#' + d.index + ' ' + (d.name || 'Camera') +
+          (d.resolution ? ' (' + d.resolution.width + 'x' + d.resolution.height + ')' : '');
+        info.style.flex = '1';
+        var addBtn = document.createElement('button');
+        addBtn.className = 'btn btn-primary btn-sm';
+        addBtn.textContent = tr('yolo_stream.register', '登録');
+        addBtn.dataset.action = 'ys-register-camera';
+        addBtn.dataset.camIndex = d.index;
+        addBtn.dataset.camName = d.name || ('Camera ' + d.index);
+        row.append(info, addBtn);
+        cameraListEl.appendChild(row);
+      });
+    } catch (e) {
+      clearChildren(cameraListEl);
+      cameraListEl.textContent = tr('yolo_stream.detect_error', 'Detection error') + ': ' + e.message;
+    }
+  }
+
+  async function ysRegisterCamera(index, name) {
+    var id = 'usb-cam-' + index;
+    await apiFetch('/sources', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({id: id, url: String(index), name: name})
+    });
+    cameraListEl.hidden = true;
+    await ysLoadSources();
+  }
+
+  function ysStartMjpeg(id) {
+    currentStreamId = id;
+    mjpegImg.src = API + '/' + encodeURIComponent(id) + '/mjpeg';
+    srcSelect.value = id; startStatusRefresh();
+  }
+  function ysStopMjpeg() {
+    currentStreamId = null; mjpegImg.removeAttribute('src');
+    statusLine.textContent = ''; stopStatusRefresh();
+  }
+
+  async function ysTogglePip() {
+    if (document.pictureInPictureElement) {
+      await document.exitPictureInPicture();
+      return;
+    }
+    if (!currentStreamId || !mjpegImg.naturalWidth) return;
+    var canvas = document.getElementById('ys-pip-canvas');
+    var video = document.getElementById('ys-pip-video');
+    canvas.width = mjpegImg.naturalWidth;
+    canvas.height = mjpegImg.naturalHeight;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(mjpegImg, 0, 0);
+    video.srcObject = canvas.captureStream(15);
+    await video.play();
+    await video.requestPictureInPicture();
+    var drawFrame = function() {
+      if (!document.pictureInPictureElement) return;
+      ctx.drawImage(mjpegImg, 0, 0, canvas.width, canvas.height);
+      requestAnimationFrame(drawFrame);
+    };
+    requestAnimationFrame(drawFrame);
+  }
+
+  function startStatusRefresh() { stopStatusRefresh(); statusTimer = setInterval(refreshStatus, 5000); }
+  function stopStatusRefresh() { if (statusTimer) { clearInterval(statusTimer); statusTimer = null; } }
+  async function refreshStatus() {
+    if (!currentStreamId) return;
+    try {
+      var data = await apiFetch('/status');
+      var src = (data.sources || []).find(function(s) { return s.id === currentStreamId; });
+      if (src) {
+        var fpsLabel = tr('yolo_stream.fps', 'FPS');
+        var detectLabel = tr('yolo_stream.detecting', 'Detecting');
+        statusLine.textContent = fpsLabel + ': ' + (src.fps || 0).toFixed(1) +
+          ' | ' + detectLabel + ' | ' +
+          (src.resolution ? src.resolution.width + 'x' + src.resolution.height : '');
+      }
+    } catch(e) { /* ignore network errors */ }
+  }
+
+  // --- Rules management ---
+  var rulesList = document.getElementById('ys-rules-list');
+
+  async function ysLoadRules() {
+    var data = await apiFetch('/rules');
+    var rules = data.rules || [];
+    clearChildren(rulesList);
+    if (rules.length === 0) {
+      var empty = document.createElement('div');
+      empty.className = 'ys-no-sources';
+      empty.setAttribute('data-i18n', 'yolo_stream.no_rules');
+      empty.textContent = tr('yolo_stream.no_rules', 'No rules configured');
+      rulesList.appendChild(empty); return;
+    }
+    rules.forEach(function(r) {
+      var item = document.createElement('div');
+      item.className = 'ys-rule-item';
+      var name = document.createElement('span');
+      name.className = 'ys-rule-name'; name.textContent = r.name || r.id;
+      var cls = document.createElement('span');
+      cls.className = 'ys-rule-classes';
+      cls.textContent = (r.conditions && r.conditions.classes || []).join(', ');
+      var toggle = document.createElement('button');
+      toggle.className = 'btn btn-sm ' + (r.enabled ? 'btn-primary' : 'btn-secondary');
+      toggle.dataset.action = 'ys-toggle-rule'; toggle.dataset.id = r.id;
+      toggle.dataset.enabled = r.enabled ? '1' : '0';
+      toggle.textContent = r.enabled
+        ? tr('yolo_stream.rule_enabled', 'Enabled')
+        : tr('yolo_stream.rule_disabled', 'Disabled');
+      var del = document.createElement('button');
+      del.className = 'btn btn-sm btn-danger';
+      del.dataset.action = 'ys-delete-rule'; del.dataset.id = r.id;
+      del.textContent = tr('yolo_stream.remove', 'Remove');
+      item.append(name, cls, toggle, del);
+      rulesList.appendChild(item);
+    });
+  }
+
+  async function ysAddRule() {
+    var id = document.getElementById('ys-rule-id').value.trim();
+    var name = document.getElementById('ys-rule-name').value.trim();
+    var classes = document.getElementById('ys-rule-classes').value.trim().split(',').map(function(c) { return c.trim(); }).filter(Boolean);
+    var conf = parseFloat(document.getElementById('ys-rule-conf').value) || 0.7;
+    var cooldown = parseInt(document.getElementById('ys-rule-cooldown').value) || 60;
+    if (!id) return;
+    var actions = [];
+    if (document.getElementById('ys-rule-act-snapshot').checked)
+      actions.push({type: 'snapshot', save_dir: './detections/snapshots'});
+    if (document.getElementById('ys-rule-act-sse').checked)
+      actions.push({type: 'sse', channel: 'yolo_stream'});
+    if (document.getElementById('ys-rule-act-mcp').checked)
+      actions.push({type: 'mcp_event', event: 'yolo_stream.detection'});
+    if (document.getElementById('ys-rule-act-record').checked)
+      actions.push({type: 'record'});
+    var rule = {
+      id: id, name: name || id, enabled: true,
+      conditions: {classes: classes, min_confidence: conf},
+      cooldown_sec: cooldown, actions: actions
+    };
+    await apiFetch('/rules', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(rule)
+    });
+    document.getElementById('ys-rule-id').value = '';
+    document.getElementById('ys-rule-name').value = '';
+    document.getElementById('ys-rule-classes').value = '';
+    await ysLoadRules();
+  }
+
+  async function ysRemoveRule(id) {
+    await apiFetch('/rules/' + encodeURIComponent(id), {method: 'DELETE'});
+    await ysLoadRules();
+  }
+
+  async function ysToggleRule(id, enabled) {
+    var newEnabled = enabled !== '1';
+    await apiFetch('/rules/' + encodeURIComponent(id), {
+      method: 'PUT', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({enabled: newEnabled})
+    });
+    await ysLoadRules();
+  }
+
+  // --- Event delegation ---
+  section.addEventListener('click', function(e) {
+    var btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    var action = btn.dataset.action;
+    var id = btn.dataset.id;
+    if (action === 'ys-add-source') ysAddSource();
+    else if (action === 'ys-detect-cameras') ysDetectCameras();
+    else if (action === 'ys-register-camera') ysRegisterCamera(btn.dataset.camIndex, btn.dataset.camName);
+    else if (action === 'ys-start') ysStartSource(id);
+    else if (action === 'ys-stop') ysStopSource(id);
+    else if (action === 'ys-remove') ysRemoveSource(id);
+    else if (action === 'ys-test') ysTestConnection(id);
+    else if (action === 'ys-pip') ysTogglePip();
+    else if (action === 'ys-add-rule') ysAddRule();
+    else if (action === 'ys-delete-rule') ysRemoveRule(id);
+    else if (action === 'ys-toggle-rule') ysToggleRule(id, btn.dataset.enabled);
+  });
+
+  // Source select change -> start MJPEG
+  srcSelect.addEventListener('change', function() {
+    var id = srcSelect.value;
+    if (id) ysStartMjpeg(id);
+    else ysStopMjpeg();
+  });
+
+  // Initial load
+  ysLoadSources();
+  ysLoadRules();
+})();
+</script>
