@@ -1,0 +1,15 @@
+{
+  "name": "builtin-stats",
+  "version": "1.0.0",
+  "description": "Statistics insights (personality analysis, timeline events, milestones)",
+  "type": "general",
+  "category": "library",
+  "entry": "stats_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "stats_core",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

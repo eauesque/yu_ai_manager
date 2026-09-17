@@ -1,0 +1,185 @@
+/* Fleet admin UI — uses main app CSS variables (--bg, --card, --text, --muted, --border, --accent) */
+
+/* offset for the fixed nav bar (~48px) */
+body { padding-top: 56px; }
+
+#fleet-root { max-width: 1200px; margin: 0 auto; padding: 1rem; }
+
+.fleet-back-row { margin-bottom: 0.75rem; }
+.fleet-back-link {
+  display: inline-block;
+  color: var(--muted, #6c757d);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+.fleet-back-link:hover { color: var(--accent, #0d6efd); text-decoration: underline; }
+
+.fleet-header {
+  display: flex; align-items: center;
+  justify-content: space-between; margin-bottom: 1rem;
+}
+
+.fleet-banner { padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem; }
+.fleet-banner--warning {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffc107;
+}
+body.dark .fleet-banner--warning { background: #3a2e00; color: #ffd966; border-color: #856404; }
+
+.fleet-tabs {
+  display: flex; border-bottom: 2px solid var(--border, #dee2e6); margin-bottom: 1.5rem;
+}
+.fleet-tab {
+  padding: 0.5rem 1.25rem; background: none; border: none;
+  border-bottom: 2px solid transparent; cursor: pointer;
+  color: var(--muted, #6c757d); margin-bottom: -2px;
+}
+.fleet-tab:hover { background: var(--bg-hover, rgba(0,0,0,0.05)); }
+.fleet-tab--active {
+  color: var(--accent, #0d6efd);
+  border-bottom-color: var(--accent, #0d6efd); font-weight: 600;
+  background: none;
+}
+.fleet-tab--active:hover { background: none; }
+
+.fleet-nodes-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;
+}
+
+.fleet-node-card {
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 8px; padding: 1rem;
+  background: var(--card, #fff);
+  color: var(--text, #222);
+  min-width: 0;
+  overflow: hidden;
+}
+.fleet-node-card .fleet-node-row-label { color: var(--muted, #6c757d); }
+.fleet-node-card .fleet-bar { background: var(--bg, #e9ecef); }
+body.dark .fleet-node-card .fleet-bar { background: #2a2a2a; }
+
+.fleet-node-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; gap: 0.5rem; min-width: 0; }
+.fleet-node-name {
+  font-weight: 700;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fleet-node-status {
+  display: flex; align-items: center; gap: 0.3rem; font-size: 0.85rem;
+  flex-shrink: 0;
+}
+.fleet-status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.fleet-status-dot--online { background: #28a745; }
+.fleet-status-dot--offline { background: #dc3545; }
+.fleet-status-dot--restarting { background: #fd7e14; }
+.fleet-status-dot--degraded { background: #ffc107; }
+
+.fleet-node-restart-btn {
+  margin-left: 0.4rem;
+  flex-shrink: 0;
+  width: 1.4rem; height: 1.4rem;
+  padding: 0; line-height: 1;
+  font-size: 0.95rem;
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted, #6c757d);
+  cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.fleet-node-restart-btn:hover {
+  background: var(--accent, #0d6efd);
+  color: #fff;
+  border-color: var(--accent, #0d6efd);
+}
+.fleet-node-restart-btn:focus-visible {
+  outline: 2px solid var(--accent, #0d6efd);
+  outline-offset: 1px;
+}
+
+.fleet-badge-chief {
+  font-size: 0.7rem; background: var(--accent, #0d6efd);
+  color: #fff; padding: 0.1rem 0.4rem; border-radius: 3px; margin-left: 0.4rem;
+}
+
+.fleet-node-row {
+  display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.3rem; font-size: 0.88rem;
+}
+.fleet-node-row-label {
+  min-width: 3.5rem; color: var(--muted, #6c757d); font-size: 0.8rem;
+}
+
+.fleet-bar { flex: 1; height: 8px; background: var(--bg, #e9ecef); border-radius: 4px; overflow: hidden; }
+.fleet-bar-fill { height: 100%; background: var(--accent, #0d6efd); transition: width 0.3s; }
+.fleet-bar-fill--high { background: #dc3545; }
+.fleet-bar-fill--medium { background: #ffc107; }
+.fleet-bar-pct { min-width: 3rem; text-align: right; font-size: 0.8rem; }
+
+/* ---- Logs tab ---- */
+.fleet-logs-layout { display: flex; gap: 1rem; height: 600px; }
+.fleet-logs-peers { width: 180px; flex-shrink: 0; overflow-y: auto; }
+.fleet-logs-viewer { flex: 1; display: flex; flex-direction: column; }
+.fleet-logs-toolbar { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.5rem; flex-wrap: wrap; }
+.fleet-logs-status { font-size: 11px; color: var(--muted); margin-left: auto; }
+.fleet-logs-output {
+  flex: 1; overflow-y: auto; font-family: monospace; font-size: 0.8rem;
+  background: #1e1e1e; color: #d4d4d4;
+  padding: 0.5rem; border-radius: 4px;
+}
+body:not(.dark) .fleet-logs-output { background: #f5f5f5; color: #1e1e1e; }
+.fleet-log-line { margin: 0; padding: 1px 0; white-space: pre-wrap; word-break: break-all; }
+.fleet-log-line--ERROR { color: #f44747; }
+.fleet-log-line--WARNING { color: #ce9178; }
+.fleet-log-line--DEBUG { color: #888; }
+.fleet-logs-peer-radio { display: block; margin-bottom: 0.4rem; cursor: pointer; }
+
+/* ---- Update tab ---- */
+.fleet-update-toolbar { display: flex; gap: 1rem; align-items: center; margin-bottom: 1rem; flex-wrap: wrap; }
+.fleet-update-toolbar label { display: flex; gap: 0.4rem; align-items: center; }
+.fleet-update-table { width: 100%; border-collapse: collapse; }
+.fleet-update-table th, .fleet-update-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--border, #dee2e6);
+  text-align: left;
+  color: var(--text, #222);
+}
+.fleet-update-progress {
+  background: var(--card, #f8f9fa);
+  color: var(--text, #222);
+  padding: 0.75rem; border-radius: 4px; margin-bottom: 1rem;
+  border: 1px solid var(--border, #dee2e6);
+}
+.fleet-update-step { display: inline-block; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; }
+.fleet-update-step--success { background: #d4edda; color: #155724; }
+.fleet-update-step--running { background: #cce5ff; color: #004085; }
+.fleet-update-step--failed  { background: #f8d7da; color: #721c24; }
+body.dark .fleet-update-step--success { background: #1a3c21; color: #75d47a; }
+body.dark .fleet-update-step--running { background: #0d2b4a; color: #7ac0f8; }
+body.dark .fleet-update-step--failed  { background: #3c1a1a; color: #f47a7a; }
+
+/* ---- Settings tab ---- */
+.fleet-settings-block {
+  background: var(--card, #f8f9fa);
+  color: var(--text, #222);
+  padding: 1rem 1.25rem;
+  border: 1px solid var(--border, #dee2e6);
+  border-radius: 4px;
+  margin-bottom: 1.25rem;
+}
+.fleet-settings-block h2 { margin-top: 0; font-size: 1.1rem; }
+.fleet-settings-desc { color: var(--text-muted, #666); margin: 0 0 0.75rem; }
+.fleet-settings-toggle { display: flex; gap: 0.5rem; align-items: center; margin-bottom: 0.75rem; }
+.fleet-settings-table { width: 100%; border-collapse: collapse; }
+.fleet-settings-table th, .fleet-settings-table td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid var(--border, #dee2e6);
+  text-align: left;
+  color: var(--text, #222);
+}
+.fleet-settings-actions { display: flex; gap: 0.75rem; align-items: center; margin-top: 0.75rem; }
+.fleet-settings-status { color: var(--text-muted, #666); font-size: 0.9rem; }

@@ -1,0 +1,393 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Prompt Simulator JS — Wildcard file management ── */
+
+var _simWildcards = {};
+var _simSelectedWc = null;
+var _simWcDirOpen = {};
+
+function simToggleWcSection() {
+  var section = document.getElementById('simWildcardSection');
+  var btn = document.getElementById('simWcToggleBtn');
+  if (section.style.display === 'none' || !section.style.display) {
+    section.style.display = 'block';
+    if (btn) btn.classList.add('active');
+  } else {
+    section.style.display = 'none';
+    if (btn) btn.classList.remove('active');
+  }
+}
+
+function simLoadWildcardFiles(files) {
+  if (!files || !files.length) return;
+  var txtFiles = [];
+  var zipFiles = [];
+  for (var i = 0; i < files.length; i++) {
+    if (/\.zip$/i.test(files[i].name)) {
+      zipFiles.push(files[i]);
+    } else {
+      txtFiles.push(files[i]);
+    }
+  }
+  var remaining = txtFiles.length + zipFiles.length;
+  function onDone() {
+    remaining--;
+    if (remaining <= 0) {
+      renderWildcardList();
+      document.getElementById('simWcFileInput').value = '';
+    }
+  }
+  /* .txt files — client-side processing */
+  txtFiles.forEach(function(file) {
+    var name = file.name.replace(/\.txt$/i, '');
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var lines = e.target.result.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l && !l.startsWith('#'); });
+      if (lines.length > 0) {
+        _simWildcards[name] = lines;
+      }
+      onDone();
+    };
+    reader.readAsText(file);
+  });
+  /* .zip files — server-side extraction */
+  zipFiles.forEach(function(file) {
+    var fd = new FormData();
+    fd.append('file', file);
+    fetch('/ext/prompt-sim/load-wildcards-zip', {
+      method: 'POST',
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      body: fd
+    })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.error) {
+          showOutput('Wildcards', '\u274c ' + data.error);
+        } else {
+          var wc = data.wildcards || {};
+          Object.keys(wc).forEach(function(name) {
+            _simWildcards[name] = wc[name];
+          });
+        }
+        onDone();
+      })
+      .catch(function(err) {
+        showOutput('Wildcards', '\u274c ' + _st('network_error') + ': ' + err.message);
+        onDone();
+      });
+  });
+}
+
+function renderWildcardList() {
+  var section = document.getElementById('simWildcardSection');
+  var list = document.getElementById('simWildcardList');
+  var btn = document.getElementById('simWcToggleBtn');
+  var names = Object.keys(_simWildcards).sort();
+  if (names.length === 0) {
+    // Keep section visible if user toggled it open manually
+    if (btn && !btn.classList.contains('active')) {
+      section.style.display = 'none';
+    }
+    list.innerHTML = '';
+    simShowWcDetail(null);
+    return;
+  }
+  var topLevel = [], dirs = {};
+  names.forEach(function(name) {
+    var slash = name.indexOf('/');
+    if (slash === -1) { topLevel.push(name); }
+    else {
+      var dir = name.substring(0, slash);
+      if (!dirs[dir]) dirs[dir] = [];
+      dirs[dir].push(name);
+    }
+  });
+  var html = '';
+  function renderItem(name, displayName) {
+    var count = _simWildcards[name].length;
+    var sel = (_simSelectedWc === name) ? ' selected' : '';
+    html += '<div class="wc-name-item' + sel + '" data-action="simSelectWildcard" data-action-arg="' + escAttr(name) + '">';
+    html += '<code style="color:#7cc;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">__' + escHtml(displayName) + '__</code>';
+    html += '<span style="color:var(--muted,#aab2c0);font-size:11px;white-space:nowrap;">' + count + '</span>';
+    html += '<button class="copy-btn" data-action="simInsertWildcard" data-action-arg="' + escAttr(name) + '" title="' + escAttr(_st('btn_to_input_short')) + '">\u2191</button>';
+    html += '<button class="copy-btn" data-action="simRemoveWildcard" data-action-arg="' + escAttr(name) + '" title="Remove">\u2715</button>';
+    html += '</div>';
+  }
+  topLevel.forEach(function(name) { renderItem(name, name); });
+  Object.keys(dirs).sort().forEach(function(dir) {
+    var open = _simWcDirOpen[dir] === true;
+    var arrowCls = 'wc-dir-arrow' + (open ? ' open' : '');
+    html += '<div class="wc-dir-toggle" data-action="simToggleWcDir" data-action-arg="' + escAttr(dir) + '">';
+    html += '<span class="' + arrowCls + '">\u25b6</span> ' + escHtml(dir) + ' <span style="color:#666;">(' + dirs[dir].length + ')</span>';
+    html += '</div>';
+    html += '<div class="wc-dir-children' + (open ? '' : ' collapsed') + '">';
+    dirs[dir].forEach(function(name) { renderItem(name, name.substring(dir.length + 1)); });
+    html += '</div>';
+  });
+  list.innerHTML = html;
+  section.style.display = 'block';
+  if (btn) btn.classList.add('active');
+}
+
+function simToggleWcDir(dir) {
+  _simWcDirOpen[dir] = _simWcDirOpen[dir] === false;
+  renderWildcardList();
+}
+
+function simRemoveWildcard(name) {
+  delete _simWildcards[name];
+  if (_simSelectedWc === name) {
+    _simSelectedWc = null;
+    simShowWcDetail(null);
+  }
+  renderWildcardList();
+}
+
+function simClearWildcards() {
+  _simWildcards = {};
+  _simSelectedWc = null;
+  _simWcDirOpen = {};
+  simShowWcDetail(null);
+  var btn = document.getElementById('simWcToggleBtn');
+  if (btn) btn.classList.remove('active');
+  renderWildcardList();
+}
+
+/* ── Wildcard detail editor (PromptSyntaxWidget) ── */
+var _simWcEditor = null;
+(function initSimWcEditor() {
+  var container = document.getElementById('simWcEditorContainer');
+  if (!container) return;
+  if (typeof PromptSyntaxWidget !== 'undefined') {
+    _simWcEditor = PromptSyntaxWidget.createEditor(container, {
+      value: '',
+      placeholder: '',
+      rows: 10,
+      showSyntaxBar: false,
+      showErrors: false,
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.id = 'simWcDetailTextarea';
+    ta.rows = 10;
+    ta.style.cssText = 'width:100%;padding:8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:rgba(30,30,50,0.8);color:var(--text,#e0e0e0);font-family:monospace;font-size:12px;resize:vertical;line-height:1.5;';
+    container.appendChild(ta);
+  }
+})();
+
+function _simWcGetValue() {
+  if (_simWcEditor) return _simWcEditor.getValue();
+  var ta = document.getElementById('simWcDetailTextarea');
+  return ta ? ta.value : '';
+}
+function _simWcSetValue(v) {
+  if (_simWcEditor) { _simWcEditor.setValue(v); }
+  else {
+    var ta = document.getElementById('simWcDetailTextarea');
+    if (ta) ta.value = v;
+  }
+}
+function _simWcGetTextarea() {
+  if (_simWcEditor) return _simWcEditor.getTextarea();
+  return document.getElementById('simWcDetailTextarea');
+}
+
+/* ── Wildcard detail panel ── */
+function simSelectWildcard(name) {
+  _simSelectedWc = name;
+  simShowWcDetail(name);
+  renderWildcardList();
+}
+
+function simInsertWildcard(name) {
+  var tag = '__' + name + '__';
+  if (_simEditor) {
+    var ta = _simEditor.getTextarea();
+    if (ta) {
+      var start = ta.selectionStart;
+      var end = ta.selectionEnd;
+      var val = ta.value;
+      var needComma = start > 0 && !/[,\s]$/.test(val.substring(0, start));
+      var insert = (needComma ? ', ' : '') + tag;
+      ta.value = val.substring(0, start) + insert + val.substring(end);
+      var newPos = start + insert.length;
+      ta.selectionStart = ta.selectionEnd = newPos;
+      ta.focus();
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+}
+
+function simShowWcDetail(name) {
+  var hint = document.getElementById('simWcDetailHint');
+  var content = document.getElementById('simWcDetailContent');
+  if (!name || !_simWildcards[name]) {
+    hint.style.display = '';
+    content.style.display = 'none';
+    return;
+  }
+  hint.style.display = 'none';
+  content.style.display = '';
+  document.getElementById('simWcDetailName').textContent = '__' + name + '__';
+  var entries = _simWildcards[name];
+  document.getElementById('simWcDetailCount').textContent = _st('wc_entries').replace('{0}', entries.length);
+  _simWcSetValue(entries.join('\n'));
+}
+
+function simSaveWcDetail() {
+  if (!_simSelectedWc) return;
+  var text = _simWcGetValue();
+  var lines = text.split(/\r?\n/).map(function(l) { return l.trim(); }).filter(function(l) { return l && !l.startsWith('#'); });
+  _simWildcards[_simSelectedWc] = lines;
+  document.getElementById('simWcDetailCount').textContent = _st('wc_entries').replace('{0}', lines.length);
+  renderWildcardList();
+  /* Brief saved feedback */
+  var container = document.getElementById('simWcDetailContent');
+  var btn = container.querySelector('[data-sim-i18n="wc_save"]');
+  if (btn) {
+    var orig = btn.textContent;
+    btn.textContent = _st('wc_saved');
+    setTimeout(function() { btn.textContent = orig; }, 1200);
+  }
+}
+
+function simAddWcEntry() {
+  var val = _simWcGetValue();
+  if (val && !val.endsWith('\n')) _simWcSetValue(val + '\n');
+  var ta = _simWcGetTextarea();
+  if (ta) {
+    ta.focus();
+    ta.selectionStart = ta.selectionEnd = ta.value.length;
+  }
+}
+
+/* ── Wildcard directory management ── */
+var _simWcDirs = [];
+
+function simToggleWcDirConfig() {
+  var el = document.getElementById('simWcDirConfig');
+  if (el.style.display === 'none' || !el.style.display) {
+    el.style.display = 'block';
+    simFetchWcDirs();
+  } else {
+    el.style.display = 'none';
+  }
+}
+
+function simFetchWcDirs() {
+  fetch('/ext/prompt-sim/wildcards')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      _simWcDirs = data.dirs || [];
+      simRenderWcDirList();
+    })
+    .catch(function() {});
+}
+
+function simRenderWcDirList(validation) {
+  var list = document.getElementById('simWcDirList');
+  if (_simWcDirs.length === 0) {
+    list.innerHTML = '<div style="color:var(--muted,#aab2c0);font-size:12px;">' + escHtml(_st('wc_dir_no_dirs')) + '</div>';
+    return;
+  }
+  var valMap = {};
+  if (validation) {
+    validation.forEach(function(v) { valMap[v.path] = v.exists; });
+  }
+  var html = '';
+  _simWcDirs.forEach(function(dir, idx) {
+    html += '<div class="wc-dir-item">';
+    html += '<code style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px;" title="' + escAttr(dir) + '">' + escHtml(dir) + '</code>';
+    if (validation && valMap[dir] !== undefined) {
+      var ok = valMap[dir];
+      html += '<span style="font-size:11px;color:' + (ok ? '#4caf50' : '#e74c3c') + ';">' + _st(ok ? 'wc_dir_exists' : 'wc_dir_not_found') + '</span>';
+    }
+    html += '<button class="copy-btn" data-action="simRemoveWcDir" data-action-arg="' + idx + '" title="' + escAttr(_st('wc_dir_remove')) + '">\u2715</button>';
+    html += '</div>';
+  });
+  list.innerHTML = html;
+}
+
+function simAddWcDir() {
+  var input = document.getElementById('simWcDirInput');
+  var val = input.value.trim();
+  if (!val) return;
+  if (_simWcDirs.indexOf(val) === -1) {
+    _simWcDirs.push(val);
+  }
+  input.value = '';
+  simSaveWcDirs();
+}
+
+function simRemoveWcDir(idx) {
+  _simWcDirs.splice(idx, 1);
+  simSaveWcDirs();
+}
+
+function simSaveWcDirs() {
+  fetch('/ext/prompt-sim/wildcard-dirs', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ dirs: _simWcDirs }),
+  })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      _simWcDirs = data.saved || [];
+      simRenderWcDirList(data.validation);
+    })
+    .catch(function() {});
+}
+
+function simLoadFromDirs() {
+  fetch('/ext/prompt-sim/wildcards')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        showOutput('Wildcards', '\u274c ' + data.error);
+        return;
+      }
+      if (!data.dirs || data.dirs.length === 0) {
+        showOutput('Wildcards', _st('wc_dir_no_dirs'));
+        return;
+      }
+      var wc = data.wildcards || {};
+      var names = Object.keys(wc);
+      // Merge with existing: directory-loaded entries don't overwrite manual uploads
+      names.forEach(function(name) {
+        if (!_simWildcards[name]) {
+          _simWildcards[name] = wc[name];
+        }
+      });
+      // Merge WC Manager data from localStorage
+      _simMergeLocalWildcards();
+      renderWildcardList();
+      showOutput('Wildcards', _st('wc_dir_loaded').replace('{0}', names.length));
+    })
+    .catch(function(err) {
+      showOutput('Wildcards', '\u274c ' + _st('network_error') + ': ' + err.message);
+    });
+}
+
+/* ── Merge WC Manager data from localStorage ── */
+function _simMergeLocalWildcards() {
+  try {
+    var wm = localStorage.getItem('wm_wildcards');
+    if (!wm) return;
+    var wmData = JSON.parse(wm);
+    for (var k in wmData) {
+      if (wmData.hasOwnProperty(k) && Array.isArray(wmData[k])) {
+        _simWildcards[k] = wmData[k];
+      }
+    }
+  } catch(_) {}
+}
+
+/* ── Auto-reload when WC Manager updates from another tab ── */
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', function(e) {
+    if (e.key === 'wm_wildcards') {
+      _simMergeLocalWildcards();
+      renderWildcardList();
+    }
+  });
+}
+</script>

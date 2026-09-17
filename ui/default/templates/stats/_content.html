@@ -1,0 +1,93 @@
+  <main id="main-content" class="container" style="padding-top:50px;">
+    <header>
+      <h1><span aria-hidden="true">📊</span> <span data-i18n="page.stats.title">Stats</span></h1>
+    </header>
+    <div id="statsStaleNotice" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);font-size:13px;color:var(--text,#eee);">
+      ⚠️ <span id="statsStaleNoticeText" data-i18n="stats.stale_notice">統計データが古い可能性があります。スキャンを実行して最新化することを推奨します。</span>
+    </div>
+    <div id="statsUnknownNotice" style="display:none;margin-bottom:12px;padding:10px 14px;border-radius:8px;background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);font-size:13px;color:var(--text,#eee);">
+      🔍 <span id="statsUnknownNoticeText" data-i18n="stats.unknown_files_notice">メタデータ未抽出ファイルがあります。スキャンを実行することを推奨します。</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <h2 style="font-size:16px;" data-i18n="stats.total_files">Total Files</h2>
+        <div class="stat-value" id="totalFiles">-</div>
+        <div id="totalFilesNote" style="font-size:0.75rem;color:var(--muted);margin-top:4px;"></div>
+      </div>
+      <div class="stat-card">
+        <h2 style="font-size:16px;" data-i18n="stats.total_tags">Total Tags</h2>
+        <div class="stat-value" id="totalTags">-</div>
+      </div>
+      <div class="stat-card">
+        <h2 style="font-size:16px;" data-i18n="stats.avg_tags">Avg Tags/File</h2>
+        <div class="stat-value" id="avgTags">-</div>
+      </div>
+      <div class="stat-card">
+        <h2 style="font-size:16px;" data-i18n="stats.streak_days">🔥 Streak</h2>
+        <div class="stat-value" id="statsStreak">-</div>
+        <div id="statsStreakLabel" style="font-size:0.75rem;color:var(--muted);margin-top:4px;" data-i18n="stats.streak_days_unit">日</div>
+      </div>
+    </div>
+
+    <div class="loading" id="loading">
+      <p data-i18n="status.loadingStats">Loading statistics...</p>
+    </div>
+
+    <div id="statsCharts" style="display:none;">
+      <div class="personality-card" id="personalityCard" style="display: none;">
+        <div class="personality-type" id="personalityType"></div>
+        <div class="personality-desc" id="personalityDesc"></div>
+        <div class="personality-advice" id="personalityAdvice"></div>
+      </div>
+
+      <div class="chart-container">
+        <h2 data-i18n="stats.creation_hours">Your Creative Hours</h2>
+        <div class="time-period-bars" id="timePeriods"></div>
+      </div>
+
+      <div class="chart-container">
+        <h2 data-i18n="stats.timeline_monthly">Generation Timeline (Monthly)</h2>
+        <button type="button" class="stats-csv-btn" data-csv-chart="timeline" title="Download CSV">📥 CSV</button>
+        <canvas id="timelineChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h2 data-i18n="stats.top_tags">Top 20 Tags</h2>
+        <button type="button" class="stats-csv-btn" data-csv-chart="topTags" title="Download CSV">📥 CSV</button>
+        <label style="display:inline-flex;align-items:center;gap:6px;font-size:12px;cursor:pointer;margin-left:10px;color:var(--muted,#888);">
+          <input type="checkbox" id="statsTopTagsSafeMode" name="stats_top_tags_safe_mode">
+          <span data-i18n="stats.safe_mode">セーフモード</span>
+        </label>
+        <canvas id="topTagsChart"></canvas>
+      </div>
+
+      <div class="chart-container" id="modelSection" style="display: none;">
+        <h2 data-i18n="stats.model_usage">Model Usage</h2>
+        <button type="button" class="stats-csv-btn" data-csv-chart="models" title="Download CSV">📥 CSV</button>
+        <canvas id="modelChart"></canvas>
+      </div>
+
+      <div class="chart-container" id="resolutionSection" style="display: none;">
+        <h2 data-i18n="stats.resolution_history">Resolution History</h2>
+        <button type="button" class="stats-csv-btn" data-csv-chart="resolutions" title="Download CSV">📥 CSV</button>
+        <div id="turningPoints"></div>
+        <canvas id="resolutionChart"></canvas>
+      </div>
+
+      <div class="chart-container" id="ratingsSection" style="display: none;">
+        <h2 data-i18n="stats.ratings_dist">⭐ Rating Distribution</h2>
+        <div id="ratingsChart" style="display:flex;gap:8px;align-items:flex-end;padding:12px 0;min-height:80px;"></div>
+        <div id="ratingsTotal" style="font-size:12px;color:var(--muted,#888);margin-top:4px;text-align:center;"></div>
+      </div>
+
+      <div class="chart-container" id="monthlySection" style="display: none;">
+        <h2 id="monthlySectionTitle" data-i18n="stats.monthly_summary">📅 Monthly Summary</h2>
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap;">
+          <label style="font-size:12px;color:var(--muted,#888);" data-i18n="stats.monthly_select_month">Month:</label>
+          <select id="monthlyMonthSelect" style="padding:4px 8px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:rgba(0,0,0,0.2);color:inherit;font-size:12px;"></select>
+        </div>
+        <div id="monthlySummaryContent" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px;"></div>
+        <div id="monthlyDailyChart" style="display:flex;gap:2px;align-items:flex-end;height:60px;padding:4px 0;"></div>
+      </div>
+    </div>
+  </main>

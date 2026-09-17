@@ -1,0 +1,20 @@
+{
+  "name": "builtin-md-viewer",
+  "version": "1.0.0",
+  "description": "Markdown file viewer with FTS5 full-text search",
+  "type": "ui_widget",
+  "category": "library",
+  "entry": "md_viewer_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/md-viewer",
+  "nav": {
+    "label": "MD Viewer",
+    "icon": "\ud83d\udcdd"
+  },
+  "core_shim": "md_viewer_core",
+  "config": {
+    "enabled": true,
+    "priority": 260
+  }
+}

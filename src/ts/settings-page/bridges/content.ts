@@ -1,0 +1,71 @@
+import * as rootsRender from '../roots-render';
+import {
+  loadScanRoots,
+  addScanRoot,
+  toggleScanRoot,
+  removeScanRoot,
+  saveRootPath,
+  saveRootComment,
+  scanAddedRoot,
+  dismissAddRootBanner,
+} from '../roots-extensions';
+import { pickFolderNative } from '../../tools-page/dir-browser';
+import {
+  switchExtSubTab,
+  loadExtensionsFull,
+  toggleExtensionState,
+  updateExtension,
+  updateAllExtensions,
+  uninstallExtension,
+  installExtension,
+  searchMarketplace,
+  refreshMarketplace,
+} from '../extensions-tab';
+import {
+  loadTaggerServers,
+  tsrSetMode,
+  tsrTest,
+  tsrRemove,
+  tsrToggleEnabled,
+  tsrMigrateLegacy,
+  tsrShowAddDialog,
+  tsrShowEditDialog,
+  tsrOnTypeChange,
+  tsrSaveDialog,
+  tsrCloseDialog,
+} from '../tagger-servers';
+
+export function createSettingsContentBridgeSection() {
+  return {
+    settingsRootsRender: rootsRender,
+    loadScanRoots,
+    addScanRoot,
+    toggleScanRoot,
+    removeScanRoot,
+    saveRootPath,
+    saveRootComment,
+    scanAddedRoot,
+    dismissAddRootBanner,
+    pickFolderNative,
+    switchExtSubTab,
+    loadExtensionsFull,
+    toggleExtensionState,
+    updateExtension,
+    updateAllExtensions,
+    uninstallExtension,
+    installExtension,
+    searchMarketplace,
+    refreshMarketplace,
+    loadTaggerServers,
+    tsrSetMode,
+    tsrTest,
+    tsrRemove,
+    tsrToggleEnabled,
+    tsrMigrateLegacy,
+    tsrShowAddDialog,
+    tsrShowEditDialog,
+    tsrOnTypeChange,
+    tsrSaveDialog,
+    tsrCloseDialog,
+  };
+}

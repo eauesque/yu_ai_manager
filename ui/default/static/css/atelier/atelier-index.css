@@ -1,0 +1,319 @@
+/*
+ * Atelier System (γ) — Index page + nav brand overrides
+ *
+ * Scoped to body.theme-atelier-*. Restyles the existing index sidebar +
+ * grid + search bar + nav brand without changing IA.
+ */
+
+/* ----- Nav brand: 2-line logo (yu + eauesque signature) ----- */
+
+/* Default (non-atelier): show legacy "YU AI Manager", hide the 2-line block */
+.nav-brand-atelier { display: none; }
+
+body.theme-atelier-light .nav-brand-legacy,
+body.theme-atelier-dark .nav-brand-legacy {
+  display: none;
+}
+
+body.theme-atelier-light .nav-brand-atelier,
+body.theme-atelier-dark .nav-brand-atelier {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 1;
+  margin-left: 8px;
+  vertical-align: middle;
+}
+
+body.theme-atelier-light .brand-yu,
+body.theme-atelier-dark .brand-yu {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 500;
+  font-variation-settings: "opsz" 22, "wght" 500;
+  letter-spacing: -0.005em;
+  color: var(--text);
+}
+
+body.theme-atelier-light .brand-eauesque,
+body.theme-atelier-dark .brand-eauesque {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: lowercase;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* Nav itself: warm surface chrome */
+body.theme-atelier-light #fixedNav,
+body.theme-atelier-dark #fixedNav {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light .nav-link,
+body.theme-atelier-dark .nav-link {
+  font-family: var(--font-ui);
+  color: var(--text-muted);
+  letter-spacing: 0.01em;
+}
+
+body.theme-atelier-light .nav-link.active,
+body.theme-atelier-dark .nav-link.active {
+  color: var(--text);
+  border-bottom: 2px solid var(--accent-tool);
+}
+
+body.theme-atelier-light #headerInfoArea .header-info-loading,
+body.theme-atelier-dark #headerInfoArea .header-info-loading {
+  color: var(--text-muted);
+  opacity: 1;
+}
+
+body.theme-atelier-light #serverStatusGrid .status-sub code,
+body.theme-atelier-dark #serverStatusGrid .status-sub code {
+  background: color-mix(in srgb, var(--accent-tool) 12%, var(--surface)) !important;
+  color: var(--text) !important;
+}
+
+body.theme-atelier-light #serverStatusGrid .status-value span,
+body.theme-atelier-dark #serverStatusGrid .status-value span {
+  color: var(--text) !important;
+}
+
+/* ----- Sidebar eyebrow + section headings ----- */
+
+body.theme-atelier-light .sidebar h3,
+body.theme-atelier-light .sidebar .section-title,
+body.theme-atelier-dark .sidebar h3,
+body.theme-atelier-dark .sidebar .section-title {
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  font-variation-settings: "opsz" var(--opsz-eyebrow);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 18px 0 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+body.theme-atelier-light .sidebar,
+body.theme-atelier-dark .sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+/* ----- Pill search input (top of search modal / nav) ----- */
+
+body.theme-atelier-light input[type="search"],
+body.theme-atelier-light input.search-input,
+body.theme-atelier-dark input[type="search"],
+body.theme-atelier-dark input.search-input {
+  font-family: var(--font-ui);
+  font-size: 14px;
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: 999px;
+  padding: 8px 16px;
+  transition: border-color 0.15s ease, background-color 0.15s ease;
+}
+
+body.theme-atelier-light input[type="search"]:focus-visible,
+body.theme-atelier-light input.search-input:focus-visible,
+body.theme-atelier-dark input[type="search"]:focus-visible,
+body.theme-atelier-dark input.search-input:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+  border-color: var(--accent-tool);
+}
+
+/* ----- Result grid: neutral canvas background -----
+ * The thumbnail grid is where saturated AI images live; warm chrome
+ * around it would shift colour perception. Drop the grid onto neutral
+ * grey (--canvas) so the images speak for themselves.
+ */
+
+body.theme-atelier-light .results-area,
+body.theme-atelier-light .grid-container,
+body.theme-atelier-light #resultsGrid,
+body.theme-atelier-dark .results-area,
+body.theme-atelier-dark .grid-container,
+body.theme-atelier-dark #resultsGrid {
+  background: var(--canvas);
+}
+
+body.theme-atelier-light .result-card,
+body.theme-atelier-dark .result-card {
+  background: var(--canvas-raised);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  border-radius: 6px;
+  font-family: var(--font-ui);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.theme-atelier-light .result-card:hover,
+body.theme-atelier-dark .result-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+/* Card metadata: caption-like Fraunces small-opsz body */
+body.theme-atelier-light .result-card .caption,
+body.theme-atelier-light .result-card .meta,
+body.theme-atelier-dark .result-card .caption,
+body.theme-atelier-dark .result-card .meta {
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-variation-settings: "opsz" 12, "wght" 400;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+/* ----- Results header segment toggle (Files / Folders / Archive) -----
+ *
+ * Default styles in search-results-header.css use rgba(255,255,255,0.04)
+ * background + cream text which lands at 1.26:1 in atelier-dark (active
+ * state 1.87:1). Lift onto --surface-raised + --text and use --accent-tool
+ * for the active state to clear AA.
+ */
+
+body.theme-atelier-light .results-group-controls .rg-btn,
+body.theme-atelier-dark .results-group-controls .rg-btn {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  border-radius: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+body.theme-atelier-light .results-group-controls .rg-btn:hover,
+body.theme-atelier-dark .results-group-controls .rg-btn:hover {
+  background: var(--surface-raised);
+  border-color: color-mix(in srgb, var(--accent-tool) 40%, var(--border));
+}
+
+body.theme-atelier-light .results-group-controls .rg-btn.active,
+body.theme-atelier-dark .results-group-controls .rg-btn.active {
+  background: var(--accent-tool);
+  border-color: var(--accent-tool);
+  color: #fff;
+}
+
+body.theme-atelier-light .results-group-controls .rg-btn:focus-visible,
+body.theme-atelier-dark .results-group-controls .rg-btn:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 1px;
+}
+
+/* ----- 「＋ 条件を追加」 button -----
+ *
+ * The template inlines style="background:rgba(102,126,234,0.15);
+ * color:var(--muted-accessible,#a3b3ff);..." which gives 1.59:1 on atelier
+ * surface. Override with !important to defeat the inline style.
+ */
+
+body.theme-atelier-light #addConditionBtn,
+body.theme-atelier-dark #addConditionBtn {
+  background: color-mix(in srgb, var(--accent-tool) 12%, var(--surface)) !important;
+  border: 1px dashed color-mix(in srgb, var(--accent-tool) 60%, var(--border)) !important;
+  color: var(--accent-tool) !important;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+body.theme-atelier-light #addConditionBtn:hover,
+body.theme-atelier-dark #addConditionBtn:hover {
+  background: color-mix(in srgb, var(--accent-tool) 22%, var(--surface)) !important;
+  border-color: var(--accent-tool) !important;
+}
+
+body.theme-atelier-light #addConditionBtn:focus-visible,
+body.theme-atelier-dark #addConditionBtn:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+}
+
+/* ----- Saved-search collection sidebar add button -----
+ *
+ * .cs-add-btn currently uses var(--accent, #4a9eff) which on atelier-light
+ * is reasonable but the button would feel decorative; on atelier the
+ * action accent is --accent-tool. Lock both themes to the same primary
+ * style so it clearly reads as "create".
+ */
+
+body.theme-atelier-light .cs-add-btn,
+body.theme-atelier-dark .cs-add-btn {
+  background: var(--accent-tool);
+  color: #fff;
+  border: 1px solid var(--accent-tool);
+  font-family: var(--font-ui);
+  font-weight: 500;
+}
+
+body.theme-atelier-light .cs-add-btn:hover,
+body.theme-atelier-dark .cs-add-btn:hover {
+  background: color-mix(in srgb, var(--accent-tool) 88%, #000);
+  border-color: color-mix(in srgb, var(--accent-tool) 88%, #000);
+  opacity: 1;
+}
+
+/* ----- Generic .btn.btn-primary (検索 / 作成 etc.) -----
+ *
+ * base-buttons.css ties btn-primary to --accent which on atelier-light
+ * lands at 3.29-3.4:1 vs the warm chrome. Reskin onto --accent-tool with
+ * white text for stable 4.5:1+ across both atelier modes.
+ */
+
+body.theme-atelier-light .btn.btn-primary,
+body.theme-atelier-dark .btn.btn-primary {
+  background: var(--accent-tool);
+  border: 1px solid var(--accent-tool);
+  color: #fff;
+}
+
+body.theme-atelier-light .btn.btn-primary:hover,
+body.theme-atelier-dark .btn.btn-primary:hover {
+  background: color-mix(in srgb, var(--accent-tool) 88%, #000);
+  border-color: color-mix(in srgb, var(--accent-tool) 88%, #000);
+  color: #fff;
+}
+
+body.theme-atelier-light .btn.btn-primary:focus-visible,
+body.theme-atelier-dark .btn.btn-primary:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 2px;
+}
+
+/* ----- Search submit button -----
+ *
+ * The search form uses the base element selector instead of .btn-primary, so
+ * keep its inline layout while pinning the action colour to an AA-safe value.
+ */
+
+body.theme-atelier-light #searchBtn,
+body.theme-atelier-dark #searchBtn {
+  background: #244f7a;
+  border: 1px solid #244f7a;
+  color: #fff;
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light #searchBtn:hover,
+body.theme-atelier-dark #searchBtn:hover {
+  background: #1e4266;
+  border-color: #1e4266;
+}
+
+body.theme-atelier-light #searchBtn span,
+body.theme-atelier-dark #searchBtn span {
+  color: #fff;
+}

@@ -1,0 +1,61 @@
+[Unit]
+Description=yu AI Manager database migration (runs before the server)
+# Ordering only. yu-server.service pairs this with Wants=, not Requires=, so a
+# failure here does not stop the server from starting -- it starts, finds the
+# database still behind, and exits 78 exactly as it did before this unit
+# existed. Requires= would turn "needs migrating" into "dependency failed" and
+# lose the one diagnostic that tells the operator what to do.
+Before=yu-server.service
+# __SOURCE_DIR__ is replaced at install time (see deploy/README.md). Left
+# unreplaced the path does not exist, systemd records the unit as skipped
+# rather than failed, and a machine with no Python tree stays quiet instead of
+# showing a red unit nobody can fix.
+ConditionPathExists=__SOURCE_DIR__/scripts/migrate_db_cli.py
+# The interpreter has to be named too. The condition above only proves the
+# Python tree is there; with uv uninstalled, moved, or simply absent from
+# systemd's fixed PATH, the unit passed its condition and then died with
+# 203/EXEC -- measured. A red unit nobody can fix is exactly what the
+# condition exists to avoid, so the interpreter gets the same treatment:
+# missing means skipped, and the server still starts and refuses with 78.
+ConditionPathExists=__UV__
+# And the environment file, for the same reason. `EnvironmentFile=` without
+# a leading dash fails the unit outright when the file is missing --
+# measured: ActiveState=failed, Result=resources, ExecStart never reached.
+# `make deploy` installs units without creating server.env, so that
+# population would get a red unit nobody can fix. Named as a condition, a
+# missing file skips this unit instead, and the server still starts and
+# refuses with 78.
+ConditionPathExists=%h/.config/yu/server.env
+
+[Service]
+Type=oneshot
+# Dash-prefixed: the condition above already decided whether to run at
+# all, so a file that vanishes between the two should not turn a skip
+# into a failure.
+EnvironmentFile=-%h/.config/yu/server.env
+# Same guard the server unit uses: an unreplaced placeholder key would open
+# nothing, and the two units would then disagree about why.
+# See deploy/yu-server.service: the placeholder test alone passes an empty or
+# unset key, and unbraced $YU_DB_KEY is deliberate -- ${...} would be expanded
+# by systemd into argv.
+ExecStartPre=/bin/sh -c 'test -n "$YU_DB_KEY" && test "$YU_DB_KEY" != "REPLACE_WITH_A_GENERATED_SECRET"'
+# Both are placeholders because systemd expands neither here: WorkingDirectory
+# takes specifiers (%h) but not environment variables, and ExecStart's first
+# word must be an absolute path, never a variable.
+WorkingDirectory=__SOURCE_DIR__
+# The script path is absolute and identical to the ConditionPathExists above.
+# Written relative it resolved against WorkingDirectory, so the two agreed only
+# by coincidence: change WorkingDirectory and the condition still passes while
+# the run dies on a path that is not there -- a guard protecting a file the
+# unit does not execute. `uv run` still resolves its project from
+# WorkingDirectory, which is why that stays.
+ExecStart=__UV__ run python __SOURCE_DIR__/scripts/migrate_db_cli.py --db ${YU_DB}
+# The default is 90s. A migration that outruns it is killed mid-way, leaving
+# the ledger at whatever step it reached. 1800 is deliberately generous; time a
+# real migration and lower it (deploy/README.md says how).
+TimeoutStartSec=1800
+# No Restart=: the ways this fails (no backup possible, wrong key, corruption)
+# are not fixed by trying again. It stops and the operator is told.
+
+[Install]
+WantedBy=default.target

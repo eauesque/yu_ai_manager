@@ -1,0 +1,111 @@
+/* modal-s2t.css — S2T (Speech-to-Text) tab styles */
+
+/* ── Actions bar ── */
+.s2t-actions {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+
+/* ── Buttons ── */
+.s2t-btn-run {
+  background: #7c3aed;
+  color: white;
+  padding: 5px 12px;
+  font-weight: 600;
+}
+.s2t-btn-run:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.s2t-btn-copy {
+  background: transparent;
+  border: 1px solid var(--border-color, #444);
+  padding: 3px 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+/* ── Result area ── */
+.s2t-result-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+.s2t-backend-badge {
+  display: inline-block;
+  background: #7c3aed33;
+  color: #a78bfa;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+}
+.s2t-text {
+  background: var(--bg-secondary, #1a1a2e);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+/* ── Segments ── */
+.s2t-segments {
+  margin-top: 8px;
+}
+.s2t-segments summary {
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--text-muted, #888);
+  user-select: none;
+}
+.s2t-segment-list {
+  margin-top: 6px;
+  max-height: 250px;
+  overflow-y: auto;
+}
+.s2t-seg-row {
+  display: flex;
+  gap: 8px;
+  padding: 2px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  border-bottom: 1px solid var(--border-color, #222);
+}
+.s2t-seg-time {
+  flex-shrink: 0;
+  color: #a78bfa;
+  font-family: monospace;
+  font-size: 11px;
+  min-width: 90px;
+}
+.s2t-seg-text {
+  color: var(--text-primary, #eee);
+}
+
+/* ── Empty state ── */
+.s2t-empty {
+  text-align: center;
+  padding: 20px 10px;
+  color: var(--text-muted, #888);
+  font-size: 13px;
+}
+.s2t-empty p {
+  margin: 0;
+}
+
+/* ── Status indicator ── */
+.meta-status-loading {
+  color: #a78bfa;
+}
+.meta-status-error {
+  color: #ef4444;
+}

@@ -1,0 +1,21 @@
+    <!-- Database backup / restore -->
+    <details class="tool-item" id="tool-database-backup">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.database_backup">&#x1F4BE; Database Backup</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.database_backup_desc">Download a backup of the database or restore from a previous backup file.</p>
+      <div id="backupStatusInfo"></div>
+      <div class="stat-row">
+        <button data-action="toolsPageApi.createManualBackup" class="btn"><span aria-hidden="true">&#x1F4BE;</span> <span data-i18n="tools.backup_create">Create Backup</span></button>
+        <button data-action="toolsPageApi.downloadBackup" class="btn btn-sm"><span aria-hidden="true">&#x1F4E5;</span> <span data-i18n="tools.backup_download">Download Backup</span></button>
+        <button data-action="toolsPageApi.triggerRestoreFile" class="btn btn-sm"><span aria-hidden="true">&#x1F4E4;</span> <span data-i18n="tools.backup_restore">Restore from File</span></button>
+        <input class="tool-input hidden" type="file" id="restoreFileInput" aria-label="Database backup file" accept=".db" data-action="toolsPageApi.restoreBackup" data-action-event="change" data-action-this="1">
+      </div>
+      <div id="backupManagedStatus"></div>
+      <div id="backupStatus"></div>
+      <div id="backupListContainer"></div>
+      </div>
+</details>

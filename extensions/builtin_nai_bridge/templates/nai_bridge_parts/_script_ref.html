@@ -1,0 +1,380 @@
+<script nonce="{{ csp_nonce }}">
+  // -- Precise Reference Images ------------------------------------
+
+  // Sibling <script> tags don't share scope with _script.html's IIFE,
+  // so re-declare the $ shorthand here.
+  function $(id) { return document.getElementById(id); }
+
+  var MAX_REFERENCES = 4;
+
+  function nabGetRefCards() {
+    return $("nabRefList").querySelectorAll(".nab-ref-card");
+  }
+
+  function nabUpdateRefCount() {
+    var n = nabGetRefCards().length;
+    $("nabRefCount").textContent = n > 0 ? "(" + n + "/" + MAX_REFERENCES + ")" : "";
+    $("nabAddRefBtn").disabled = n >= MAX_REFERENCES;
+  }
+
+  function nabReindexRefCards() {
+    var cards = nabGetRefCards();
+    cards.forEach(function(card, i) {
+      card.setAttribute("data-ref-idx", i);
+      card.querySelector(".nab-ref-num").textContent = "#" + (i + 1);
+      card.querySelector(".nab-ref-del").setAttribute("data-action", "nabRemoveReference");
+      card.querySelector(".nab-ref-del").setAttribute("data-action-arg", String(i));
+    });
+    nabUpdateRefCount();
+    if (typeof window.nabUpdateCost === "function") window.nabUpdateCost();
+  }
+
+  window.nabAddReference = function() {
+    var list = $("nabRefList");
+    var n = nabGetRefCards().length;
+    if (n >= MAX_REFERENCES) return;
+
+    var card = document.createElement("div");
+    card.className = "nab-ref-card";
+    card.setAttribute("data-ref-idx", n);
+    card.innerHTML =
+      '<div class="nab-ref-card-header">' +
+        '<span class="nab-ref-num">#' + (n + 1) + '</span>' +
+        '<button class="nab-btn small nab-ref-del" ' +
+          'data-action="nabRemoveReference" data-action-arg="' + n + '">' + window.tr('nai_bridge.delete_btn', '削除') + '</button>' +
+      '</div>' +
+      '<div class="nab-ref-drop" data-ref-drop="' + n + '">' +
+        '<div class="nab-ref-placeholder">' + window.tr('nai_bridge.drop_or_click', '画像をドロップまたはクリック') + '</div>' +
+        '<div class="nab-ref-preview" style="display:none;">' +
+          '<img class="nab-ref-img" alt="Reference">' +
+        '</div>' +
+        '<input type="file" class="nab-ref-file" accept="image/*,.naiv4vibe,.naiv4vibebundle" hidden>' +
+      '</div>' +
+      '<div class="nab-param">' +
+        '<label>' + window.tr('nai_bridge.info_extracted_label', 'Info Extracted') + '</label>' +
+        '<input class="nab-ref-info" type="range" min="0" max="1" step="0.05" value="1.0" ' +
+          'data-mirror-target-class="nab-ref-info-val" data-mirror-format="float2">' +
+        '<span class="nab-ref-info-val">1.00</span>' +
+      '</div>' +
+      '<div class="nab-param">' +
+        '<label>' + window.tr('nai_bridge.ref_strength_label', '参照強度') + '</label>' +
+        '<input class="nab-ref-strength" type="range" min="0" max="1" step="0.05" value="0.6" ' +
+          'data-mirror-target-class="nab-ref-strength-val" data-mirror-format="float2">' +
+        '<span class="nab-ref-strength-val">0.60</span>' +
+      '</div>';
+    list.appendChild(card);
+    // Post-creation DOM: type selector and label corrections (avoids re-setting inner markup)
+    (function() {
+      var header = card.querySelector('.nab-ref-card-header');
+      var delBtn = header && header.querySelector('.nab-ref-del');
+      if (header && delBtn) {
+        var sel = document.createElement('select');
+        sel.className = 'nab-ref-type';
+        sel.setAttribute('aria-label', 'Reference type');
+        [
+          ['character_and_style', window.tr('nai_bridge.precise_type_char_style', 'キャラクター&絵柄')],
+          ['character',           window.tr('nai_bridge.precise_type_char', 'キャラクター')],
+          ['style',               window.tr('nai_bridge.precise_type_style', '絵柄')],
+        ].forEach(function(pair) {
+          var opt = document.createElement('option');
+          opt.value = pair[0];
+          opt.textContent = pair[1];
+          sel.appendChild(opt);
+        });
+        header.insertBefore(sel, delBtn);
+      }
+      // Fix labels: official Precise Reference uses "Fidelity" and "Strength"
+      var labels = card.querySelectorAll('.nab-param label');
+      if (labels[0]) labels[0].textContent = window.tr('nai_bridge.precise_fidelity_label', '忠実度');
+      if (labels[1]) labels[1].textContent = window.tr('nai_bridge.strength_label', '強度');
+      // Set default Strength to 1.0 (official Precise Reference default)
+      var strengthEl = card.querySelector('.nab-ref-strength');
+      if (strengthEl) {
+        strengthEl.value = '1.0';
+        strengthEl.dispatchEvent(new Event('input', {bubbles: true}));
+      }
+    })();
+    nabUpdateRefCount();
+    nabBindRefCard(card);
+  };
+
+  window.nabRemoveReference = function(idx) {
+    var cards = nabGetRefCards();
+    if (idx >= 0 && idx < cards.length) {
+      cards[idx].remove();
+      nabReindexRefCards();
+    }
+  };
+
+  function nabBindRefCard(card) {
+    var dropZone = card.querySelector(".nab-ref-drop");
+    var fileInput = card.querySelector(".nab-ref-file");
+
+    dropZone.addEventListener("click", function() {
+      fileInput.click();
+    });
+
+    fileInput.addEventListener("change", function() {
+      if (this.files && this.files[0]) {
+        nabLoadRefImage(card, this.files[0]);
+      }
+    });
+
+    dropZone.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+    dropZone.addEventListener("dragleave", function() {
+      dropZone.classList.remove("dragover");
+    });
+    dropZone.addEventListener("drop", function(e) {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files.length > 0) {
+        nabLoadRefImage(card, files[0]);
+      }
+    });
+  }
+
+  async function nabUploadVibeFileToCard(card, file) {
+    var fd = new FormData();
+    fd.append("file", file);
+    var resp, data;
+    try {
+      resp = await fetch("/ext/nai-bridge/api/vibe/upload", {
+        method: "POST",
+        body: fd,
+        headers: {"X-Requested-With": "XMLHttpRequest"},
+        credentials: "same-origin",
+      });
+      data = await resp.json();
+    } catch (e) {
+      alert(window.tr("nai_bridge.vibe_upload_failed", "Vibe ファイル読み込み失敗") + ": " + e.message);
+      return;
+    }
+    var payload = data && data.data;
+    if (!payload || !payload.vibes || !payload.vibes.length) {
+      alert(window.tr("nai_bridge.vibe_upload_failed", "Vibe ファイル読み込み失敗") + ": " + (data.error || "no vibes"));
+      return;
+    }
+
+    // Apply the first vibe to the drop target card; add additional vibes as new cards
+    payload.vibes.forEach(function(v, idx) {
+      var targetCard;
+      if (idx === 0) {
+        targetCard = card;
+      } else {
+        // Add a new card for subsequent vibes, stop if MAX_REFERENCES reached
+        var before = nabGetRefCards().length;
+        nabAddReference();
+        var after = nabGetRefCards().length;
+        if (after === before) return; // no slot available
+        targetCard = nabGetRefCards()[after - 1];
+      }
+      targetCard.setAttribute("data-ref-b64", v.source_image_b64);
+      targetCard.setAttribute("data-vibe-model", v.model || "");
+      var img = targetCard.querySelector(".nab-ref-img");
+      img.src = "data:" + (v.source_image_mime || "image/jpeg") + ";base64," + v.source_image_b64;
+      targetCard.querySelector(".nab-ref-placeholder").style.display = "none";
+      targetCard.querySelector(".nab-ref-preview").style.display = "";
+      var entry = v.entries && v.entries[0];
+      if (entry) {
+        var infoEl = targetCard.querySelector(".nab-ref-info");
+        if (infoEl) {
+          infoEl.value = entry.information_extracted;
+          infoEl.dispatchEvent(new Event("input", {bubbles: true}));
+        }
+        var strEl = targetCard.querySelector(".nab-ref-strength");
+        if (strEl) {
+          strEl.value = entry.strength;
+          strEl.dispatchEvent(new Event("input", {bubbles: true}));
+        }
+      }
+    });
+  }
+
+  function nabLoadRefImage(card, file) {
+    if (!file) return;
+    if (/\.naiv4vibe(bundle)?$/i.test(file.name)) {
+      nabUploadVibeFileToCard(card, file);
+      return;
+    }
+    if (!file.type.startsWith("image/")) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      card.setAttribute("data-ref-b64",
+        dataUrl.replace(/^data:image\/[^;]+;base64,/, ""));
+      var img = card.querySelector(".nab-ref-img");
+      img.src = dataUrl;
+      card.querySelector(".nab-ref-placeholder").style.display = "none";
+      card.querySelector(".nab-ref-preview").style.display = "";
+      if (typeof window.nabUpdateCost === "function") window.nabUpdateCost();
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // Called by nabGenerate in _script.html
+  window.nabCollectReferences = function() {
+    var result = [];
+    nabGetRefCards().forEach(function(card) {
+      var b64 = card.getAttribute("data-ref-b64");
+      if (!b64) return;
+      var info = parseFloat(
+        card.querySelector(".nab-ref-info").value) || 1.0;
+      var strengthEl = card.querySelector(".nab-ref-strength");
+      var strength = strengthEl ? (parseFloat(strengthEl.value) || 1.0) : 1.0;
+      var typeEl = card.querySelector('.nab-ref-type');
+      var type = (typeEl && typeEl.value) ? typeEl.value : 'character_and_style';
+      result.push({
+        image: b64,
+        information_extracted: info,
+        strength: strength,
+        type: type,
+      });
+    });
+    return result;
+  };
+
+  // -- Bundle selection modal -------------------------------------------
+
+  var _bundleVibes = null;
+
+  function _applyVibeToCard(card, v) {
+    card.setAttribute("data-ref-b64", v.source_image_b64);
+    card.setAttribute("data-vibe-model", v.model || "");
+    var img = card.querySelector(".nab-ref-img");
+    img.src = "data:image/jpeg;base64," + v.source_image_b64;
+    card.querySelector(".nab-ref-placeholder").style.display = "none";
+    card.querySelector(".nab-ref-preview").style.display = "";
+    var entry = v.entries && v.entries[0];
+    if (entry) {
+      var infoEl = card.querySelector(".nab-ref-info");
+      if (infoEl) {
+        infoEl.value = entry.information_extracted;
+        infoEl.dispatchEvent(new Event("input", {bubbles: true}));
+      }
+      var strEl = card.querySelector(".nab-ref-strength");
+      if (strEl) {
+        strEl.value = entry.strength;
+        strEl.dispatchEvent(new Event("input", {bubbles: true}));
+      }
+    }
+    if (typeof window.nabUpdateCost === "function") window.nabUpdateCost();
+  }
+
+  function _updateBundleCount() {
+    var checked = document.querySelectorAll("#nabVibeBundleList .nab-bundle-item.selected").length;
+    var total = document.querySelectorAll("#nabVibeBundleList .nab-bundle-item").length;
+    var vacancyEl = document.getElementById("nabVibeBundleCount");
+    if (vacancyEl) {
+      var vacancy = MAX_REFERENCES - nabGetRefCards().length;
+      vacancyEl.textContent = checked + " / " + total + window.tr("nai_bridge.vibe_bundle_selected", " 件選択") + "  " +
+        window.tr("nai_bridge.vibe_bundle_vacancy", "（空きスロット: ") + vacancy + window.tr("nai_bridge.vibe_bundle_vacancy_close", " 件）");
+    }
+  }
+
+  window.nabOpenVibeBundleModal = function(vibes) {
+    _bundleVibes = vibes;
+    var list = document.getElementById("nabVibeBundleList");
+    // Clear list
+    while (list.firstChild) list.removeChild(list.firstChild);
+
+    vibes.forEach(function(v, idx) {
+      var wrap = document.createElement("div");
+      wrap.className = "nab-bundle-item-wrap";
+
+      var item = document.createElement("div");
+      item.className = "nab-bundle-item selected";  // selected by default
+      item.dataset.idx = String(idx);
+
+      var img = document.createElement("img");
+      img.className = "nab-bundle-item-img";
+      img.alt = "vibe " + (idx + 1);
+      img.src = "data:" + (v.source_image_mime || "image/jpeg") + ";base64," + v.source_image_b64;
+
+      var info = document.createElement("div");
+      info.className = "nab-bundle-item-info";
+
+      var modelEl = document.createElement("div");
+      modelEl.className = "nab-bundle-item-model";
+      modelEl.textContent = v.model || "";
+
+      var entriesEl = document.createElement("div");
+      entriesEl.className = "nab-bundle-item-entries";
+      entriesEl.textContent = (v.entries || [])
+        .map(function(e) { return (Number(e.information_extracted) * 100).toFixed(0) + "%"; })
+        .join(" / ");
+
+      info.appendChild(modelEl);
+      info.appendChild(entriesEl);
+      item.appendChild(img);
+      item.appendChild(info);
+
+      item.addEventListener("click", function() {
+        item.classList.toggle("selected");
+        _updateBundleCount();
+      });
+
+      wrap.appendChild(item);
+      list.appendChild(wrap);
+    });
+
+    _updateBundleCount();
+    var modal = document.getElementById("nabVibeBundleModal");
+    modal.classList.add("open");
+    modal.setAttribute("aria-hidden", "false");
+  };
+
+  window.nabCloseBundleModal = function() {
+    var modal = document.getElementById("nabVibeBundleModal");
+    modal.classList.remove("open");
+    modal.setAttribute("aria-hidden", "true");
+    _bundleVibes = null;
+  };
+
+  window.nabBundleSelectAll = function() {
+    document.querySelectorAll("#nabVibeBundleList .nab-bundle-item")
+      .forEach(function(el) { el.classList.add("selected"); });
+    _updateBundleCount();
+  };
+
+  window.nabBundleLoad = function() {
+    if (!_bundleVibes) return;
+    var selected = Array.prototype.slice.call(
+      document.querySelectorAll("#nabVibeBundleList .nab-bundle-item.selected"));
+
+    var vacancy = MAX_REFERENCES - nabGetRefCards().length;
+    if (selected.length > vacancy) {
+      selected = selected.slice(0, Math.max(0, vacancy));
+      if (selected.length === 0) {
+        alert(window.tr("nai_bridge.vibe_bundle_no_vacancy", "空きスロットがありません"));
+        return;
+      }
+    }
+
+    selected.forEach(function(item) {
+      var v = _bundleVibes[parseInt(item.dataset.idx, 10)];
+      var before = nabGetRefCards().length;
+      nabAddReference();
+      var after = nabGetRefCards().length;
+      if (after === before) return;
+      var card = nabGetRefCards()[after - 1];
+      _applyVibeToCard(card, v);
+    });
+
+    nabCloseBundleModal();
+    // Open reference section
+    var refSec = document.getElementById("nabRefSection");
+    if (refSec) refSec.open = true;
+  };
+
+  // Close on backdrop click (Escape key handled by data-action delegation)
+  var _nabBundleModalEl = document.getElementById("nabVibeBundleModal");
+  if (_nabBundleModalEl) {
+    _nabBundleModalEl.addEventListener("click", function(e) {
+      if (e.target === this) window.nabCloseBundleModal();
+    });
+  }
+</script>

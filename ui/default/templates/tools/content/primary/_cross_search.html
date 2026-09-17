@@ -1,0 +1,28 @@
+    <!-- Cross-text search (MD + Chat + Prompt) -->
+    <details class="tool-item" id="tool-cross-search">
+      <summary class="tool-item-header">
+        <span class="tool-item-header__title" data-i18n="tools.cross_search">🔎 Cross-Text Search</span>
+        <span class="tool-item-header__desc" data-i18n="tools.cross_search_desc">Search Markdown, chat, and prompts.</span>
+        <span class="tool-item-header__chevron">▼</span>
+      </summary>
+      <div class="tool-item-body">
+        <div class="tool-form-grid">
+          <div class="tool-field tool-field--full">
+            <label class="tool-label" for="crossSearchQuery" data-i18n="tools.search">Search</label>
+            <input class="tool-input" type="text" id="crossSearchQuery" placeholder="Search keyword..." aria-label="Cross-text search keyword" data-action-enter="toolsPageApi.crossSearch">
+          </div>
+          <div class="tool-field tool-field--full">
+            <label class="tool-label">Sources</label>
+            <label><input type="checkbox" id="crossSearchMd" checked aria-label="Search MD"> MD</label>
+            <label><input type="checkbox" id="crossSearchChat" checked aria-label="Search Chat"> Chat</label>
+            <label><input type="checkbox" id="crossSearchPrompt" checked aria-label="Search Prompt"> Prompt</label>
+          </div>
+        </div>
+        <div class="tool-actions">
+          <button class="btn btn-primary" data-action="toolsPageApi.crossSearch">
+            <span data-i18n="tools.search">Search</span>
+          </button>
+        </div>
+        <div class="tool-result" id="crossSearchResult"></div>
+      </div>
+    </details>

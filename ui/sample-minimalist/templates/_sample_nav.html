@@ -1,0 +1,22 @@
+<nav class="nav">
+  <a href="/" class="nav-brand">YU</a>
+  <button class="nav-hamburger" id="hamburger" type="button" aria-label="Menu">&#9776;</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/" class="nav-link{% if active == 'search' %} active{% endif %}">Search</a>
+    <a href="/stats" class="nav-link{% if active == 'stats' %} active{% endif %}">Stats</a>
+  </div>
+  <div class="nav-actions">
+    <button class="nav-btn" id="themeToggle" type="button" title="Toggle theme">&#9789;</button>
+    <div class="nav-overflow">
+      <button class="nav-btn" id="overflowBtn" type="button" title="More">&#x22EF;</button>
+      <div class="nav-overflow-menu" id="overflowMenu">
+        <a href="/tools" class="nav-overflow-item">Tools</a>
+        <a href="/settings" class="nav-overflow-item">Settings</a>
+        <a href="/inspect" class="nav-overflow-item">Inspect</a>
+        <a href="/story" class="nav-overflow-item">Story</a>
+        <a href="/report" class="nav-overflow-item">Report</a>
+        <a href="/extensions" class="nav-overflow-item">Extensions</a>
+      </div>
+    </div>
+  </div>
+</nav>

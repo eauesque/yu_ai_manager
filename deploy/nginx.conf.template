@@ -1,0 +1,57 @@
+# YU AI Manager -- Nginx reverse proxy configuration
+# envsubst variables: ${UPSTREAM_HOST}, ${UPSTREAM_PORT}
+# Auto-expanded by Docker Compose nginx:alpine template mechanism
+
+upstream app {
+    server ${UPSTREAM_HOST}:${UPSTREAM_PORT};
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    # Max upload size (must match Flask MAX_CONTENT_LENGTH)
+    client_max_body_size 100m;
+
+    # ---- Static files: bypass Flask and serve directly ----
+    location /static/ {
+        alias /app/static/;
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+        access_log off;
+    }
+
+    # ---- SSE (Server-Sent Events): disable buffering ----
+    location /api/events/ {
+        proxy_pass http://app;
+        proxy_http_version 1.1;
+        proxy_set_header Connection "";
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 86400s;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # ---- All other requests: proxy to Flask ----
+    location / {
+        proxy_pass http://app;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+
+        # WebSocket upgrade support
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+
+    # ---- Gzip compression ----
+    gzip on;
+    gzip_types application/json text/css application/javascript text/xml;
+    gzip_min_length 256;
+}

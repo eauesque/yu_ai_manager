@@ -1,0 +1,86 @@
+{
+  "name": "builtin-comfyui-bridge",
+  "version": "0.1.0",
+  "description": "ComfyUI integration bridge",
+  "type": "ui_widget",
+  "category": "bridge",
+  "entry": "comfyui_bridge.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/comfyui-bridge",
+  "nav": {
+    "label": "ComfyUI Bridge",
+    "icon": "\ud83d\udd17"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 410
+  },
+  "config_schema": {
+    "api_url": {
+      "type": "str",
+      "default": "http://127.0.0.1:8188",
+      "label": "ComfyUI API URL"
+    },
+    "auto_send": {
+      "type": "bool",
+      "default": false,
+      "label": "Skip confirmation dialog"
+    },
+    "default_sampler": {
+      "type": "enum",
+      "default": "euler",
+      "options": [
+        "euler",
+        "euler_ancestral",
+        "dpmpp_2m",
+        "dpmpp_sde",
+        "ddim",
+        "uni_pc"
+      ],
+      "label": "Default Sampler"
+    },
+    "default_scheduler": {
+      "type": "enum",
+      "default": "normal",
+      "options": [
+        "normal",
+        "karras",
+        "exponential",
+        "sgm_uniform"
+      ],
+      "label": "Default Scheduler"
+    },
+    "default_image_format": {
+      "type": "enum",
+      "default": "png",
+      "options": ["png", "webp", "jpg"],
+      "label": "Default Image Format"
+    },
+    "bridge_managed_save": {
+      "type": "bool",
+      "default": false,
+      "label": "Embed Sweep XMP directly into ComfyUI output (avoids double-saving)"
+    },
+    "comfy_output_root": {
+      "type": "str",
+      "default": "",
+      "label": "Sweep XMP embed target path (ComfyUI-side output directory)"
+    },
+    "comfy_output_same_as_save_folder": {
+      "type": "bool",
+      "default": true,
+      "label": "Use save_folder as the Sweep XMP embed target"
+    },
+    "gateway_url": {
+      "type": "string",
+      "default": "",
+      "label": "Gateway URL (e.g. http://host:5000/comfy)"
+    },
+    "api_key_enc": {
+      "type": "string",
+      "default": "",
+      "label": "Gateway API Key (encrypted)"
+    }
+  }
+}

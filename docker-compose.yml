@@ -1,0 +1,43 @@
+services:
+  # === 本番用 (local only by default; use tools/gen-compose.sh --lan for LAN) ===
+  yu-ai-manager:
+    build: .
+    container_name: yu-ai-manager
+    ports:
+      - "127.0.0.1:5000:5000"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["python", "web_ui.py", "--db", "/app/data/tags.db", "--host", "127.0.0.1"]
+    restart: unless-stopped
+
+  # === Development (mount entire source, hot-reload enabled) ===
+  yu-ai-manager-dev:
+    build: .
+    container_name: yu-ai-manager-dev
+    ports:
+      - "127.0.0.1:5001:5000"
+    volumes:
+      - .:/app
+      - ./data:/app/data
+      - ./uploads:/app/uploads
+    environment:
+      - PYTHONUNBUFFERED=1
+      - DEBUG=1
+    command: ["python", "web_ui.py", "--db", "/app/data/tags.db", "--host", "0.0.0.0", "--debug"]
+
+  # === Test runner ===
+  test:
+    build: .
+    container_name: yu-ai-manager-test
+    volumes:
+      - .:/app
+      - ./data:/app/data
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: ["python", "-m", "pytest", "tests/", "-v", "--tb=short"]
+    profiles:
+      - test
+

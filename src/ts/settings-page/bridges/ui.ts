@@ -1,0 +1,112 @@
+import {
+  loadApiKeys,
+  createApiKey,
+  copyCreatedKey,
+  deleteApiKey,
+  editApiKeyLabel,
+  updateMcpSnippet,
+  copyMcpSnippet,
+  scrollToMcpSnippet,
+  switchMcpMode,
+} from '../apikeys-ui';
+import {
+  createGatewayKey,
+  deleteGatewayKey,
+  copyGatewaySecret,
+} from '../gateway-keys';
+import {
+  resetAccentColor,
+  toggleRetroMode,
+  setAtelierTheme,
+  toggleContainerNavContinuous,
+  setContainerNavOrder,
+  toggleModalDefaultAnalysis,
+  toggleModalKeepScroll,
+  toggleModalKbGuide,
+  toggleDockZoom,
+  setBgImage,
+  clearBgImage,
+  setBgOpacity,
+  toggleSoundEnabled,
+  onSoundVolumeChange,
+  toggleSoundMute,
+} from '../appearance';
+import { refreshThemeManager } from '../../theme-system/manager-ui';
+import {
+  toggleLogPause,
+  clearLogDisplay,
+  copyLogDisplay,
+  downloadLogDisplay,
+  onLogLevelChange,
+  onLogSearchInput,
+} from '../logs-tab';
+import {
+  togglePause as toggleNativeLogPause,
+  clear as clearNativeLog,
+  onLevelChange as onNativeLogLevelChange,
+  onSearchInput as onNativeLogSearchInput,
+} from '../native-logs-panel';
+import { installUi, loadUiList } from '../ui-tab';
+import {
+  importTagDictCsv,
+  clearTagDict,
+  onTagDictSearchInput,
+} from '../tag-dict-tab';
+import {
+  saveSnsSettings,
+  testBskyConnection,
+  saveBskyMonitorSettings,
+  bskyPollNow,
+} from '../sns-tab';
+
+export function createSettingsUiBridgeSection() {
+  return {
+    loadApiKeys,
+    createApiKey,
+    createGatewayKey,
+    copyCreatedKey,
+    copyGatewaySecret,
+    deleteApiKey,
+    deleteGatewayKey,
+    editApiKeyLabel,
+    updateMcpSnippet,
+    copyMcpSnippet,
+    scrollToMcpSnippet,
+    switchMcpMode,
+    resetAccentColor,
+    toggleRetroMode,
+    setAtelierTheme,
+    toggleContainerNavContinuous,
+    setContainerNavOrder,
+    toggleModalDefaultAnalysis,
+    toggleModalKeepScroll,
+    toggleModalKbGuide,
+    toggleDockZoom,
+    setBgImage,
+    clearBgImage,
+    setBgOpacity,
+    toggleSoundEnabled,
+    onSoundVolumeChange,
+    toggleSoundMute,
+    refreshThemeManager,
+    toggleLogPause,
+    clearLogDisplay,
+    copyLogDisplay,
+    downloadLogDisplay,
+    onLogLevelChange,
+    onLogSearchInput,
+    toggleNativeLogPause,
+    clearNativeLog,
+    onNativeLogLevelChange,
+    onNativeLogSearchInput,
+    installUi,
+    loadUiList,
+    importTagDictCsv,
+    clearTagDict,
+    onTagDictSearchInput,
+    saveSnsSettings,
+    testBskyConnection,
+    saveBskyMonitorSettings,
+    bskyPollNow,
+  };
+}

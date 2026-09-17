@@ -1,0 +1,54 @@
+{
+  "name": "builtin-hailo-genai",
+  "version": "1.0.0",
+  "description": "Hailo-10H GenAI (LLM/VLM/Speech2Text)",
+  "type": "ui_widget",
+  "category": "ai",
+  "entry": "hailo_genai_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/hailo-genai",
+  "nav": {
+    "label": "GenAI",
+    "icon": "\ud83e\udd16"
+  },
+  "core_shim": "hailo_genai_core",
+  "config": {
+    "enabled": true,
+    "priority": 52
+  },
+  "config_schema": {
+    "default_llm_model": {
+      "type": "string",
+      "default": "qwen3-1.7b-instruct",
+      "label": "Default LLM Model",
+      "description": "LLM model to load by default"
+    },
+    "default_vlm_model": {
+      "type": "string",
+      "default": "qwen2-vl-2b-instruct",
+      "label": "Default VLM Model",
+      "description": "Vision-Language model used when a chat request includes an image (qwen2-vl-2b-instruct or qwen3-vl-2b-instruct)"
+    },
+    "max_generated_tokens": {
+      "type": "int",
+      "default": 512,
+      "range": [
+        64,
+        2048
+      ],
+      "label": "Max Generated Tokens",
+      "description": "Maximum number of tokens to generate per response"
+    },
+    "temperature": {
+      "type": "float",
+      "default": 0.7,
+      "range": [
+        0.0,
+        2.0
+      ],
+      "label": "Temperature",
+      "description": "Sampling temperature (0 = deterministic, 2 = creative). HailoRT requires >0; values of 0 are automatically clamped to 0.01."
+    }
+  }
+}

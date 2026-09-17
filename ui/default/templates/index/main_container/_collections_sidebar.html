@@ -1,0 +1,39 @@
+<aside class="collections-sidebar" id="collectionsSidebar">
+  <div class="cs-header">
+    <span class="cs-title" data-i18n="collections.sidebar_title">Collections</span>
+    <button class="cs-collapse-btn" id="csCollapseBtn" type="button">&laquo;</button>
+  </div>
+  <!-- Tabs -->
+  <div class="cs-tabs" role="tablist">
+    <button class="cs-tab active" data-tab="collections" id="csTabCollections" type="button" role="tab" aria-selected="true" aria-controls="csPanelCollections" data-i18n="collections.tab_collections">Collections</button>
+    <button class="cs-tab" data-tab="folders" id="csTabFolders" type="button" role="tab" aria-selected="false" aria-controls="csPanelFolders" data-i18n="collections.tab_folders">Folders</button>
+  </div>
+  <!-- Collections panel -->
+  <div class="cs-tab-panel active" id="csPanelCollections" role="tabpanel" aria-labelledby="csTabCollections">
+    <div class="cs-body" id="csSidebarBody">
+      <div class="cs-list" id="csCollectionList" role="grid" aria-label="Collections"></div>
+      <div class="cs-add">
+        <input type="text" id="csNewName" class="cs-add-input" data-i18n-placeholder="collections.new_placeholder" placeholder="New collection name" aria-label="New collection name" />
+        <button id="csAddBtn" class="cs-add-btn" type="button" data-i18n="collections.create">Create</button>
+      </div>
+      <button id="csSaveSearchBtn" class="cs-save-search-btn" type="button" data-i18n="collections.save_search">Save current search</button>
+    </div>
+  </div>
+  <!-- Folders panel -->
+  <div class="cs-tab-panel" id="csPanelFolders" role="tabpanel" aria-labelledby="csTabFolders">
+    <div class="ft-filter">
+      <input type="text" id="ftFilter" placeholder="Filter folders..." aria-label="Filter folders" data-i18n-placeholder="collections.folder_filter_placeholder">
+    </div>
+    <div class="ft-tree" id="ftTree"></div>
+    <div class="ft-footer">
+      <span id="ftFolderCount">0</span> <span data-i18n="collections.folders_unit">folders</span>
+    </div>
+  </div>
+</aside>
+<!-- Mobile: FAB + bottom drawer for Collections/Folders -->
+<button class="cs-mobile-fab" id="csMobileFab" type="button" aria-label="Collections">📂</button>
+<div class="cs-drawer-backdrop" id="csDrawerBackdrop"></div>
+<div class="cs-drawer" id="csDrawer">
+  <div class="cs-drawer-handle"></div>
+  <div class="cs-drawer-body" id="csDrawerBody"></div>
+</div>

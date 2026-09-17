@@ -1,0 +1,68 @@
+# MCP parity exceptions
+# Lines starting with '#' are comments. Blank lines are ignored.
+# Each entry is matched as a prefix or exact path against route full_path / MCP static_path.
+# Add paths here when a route is intentionally NOT exposed via MCP
+# (e.g. HTML delivery, SSE streams, internal health checks, admin-only endpoints).
+
+# --- HTML delivery / UI pages ---
+/api/openapi.json
+
+# --- SSE / streaming endpoints ---
+/api/events
+/ext/chatlog/api/events
+/ext/hailo-genai/api/stream
+/api/llm/stream
+
+# --- Gateway proxy pass-through (not direct API, proxied to SD/ComfyUI/Ollama) ---
+/sd/
+/comfy/
+/ollama/
+/agentmemory/
+/v1/
+
+# --- Internal / health / auth ---
+/api/agent/scope/
+/api/auth
+/api/csrf
+/api/ping
+/api/health
+/api/version
+/ext/mcp-client/api/tool-call
+
+# --- LAN Cowork fleet routes (internal peer communication) ---
+/api/fleet/
+/api/lan-cowork/
+
+# --- File download / send_file endpoints (binary, not JSON) ---
+/api/files/download/
+/api/files/thumbnail/
+/api/files/video/
+/api/ocr/export/
+/api/backup/download
+/api/tools/backup/
+
+# --- Tauri shell / desktop-only ---
+/api/tauri/
+
+# --- SVG / image generation (binary response) ---
+/api/svg/
+
+# --- Crypto / HMAC helpers (internal) ---
+/api/crypto/
+
+# --- Recipe / workflow templates (WebUI-only) ---
+/api/recipe
+
+# --- Misc UI helpers not useful via MCP ---
+/api/ui/
+/api/help/
+
+# --- Debug roundtrip (test endpoints, not production MCP surface) ---
+/api/debug/roundtrip
+
+# --- Rust-native OCR job routes (no Python @bp.route by design) ---
+# The five OCR execution routes moved to Rust as a job form; the MCP tools now
+# submit and poll. These paths are served by yu-server, so the Python route
+# scan cannot see them. Removing them from Python was the point.
+/api/jobs/ocr
+/api/ocr/benchmark/report/

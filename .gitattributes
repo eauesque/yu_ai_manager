@@ -1,0 +1,23 @@
+# Normalize line endings: store as LF, checkout as-is on all platforms
+* text=auto eol=lf
+
+# Claude Code memory files: use LLM merge driver on conflict.
+# Driver is registered per-machine by scripts/setup-memory-sync.sh/.ps1
+.claude/memory/*.md merge=llm-memory
+
+# Binary files — no line ending conversion
+docs/development/patches/*.patch binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
+*.eot binary
+*.db binary
+*.zip binary
+*.gz binary
+*.whl binary

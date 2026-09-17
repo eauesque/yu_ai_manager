@@ -1,0 +1,36 @@
+    <div class="results-header">
+      <div class="results-count" id="resultsCount"></div>
+      <div class="results-group-controls" id="resultsGroupControls" role="group" aria-label="Result Grouping"></div>
+      <span class="export-split-wrap" id="exportCsvSplit" style="display:none;" role="group" aria-label="CSV出力"><button type="button" id="exportCsvBtn" class="export-split-main" data-action="searchResultsApi.exportResultsCsv" data-i18n-title="search.export_csv_title" title="Export as CSV"><span aria-hidden="true">📥</span> CSV (100)</button><!--
+      --><button type="button" id="exportCsvChevron" class="export-split-chevron" data-action="searchResultsApi.showCsvLimitDropdown" data-action-this="1" aria-label="件数変更" title="件数変更">▼</button></span>
+      <span class="export-split-wrap" id="exportRecipeJsonSplit" style="display:none;" role="group" aria-label="Recipe JSON出力"><button type="button" id="exportRecipeJsonBtn" class="export-split-main" data-action="searchResultsApi.exportResultsRecipeJson" title="レシピJSON出力"><span aria-hidden="true">📥</span> Recipe JSON (100)</button><!--
+      --><button type="button" id="exportRecipeJsonChevron" class="export-split-chevron" data-action="searchResultsApi.showCsvLimitDropdown" data-action-this="1" aria-label="件数変更" title="件数変更">▼</button></span>
+      <button type="button" id="favSelectModeBtn" data-action="runtimeToolsApi.favSelectToggle" style="border:1px solid rgba(128,128,128,0.3);background:transparent;color:var(--muted);border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11px;white-space:nowrap;" data-i18n-title="search.select_mode_title" title="Selection mode (Ctrl+Click / Shift+Click / Rubber-band select → Favorites, Collection, ZIP download)">☑ <span data-i18n="search.select_btn">Select</span></button>
+    </div>
+    <!-- Favorites selection action bar -->
+    <div id="favSelectBar" class="fav-select-bar" style="display:none;">
+      <span id="favSelectCount" style="font-size:12px;color:var(--muted,#aaa);min-width:60px;">0 selected</span>
+      <button type="button" class="fav-select-action" data-action="runtimeToolsApi.favSelectAll" data-i18n="search.select_all">Select All</button>
+      <button type="button" class="fav-select-action" data-action="runtimeToolsApi.favDeselectAll" data-i18n="search.deselect">Deselect</button>
+      <button type="button" class="fav-select-action primary" data-action="runtimeToolsApi.favBatchAdd">⭐ <span data-i18n="search.add_to_favorites">Add to Favorites</span></button>
+      <button type="button" class="fav-select-action danger" data-action="runtimeToolsApi.favBatchRemove" data-i18n="search.remove_from_favorites">Remove from Favorites</button>
+      <div style="position:relative;display:inline-block;">
+        <button type="button" class="fav-select-action" data-action="runtimeToolsApi.favShowCollDropdown" data-action-this="1">📁 <span data-i18n="search.add_to_collection">Add to Collection</span> ▾</button>
+        <div id="favCollDropdown" class="fav-coll-dropdown" style="display:none;"></div>
+      </div>
+      <button type="button" class="fav-select-action" data-action="runtimeToolsApi.favBatchDownloadZip">📦 <span data-i18n="search.download_zip">Download ZIP</span></button>
+      <button type="button" class="fav-select-action" data-action="runtimeToolsApi.favSelectToggle" style="margin-left:auto;">✓ <span data-i18n="search.done_btn">Done</span></button>
+    </div>
+    <div class="results-group-summary" id="resultsGroupSummary" style="display:none;"></div>
+    <div id="searchPathTip" class="search-path-tip" style="display:none;"></div>
+
+    <div class="results-grid" id="results"></div>
+    <!-- sentinel placed outside #results: prevents destruction when VirtualGrid clears innerHTML -->
+    <div id="loadMoreSentinelAnchor"></div>
+    <div id="resultKeyboardGuide" class="keyboard-guide" style="display:none;" aria-hidden="true" inert></div>
+
+  <div class="loading" id="loading" style="display: none;">
+      <p data-i18n="search.searching">検索中...</p>
+      <p id="loadingTip" style="font-size:12px;color:#9aa;margin-top:6px;"></p>
+  </div>
+  </div>

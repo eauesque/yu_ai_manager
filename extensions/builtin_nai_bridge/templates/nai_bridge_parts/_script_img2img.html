@@ -1,0 +1,138 @@
+<script nonce="{{ csp_nonce }}">
+  // -- img2img ---------------------------------------------------------
+
+  // Sibling <script> tags don't share scope with _script.html's IIFE,
+  // so re-declare the $ shorthand here.
+  function $(id) { return document.getElementById(id); }
+
+  var _nabImg2ImgData = null;
+
+  window.nabClickImg2ImgFile = function() {
+    var input = $("nabImg2ImgFile");
+    if (input) input.click();
+  };
+
+  function nabUpdateImg2ImgStatus() {
+    $("nabImg2ImgStatus").textContent = _nabImg2ImgData ? "(" + window.tr('nai_bridge.one_image', '1 image') + ")" : "";
+  }
+
+  function _nabApplyImgDimensions(dataUrl) {
+    var img = new Image();
+    img.onload = function() {
+      var w = Math.min(Math.max(img.naturalWidth || 0, 64), 1600);
+      var h = Math.min(Math.max(img.naturalHeight || 0, 64), 1600);
+      if (!w || !h) return;
+      var wEl = $("nabWidth"), hEl = $("nabHeight");
+      if (!wEl || !hEl) return;
+      wEl.value = w;
+      hEl.value = h;
+      $("nabResPreset").value = "custom";
+      if (typeof nabUpdateCost === "function") nabUpdateCost();
+    };
+    img.src = dataUrl;
+  }
+
+  window.nabSetImg2ImgFile = function(file) {
+    // data-action-this="1" hands the <input> element itself, not a File.
+    if (file && file.tagName === "INPUT") file = file.files && file.files[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      _nabImg2ImgData = dataUrl.replace(/^data:image\/[^;]+;base64,/, "");
+      $("nabImg2ImgImg").src = dataUrl;
+      $("nabImg2ImgPlaceholder").style.display = "none";
+      $("nabImg2ImgPreview").style.display = "";
+      nabUpdateImg2ImgStatus();
+      nabUpdateGenLabel();
+      _nabApplyImgDimensions(dataUrl);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.nabClearImg2Img = function() {
+    _nabImg2ImgData = null;
+    $("nabImg2ImgImg").src = "";
+    $("nabImg2ImgPlaceholder").style.display = "";
+    $("nabImg2ImgPreview").style.display = "none";
+    $("nabImg2ImgFile").value = "";
+    nabUpdateImg2ImgStatus();
+    nabUpdateGenLabel();
+  };
+
+  // Called by nabGenerate in _script.html
+  window.nabCollectImg2Img = function() {
+    if (!_nabImg2ImgData) return null;
+    return {
+      image: _nabImg2ImgData,
+      strength: parseFloat($("nabImg2ImgStrength").value) || 0.7,
+      noise: parseFloat($("nabImg2ImgNoise").value) || 0.0,
+    };
+  };
+
+  window.nabUpdateGenLabel = function() {
+    var btn = $("nabGenBtn");
+    if (!btn) return;
+    if (typeof nabCollectInpaint === "function" && nabCollectInpaint()) {
+      btn.textContent = window.tr('nai_bridge.inpaint_generate_btn', 'Inpaint Generate');
+    } else if (_nabImg2ImgData) {
+      btn.textContent = window.tr('nai_bridge.img2img_generate_btn', 'img2img Generate');
+    } else {
+      btn.textContent = window.tr('nai_bridge.generate_btn', 'Generate');
+    }
+  };
+
+  // -- Drag & drop ----------------------------------------------------
+
+  (function() {
+    var drop = $("nabImg2ImgDrop");
+    if (!drop) return;
+
+    drop.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      drop.classList.add("dragover");
+    });
+    drop.addEventListener("dragleave", function() {
+      drop.classList.remove("dragover");
+    });
+    drop.addEventListener("drop", function(e) {
+      e.preventDefault();
+      drop.classList.remove("dragover");
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files.length > 0) {
+        nabSetImg2ImgFile(files[0]);
+      }
+    });
+  })();
+
+  // -- Set img2img from base64 (result panel action / cross-bridge) --
+
+  window._nabSetImg2ImgBase64 = function(b64) {
+    if (!b64) return;
+    _nabImg2ImgData = b64;
+    var mime = "image/png";
+    try { var h = atob(b64.slice(0, 12)); if (h.charCodeAt(0) === 0xFF && h.charCodeAt(1) === 0xD8) mime = "image/jpeg"; else if (h.charCodeAt(0) === 0x52 && h.charCodeAt(8) === 0x57) mime = "image/webp"; } catch(e) {}
+    var dataUrl = "data:" + mime + ";base64," + b64;
+    $("nabImg2ImgImg").src = dataUrl;
+    $("nabImg2ImgPlaceholder").style.display = "none";
+    $("nabImg2ImgPreview").style.display = "";
+    nabUpdateImg2ImgStatus();
+    nabUpdateGenLabel();
+    _nabApplyImgDimensions(dataUrl);
+    var section = $("nabImg2ImgSection");
+    if (section && !section.open) section.open = true;
+    section.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    if (window.showToast) window.showToast(window.tr('nai_bridge.img2img_set', 'img2img にセットしました'));
+  };
+
+  window._nabSendImg2ImgTo = function(target, b64) {
+    if (!b64) return;
+    localStorage.setItem("bridge_send_image", JSON.stringify({
+      base64: b64,
+      source: "nai-bridge"
+    }));
+    if (target === "sd") {
+      window.tauriCrossTab.sendToBridge("a1111", {});
+    }
+  };
+</script>

@@ -1,0 +1,308 @@
+/* ui/default/static/css/pages/lan_cowork.css
+ * Layout for /lan-cowork.
+ * All classes use .lc- prefix to avoid collisions.
+ * Light + dark via CSS variables (--bg, --fg, --card, --border, --muted).
+ */
+
+.lc-page {
+  max-width: 860px;
+  margin: 0 auto 24px;
+  padding: 50px 20px 0;
+}
+
+.lc-header h1 {
+  font-size: 1.4rem;
+  margin: 0 0 8px;
+  color: var(--fg, #222);
+}
+
+.lc-subnav {
+  margin-bottom: 16px;
+  display: flex;
+  gap: 16px;
+}
+
+.lc-subnav-link {
+  font-size: 0.85rem;
+  color: var(--accent, #2563eb);
+  text-decoration: none;
+}
+
+.lc-subnav-link:hover {
+  text-decoration: underline;
+}
+
+.lc-section {
+  margin-bottom: 32px;
+}
+
+.lc-section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.lc-section h2,
+.lc-section-header h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0;
+  color: var(--fg, #222);
+}
+
+/* Peer cards */
+.lc-peer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 10px;
+  align-items: stretch;
+}
+
+.lc-peer-card {
+  background: var(--card, #fafafa);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  padding: 10px 14px;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lc-peer-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--fg, #222);
+  margin-bottom: 2px;
+}
+
+.lc-peer-addr {
+  font-size: 0.8rem;
+  color: var(--muted, #666);
+  margin-bottom: 6px;
+}
+
+.lc-badge {
+  display: inline-block;
+  font-size: 0.75rem;
+  padding: 1px 8px;
+  border-radius: 10px;
+  font-weight: 600;
+}
+
+.lc-badge-online {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.lc-badge-offline {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+body.dark .lc-badge-online  { background: #065f46; color: #d1fae5; }
+body.dark .lc-badge-offline { background: #7f1d1d; color: #fecaca; }
+
+.lc-empty {
+  color: var(--muted, #666);
+  font-size: 0.9rem;
+}
+
+/* Import form */
+.lc-import-form {
+  background: var(--card, #fafafa);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 8px;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.lc-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.lc-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fg, #222);
+}
+
+.lc-field select,
+.lc-field input[type="text"] {
+  padding: 6px 10px;
+  border: 1px solid var(--border, #ccc);
+  border-radius: 6px;
+  background: var(--bg, #fff);
+  color: var(--fg, #222);
+  font-size: 0.9rem;
+}
+
+.lc-folder-input-row {
+  display: flex;
+  gap: 6px;
+  align-items: stretch;
+}
+
+.lc-folder-input-row input[type="text"] {
+  flex: 1;
+  min-width: 0;
+}
+
+.lc-folder-input-row button {
+  flex: 0 0 auto;
+  padding: 6px 12px;
+  font-size: 1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.lc-options {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.lc-options label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.lc-actions {
+  display: flex;
+  gap: 10px;
+}
+
+.lc-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lc-progress-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 4px;
+}
+
+.lc-progress-label {
+  font-size: 0.85rem;
+  color: var(--muted, #666);
+  white-space: nowrap;
+}
+
+/* ── Main-page PIN modal ── */
+.lc-pin-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+
+.lc-pin-modal-overlay:not([hidden]) {
+  display: flex;
+}
+
+.lc-pin-modal {
+  background: var(--bg, #fff);
+  border: 1px solid var(--border, #ddd);
+  border-radius: 12px;
+  padding: 28px 32px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.lc-pin-modal-title {
+  margin: 0 0 8px;
+  font-size: 1.05rem;
+  color: var(--fg, #222);
+}
+
+.lc-pin-modal-msg {
+  font-size: 0.9rem;
+  color: var(--muted, #666);
+  margin: 0 0 16px;
+}
+
+.lc-pin-sas {
+  margin: 0 0 16px;
+  padding: 10px 12px;
+  border: 1px solid var(--border, #ddd);
+  border-radius: 6px;
+  background: var(--bg-secondary, #f8fafc);
+}
+
+.lc-pin-sas-label {
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--muted, #666);
+  margin-bottom: 4px;
+}
+
+.lc-pin-sas-code {
+  display: block;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--fg, #222);
+}
+
+.lc-pin-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+.lc-pin-field label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--fg, #222);
+}
+
+.lc-pin-input {
+  padding: 8px 12px;
+  border: 1px solid var(--border, #ccc);
+  border-radius: 6px;
+  background: var(--bg, #fff);
+  color: var(--fg, #222);
+  font-size: 1.1rem;
+  letter-spacing: 0.2em;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.lc-pin-error {
+  color: #ef4444;
+  font-size: 0.85rem;
+  padding: 6px 10px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+body.dark .lc-pin-error {
+  background: #450a0a;
+  border-color: #7f1d1d;
+}
+
+.lc-pin-modal-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}

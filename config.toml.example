@@ -1,0 +1,6 @@
+compute_hash = false
+enable_fts   = true
+
+# Add directories to watch via the WebUI (Settings > Scan Roots),
+# or add entries here. Each entry: { path = "<absolute path>", enabled = true, recursive = true, comment = "<label>" }
+scan_roots = []

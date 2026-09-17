@@ -1,0 +1,82 @@
+{
+  "name": "builtin-speech-to-text",
+  "version": "1.0.0",
+  "description": "Speech-to-Text with auto backend detection (Hailo NPU / CUDA / ROCm GPU / CPU)",
+  "type": "ui_widget",
+  "category": "ai",
+  "entry": "speech_to_text_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/speech-to-text",
+  "nav": {
+    "label": "Speech2Text",
+    "icon": "\ud83c\udfa4"
+  },
+  "core_shim": "speech_to_text_core",
+  "config": {
+    "enabled": true,
+    "priority": 120
+  },
+  "config_schema": {
+    "backend": {
+      "type": "select",
+      "options": ["auto", "hailo", "cuda", "rocm", "cpu"],
+      "default": "auto",
+      "label": "Backend",
+      "description": "Inference backend. 'auto' detects the best available."
+    },
+    "model_size": {
+      "type": "select",
+      "options": ["tiny", "base", "small", "medium"],
+      "default": "base",
+      "label": "Model Size",
+      "description": "Whisper model size. Larger = more accurate but slower."
+    },
+    "default_language": {
+      "type": "string",
+      "default": "ja",
+      "label": "Default Language",
+      "description": "Default language code for transcription (e.g. ja, en)"
+    },
+    "stream_chunk_min_sec": {
+      "type": "number",
+      "default": 3,
+      "min": 1,
+      "max": 30,
+      "label": "Stream Min Chunk (sec)",
+      "description": "Minimum audio chunk duration before splitting at silence"
+    },
+    "stream_chunk_max_sec": {
+      "type": "number",
+      "default": 10,
+      "min": 5,
+      "max": 120,
+      "label": "Stream Max Chunk (sec)",
+      "description": "Maximum audio chunk duration (force-split if no silence)"
+    },
+    "stream_silence_threshold": {
+      "type": "number",
+      "default": 500,
+      "min": 100,
+      "max": 5000,
+      "label": "Stream Silence Threshold",
+      "description": "RMS threshold for silence detection in stream mode"
+    },
+    "stream_silence_ms": {
+      "type": "number",
+      "default": 500,
+      "min": 100,
+      "max": 3000,
+      "label": "Stream Silence Duration (ms)",
+      "description": "Minimum silence duration to trigger chunk split"
+    },
+    "live_interval_sec": {
+      "type": "number",
+      "default": 3,
+      "min": 1,
+      "max": 10,
+      "label": "Live Interval (sec)",
+      "description": "Interval between transcription runs in live streaming mode"
+    }
+  }
+}

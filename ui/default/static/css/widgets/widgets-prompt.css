@@ -1,0 +1,17 @@
+/* Prompt text contrast improvement */
+.prompt-text {
+  background: var(--bg, #f5f6f8);
+  padding: 12px;
+  border-radius: 5px;
+  font-family: "Consolas", "Monaco", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+body.dark .prompt-text {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}

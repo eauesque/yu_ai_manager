@@ -1,0 +1,26 @@
+    <details class="tool-item" id="tool-mcp-connections">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.mcp_connections">🔌 MCP Connections</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.mcp_connections_desc">Manage external MCP server connections</p>
+      <div id="mcpConnectionList"></div>
+      <div>
+        <input class="tool-input" type="text" id="mcpConnName" placeholder="Connection name" aria-label="Connection name">
+        <input class="tool-input" type="text" id="mcpConnCmd" placeholder="Command (e.g. npx -y @mcp/server)" aria-label="Command">
+        <button type="button" id="mcpConnAddBtn" class="btn btn-sm" data-i18n="tools.mcp_add">Add</button>
+      </div>
+      <details>
+        <summary data-i18n="tools.mcp_paste_json">Paste JSON config</summary>
+        <div>
+          <textarea class="tool-textarea" id="mcpConnJsonInput" rows="6" placeholder='{"name":"my-server","transport":"stdio","stdio":{"command":"npx","args":["-y","@mcp/server"]}}' aria-label="JSON config" data-json-enhance data-json-schema="mcp-connections"></textarea>
+          <div>
+            <button type="button" id="mcpConnJsonAddBtn" class="btn btn-sm" data-i18n="tools.mcp_import_json">Import JSON</button>
+            <span id="mcpConnJsonError"></span>
+          </div>
+        </div>
+      </details>
+      </div>
+</details>

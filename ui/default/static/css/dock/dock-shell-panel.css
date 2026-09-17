@@ -1,0 +1,77 @@
+/* Regex cheat sheet shell/header */
+.cheat-panel {
+  position: fixed;
+  left: 12px;
+  right: 12px;
+  bottom: 12px;
+  z-index: 1200;
+  background: var(--cheat-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  /* backdrop-filter removed for GPU performance */
+  max-height: 70vh;
+}
+
+.cheat-panel.open {
+  display: flex;
+  animation: vt-dock-slide-up 0.25s ease both;
+}
+@keyframes vt-dock-slide-up {
+  from { opacity: 0; transform: translateY(30px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .cheat-panel.open { animation: none; }
+}
+
+.cheat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--cheat-header-bg);
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--cheat-text);
+}
+
+.cheat-resize-handle {
+  height: 10px;
+  cursor: ns-resize;
+  background: linear-gradient(to bottom, transparent, rgba(0, 0, 0, 0.1), transparent);
+  border-bottom: 1px solid var(--border);
+}
+
+body.dark .cheat-resize-handle {
+  background: linear-gradient(to bottom, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.cheat-header .right {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.cheat-header .close {
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--cheat-text);
+  width: 30px;
+  height: 30px;
+  border-radius: 10px;
+  cursor: pointer;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+}
+
+body.dark .cheat-header .close {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.cheat-header .close:hover { filter: brightness(0.98); }

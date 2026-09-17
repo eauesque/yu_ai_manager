@@ -1,0 +1,90 @@
+/* search-util-bar.css — Utility buttons in the search condition row */
+.search-util-bar {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.search-util-btn {
+  padding: 3px 8px;
+  font-size: 11px;
+  background: none;
+  border: 1px solid var(--border);
+  color: inherit;
+  border-radius: 3px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.search-util-btn:hover {
+  background: rgba(128,128,128,0.12);
+}
+
+.search-util-preset-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.search-util-dropdown {
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 100;
+  min-width: 180px;
+  background: var(--card, #1e1e3a);
+  border: 1px solid rgba(128,128,128,0.25);
+  border-radius: 6px;
+  padding: 8px;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.search-util-dropdown-save {
+  flex: 1;
+  padding: 4px 8px;
+  font-size: 11px;
+  background: rgba(102,126,234,0.15);
+  border: 1px solid rgba(102,126,234,0.4);
+  color: #667eea;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+/* ⋯ overflow menu */
+.search-util-overflow-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.search-util-overflow-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  z-index: 100;
+  min-width: 180px;
+  background: var(--card, #1e1e3a);
+  border: 1px solid rgba(128,128,128,0.25);
+  border-radius: 6px;
+  padding: 4px 0;
+  margin-top: 4px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.search-util-overflow-item {
+  display: block;
+  width: 100%;
+  padding: 7px 12px;
+  font-size: 12px;
+  background: none;
+  border: none;
+  color: var(--text, #e7eaf0);
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.search-util-overflow-item:hover {
+  background: rgba(128,128,128,0.12);
+}

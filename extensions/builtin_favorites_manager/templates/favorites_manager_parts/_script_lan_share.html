@@ -1,0 +1,121 @@
+<script nonce="{{ csp_nonce }}">
+/**
+ * Favorites Manager — LAN Share handler.
+ * Creates/revokes share tokens and shows QR modal.
+ */
+(function() {
+  'use strict';
+
+  // Resolve apiFetch from the appApi namespace
+  function apiFetch(url, opts) {
+    return window.appApi.apiFetch(url, opts);
+  }
+
+  var _activeToken = null;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var btn = document.getElementById('fmLanShareBtn');
+    if (!btn) return;
+
+    btn.addEventListener('click', function() {
+      var cid = window._fm ? window._fm.getCollectionId() : null;
+      if (cid === null) {
+        showToast('\u30b3\u30ec\u30af\u30b7\u30e7\u30f3\u3092\u5148\u306b\u9078\u629e\u3057\u3066\u304f\u3060\u3055\u3044\uff08\u300c\u3059\u3079\u3066\u300d\u4ee5\u5916\uff09');
+        return;
+      }
+      createShare(cid);
+    });
+
+    var copyBtn = document.getElementById('fmLanShareCopyBtn');
+    if (copyBtn) {
+      copyBtn.addEventListener('click', function() {
+        var urlInput = document.getElementById('fmLanShareUrl');
+        if (urlInput) {
+          navigator.clipboard.writeText(urlInput.value).then(function() {
+            showToast('URL \u3092\u30b3\u30d4\u30fc\u3057\u307e\u3057\u305f');
+          });
+        }
+      });
+    }
+
+    var stopBtn = document.getElementById('fmLanShareStopBtn');
+    if (stopBtn) {
+      stopBtn.addEventListener('click', function() {
+        revokeShare();
+      });
+    }
+  });
+
+  function createShare(collectionId) {
+    apiFetch('/api/lan-share/create', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({collection_id: collectionId})
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.error) {
+        showToast('\u30a8\u30e9\u30fc: ' + data.error);
+        return;
+      }
+      _activeToken = data.token;
+      showQrModal(data);
+    })
+    .catch(function(e) {
+      showToast('LAN \u5171\u6709\u306b\u5931\u6557: ' + e.message);
+    });
+  }
+
+  function showQrModal(data) {
+    var modal = document.getElementById('fmLanShareModal');
+    var info = document.getElementById('fmLanShareInfo');
+    var urlInput = document.getElementById('fmLanShareUrl');
+    var qrContainer = document.getElementById('fmQrContainer');
+
+    if (info) info.textContent = data.collection_name + ' \u2014 ' + data.image_count + ' \u679a \u2014 15\u5206\u5f8c\u306b\u671f\u9650\u5207\u308c';
+    if (urlInput) urlInput.value = data.url;
+
+    if (qrContainer && typeof QRCode !== 'undefined') {
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: data.url,
+        width: 280,
+        height: 280,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    if (modal) {
+      modal.style.display = 'flex';
+      if (window.FocusTrap) FocusTrap.activate(modal, closeQrModal);
+    }
+  }
+
+  function closeQrModal() {
+    var modal = document.getElementById('fmLanShareModal');
+    if (modal) {
+      modal.style.display = 'none';
+      if (window.FocusTrap) FocusTrap.deactivate(modal);
+    }
+  }
+
+  function revokeShare() {
+    if (!_activeToken) { closeQrModal(); return; }
+    apiFetch('/api/lan-share/revoke', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({token: _activeToken})
+    })
+    .then(function() {
+      _activeToken = null;
+      closeQrModal();
+      showToast('\u5171\u6709\u3092\u505c\u6b62\u3057\u307e\u3057\u305f');
+    })
+    .catch(function() {
+      closeQrModal();
+    });
+  }
+})();
+</script>

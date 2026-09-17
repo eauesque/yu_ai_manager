@@ -1,0 +1,15 @@
+{
+  "name": "builtin-ratings",
+  "version": "1.0.0",
+  "description": "File star rating system (1-5 stars)",
+  "type": "general",
+  "category": "metadata",
+  "entry": "ratings_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "ratings_core",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

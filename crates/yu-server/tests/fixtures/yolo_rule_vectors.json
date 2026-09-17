@@ -1,0 +1,560 @@
+{
+  "rule_cases": [
+    {
+      "label": "class_filter_none",
+      "rule": {
+        "id": "all"
+      },
+      "steps": [
+        {
+          "source_id": "cam-a",
+          "detections": [
+            {
+              "class": "cat",
+              "confidence": 0.1
+            }
+          ],
+          "now": "2026-08-10T12:00:00",
+          "monotonic": 100.0,
+          "expected": [
+            {
+              "class": "cat",
+              "confidence": 0.1
+            }
+          ]
+        }
+      ],
+      "serialized_rule": {
+        "id": "all",
+        "name": "",
+        "enabled": true,
+        "conditions": {},
+        "cooldown_sec": 0,
+        "actions": []
+      }
+    },
+    {
+      "label": "confidence_exact",
+      "rule": {
+        "id": "person",
+        "conditions": {
+          "classes": [
+            "person"
+          ],
+          "min_confidence": 0.75
+        }
+      },
+      "steps": [
+        {
+          "source_id": "cam-a",
+          "detections": [
+            {
+              "class": "person",
+              "confidence": 0.75
+            },
+            {
+              "class": "person",
+              "confidence": 0.749
+            },
+            {
+              "class": "car",
+              "confidence": 0.99
+            }
+          ],
+          "now": "2026-08-10T12:00:00",
+          "monotonic": 100.0,
+          "expected": [
+            {
+              "class": "person",
+              "confidence": 0.75
+            }
+          ]
+        }
+      ],
+      "serialized_rule": {
+        "id": "person",
+        "name": "",
+        "enabled": true,
+        "conditions": {
+          "classes": [
+            "person"
+          ],
+          "min_confidence": 0.75
+        },
+        "cooldown_sec": 0,
+        "actions": []
+      }
+    },
+    {
+      "label": "source_mismatch",
+      "rule": {
+        "id": "source",
+        "conditions": {
+          "sources": [
+            "cam-a"
+          ]
+        }
+      },
+      "steps": [
+        {
+          "source_id": "cam-b",
+          "detections": [
+            {
+              "class": "person",
+              "confidence": 1.0
+            }
+          ],
+          "now": "2026-08-10T12:00:00",
+          "monotonic": 100.0,
+          "expected": []
+        }
+      ],
+      "serialized_rule": {
+        "id": "source",
+        "name": "",
+        "enabled": true,
+        "conditions": {
+          "sources": [
+            "cam-a"
+          ]
+        },
+        "cooldown_sec": 0,
+        "actions": []
+      }
+    },
+    {
+      "label": "schedule_start_inclusive",
+      "rule": {
+        "id": "schedule-start",
+        "conditions": {
+          "schedule": {
+            "days": [
+              "mon"
+            ],
+            "start": "08:00",
+            "end": "18:00"
+          }
+        }
+      },
+      "steps": [
+        {
+          "source_id": "cam",
+          "detections": [
+            {
+              "class": "person"
+            }
+          ],
+          "now": "2026-08-10T08:00:00",
+          "monotonic": 100.0,
+          "expected": [
+            {
+              "class": "person"
+            }
+          ]
+        }
+      ],
+      "serialized_rule": {
+        "id": "schedule-start",
+        "name": "",
+        "enabled": true,
+        "conditions": {
+          "schedule": {
+            "days": [
+              "mon"
+            ],
+            "start": "08:00",
+            "end": "18:00"
+          }
+        },
+        "cooldown_sec": 0,
+        "actions": []
+      }
+    },
+    {
+      "label": "schedule_end_exclusive",
+      "rule": {
+        "id": "schedule-end",
+        "conditions": {
+          "schedule": {
+            "days": [
+              "mon"
+            ],
+            "start": "08:00",
+            "end": "18:00"
+          }
+        }
+      },
+      "steps": [
+        {
+          "source_id": "cam",
+          "detections": [
+            {
+              "class": "person"
+            }
+          ],
+          "now": "2026-08-10T18:00:00",
+          "monotonic": 100.0,
+          "expected": []
+        }
+      ],
+      "serialized_rule": {
+        "id": "schedule-end",
+        "name": "",
+        "enabled": true,
+        "conditions": {
+          "schedule": {
+            "days": [
+              "mon"
+            ],
+            "start": "08:00",
+            "end": "18:00"
+          }
+        },
+        "cooldown_sec": 0,
+        "actions": []
+      }
+    },
+    {
+      "label": "schedule_cross_midnight",
+      "rule": {
+        "id": "overnight",
+        "conditions": {
+          "schedule": {
+            "start": "22:00",
+            "end": "06:00"
+          }
+        }
+      },
+      "steps": [
+        {
+          "source_id": "cam",
+          "detections": [
+            {
+              "class": "person"
+            }
+          ],
+          "now": "2026-08-10T22:00:00",
+          "monotonic": 100.0,
+          "expected": [
+            {
+              "class": "person"
+            }
+          ]
+        },
+        {
+          "source_id": "cam",
+          "detections": [
+            {
+              "class": "person"
+            }
+          ],
+          "now": "2026-08-11T05:59:00",
+          "monotonic": 101.0,
+          "expected": [
+            {
+              "class": "person"
+            }
+          ]
+        },
+        {
+          "source_id": "cam",
+          "detections": [
+            {
+              "class": "person"
+            }
+          ],
+          "now": "2026-08-11T06:00:00",
+          "monotonic": 102.0,
+          "expected": []
+        }
+      ],
+      "serialized_rule": {
+        "id": "overnight",
+        "name": "",
+        "enabled": true,
+        "conditions": {
+          "schedule": {
+            "start": "22:00",
+            "end": "06:00"
+          }
+        },
+        "cooldown_sec": 0,
+        "actions": []
+      }
+    },
+    {
+      "label": "cooldown_boundary",
+      "rule": {
+        "id": "cooldown",
+        "cooldown_sec": 10
+      },
+      "steps": [
+        {
+          "source_id": "cam",
+          "detections": [
+            {
+              "class": "person"
+            }
+          ],
+          "now": "2026-08-10T12:00:00",
+          "monotonic": 100.0,
+          "expected": [
+            {
+              "class": "person"
+            }
+          ]
+        },
+        {
+          "source_id": "cam",
+          "detections": [
+            {
+              "class": "person"
+            }
+          ],
+          "now": "2026-08-10T12:00:00",
+          "monotonic": 109.0,
+          "expected": []
+        },
+        {
+          "source_id": "cam",
+          "detections": [
+            {
+              "class": "person"
+            }
+          ],
+          "now": "2026-08-10T12:00:00",
+          "monotonic": 110.0,
+          "expected": [
+            {
+              "class": "person"
+            }
+          ]
+        }
+      ],
+      "serialized_rule": {
+        "id": "cooldown",
+        "name": "",
+        "enabled": true,
+        "conditions": {},
+        "cooldown_sec": 10,
+        "actions": []
+      }
+    }
+  ],
+  "engine_cases": [
+    {
+      "label": "empty_detections",
+      "rules": [
+        {
+          "id": "all"
+        }
+      ],
+      "source_id": "cam",
+      "detections": [],
+      "now": "2026-08-10T12:00:00",
+      "monotonic": 100.0,
+      "expected": []
+    },
+    {
+      "label": "multiple_rules_match",
+      "rules": [
+        {
+          "id": "people",
+          "conditions": {
+            "classes": [
+              "person"
+            ]
+          }
+        },
+        {
+          "id": "confident",
+          "conditions": {
+            "min_confidence": 0.5
+          }
+        },
+        {
+          "id": "other-source",
+          "conditions": {
+            "sources": [
+              "other"
+            ]
+          }
+        }
+      ],
+      "source_id": "cam",
+      "detections": [
+        {
+          "class": "person",
+          "confidence": 0.8
+        },
+        {
+          "class": "cat",
+          "confidence": 0.7
+        }
+      ],
+      "now": "2026-08-10T12:00:00",
+      "monotonic": 100.0,
+      "expected": [
+        {
+          "rule": {
+            "id": "people",
+            "name": "",
+            "enabled": true,
+            "conditions": {
+              "classes": [
+                "person"
+              ]
+            },
+            "cooldown_sec": 0,
+            "actions": []
+          },
+          "detections": [
+            {
+              "class": "person",
+              "confidence": 0.8
+            }
+          ]
+        },
+        {
+          "rule": {
+            "id": "confident",
+            "name": "",
+            "enabled": true,
+            "conditions": {
+              "min_confidence": 0.5
+            },
+            "cooldown_sec": 0,
+            "actions": []
+          },
+          "detections": [
+            {
+              "class": "person",
+              "confidence": 0.8
+            },
+            {
+              "class": "cat",
+              "confidence": 0.7
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "crud_case": {
+    "add": [
+      {
+        "id": "alpha",
+        "name": "First"
+      },
+      {
+        "id": "beta",
+        "conditions": {
+          "classes": [
+            "car"
+          ]
+        }
+      }
+    ],
+    "update": {
+      "id": "ignored",
+      "name": "Updated",
+      "cooldown_sec": 5
+    },
+    "expected_get": {
+      "id": "alpha",
+      "name": "Updated",
+      "enabled": true,
+      "conditions": {},
+      "cooldown_sec": 5,
+      "actions": []
+    },
+    "expected_list": [
+      {
+        "id": "alpha",
+        "name": "Updated",
+        "enabled": true,
+        "conditions": {},
+        "cooldown_sec": 5,
+        "actions": []
+      },
+      {
+        "id": "beta",
+        "name": "",
+        "enabled": true,
+        "conditions": {
+          "classes": [
+            "car"
+          ]
+        },
+        "cooldown_sec": 0,
+        "actions": []
+      }
+    ],
+    "removed_beta": true,
+    "removed_missing": false,
+    "load": [
+      {
+        "id": "gamma",
+        "enabled": false
+      }
+    ],
+    "expected_export": [
+      {
+        "id": "gamma",
+        "name": "",
+        "enabled": false,
+        "conditions": {},
+        "cooldown_sec": 0,
+        "actions": []
+      }
+    ]
+  },
+  "action_case": {
+    "rule": {
+      "id": "actions",
+      "name": "",
+      "enabled": true,
+      "conditions": {},
+      "cooldown_sec": 0,
+      "actions": [
+        {
+          "type": "webhook"
+        },
+        {
+          "type": "snapshot",
+          "name": "first"
+        },
+        {
+          "type": "snapshot",
+          "name": "second"
+        },
+        {
+          "type": "record",
+          "fail": true
+        }
+      ]
+    },
+    "expected": [
+      {
+        "type": "snapshot",
+        "status": "ok",
+        "name": "first"
+      },
+      {
+        "type": "snapshot",
+        "status": "ok",
+        "name": "second"
+      },
+      {
+        "type": "webhook",
+        "status": "ok",
+        "snapshot_name": "second"
+      },
+      {
+        "type": "record",
+        "status": "error",
+        "error": "planned failure"
+      }
+    ]
+  }
+}

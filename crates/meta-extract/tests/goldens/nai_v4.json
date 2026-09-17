@@ -1,0 +1,9 @@
+{
+  "parser": "nai_v4",
+  "fixture": "fixtures/inspect_parity/novelai_v4_conform.png",
+  "python_format_raw": "novelai_v4",
+  "positive": "a serene landscape",
+  "negative": "ugly, blurry",
+  "raw_meta": "{\"Comment\":\"{\\\"v4_prompt\\\":{\\\"caption\\\":{\\\"base_caption\\\":\\\"a serene landscape\\\"}},\\\"v4_negative_prompt\\\":{\\\"caption\\\":{\\\"base_caption\\\":\\\"ugly, blurry\\\"}},\\\"steps\\\":28,\\\"scale\\\":6.0,\\\"seed\\\":1234567,\\\"sampler\\\":\\\"k_euler\\\",\\\"noise_schedule\\\":\\\"karras\\\"}\",\"Description\":\"\",\"Software\":\"NovelAI\",\"Source\":\"\"}",
+  "format_rust": "nai_v4"
+}

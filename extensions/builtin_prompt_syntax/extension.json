@@ -1,0 +1,29 @@
+{
+  "name": "builtin-prompt-syntax",
+  "version": "1.0.0",
+  "description": "Prompt syntax highlighting, auto-detection, and error-detection engine - supports NAI/SD/DP syntax, bracket-depth color coding, and mixed-syntax warnings",
+  "type": "ui_widget",
+  "category": "prompt",
+  "entry": "prompt_syntax.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/syntax",
+  "config": {
+    "enabled": true,
+    "priority": 210
+  },
+  "config_schema": {
+    "auto_detect": {
+      "type": "bool",
+      "default": true,
+      "label": "Auto-detect Syntax",
+      "description": "Automatically detect NAI/SD/DP syntax in the input text"
+    },
+    "show_errors": {
+      "type": "bool",
+      "default": true,
+      "label": "Show Errors",
+      "description": "Display warnings for bracket mismatches and abnormal weight values"
+    }
+  }
+}

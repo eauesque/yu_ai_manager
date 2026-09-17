@@ -1,0 +1,28 @@
+# uv pinned-binary checksums (SHA-256). DO NOT EDIT BY HAND.
+# Regenerate via: bash scripts/update_uv_checksums.sh
+# Columns: <version> <triple> <kind:archive|binary> <sha256> <artifact>
+version 0.11.8
+0.11.8 x86_64-unknown-linux-gnu archive 56dd1b66701ecb62fe896abb919444e4b83c5e8645cca953e6ddd496ff8a0feb uv-x86_64-unknown-linux-gnu.tar.gz
+0.11.8 x86_64-unknown-linux-gnu binary 646adf5cf12ba17d1a41fa77c8dd6496f73651dcfeeed6b5f4ec019b36bc7153 uv
+0.11.8 x86_64-unknown-linux-gnu binary 868569227b22fc478eee49213751007084d8958c7524f2b0da8c18587f4da9a9 uvx
+0.11.8 aarch64-unknown-linux-gnu archive eee8dd658d20e5ac85fec9c2326b6cbc9d83a1eef09ef07433e58698ac849591 uv-aarch64-unknown-linux-gnu.tar.gz
+0.11.8 aarch64-unknown-linux-gnu binary abacf92d397e1f4a790c1f284a3fbc0720ff790e767ef85eb323fc482533494c uv
+0.11.8 aarch64-unknown-linux-gnu binary 2575b58e965f637eebab8833963c59f96c767130c805a39d89cbe9defc7cac1a uvx
+0.11.8 armv7-unknown-linux-gnueabihf archive b0674ede45b797362f34af0a75d6391e844992ae92a9c181a353e3892af4c325 uv-armv7-unknown-linux-gnueabihf.tar.gz
+0.11.8 armv7-unknown-linux-gnueabihf binary c669ac82a1a5e32840b64bc785c1c2403e5ee5bae35859ca30c246d930e3a11a uv
+0.11.8 armv7-unknown-linux-gnueabihf binary 49fbc67f2c88120f9fd0ae30ede88ecb7b3e54ad88df44675b4ed319c15e38ff uvx
+0.11.8 x86_64-apple-darwin archive c59d73bf34b58bc8e33a11629f7a255c11789fd00f03cd3e68ab2d1603645de9 uv-x86_64-apple-darwin.tar.gz
+0.11.8 x86_64-apple-darwin binary 9ce7f803b7a4cf61c3fe753f593a7b1e94e4d905fcaa3a6ff8da5d4dba99fee7 uv
+0.11.8 x86_64-apple-darwin binary 6f231c35c64f6f13231b0a952a42b408820ad98e0d5716965afc42080069ce62 uvx
+0.11.8 aarch64-apple-darwin archive c729adb365114e844dd7f9316313a7ed6443b89bb5681d409eebac78b0bd06c8 uv-aarch64-apple-darwin.tar.gz
+0.11.8 aarch64-apple-darwin binary 51f0ae3c531a124727fa39e16e8599f2e371e427822a4aa92ebf667b52548b43 uv
+0.11.8 aarch64-apple-darwin binary aa115a8539653956e6aab1cf311f70958c116b5f60968726dcd092cba7efdacf uvx
+0.11.8 x86_64-pc-windows-msvc archive c84629a56e0706b69a47ea35862208af827cb6fbfa1d0ca763c52c67594637e8 uv-x86_64-pc-windows-msvc.zip
+0.11.8 x86_64-pc-windows-msvc binary c3f337907f233811954d96e0ecf2d46df094413250ebdcd10d40d9b5c48febd2 uv.exe
+0.11.8 x86_64-pc-windows-msvc binary 07990697b498323c7f497f1e5ecc939088e4889a61ac0816c8775f9db3e7df39 uvx.exe
+0.11.8 aarch64-pc-windows-msvc archive bb48716e74e4998993f15bc57a55e4d0d73ccbd27a66d7cbed37605f7c67d747 uv-aarch64-pc-windows-msvc.zip
+0.11.8 aarch64-pc-windows-msvc binary f06cce0c9eef8cde4430c180108d1af443abbff2765a504c3f515ee9649c5999 uv.exe
+0.11.8 aarch64-pc-windows-msvc binary 725f185c743ec9a669178469b5820f1c475adbb0756afbf4e21dfa5c92df88af uvx.exe
+0.11.8 i686-pc-windows-msvc archive 59520c34c3c29a901bb490d4bec55a8e1d46c75d2fbad238871e18de733b4201 uv-i686-pc-windows-msvc.zip
+0.11.8 i686-pc-windows-msvc binary bbc19a213c477692ecafc53019d59b472c6d74611375e1e39685613d4a7c6e14 uv.exe
+0.11.8 i686-pc-windows-msvc binary 7d8b962a0eeff966e0f4800141f34680760101a7b5e64193bbceef7a41ca0679 uvx.exe

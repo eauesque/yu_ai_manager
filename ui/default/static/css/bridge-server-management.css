@@ -1,0 +1,243 @@
+/* ── Server Management Panel ─────────────────────────────────────────────── */
+/* Accordion: server-management-section matches cfb-options-section style */
+details.server-management-section {
+  margin-top: 12px;
+  border: 1px solid rgba(128, 128, 128, 0.15);
+  border-radius: 8px;
+  padding: 8px 14px;
+  background: rgba(30, 30, 50, 0.3);
+}
+
+details.server-management-section > summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text, #f0f0f0);
+  user-select: none;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+details.server-management-section > summary::before {
+  content: '▶';
+  font-size: 10px;
+  transition: transform 120ms ease;
+  display: inline-block;
+}
+
+details.server-management-section[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+body:not(.dark) details.server-management-section {
+  background: rgba(102, 126, 234, 0.04);
+  border-color: rgba(128, 128, 128, 0.15);
+}
+
+body:not(.dark) details.server-management-section > summary {
+  color: var(--text, #333);
+}
+
+
+
+.server-mgmt-body h4 {
+  margin: 10px 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--text-secondary, #888);
+  text-transform: uppercase;
+}
+
+.server-mgmt-body .mgmt-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--text, #e0e0e0);
+}
+
+.server-mgmt-body .mgmt-label span {
+  flex: 0 0 auto;
+}
+
+.server-mgmt-body .mgmt-label input,
+.server-mgmt-body .mgmt-label select {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  background: rgba(30, 30, 50, 0.8);
+  color: var(--text, #e0e0e0);
+  font-size: 13px;
+  min-height: 28px;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.server-mgmt-body .mgmt-label input:focus,
+.server-mgmt-body .mgmt-label select:focus {
+  outline: none;
+  border-color: var(--accent, #667eea);
+  background: rgba(102, 126, 234, 0.08);
+}
+
+.server-mgmt-body .mgmt-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: var(--text, #e0e0e0);
+  cursor: pointer;
+  user-select: none;
+}
+
+.server-mgmt-body .mgmt-checkbox-label input[type="checkbox"] {
+  cursor: pointer;
+}
+
+/* Light mode overrides */
+body:not(.dark) .server-mgmt-body .mgmt-label,
+body:not(.dark) .server-mgmt-body .mgmt-checkbox-label {
+  color: var(--text, #222);
+}
+
+body:not(.dark) .server-mgmt-body .mgmt-label input,
+body:not(.dark) .server-mgmt-body .mgmt-label select {
+  background: var(--bg, #fff);
+  color: var(--text, #222);
+  border-color: rgba(128, 128, 128, 0.25);
+}
+
+body:not(.dark) .server-mgmt-body .mgmt-label input:focus,
+body:not(.dark) .server-mgmt-body .mgmt-label select:focus {
+  background: rgba(102, 126, 234, 0.04);
+}
+
+.server-mgmt-body .backend-row,
+.server-mgmt-body .group-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 0;
+  font-size: 13px;
+  color: var(--text, #e0e0e0);
+}
+
+body:not(.dark) .server-mgmt-body .backend-row,
+body:not(.dark) .server-mgmt-body .group-row {
+  color: var(--text, #222);
+}
+
+.server-mgmt-body .add-backend-form,
+.server-mgmt-body .add-group-form {
+  padding: 6px 0 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+
+.server-mgmt-body .backend-color-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  flex: 0 0 8px;
+  border-radius: 50%;
+  background: rgba(128, 128, 128, 0.6);
+  margin-right: 2px;
+}
+
+/* Server Management Panel - Button Tiers */
+.server-mgmt-body .btn-secondary,
+.server-mgmt-body .btn-tertiary,
+.server-mgmt-body .btn-delete {
+  align-self: flex-start;
+  border-radius: 4px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+
+.server-mgmt-body .btn-secondary {
+  background: rgba(102, 126, 234, 0.08);
+  border: 1px solid rgba(102, 126, 234, 0.3);
+  color: var(--text, #e0e0e0);
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.server-mgmt-body .btn-secondary:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.5);
+}
+
+.server-mgmt-body .btn-tertiary {
+  background: transparent;
+  border: 1px solid rgba(128, 128, 128, 0.2);
+  color: var(--text-secondary, #aaa);
+  padding: 5px 10px;
+  font-size: 12px;
+}
+
+.server-mgmt-body .btn-tertiary:hover:not(:disabled) {
+  border-color: rgba(128, 128, 128, 0.4);
+  color: var(--text, #e0e0e0);
+}
+
+.server-mgmt-body .btn-small {
+  padding: 4px 8px;
+  font-size: 11px;
+}
+
+.server-mgmt-body .btn-delete {
+  background: rgba(220, 38, 38, 0.1);
+  border: 1px solid rgba(220, 38, 38, 0.3);
+  color: #ef4444;
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+.server-mgmt-body .btn-delete:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.2);
+  border-color: rgba(220, 38, 38, 0.5);
+}
+
+.server-mgmt-body button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+body.dark .server-mgmt-body .btn-delete:hover:not(:disabled) {
+  background: rgba(220, 38, 38, 0.15);
+}
+
+body:not(.dark) .server-mgmt-body .btn-secondary {
+  background: rgba(102, 126, 234, 0.06);
+  border-color: rgba(102, 126, 234, 0.25);
+  color: var(--text, #222);
+}
+
+body:not(.dark) .server-mgmt-body .btn-secondary:hover:not(:disabled) {
+  background: rgba(102, 126, 234, 0.13);
+  border-color: rgba(102, 126, 234, 0.42);
+}
+
+body:not(.dark) .server-mgmt-body .btn-tertiary {
+  border-color: rgba(100, 100, 100, 0.15);
+  color: var(--text-secondary, #666);
+}
+
+body:not(.dark) .server-mgmt-body .btn-tertiary:hover:not(:disabled) {
+  border-color: rgba(100, 100, 100, 0.32);
+  color: var(--text, #222);
+}
+
+body:not(.dark) .server-mgmt-body .btn-delete {
+  background: rgba(220, 38, 38, 0.08);
+  color: #dc2626;
+}

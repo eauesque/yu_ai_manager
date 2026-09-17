@@ -1,0 +1,240 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  "use strict";
+
+  var API = "/ext/prompt-library/api";
+  var PAGE_SIZE = 50;
+  var _page = 0;
+  var _total = 0;
+  var _searchTimer = null;
+  var _folderId = null;
+  var _tagId = null;
+
+  // -- DOM helpers --
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  // -- API fetch wrapper --
+  function apiFetch(path, opts) {
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    if (opts.body && typeof opts.body === "object") {
+      opts.headers["Content-Type"] = "application/json";
+      opts.body = JSON.stringify(opts.body);
+    }
+    return fetch(API + path, opts).then(function(r) { return r.json(); });
+  }
+
+  // -- Simple toast --
+  function showToast(msg) {
+    var el = document.createElement("div");
+    el.textContent = msg;
+    el.style.cssText =
+      "position:fixed;bottom:20px;left:50%;transform:translateX(-50%);" +
+      "background:var(--accent,#667eea);color:#fff;padding:8px 20px;" +
+      "border-radius:8px;font-size:13px;z-index:20000;opacity:0;transition:opacity 0.3s;";
+    document.body.appendChild(el);
+    requestAnimationFrame(function() { el.style.opacity = "1"; });
+    setTimeout(function() {
+      el.style.opacity = "0";
+      setTimeout(function() { el.remove(); }, 400);
+    }, 2000);
+  }
+
+  // -- Load prompt list --
+  function loadList() {
+    var q = $("plSearch").value.trim();
+    var sortVal = $("plSort").value.split("-");
+    var sort = sortVal[0];
+    var order = sortVal[1] || "desc";
+    var offset = _page * PAGE_SIZE;
+
+    var qs = "?sort=" + sort + "&order=" + order + "&offset=" + offset + "&limit=" + PAGE_SIZE;
+    if (q) qs += "&q=" + encodeURIComponent(q);
+    if (_folderId) qs += "&folder_id=" + _folderId;
+    if (_tagId) qs += "&tag_id=" + _tagId;
+
+    apiFetch("/prompts" + qs).then(function(res) {
+      if (!res.ok) return;
+      _total = res.total || 0;
+      renderList(res.items || []);
+      renderPagination();
+    });
+  }
+
+  // -- Render cards --
+  var _emptyEl = $("plEmpty");
+
+  function renderList(items) {
+    var list = $("plList");
+
+    if (!items.length) {
+      list.innerHTML = "";
+      if (_emptyEl) {
+        list.appendChild(_emptyEl);
+        _emptyEl.style.display = "";
+      }
+      return;
+    }
+    if (_emptyEl) _emptyEl.style.display = "none";
+
+    var html = "";
+    for (var i = 0; i < items.length; i++) {
+      html += renderCard(items[i]);
+    }
+    list.innerHTML = html;
+  }
+
+  var MARKER_COLORS = ['#60a5fa','#f87171','#6ee77a','#fbbf24','#c084fc','#fb923c'];
+
+  function buildPlMiniGrid(center, charIndex) {
+    if (!center) return "";
+    var color = MARKER_COLORS[(charIndex) % MARKER_COLORS.length];
+    var col = Math.min(4, Math.floor(center.x * 5));
+    var row = Math.min(4, Math.floor(center.y * 5));
+    var activeKey = row + "-" + col;
+    var html = '<span class="pl-mini-grid">';
+    for (var r = 0; r < 5; r++) {
+      for (var c = 0; c < 5; c++) {
+        var isActive = (r + "-" + c) === activeKey;
+        html += '<span class="pl-mini-cell' + (isActive ? ' active' : '') + '"'
+          + (isActive ? ' style="background:' + color + '"' : '') + '></span>';
+      }
+    }
+    html += '</span>';
+    return html;
+  }
+
+  function renderCharsPreview(chars) {
+    if (!Array.isArray(chars) || !chars.length) return "";
+    var html = '<div class="pl-card-chars">';
+    html += '<div class="pl-chars-header"><span class="pl-chars-label">' + window.tr('prompt_library.characters', 'Characters') + ' (' + chars.length + ')</span></div>';
+    html += '<div class="pl-chars-cards">';
+    for (var i = 0; i < chars.length; i++) {
+      var c = chars[i];
+      var color = MARKER_COLORS[i % MARKER_COLORS.length];
+      html += '<div class="pl-char-card">';
+      html += '<div class="pl-char-card-header">';
+      html += '<span class="pl-char-num" style="color:' + color + '">#' + (i + 1) + '</span>';
+      if (c.center) {
+        html += '<span class="pl-char-pos-group">';
+        html += buildPlMiniGrid(c.center, i);
+        html += '</span>';
+      } else {
+        html += '<span class="pl-char-pos-ai">AI</span>';
+      }
+      html += '</div>';
+      html += '<div class="pl-char-card-prompt">' + esc(c.prompt || "") + '</div>';
+      if (c.negative) {
+        html += '<div class="pl-char-card-neg"><span class="pl-char-neg-label">' + window.tr('prompt_library.neg_label', 'Neg:') + '</span> ' + esc(c.negative) + '</div>';
+      }
+      html += '</div>';
+    }
+    html += '</div></div>';
+    return html;
+  }
+
+  function renderCard(p) {
+    var params = [];
+    if (p.steps) params.push("Steps: " + esc(p.steps));
+    if (p.sampler) params.push(esc(p.sampler));
+    if (p.cfg_scale) params.push("CFG: " + esc(p.cfg_scale));
+    if (p.seed) params.push("Seed: " + esc(p.seed));
+    if (p.model_name) params.push(esc(p.model_name));
+
+    var paramHtml = "";
+    if (params.length) {
+      paramHtml = '<div class="pl-card-params">';
+      for (var j = 0; j < params.length; j++) {
+        paramHtml += '<span class="pl-card-param">' + params[j] + "</span>";
+      }
+      paramHtml += "</div>";
+    }
+
+    var dateStr = p.updated_at ? new Date(p.updated_at * 1000).toLocaleString() : "";
+
+    return '<div class="pl-card" data-id="' + p.id + '">'
+      + '<div class="pl-select-cb-wrap">'
+      + '<input type="checkbox" class="pl-select-check" data-id="' + p.id
+      + '" aria-label="Select prompt" data-action="PLBulk.toggleCard" data-action-arg="' + p.id + '">'
+      + '</div>'
+      + '<div class="pl-card-header">'
+      + '<span class="pl-card-title">' + esc(p.title || window.tr('prompt_library.untitled', '(untitled)')) + "</span>"
+      + '<div class="pl-card-actions">'
+      + '<button class="pl-btn small" data-action="PL.edit" data-action-arg="' + p.id + '">' + window.tr('prompt_library.btn_edit', 'Edit') + '</button>'
+      + '<button class="pl-btn small" data-action="PL.copy" data-action-arg="' + p.id + '">' + window.tr('prompt_library.btn_copy', 'Copy') + '</button>'
+      + '<span class="pl-bridge-wrap" style="position:relative;">'
+      + '<button class="pl-btn small" data-action="PLBridge.toggle" data-action-arg="' + p.id + '">' + window.tr('prompt_library.btn_bridge', 'Bridge') + '</button>'
+      + '<div class="pl-bridge-menu" id="plBridge-' + p.id + '" style="display:none;position:absolute;top:100%;right:0;z-index:100;background:var(--card,#1b1f2a);border:1px solid var(--border,#2b3240);border-radius:6px;box-shadow:0 4px 12px rgba(0,0,0,0.3);min-width:120px;">'
+      + '<button class="pl-bridge-item" data-action="PLBridge.send" data-action-arg="' + p.id + ',sd">SD WebUI</button>'
+      + '<button class="pl-bridge-item" data-action="PLBridge.send" data-action-arg="' + p.id + ',comfy">ComfyUI</button>'
+      + '<button class="pl-bridge-item" data-action="PLBridge.send" data-action-arg="' + p.id + ',nai">NAI</button>'
+      + '</div></span>'
+      + '<button class="pl-btn small danger" data-action="PL.del" data-action-arg="' + p.id + '">' + window.tr('prompt_library.btn_del', 'Del') + '</button>'
+      + "</div></div>"
+      + '<div class="pl-card-body">'
+      + (p.positive ? '<div class="pl-card-prompt">' + esc(p.positive) + "</div>" : "")
+      + (p.negative ? '<div class="pl-card-negative"><span class="pl-neg-label">Neg:</span> ' + esc(p.negative) + "</div>" : "")
+      + renderCharsPreview(p.characters)
+      + paramHtml
+      + (dateStr ? '<div class="pl-card-date">' + esc(dateStr) + "</div>" : "")
+      + "</div></div>";
+  }
+
+  // -- Pagination --
+  function renderPagination() {
+    var totalPages = Math.max(1, Math.ceil(_total / PAGE_SIZE));
+    var pag = $("plPagination");
+    if (_total <= PAGE_SIZE) {
+      pag.style.display = "none";
+      return;
+    }
+    pag.style.display = "";
+    $("plPageInfo").textContent = (_page + 1) + " / " + totalPages;
+    $("plPrev").disabled = (_page <= 0);
+    $("plNext").disabled = (_page >= totalPages - 1);
+  }
+
+  // -- Event bindings --
+  $("plSearch").addEventListener("input", function() {
+    clearTimeout(_searchTimer);
+    _searchTimer = setTimeout(function() { _page = 0; loadList(); }, 300);
+  });
+
+  $("plSort").addEventListener("change", function() { _page = 0; loadList(); });
+
+  $("plPrev").addEventListener("click", function() {
+    if (_page > 0) { _page--; loadList(); }
+  });
+  $("plNext").addEventListener("click", function() {
+    var totalPages = Math.ceil(_total / PAGE_SIZE);
+    if (_page < totalPages - 1) { _page++; loadList(); }
+  });
+
+  // -- Reload with filters (called by sidebar) --
+  function reloadWithFilters(opts) {
+    opts = opts || {};
+    if ("folder_id" in opts) _folderId = opts.folder_id;
+    if ("tag_id" in opts) _tagId = opts.tag_id;
+    _page = 0;
+    loadList();
+  }
+
+  // -- Public API (extended by _script_modal.html + _script_bulk.html) --
+  window.PL = {
+    reload: reloadWithFilters,
+    _loadList: loadList,
+    _apiFetch: apiFetch,
+    _esc: esc,
+    _$: $,
+    _showToast: showToast,
+  };
+
+  // -- Init --
+  loadList();
+})();
+</script>

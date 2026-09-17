@@ -1,0 +1,676 @@
+<script nonce="{{ csp_nonce }}">
+// LoRA Dataset Manager client-side logic
+(function() {
+  'use strict';
+
+  const API = '/ext/lora-dataset';
+  let currentProject = null;
+  let projects = [];
+  let tagSummary = [];
+  let excludedTags = new Set();
+
+  // -- Helpers --
+  async function api(path, opts = {}) {
+    const res = await fetch(API + path, {
+      headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', ...opts.headers },
+      ...opts,
+    });
+    return res.json();
+  }
+
+  function esc(s) {
+    const d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function tr(key, fallback) {
+    return (typeof window.tr === 'function' ? window.tr(key, fallback) : null) || fallback;
+  }
+
+  function $(id) { return document.getElementById(id); }
+
+  // -- Project List --
+  async function loadProjects() {
+    const data = await api('/projects');
+    projects = (data.projects || data.data?.projects || []);
+    renderProjectList();
+  }
+
+  function renderProjectList() {
+    const el = $('ldmProjectList');
+    if (!el) return;
+    el.innerHTML = projects.map(p =>
+      '<div class="ldm-project-item ' + (currentProject?.id === p.id ? 'active' : '') + '"' +
+      ' data-pid="' + p.id + '" tabindex="0">' +
+      esc(p.name) +
+      '<span class="ldm-count">' + (p.file_count || 0) + '</span>' +
+      '</div>'
+    ).join('');
+
+    // Bind click events via delegation
+    el.querySelectorAll('.ldm-project-item').forEach(function(item) {
+      item.addEventListener('click', function() { selectProject(parseInt(item.dataset.pid)); });
+      item.addEventListener('keydown', function(e) { if (e.key === 'Enter') selectProject(parseInt(item.dataset.pid)); });
+    });
+  }
+
+  // -- Select Project --
+  async function selectProject(id) {
+    const data = await api('/projects/' + id);
+    currentProject = data.data || data;
+    if (!currentProject.id) currentProject = data;
+    excludedTags = new Set((currentProject.tag_exclude || []).map(function(t) { return t.toLowerCase(); }));
+    renderProjectList();
+    renderProjectDetail();
+    loadTags();
+    loadPresets();
+    loadCheckpoints();
+    checkTrainStatus().then(function(running) { if (running) startTrainPoll(); });
+  }
+
+  function renderProjectDetail() {
+    var p = currentProject;
+    if (!p) return;
+    $('ldmEmpty').style.display = 'none';
+    $('ldmDetail').style.display = '';
+    $('ldmProjectName').textContent = p.name;
+    $('ldmProjectModel').textContent = p.base_model.toUpperCase();
+    $('ldmBaseModel').value = p.base_model;
+    $('ldmModelScope').value = p.model_scope || 'active';
+    $('ldmRepeat').value = p.repeat;
+    $('ldmSearchQuery').value = p.search_query || '';
+    $('ldmFileCount').textContent = (p.file_ids?.length || 0) + ' ' + tr('lora.files', 'files');
+    renderFileGrid();
+  }
+
+  function renderFileGrid() {
+    var el = $('ldmFileGrid');
+    if (!el || !currentProject) return;
+    var ids = currentProject.file_ids || [];
+    el.innerHTML = ids.slice(0, 200).map(function(id) {
+      return '<img class="ldm-file-thumb" src="/api/thumbnail/' + id + '" alt="file ' + id + '" loading="lazy" title="ID: ' + id + '">';
+    }).join('');
+    if (ids.length > 200) {
+      el.innerHTML += '<div style="grid-column:1/-1;text-align:center;color:var(--muted);font-size:11px;padding:8px;">+' + (ids.length - 200) + ' more</div>';
+    }
+  }
+
+  // -- CRUD --
+  async function createProject() {
+    var name = $('ldmNewName').value.trim();
+    var concept = $('ldmNewConcept').value.trim();
+    var base_model = $('ldmNewBaseModel').value;
+    if (!name || !concept) return;
+    var data = await api('/projects', {
+      method: 'POST',
+      body: JSON.stringify({ name: name, concept: concept, base_model: base_model }),
+    });
+    $('ldmNewDialog').close();
+    $('ldmNewName').value = '';
+    $('ldmNewConcept').value = '';
+    await loadProjects();
+    var created = data.data || data;
+    if (created.id) selectProject(created.id);
+  }
+
+  async function deleteProject() {
+    if (!currentProject) return;
+    if (!confirm(tr('lora.confirm_delete', 'Delete this project?'))) return;
+    await api('/projects/' + currentProject.id, { method: 'DELETE' });
+    currentProject = null;
+    $('ldmDetail').style.display = 'none';
+    $('ldmEmpty').style.display = '';
+    await loadProjects();
+  }
+
+  async function updateField(field, value) {
+    if (!currentProject) return;
+    var body = {};
+    body[field] = value;
+    await api('/projects/' + currentProject.id, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+    currentProject[field] = value;
+  }
+
+  async function loadProfilesIntoModelScope() {
+    try {
+      var res = await fetch('/api/wd-tagger/profiles', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      if (!res.ok) return;
+      var data = await res.json();
+      var profiles = data.data?.profiles || data.profiles || [];
+      var sel = $('ldmModelScope');
+      if (!sel) return;
+      profiles.forEach(function(p) {
+        var modelId = p.model_id;
+        if (!modelId) return;
+        var exists = Array.prototype.some.call(sel.options, function(opt) {
+          return opt.value === modelId;
+        });
+        if (exists) return;
+        var opt = document.createElement('option');
+        opt.value = modelId;
+        opt.textContent = (p.display_name || modelId) + ' (' + modelId + ')';
+        sel.appendChild(opt);
+      });
+      if (currentProject) {
+        sel.value = currentProject.model_scope || 'active';
+      }
+    } catch (e) {
+      // Profile loading is non-fatal.
+    }
+  }
+
+  // -- Image Selection --
+  async function searchFiles() {
+    var q = $('ldmSearchQuery').value.trim();
+    if (!q) return;
+    if (currentProject) updateField('search_query', q);
+    var el = $('ldmSearchResults');
+    el.textContent = tr('lora.searching', 'Searching...');
+    try {
+      var res = await fetch('/api/search?q=' + encodeURIComponent(q) + '&limit=200', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      });
+      var data = await res.json();
+      var files = data.results || data.data?.results || [];
+      el.innerHTML = files.length + ' ' + tr('lora.results_found', 'results found') +
+        ' <button class="btn btn-primary" style="padding:4px 10px;font-size:11px;margin-left:8px;" id="ldmAddAllBtn">' +
+        tr('lora.add_all', 'Add All') + '</button>';
+      window._ldmSearchResults = files.map(function(f) { return f.id || f.file_id; });
+      // Bind the dynamic button
+      var addAllBtn = $('ldmAddAllBtn');
+      if (addAllBtn) addAllBtn.addEventListener('click', addAllSearchResults);
+    } catch (e) {
+      el.textContent = 'Search failed: ' + e.message;
+    }
+  }
+
+  async function addAllSearchResults() {
+    if (!currentProject || !window._ldmSearchResults) return;
+    var existing = new Set(currentProject.file_ids || []);
+    var merged = (currentProject.file_ids || []).slice();
+    window._ldmSearchResults.forEach(function(id) {
+      if (!existing.has(id)) { merged.push(id); existing.add(id); }
+    });
+    currentProject.file_ids = merged;
+    await updateField('file_ids', merged);
+    $('ldmFileCount').textContent = merged.length + ' ' + tr('lora.files', 'files');
+    renderFileGrid();
+  }
+
+  // -- Tags --
+  async function loadTags() {
+    if (!currentProject || !currentProject.file_ids?.length) {
+      $('ldmTagList').innerHTML = '<span style="color:var(--muted);font-size:12px;">' + tr('lora.no_files', 'No files selected') + '</span>';
+      return;
+    }
+    var data = await api('/projects/' + currentProject.id + '/tags?limit=300');
+    tagSummary = data.tags || data.data?.tags || [];
+    renderTags();
+    loadCaptionPreview();
+  }
+
+  function renderTags() {
+    var el = $('ldmTagList');
+    el.innerHTML = tagSummary.map(function(t) {
+      var isExcluded = excludedTags.has(t.tag_name.toLowerCase());
+      return '<span class="ldm-tag-chip ' + (isExcluded ? 'excluded' : '') + '"' +
+        ' data-tag="' + esc(t.tag_name) + '"' +
+        ' title="' + esc(t.tag_name) + ' (' + t.count + 'x, ' + (t.avg_confidence * 100).toFixed(1) + '%)">' +
+        esc(t.tag_name) +
+        '<span class="ldm-tag-count">' + t.count + '</span>' +
+        '</span>';
+    }).join('');
+
+    // Bind click events
+    el.querySelectorAll('.ldm-tag-chip').forEach(function(chip) {
+      chip.addEventListener('click', function() { toggleTag(chip.dataset.tag); });
+    });
+  }
+
+  function toggleTag(tag) {
+    var key = tag.toLowerCase();
+    if (excludedTags.has(key)) {
+      excludedTags.delete(key);
+    } else {
+      excludedTags.add(key);
+    }
+    var excludeList = Array.from(excludedTags);
+    updateField('tag_exclude', excludeList);
+    currentProject.tag_exclude = excludeList;
+    renderTags();
+    loadCaptionPreview();
+  }
+
+  async function loadCaptionPreview() {
+    if (!currentProject?.file_ids?.length) return;
+    var data = await api('/projects/' + currentProject.id + '/caption-preview');
+    var caption = data.caption || data.data?.caption || '';
+    $('ldmCaptionPreview').textContent = caption || tr('lora.no_tags', 'No tags found for this file');
+  }
+
+  // -- Presets --
+  async function loadPresets() {
+    var data = await api('/tag-presets');
+    var presets = data.presets || data.data?.presets || [];
+    var sel = $('ldmPresetSelect');
+    sel.innerHTML = '<option value="">' + tr('lora.custom', 'Custom') + '</option>';
+    presets.forEach(function(p) {
+      sel.innerHTML += '<option value="' + p.id + '">' + esc(p.name) + ' (' + p.tags.length + ')</option>';
+    });
+    if (currentProject?.tag_preset) sel.value = currentProject.tag_preset;
+  }
+
+  async function loadPresetSelection() {
+    var sel = $('ldmPresetSelect');
+    var presetId = sel.value;
+    if (!presetId) {
+      excludedTags.clear();
+    } else {
+      var data = await api('/tag-presets');
+      var presets = data.presets || data.data?.presets || [];
+      var preset = presets.find(function(p) { return String(p.id) === presetId; });
+      if (preset) {
+        excludedTags = new Set(preset.tags.map(function(t) { return t.toLowerCase(); }));
+      }
+    }
+    if (currentProject) {
+      var excludeList = Array.from(excludedTags);
+      updateField('tag_exclude', excludeList);
+      updateField('tag_preset', presetId);
+      currentProject.tag_exclude = excludeList;
+      currentProject.tag_preset = presetId;
+    }
+    renderTags();
+    loadCaptionPreview();
+  }
+
+  async function savePreset() {
+    var name = prompt(tr('lora.preset_name_prompt', 'Preset name:'));
+    if (!name) return;
+    await api('/tag-presets', {
+      method: 'POST',
+      body: JSON.stringify({ name: name, tags: Array.from(excludedTags) }),
+    });
+    loadPresets();
+  }
+
+  // -- Export --
+  async function startExport() {
+    if (!currentProject) return;
+    var outputDir = $('ldmOutputDir').value.trim();
+    var statusEl = $('ldmExportStatus');
+    statusEl.innerHTML = '<span style="color:var(--accent);">' + tr('lora.exporting', 'Exporting...') + '</span>';
+
+    var data = await api('/projects/' + currentProject.id + '/export', {
+      method: 'POST',
+      body: JSON.stringify({ output_dir: outputDir || undefined }),
+    });
+
+    if (data.error || data.ok === false) {
+      statusEl.innerHTML = '<span style="color:#d32f2f;">' + esc(data.error || 'Export failed') + '</span>';
+      return;
+    }
+
+    var poll = setInterval(async function() {
+      var st = await api('/projects/' + currentProject.id + '/export/status');
+      var result = st.result || st.data?.result;
+      var running = st.running ?? st.data?.running;
+      if (!running && result) {
+        clearInterval(poll);
+        if (result.error) {
+          statusEl.innerHTML = '<span style="color:#d32f2f;">Error: ' + esc(result.error) + '</span>';
+        } else {
+          statusEl.innerHTML =
+            '<span style="color:#2e7d32;">' + tr('lora.export_complete', 'Export complete') + ': ' +
+            result.image_count + ' images' +
+            (result.skipped_count ? ', ' + result.skipped_count + ' skipped' : '') +
+            (result.empty_caption_count ? ', ' + result.empty_caption_count + ' without caption' : '') +
+            '</span><br><code style="font-size:11px;">' + esc(result.output_dir) + '</code>';
+        }
+      }
+    }, 1000);
+  }
+
+  // -- Train --
+  var _trainPollTimer = null;
+
+  async function loadCheckpoints() {
+    var data = await api('/checkpoints');
+    var list = data.checkpoints || data.data?.checkpoints || [];
+    var sel = $('ldmCheckpoint');
+    sel.innerHTML = '<option value="">' + tr('lora.select_checkpoint', 'Select checkpoint...') + '</option>';
+    list.forEach(function(c) {
+      var sizeMB = (c.size / 1048576).toFixed(0);
+      sel.innerHTML += '<option value="' + esc(c.path) + '">' + esc(c.name) + ' (' + sizeMB + 'MB)</option>';
+    });
+  }
+
+  var _hasResumeState = false;
+
+  function updateTrainUI(running, logTail, logTotal, pid) {
+    var statusEl = $('ldmTrainStatus');
+    var statusText = $('ldmTrainStatusText');
+    var logEl = $('ldmLogOutput');
+    var logInfo = $('ldmLogInfo');
+    var startBtn = $('ldmStartTrainBtn');
+    var refreshBtn = $('ldmRefreshLogBtn');
+    var resumeBtn = $('ldmResumeTrainBtn');
+
+    if (running) {
+      statusEl.style.display = '';
+      statusEl.style.background = 'rgba(102,126,234,0.12)';
+      statusEl.style.borderColor = 'rgba(102,126,234,0.3)';
+      statusText.textContent = tr('lora.training_running', 'Training in progress...') +
+        (pid ? ' (PID: ' + pid + ')' : '');
+      if (startBtn) startBtn.disabled = true;
+      if (resumeBtn) resumeBtn.style.display = 'none';
+    } else {
+      if (logTotal > 0) {
+        statusEl.style.display = '';
+        statusEl.style.background = 'rgba(46,125,50,0.12)';
+        statusEl.style.borderColor = 'rgba(46,125,50,0.3)';
+        statusText.textContent = tr('lora.training_finished', 'Training finished') +
+          ' (' + logTotal + ' ' + tr('lora.log_lines', 'log lines') + ')';
+      } else {
+        statusEl.style.display = 'none';
+      }
+      if (startBtn) startBtn.disabled = false;
+      // Show Resume button if a saved state exists
+      if (resumeBtn) resumeBtn.style.display = _hasResumeState ? '' : 'none';
+    }
+
+    if (logTail && logTail.length > 0) {
+      $('ldmTrainLog').style.display = '';
+      logEl.textContent = logTail.join('\n');
+      logEl.scrollTop = logEl.scrollHeight;
+      if (logInfo) logInfo.textContent = logTotal + ' ' + tr('lora.log_lines', 'lines total');
+      if (refreshBtn) refreshBtn.style.display = '';
+    }
+  }
+
+  async function checkResumeAvailable() {
+    // Use dry_run with resume to check if a state dir exists
+    if (!currentProject) return;
+    var checkpoint = $('ldmCheckpoint').value;
+    if (!checkpoint) {
+      // Try to detect without checkpoint -- just check output dir for state files
+      // Use the train status endpoint which doesn't need checkpoint
+      _hasResumeState = false;
+      return;
+    }
+    try {
+      var data = await api('/projects/' + currentProject.id + '/train', {
+        method: 'POST',
+        body: JSON.stringify({ checkpoint: checkpoint, dry_run: true, resume: true }),
+      });
+      var d = data.data || data;
+      _hasResumeState = !!d.resume_from;
+      var resumeBtn = $('ldmResumeTrainBtn');
+      if (resumeBtn) resumeBtn.style.display = _hasResumeState ? '' : 'none';
+    } catch (e) {
+      _hasResumeState = false;
+    }
+  }
+
+  async function checkTrainStatus() {
+    var pid = currentProject ? currentProject.id : 0;
+    if (!pid) return;
+    try {
+      var data = await api('/projects/' + pid + '/train/status');
+      var d = data.data || data;
+      updateTrainUI(d.running, d.log_tail, d.log_total, d.pid);
+      return d.running;
+    } catch (e) { return false; }
+  }
+
+  function startTrainPoll() {
+    if (_trainPollTimer) return;
+    _trainPollTimer = setInterval(async function() {
+      var running = await checkTrainStatus();
+      if (!running) {
+        clearInterval(_trainPollTimer);
+        _trainPollTimer = null;
+      }
+    }, 3000);
+  }
+
+  async function dryRun() {
+    if (!currentProject) return;
+    var checkpoint = $('ldmCheckpoint').value;
+    if (!checkpoint) { alert(tr('lora.select_checkpoint', 'Select a checkpoint')); return; }
+    var data = await api('/projects/' + currentProject.id + '/train', {
+      method: 'POST',
+      body: JSON.stringify({ checkpoint: checkpoint, dry_run: true }),
+    });
+    var cmd = data.command || data.data?.command || data.error || 'No command generated';
+    $('ldmCommandPreview').style.display = '';
+    $('ldmCommandText').textContent = cmd;
+  }
+
+  async function startTrain() {
+    if (!currentProject) return;
+    if (!confirm(tr('lora.confirm_train', 'Start training? This may take a long time.'))) return;
+    var checkpoint = $('ldmCheckpoint').value;
+    if (!checkpoint) { alert(tr('lora.select_checkpoint', 'Select a checkpoint')); return; }
+
+    $('ldmTrainLog').style.display = '';
+    var logEl = $('ldmLogOutput');
+    logEl.textContent = 'Starting...\n';
+
+    await api('/projects/' + currentProject.id + '/train', {
+      method: 'POST',
+      body: JSON.stringify({ checkpoint: checkpoint }),
+    });
+
+    // SSE for real-time log streaming
+    if (window.sseSubscribe) {
+      window.sseSubscribe('lora_train.output', function(d) {
+        logEl.textContent += (d.line || d.data?.line || '') + '\n';
+        logEl.scrollTop = logEl.scrollHeight;
+      });
+      window.sseSubscribe('lora_train.complete', function(d) {
+        var success = d.success ?? d.data?.success;
+        logEl.textContent += '\n--- ' + (success ? 'Training complete!' : 'Training failed: ' + (d.error || d.data?.error || 'unknown')) + ' ---\n';
+        checkTrainStatus();
+      });
+    }
+
+    // Also poll for status updates
+    startTrainPoll();
+  }
+
+  async function resumeTrain() {
+    if (!currentProject) return;
+    if (!confirm(tr('lora.confirm_resume', 'Resume training from the last saved state?'))) return;
+    var checkpoint = $('ldmCheckpoint').value;
+    if (!checkpoint) { alert(tr('lora.select_checkpoint', 'Select a checkpoint')); return; }
+
+    $('ldmTrainLog').style.display = '';
+    var logEl = $('ldmLogOutput');
+    logEl.textContent = 'Resuming...\n';
+
+    await api('/projects/' + currentProject.id + '/train', {
+      method: 'POST',
+      body: JSON.stringify({ checkpoint: checkpoint, resume: true }),
+    });
+
+    if (window.sseSubscribe) {
+      window.sseSubscribe('lora_train.output', function(d) {
+        logEl.textContent += (d.line || d.data?.line || '') + '\n';
+        logEl.scrollTop = logEl.scrollHeight;
+      });
+      window.sseSubscribe('lora_train.complete', function(d) {
+        var success = d.success ?? d.data?.success;
+        logEl.textContent += '\n--- ' + (success ? 'Training complete!' : 'Training failed: ' + (d.error || d.data?.error || 'unknown')) + ' ---\n';
+        checkTrainStatus();
+      });
+    }
+    startTrainPoll();
+  }
+
+  async function refreshLog() {
+    await checkTrainStatus();
+  }
+
+  // -- Tabs --
+  function switchTab(btn) {
+    document.querySelectorAll('.ldm-tab').forEach(function(t) {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.ldm-tab-panel').forEach(function(p) {
+      p.classList.remove('active');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    var panel = $(btn.dataset.tab);
+    if (panel) panel.classList.add('active');
+  }
+
+  // -- Event Binding --
+  function bindEvents() {
+    // New project button
+    var newBtn = $('ldmNewBtn');
+    if (newBtn) newBtn.addEventListener('click', function() { $('ldmNewDialog').showModal(); });
+
+    // Dialog buttons
+    var cancelBtn = $('ldmNewCancelBtn');
+    if (cancelBtn) cancelBtn.addEventListener('click', function() { $('ldmNewDialog').close(); });
+    var createBtn = $('ldmNewCreateBtn');
+    if (createBtn) createBtn.addEventListener('click', createProject);
+
+    // Delete
+    var deleteBtn = $('ldmDeleteBtn');
+    if (deleteBtn) deleteBtn.addEventListener('click', deleteProject);
+
+    // Tab bar
+    var tabBar = $('ldmTabBar');
+    if (tabBar) tabBar.addEventListener('click', function(e) {
+      var btn = e.target.closest('.ldm-tab');
+      if (btn) switchTab(btn);
+    });
+
+    // Search
+    var searchBtn = $('ldmSearchBtn');
+    if (searchBtn) searchBtn.addEventListener('click', searchFiles);
+
+    // Add selected
+    var addSelBtn = $('ldmAddSelectedBtn');
+    if (addSelBtn) addSelBtn.addEventListener('click', addAllSearchResults);
+
+    // Preset
+    var presetSel = $('ldmPresetSelect');
+    if (presetSel) presetSel.addEventListener('change', loadPresetSelection);
+    var savePresetBtn = $('ldmSavePresetBtn');
+    if (savePresetBtn) savePresetBtn.addEventListener('click', savePreset);
+
+    // Export
+    var baseModelSel = $('ldmBaseModel');
+    if (baseModelSel) baseModelSel.addEventListener('change', function() { updateField('base_model', this.value); });
+    var modelScopeSel = $('ldmModelScope');
+    if (modelScopeSel) modelScopeSel.addEventListener('change', async function() {
+      await updateField('model_scope', this.value);
+      loadTags();
+      loadCaptionPreview();
+    });
+    var repeatInput = $('ldmRepeat');
+    if (repeatInput) repeatInput.addEventListener('change', function() { updateField('repeat', parseInt(this.value)); });
+    var exportBtn = $('ldmExportBtn');
+    if (exportBtn) exportBtn.addEventListener('click', startExport);
+
+    // Train
+    var dryRunBtn = $('ldmDryRunBtn');
+    if (dryRunBtn) dryRunBtn.addEventListener('click', dryRun);
+    var trainBtn = $('ldmStartTrainBtn');
+    if (trainBtn) trainBtn.addEventListener('click', startTrain);
+    var resumeTrainBtn = $('ldmResumeTrainBtn');
+    if (resumeTrainBtn) resumeTrainBtn.addEventListener('click', resumeTrain);
+    var refreshLogBtn = $('ldmRefreshLogBtn');
+    if (refreshLogBtn) refreshLogBtn.addEventListener('click', refreshLog);
+    var ckptSel = $('ldmCheckpoint');
+    if (ckptSel) ckptSel.addEventListener('change', checkResumeAvailable);
+
+    // Settings
+    var saveSettingsBtn = $('ldmSaveSettingsBtn');
+    if (saveSettingsBtn) saveSettingsBtn.addEventListener('click', saveSettings);
+  }
+
+  // -- Settings --
+  async function loadSettings() {
+    try {
+      var data = await fetch('/api/extensions/builtin_lora_dataset_manager/config', {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      }).then(function(r) { return r.json(); });
+      // Extract values from config_schema structure
+      var schema = data.config_schema || data.data?.config_schema || {};
+      var cfg = {};
+      for (var k in schema) { cfg[k] = schema[k].value !== undefined ? schema[k].value : schema[k].default || ''; }
+      if ($('ldmCfgKohyaPath'))     $('ldmCfgKohyaPath').value     = cfg.kohya_path || '';
+      if ($('ldmCfgOutputDir'))     $('ldmCfgOutputDir').value     = cfg.output_base_dir || '';
+      if ($('ldmCfgCheckpointDir')) $('ldmCfgCheckpointDir').value = cfg.checkpoint_dir || '';
+      if ($('ldmCfgKohyaPython'))  $('ldmCfgKohyaPython').value  = cfg.kohya_python_path || '';
+      if ($('ldmCfgDefaultModel'))  $('ldmCfgDefaultModel').value  = cfg.default_base_model || 'sdxl';
+      if ($('ldmCfgNetDim'))       $('ldmCfgNetDim').value       = cfg.train_network_dim || 32;
+      if ($('ldmCfgNetAlpha'))     $('ldmCfgNetAlpha').value     = cfg.train_network_alpha || 16;
+      if ($('ldmCfgLR'))           $('ldmCfgLR').value           = cfg.train_learning_rate || '1e-4';
+      if ($('ldmCfgMaxEpochs'))    $('ldmCfgMaxEpochs').value    = cfg.train_max_epochs || 10;
+      if ($('ldmCfgSaveEvery'))    $('ldmCfgSaveEvery').value    = cfg.train_save_every_n_epochs || 2;
+      if ($('ldmCfgExtraArgs'))    $('ldmCfgExtraArgs').value    = cfg.train_extra_args || '';
+    } catch (e) {
+      // Settings load failure is non-fatal
+    }
+  }
+
+  async function saveSettings() {
+    var body = { values: {
+      kohya_path:        ($('ldmCfgKohyaPath')     ? $('ldmCfgKohyaPath').value.trim()     : ''),
+      output_base_dir:   ($('ldmCfgOutputDir')     ? $('ldmCfgOutputDir').value.trim()     : ''),
+      checkpoint_dir:    ($('ldmCfgCheckpointDir') ? $('ldmCfgCheckpointDir').value.trim() : ''),
+      default_base_model:($('ldmCfgDefaultModel')  ? $('ldmCfgDefaultModel').value          : 'sdxl'),
+      kohya_python_path: ($('ldmCfgKohyaPython')  ? $('ldmCfgKohyaPython').value.trim()  : ''),
+      train_network_dim:         ($('ldmCfgNetDim')    ? parseInt($('ldmCfgNetDim').value) || 32    : 32),
+      train_network_alpha:       ($('ldmCfgNetAlpha')  ? parseInt($('ldmCfgNetAlpha').value) || 16  : 16),
+      train_learning_rate:       ($('ldmCfgLR')        ? $('ldmCfgLR').value.trim() || '1e-4'       : '1e-4'),
+      train_max_epochs:          ($('ldmCfgMaxEpochs') ? parseInt($('ldmCfgMaxEpochs').value) || 10 : 10),
+      train_save_every_n_epochs: ($('ldmCfgSaveEvery') ? parseInt($('ldmCfgSaveEvery').value) || 2  : 2),
+      train_extra_args:          ($('ldmCfgExtraArgs') ? $('ldmCfgExtraArgs').value.trim()           : ''),
+    }};
+    var status = $('ldmSettingsSaveStatus');
+    try {
+      var data = await fetch('/api/extensions/builtin_lora_dataset_manager/config', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      }).then(function(r) { return r.json(); });
+      if (data.ok) {
+        if (status) { status.textContent = 'Saved'; status.className = 'ldm-save-status ok'; }
+        setTimeout(function() { if (status) status.textContent = ''; }, 2000);
+      } else {
+        if (status) { status.textContent = data.error || 'Error'; status.className = 'ldm-save-status err'; }
+      }
+    } catch (e) {
+      if (status) { status.textContent = 'Request failed'; status.className = 'ldm-save-status err'; }
+    }
+  }
+
+  // -- Init --
+  function init() {
+    bindEvents();
+    loadProfilesIntoModelScope();
+    loadProjects();
+    loadSettings();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();
+</script>

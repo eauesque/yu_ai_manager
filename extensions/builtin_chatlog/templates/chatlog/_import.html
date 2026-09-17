@@ -1,0 +1,27 @@
+<div class="ctl-modal-overlay" id="ctlImportModal">
+  <div class="ctl-modal">
+    <h2 style="font-size:16px;" data-i18n="chatlog.import_title">チャットログ インポート</h2>
+    <div class="ctl-modal-field">
+      <label for="ctlImportSource" data-i18n="chatlog.import_source">ソース</label>
+      <select id="ctlImportSource">
+        <option value="claude">Claude</option>
+        <option value="chatgpt">ChatGPT</option>
+        <option value="openwebui">Open WebUI</option>
+      </select>
+    </div>
+    <div class="ctl-modal-field">
+      <label for="ctlImportFile" data-i18n="chatlog.import_file_label">conversations.json / エクスポート ZIP</label>
+      <input type="file" id="ctlImportFile" accept=".json,.zip">
+    </div>
+    <div class="ctl-import-progress" id="ctlImportProgress">
+      <span class="ctl-import-msg" id="ctlImportMsg" data-i18n="chatlog.preparing">準備中...</span>
+      <div class="ctl-import-bar">
+        <div class="ctl-import-bar-fill" id="ctlImportFill"></div>
+      </div>
+    </div>
+    <div class="ctl-modal-actions">
+      <button class="ctl-btn" id="ctlImportCancel" data-i18n="chatlog.cancel">キャンセル</button>
+      <button class="ctl-btn ctl-btn-primary" id="ctlImportStart" data-i18n="chatlog.import_start">インポート開始</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,289 @@
+<script nonce="{{ csp_nonce }}">
+/* -- ComfyUI Bridge: Discovery Panel (LoRA / Embeddings / Models / Custom Nodes) -- */
+(function() {
+  "use strict";
+
+  var BASE = "/ext/comfyui-bridge";
+  var _activeCategory = "lora";
+  var _cache = {};
+  // Track in-flight fetches so rapid tab switching doesn't fire duplicate
+  // requests against an upstream that is already busy enumerating models.
+  var _inflight = {};
+
+  // Category registry: each entry describes how to fetch and render a category.
+  //   url: API endpoint returning the resource list
+  //   dataKey: JSON key in response holding the array (e.g. "loras", "models")
+  //   insert: optional function(name) => string for prompt insertion (null = read-only)
+  //   emptyKey/emptyText: empty-state message
+  //   label: fallback label if i18n missing (for _updateBadge)
+  var CATEGORIES = {
+    lora: {
+      url: "/api/loras", dataKey: "loras",
+      insert: function(name) { return "<lora:" + name + ":1.0>"; },
+      emptyKey: "comfyui_bridge.no_loras", emptyText: "No LoRAs found",
+      label: "LoRA",
+    },
+    emb: {
+      url: "/api/embeddings", dataKey: "embeddings",
+      insert: function(name) { return "embedding:" + name; },
+      emptyKey: "comfyui_bridge.no_embeddings", emptyText: "No embeddings found",
+      label: "Emb",
+    },
+    checkpoints: {
+      url: "/api/discovery/models?type=checkpoints", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_checkpoints", emptyText: "No checkpoints found",
+      label: "Ckpt",
+    },
+    diffusion_models: {
+      url: "/api/diffusion-models", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_diffusion_models", emptyText: "No diffusion models found",
+      label: "Diff",
+    },
+    text_encoders: {
+      url: "/api/text-encoders", dataKey: "encoders",
+      emptyKey: "comfyui_bridge.no_text_encoders", emptyText: "No text encoders found",
+      label: "TE",
+    },
+    vae: {
+      url: "/api/discovery/models?type=vae", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_vaes", emptyText: "No VAEs found",
+      label: "VAE",
+    },
+    controlnet: {
+      url: "/api/controlnets", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_controlnets", emptyText: "No ControlNet models found",
+      label: "CN",
+    },
+    upscale_models: {
+      url: "/api/upscale-models", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_upscale_models", emptyText: "No upscale models found",
+      label: "Up",
+    },
+    clip_vision: {
+      url: "/api/discovery/models?type=clip_vision", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_clip_vision", emptyText: "No CLIP Vision models found",
+      label: "CV",
+    },
+    hypernetworks: {
+      url: "/api/discovery/models?type=hypernetworks", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_hypernetworks", emptyText: "No hypernetworks found",
+      label: "HN",
+    },
+    style_models: {
+      url: "/api/discovery/models?type=style_models", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_style_models", emptyText: "No style models found",
+      label: "Style",
+    },
+    gligen: {
+      url: "/api/discovery/models?type=gligen", dataKey: "models",
+      emptyKey: "comfyui_bridge.no_gligen", emptyText: "No GLIGEN models found",
+      label: "GLIGEN",
+    },
+    nodes: {
+      url: "/api/custom-nodes", dataKey: "nodes", isNodes: true,
+      emptyKey: "comfyui_bridge.no_custom_nodes", emptyText: "No custom nodes found",
+      label: "Nodes",
+    },
+  };
+
+  function $(id) { return document.getElementById(id); }
+
+  function _setEmpty(key, fallback) {
+    var content = $("cfbDiscContent");
+    if (!content) return;
+    while (content.firstChild) content.removeChild(content.firstChild);
+    var div = document.createElement("div");
+    div.className = "cfb-disc-empty";
+    div.textContent = window.tr ? window.tr(key, fallback) : fallback;
+    content.appendChild(div);
+  }
+
+  function insertToPrompt(text) {
+    if (typeof _cfbGetPrompt === "function" && typeof _cfbSetPrompt === "function") {
+      var current = _cfbGetPrompt();
+      var sep = (current && !current.endsWith(" ") && !current.endsWith(",") && !current.endsWith("\n")) ? ", " : "";
+      _cfbSetPrompt(current + sep + text);
+    } else {
+      var ta = $("cfbPrompt");
+      if (!ta) return;
+      var pos = ta.selectionStart || ta.value.length;
+      var before = ta.value.substring(0, pos);
+      var after = ta.value.substring(pos);
+      var sep2 = (before && !before.endsWith(" ") && !before.endsWith(",") && !before.endsWith("\n")) ? ", " : "";
+      ta.value = before + sep2 + text + after;
+      ta.selectionStart = ta.selectionEnd = pos + sep2.length + text.length;
+      ta.focus();
+    }
+    if (window.showToast) {
+      window.showToast(
+        (window.tr ? window.tr("comfyui_bridge.inserted", "Inserted: ") : "Inserted: ") + text);
+    }
+  }
+
+  // -- Category switch (from dropdown) --
+  window.cfbSwitchDiscCategory = function() {
+    var sel = $("cfbDiscCategory");
+    if (!sel) return;
+    _activeCategory = sel.value;
+    var search = $("cfbDiscSearch");
+    if (search) search.value = "";
+    _ensureLoaded(_activeCategory);
+    _renderCategory();
+  };
+
+  // -- Filter --
+  window.cfbFilterDiscovery = function() {
+    _renderCategory();
+  };
+
+  // -- Entry point: called after successful connection --
+  window.cfbLoadDiscovery = function() {
+    _cache = {};
+    _inflight = {};
+    _loadCategory(_activeCategory);
+  };
+
+  function _loadCategory(key) {
+    var cfg = CATEGORIES[key];
+    if (!cfg) return;
+    if (_inflight[key]) return;
+    _inflight[key] = true;
+    fetch(BASE + cfg.url).then(function(r) { return r.json(); }).then(function(data) {
+      var arr = (data && data[cfg.dataKey]) || [];
+      _cache[key] = arr;
+      if (_activeCategory === key) _renderCategory();
+      _updateBadge();
+    }).catch(function() {
+      if (_activeCategory === key) {
+        _setEmpty("comfyui_bridge.disc_load_failed", "Failed to load");
+      }
+    }).then(function() {
+      _inflight[key] = false;
+    });
+  }
+
+  function _ensureLoaded(key) {
+    if (_cache[key] == null) _loadCategory(key);
+  }
+
+  function _updateBadge() {
+    var badge = $("cfbDiscoveryBadge");
+    if (!badge) return;
+    var parts = [];
+    Object.keys(_cache).forEach(function(key) {
+      var arr = _cache[key];
+      if (arr && arr.length) {
+        var cfg = CATEGORIES[key];
+        parts.push(arr.length + " " + (cfg ? cfg.label : key));
+      }
+    });
+    badge.textContent = parts.length ? "(" + parts.join(", ") + ")" : "";
+  }
+
+  function _renderCategory() {
+    var content = $("cfbDiscContent");
+    if (!content) return;
+    var cfg = CATEGORIES[_activeCategory];
+    if (!cfg) { _setEmpty("comfyui_bridge.disc_empty", ""); return; }
+    var data = _cache[_activeCategory];
+    if (data == null) {
+      _setEmpty("comfyui_bridge.loading", "Loading...");
+      return;
+    }
+    if (!data.length) {
+      _setEmpty(cfg.emptyKey, cfg.emptyText);
+      return;
+    }
+
+    var q = (($("cfbDiscSearch") || {}).value || "").trim().toLowerCase();
+
+    if (cfg.isNodes) {
+      _renderNodes(content, data, q);
+    } else {
+      _renderNameList(content, data, q, cfg.insert);
+    }
+  }
+
+  function _renderNameList(el, items, q, insertFn) {
+    var filtered = q
+      ? items.filter(function(n) { return n.toLowerCase().indexOf(q) >= 0; })
+      : items;
+    while (el.firstChild) el.removeChild(el.firstChild);
+    if (!filtered.length) {
+      var empty = document.createElement("div");
+      empty.className = "cfb-disc-empty";
+      empty.textContent = window.tr ? window.tr("comfyui_bridge.no_matches", "No matches") : "No matches";
+      el.appendChild(empty);
+      return;
+    }
+    filtered.forEach(function(name) {
+      var row = document.createElement("div");
+      row.className = "cfb-disc-item";
+      if (!insertFn) row.style.cursor = "default";
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "cfb-disc-item-name";
+      nameSpan.textContent = name;
+      row.appendChild(nameSpan);
+      if (insertFn) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "cfb-disc-item-insert";
+        btn.textContent = "+ " + (window.tr ? window.tr("comfyui_bridge.insert", "Insert") : "Insert");
+        function doInsert(e) {
+          if (e) e.stopPropagation();
+          insertToPrompt(insertFn(name));
+        }
+        btn.addEventListener("click", doInsert);
+        row.addEventListener("click", doInsert);
+      }
+      el.appendChild(row);
+    });
+  }
+
+  function _renderNodes(el, nodes, q) {
+    var filtered = q ? nodes.filter(function(n) {
+      return (n.name || "").toLowerCase().indexOf(q) >= 0 ||
+             (n.category || "").toLowerCase().indexOf(q) >= 0;
+    }) : nodes;
+    filtered.sort(function(a, b) {
+      var ca = a.category || "", cb = b.category || "";
+      if (ca !== cb) return ca < cb ? -1 : 1;
+      return (a.name || "").localeCompare(b.name || "");
+    });
+    while (el.firstChild) el.removeChild(el.firstChild);
+    if (!filtered.length) {
+      var empty = document.createElement("div");
+      empty.className = "cfb-disc-empty";
+      empty.textContent = window.tr ? window.tr("comfyui_bridge.no_matches", "No matches") : "No matches";
+      el.appendChild(empty);
+      return;
+    }
+    filtered.forEach(function(n) {
+      var row = document.createElement("div");
+      row.className = "cfb-disc-item";
+      row.style.cursor = "default";
+      var nameSpan = document.createElement("span");
+      nameSpan.className = "cfb-disc-item-name";
+      nameSpan.textContent = n.name || "";
+      row.appendChild(nameSpan);
+      if (n.category) {
+        var cat = document.createElement("span");
+        cat.className = "cfb-disc-item-cat";
+        cat.textContent = n.category;
+        row.appendChild(cat);
+      }
+      el.appendChild(row);
+    });
+  }
+
+  // Auto-load when connected (hook into cfbTestConnection)
+  var _origTestConn = window.cfbTestConnection;
+  if (_origTestConn) {
+    window.cfbTestConnection = function() {
+      var p = _origTestConn.apply(this, arguments);
+      setTimeout(function() { window.cfbLoadDiscovery(); }, 500);
+      return p;
+    };
+  }
+})();
+</script>

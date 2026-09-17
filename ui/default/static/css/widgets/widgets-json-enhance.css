@@ -1,0 +1,146 @@
+/* ─── JSON Editor Highlight Overlay (jeh-*) ─────────────────────────────
+   Applied by json-editor-enhance.ts to any textarea[data-json-enhance].
+
+   Design notes (distilled from prompt-syntax ACCIDENT_POINTS #8 QA):
+
+   SCROLLBAR WIDTH PROBLEM
+     On Windows the textarea scrollbar (~17 px) reduces the content width,
+     causing different line-wrap positions vs the highlight layer.  Both
+     scrollbars are hidden via scrollbar-width:none / -webkit-scrollbar
+     so content widths are identical in both elements.
+
+   FONT RENDERING
+     font-kerning:none / text-rendering:geometricPrecision /
+     font-variant-ligatures:none  prevent sub-pixel rendering differences
+     between the textarea and highlight div.
+
+   SPAN LAYOUT ISOLATION
+     Spans added by the highlighter must NOT change character widths.
+     font-weight:bold / letter-spacing / padding / margin on span elements
+     shift subsequent character positions → never use these in highlight.
+────────────────────────────────────────────────────────────────────── */
+
+.jeh-wrap {
+  display: grid;
+  /* Block-level — inherits full width from parent context */
+}
+
+/* Stack both children in the same grid cell */
+.jeh-wrap > * {
+  grid-area: 1 / 1;
+}
+
+/* Highlight layer: scrolls via JS (scrollTop = textarea.scrollTop).
+   overflow:auto is required for scrollTop assignment; scrollbar is hidden
+   so textarea and highlight use identical content widths. */
+.jeh-bg {
+  overflow: auto;
+  scrollbar-width: none;      /* Firefox */
+  -ms-overflow-style: none;   /* IE/Edge legacy */
+  pointer-events: none;
+  position: relative;         /* stacking context for .jeh-bg-inner */
+  /* z-index: 1 ensures the highlight layer renders visually above the textarea.
+     Without this, DOM order makes the textarea paint last (on top), and the
+     browser's native color-scheme background on the textarea can occlude
+     the jeh-bg-inner text even when background:transparent is declared.
+     pointer-events:none keeps input routing to the textarea behind. */
+  z-index: 1;
+  border-style: solid;
+  border-color: transparent;
+  background: transparent;
+  color: var(--text);         /* explicit inherit anchor — text nodes in jeh-bg-inner inherit this */
+  /* Stable font rendering (must match textarea) */
+  font-kerning: none;
+  text-rendering: geometricPrecision;
+  font-variant-ligatures: none;
+  letter-spacing: 0;
+  word-spacing: 0;
+  align-self: stretch;
+  justify-self: stretch;
+}
+.jeh-bg::-webkit-scrollbar {
+  display: none;              /* Chrome / Safari / Edge Chromium */
+}
+
+/* Highlight content — absolutely positioned so it does not affect
+   the grid track size (only the textarea drives grid height). */
+.jeh-bg-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  min-width: 100%;
+  min-height: 100%;
+  /* font/padding/white-space etc. are set inline by JS to match textarea */
+}
+
+/* Span layout isolation: never let highlight spans shift character positions.
+   Only color and background-color are safe to change. */
+.jeh-bg-inner span {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;       /* NEVER bold — would widen characters */
+  line-height: inherit;
+  vertical-align: baseline;
+  letter-spacing: inherit;
+  word-spacing: inherit;
+  padding: 0;
+  margin: 0;
+  border: none;
+}
+
+/* Error bar — sibling of .jeh-wrap, rendered below it */
+.jeh-err {
+  display: none;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--danger, #f44336);
+  padding: 3px 8px 4px;
+  background: rgba(244, 67, 54, 0.06);
+  border: 1px solid rgba(244, 67, 54, 0.18);
+  border-top: none;
+  border-radius: 0 0 4px 4px;
+  margin-top: -1px;           /* attach flush to textarea bottom border */
+}
+
+/* ── JSON Doctor validation warning bar ─────────────────────────────────── */
+
+/* Validation warning bar (schema issues, not syntax errors) */
+.jeh-err--warn {
+  color: var(--status-warn);
+  background: color-mix(in srgb, var(--status-warn) 8%, transparent);
+  border-color: color-mix(in srgb, var(--status-warn) 20%, transparent);
+}
+
+/* Fallback for browsers without color-mix() (Safari < 16.2, older Firefox) */
+@supports not (color: color-mix(in srgb, red 1%, transparent)) {
+  .jeh-err--warn {
+    background: rgba(124, 71, 0, 0.06);
+    border-color: rgba(124, 71, 0, 0.18);
+  }
+}
+
+.jeh-err-summary {
+  display: block;
+  cursor: default;
+}
+
+.jeh-err-details {
+  margin-top: 2px;
+}
+
+.jeh-err-details summary {
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--status-warn);
+  list-style: none; /* Remove default triangle on some browsers */
+}
+
+.jeh-err-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.jeh-err-details ul {
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--status-warn);
+}

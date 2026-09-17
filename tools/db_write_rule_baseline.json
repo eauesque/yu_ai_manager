@@ -1,0 +1,8 @@
+{
+  "schema": 1,
+  "generated_with": "scripts/pre_push_check.py",
+  "note": "Baseline of accepted §3.2 violations. These functions are actually called via run_db_write/submit_db_write from their public callers (e.g. routes/), so they DO run on the dedicated writer thread — the lint can't see the cross-file relationship. New violations not listed here will fail pre-push.",
+  "files": {
+    "core/services_core/maintenance_service.py": 2
+  }
+}

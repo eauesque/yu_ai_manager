@@ -1,0 +1,13 @@
+target/
+node_modules/
+dist/
+build/
+coverage/
+*.lock
+*.min.js
+*.map
+*.png
+*.jpg
+*.mp4
+agent-outputs/
+tmp/agent-raw/

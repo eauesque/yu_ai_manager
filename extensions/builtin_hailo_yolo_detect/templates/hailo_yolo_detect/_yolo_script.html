@@ -1,0 +1,378 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  var BASE = '/ext/hailo-yolo/api';
+  var _startedAt = 0;
+
+  function _formatElapsed(sec) {
+    if (sec < 60) return Math.round(sec) + window.tr('yolo_detect.unit_seconds', '秒');
+    var m = Math.floor(sec / 60);
+    var s = Math.round(sec % 60);
+    return m + window.tr('yolo_detect.unit_minutes', '分') + (s > 0 ? s + window.tr('yolo_detect.unit_seconds', '秒') : '');
+  }
+
+  // --- Progress ---
+  function updateProgress(data) {
+    var processed = data.processed || 0;
+    var total = data.total || 0;
+    var errors = data.errors || 0;
+    var pct = total > 0 ? Math.round(processed / total * 100) : 0;
+    var pctEl = document.getElementById('yoloProgressPct');
+    var barEl = document.getElementById('yoloProgressBar');
+    var detEl = document.getElementById('yoloProgressDetail');
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (barEl) barEl.style.width = pct + '%';
+    if (detEl) {
+      var elapsed = data.elapsed || Math.round((Date.now() / 1000) - (_startedAt || Date.now() / 1000));
+      detEl.textContent = processed + '/' + total + ' ' + window.tr('yolo_detect.processed', '処理済') + ', ' + errors + ' ' + window.tr('yolo_detect.skipped', 'スキップ') + ', ' + _formatElapsed(elapsed);
+    }
+  }
+
+  function showRunningUI() {
+    document.getElementById('yoloStartBtn').style.display = 'none';
+    document.getElementById('yoloStopBtn').style.display = '';
+    document.getElementById('yoloProgress').style.display = '';
+    document.getElementById('yoloProgressLabel').textContent = window.tr('yolo_detect.detecting', '検出中...');
+    var r = document.getElementById('yoloResult');
+    if (r) r.style.display = 'none';
+  }
+
+  function onDetectComplete(data) {
+    document.getElementById('yoloStartBtn').style.display = '';
+    document.getElementById('yoloStopBtn').style.display = 'none';
+    var label = document.getElementById('yoloProgressLabel');
+    var reason = data.reason || 'complete';
+    if (label) label.textContent = reason === 'stopped' ? window.tr('yolo_detect.stopped', '停止しました') : window.tr('yolo_detect.complete', '完了');
+    var processed = data.processed || 0;
+    var errors = data.errors || 0;
+    var elapsed = data.elapsed_seconds || 0;
+    var r = document.getElementById('yoloResult');
+    if (r) {
+      r.style.display = '';
+      r.textContent = processed + ' ' + window.tr('yolo_detect.files_detected_in', 'ファイルを') + ' ' + _formatElapsed(elapsed) + window.tr('yolo_detect.time_suffix', 'で検出') + (errors > 0 ? ' (' + errors + ' ' + window.tr('yolo_detect.skipped', 'スキップ') + ')' : '');
+    }
+    loadStatus();
+  }
+
+  // --- Status ---
+  // Collect supported models from all available backends
+  function collectSupportedModels(backends) {
+    var supported = {};
+    for (var i = 0; i < (backends || []).length; i++) {
+      var models = backends[i].supported_models || [];
+      for (var j = 0; j < models.length; j++) {
+        supported[models[j]] = true;
+      }
+    }
+    return supported;
+  }
+
+  function updateModelOptions(supported) {
+    var sel = document.getElementById('yoloModelSelect');
+    if (!sel) return;
+    var options = sel.options;
+    var hasSelected = false;
+    for (var i = 0; i < options.length; i++) {
+      var available = !!supported[options[i].value];
+      options[i].disabled = !available;
+      if (!available && options[i].selected) {
+        options[i].selected = false;
+      }
+      if (available && !hasSelected) {
+        // Auto-select first available if current is disabled
+        if (!sel.options[sel.selectedIndex] || sel.options[sel.selectedIndex].disabled) {
+          options[i].selected = true;
+        }
+        hasSelected = true;
+      }
+    }
+  }
+
+  function loadStatus() {
+    fetch(BASE + '/runtime').then(function(r) { return r.json(); }).then(function(d) {
+      var el = document.getElementById('yoloStatus');
+      if (!el) return;
+      el.textContent = '';
+
+      var countB1 = document.createElement('b'); countB1.textContent = d.detected_count; el.appendChild(countB1);
+      el.appendChild(document.createTextNode(' ' + window.tr('yolo_detect.detected', '検出済') + ' / '));
+      var countB2 = document.createElement('b'); countB2.textContent = d.undetected_count; el.appendChild(countB2);
+      el.appendChild(document.createTextNode(' ' + window.tr('yolo_detect.undetected', '未検出')));
+
+      if (d.config) {
+        var sel = document.getElementById('yoloModelSelect');
+        if (sel) sel.value = d.config.model || 'yolov8n';
+        var confSlider = document.getElementById('yoloConfThreshold');
+        if (confSlider) { confSlider.value = d.config.confidence_threshold || 0.25; document.getElementById('yoloConfVal').textContent = parseFloat(confSlider.value).toFixed(2); }
+        var batchSlider = document.getElementById('yoloBatchSize');
+        if (batchSlider) { batchSlider.value = d.config.batch_size || 16; document.getElementById('yoloBatchVal').textContent = batchSlider.value; }
+        var frameSlider = document.getElementById('yoloFrameInterval');
+        if (frameSlider) { frameSlider.value = d.config.video_frame_interval || 2.0; document.getElementById('yoloFrameVal').textContent = parseFloat(frameSlider.value).toFixed(1); }
+      }
+      // Disable model options not supported by any backend
+      var supported = collectSupportedModels(d.available_backends);
+      updateModelOptions(supported);
+
+      var autoEl = document.getElementById('yoloAutoDetect');
+      if (autoEl) autoEl.checked = !!d.auto_detect_on_scan;
+
+      updateModelInfo(d.models);
+    }).catch(function() {
+      var el = document.getElementById('yoloStatus');
+      if (el) el.innerHTML = '<span class="yd-err">' + window.tr('yolo_detect.status_load_failed', 'ステータスの読み込みに失敗') + '</span>';
+    });
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function updateModelInfo(models) {
+    if (!models) return;
+    var sel = document.getElementById('yoloModelSelect');
+    var infoEl = document.getElementById('yoloModelInfo');
+    if (!sel || !infoEl) return;
+    var model = models[sel.value];
+    if (model) {
+      var status = model.available
+        ? '<span class="yd-ok">' + window.tr('yolo_detect.model_ready', '準備完了') + '</span>'
+        : '<span class="yd-err">' + window.tr('yolo_detect.model_not_downloaded', '未ダウンロード') + '</span>';
+      var size = model.file_size_mb ? ' (' + model.file_size_mb + ' MB)' : '';
+      infoEl.innerHTML = status + size + ' - ' + escapeHtml(model.description);
+    }
+  }
+
+  // --- Start Detection ---
+  window.yoloStartDetect = function() {
+    var model = document.getElementById('yoloModelSelect').value;
+    var batchSize = parseInt(document.getElementById('yoloBatchSize').value) || 16;
+    var conf = parseFloat(document.getElementById('yoloConfThreshold').value) || 0.25;
+    var interval = parseFloat(document.getElementById('yoloFrameInterval').value) || 2.0;
+    var distributed = document.getElementById('yoloDistributed').checked;
+    var modeEl = document.querySelector('input[name="yoloMode"]:checked');
+    var archive = modeEl ? modeEl.value === 'archive' : false;
+    var mediaFilter = 'all';
+    if (archive) {
+      var filterSel = document.getElementById('yoloMediaFilter');
+      if (filterSel.value === 'custom') {
+        mediaFilter = document.getElementById('yoloMediaFilterCustom').value || 'all';
+      } else {
+        mediaFilter = filterSel.value;
+      }
+    }
+    var r = document.getElementById('yoloResult');
+    fetch(BASE + '/detect/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({
+        model: model, batch_size: batchSize, confidence_threshold: conf,
+        video_frame_interval: interval, distributed: distributed,
+        archive: archive, media_filter: mediaFilter
+      })
+    }).then(function(resp) { return resp.json(); }).then(function(d) {
+      if (d.status === 'already_running') {
+        if (r) { r.style.display = ''; r.textContent = window.tr('yolo_detect.already_running', '検出は既に実行中です'); }
+        return;
+      }
+      if (d.status === 'no_files') {
+        if (r) { r.style.display = ''; r.textContent = d.message || window.tr('yolo_detect.no_files', '未検出のファイルがありません'); }
+        return;
+      }
+      _startedAt = Date.now() / 1000;
+      showRunningUI();
+    }).catch(function(e) {
+      if (r) { r.style.display = ''; r.textContent = window.tr('yolo_detect.start_failed', '検出開始に失敗') + ': ' + e.message; }
+    });
+  };
+
+  // --- Stop ---
+  window.yoloStopDetect = function() {
+    fetch(BASE + '/detect/stop', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).catch(function() {});
+  };
+
+  // --- Clear ---
+  window.yoloClearResults = function() {
+    if (!confirm(window.tr('yolo_detect.confirm_clear', '全ての検出結果を削除しますか？この操作は取り消せません。'))) return;
+    fetch(BASE + '/detect/clear', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      var el = document.getElementById('yoloResult');
+      if (el) { el.style.display = ''; el.textContent = d.deleted + ' ' + window.tr('yolo_detect.results_deleted', '件の検出結果を削除しました'); }
+      loadStatus();
+    }).catch(function(e) {
+      var el = document.getElementById('yoloResult');
+      if (el) { el.style.display = ''; el.textContent = window.tr('yolo_detect.delete_failed', '削除に失敗') + ': ' + e.message; }
+    });
+  };
+
+  // --- Download Model ---
+  window.yoloDownloadModel = function() {
+    var model = document.getElementById('yoloModelSelect').value;
+    var btn = document.getElementById('yoloDownloadBtn');
+    var origHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.textContent = window.tr('yolo_detect.downloading', 'ダウンロード中...');
+    fetch(BASE + '/model/download', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({model: model})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+      var r = document.getElementById('yoloResult');
+      if (d.status === 'ok') {
+        if (r) { r.style.display = ''; r.textContent = window.tr('yolo_detect.download_complete', 'モデル {model} のダウンロードが完了しました').replace('{model}', model); }
+        loadStatus();
+        if (window.extensionHealthApi && typeof window.extensionHealthApi.renderInto === 'function') {
+          window.extensionHealthApi.renderInto('yoloHealth', 'builtin-hailo-yolo-detect', 'details');
+        }
+      } else {
+        if (r) { r.style.display = ''; r.textContent = d.message || window.tr('yolo_detect.download_failed', 'ダウンロードに失敗しました'); }
+      }
+    }).catch(function(e) {
+      btn.disabled = false;
+      btn.innerHTML = origHTML;
+      var r = document.getElementById('yoloResult');
+      if (r) { r.style.display = ''; r.textContent = window.tr('yolo_detect.download_failed', 'ダウンロード失敗') + ': ' + e.message; }
+    });
+  };
+
+  // --- Search by Class (XSS-safe createElement) ---
+  window.yoloSearchClass = function() {
+    var q = document.getElementById('yoloSearchInput').value.trim();
+    if (!q) return;
+    var conf = parseFloat(document.getElementById('yoloConfThreshold').value) || 0;
+    var resultsEl = document.getElementById('yoloSearchResults');
+    resultsEl.style.display = '';
+    resultsEl.textContent = window.tr('yolo_detect.searching', '検索中...');
+    fetch(BASE + '/detect/search?class_name=' + encodeURIComponent(q) + '&min_confidence=' + conf + '&limit=50')
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        resultsEl.innerHTML = '';
+        if (d.status !== 'ok' || !d.results || d.results.length === 0) {
+          resultsEl.textContent = window.tr('yolo_detect.no_search_results', '"{q}" の検索結果はありません').replace('{q}', q);
+          return;
+        }
+        var header = document.createElement('div');
+        header.className = 'yd-search-results-header';
+        header.textContent = window.tr('yolo_detect.search_results_header', '{total} ファイルに "{q}" を検出:').replace('{total}', d.total).replace('{q}', q);
+        resultsEl.appendChild(header);
+
+        var grid = document.createElement('div');
+        grid.className = 'yd-search-results-grid';
+        for (var i = 0; i < d.results.length; i++) {
+          var item = d.results[i];
+          var confPct = Math.round(item.detection.confidence * 100);
+          var tag = document.createElement('a');
+          tag.href = '/?id=' + item.file_id;
+          tag.target = '_blank';
+          tag.rel = 'noopener';
+          tag.className = 'yd-search-tag';
+          tag.textContent = item.filename + ' ';
+          var badge = document.createElement('span');
+          badge.className = 'yd-conf-badge';
+          badge.textContent = '(' + confPct + '%)';
+          tag.appendChild(badge);
+          grid.appendChild(tag);
+        }
+        resultsEl.appendChild(grid);
+      })
+      .catch(function(e) {
+        resultsEl.innerHTML = '';
+        var err = document.createElement('span');
+        err.className = 'yd-err';
+        err.textContent = window.tr('yolo_detect.search_failed', '検索に失敗') + ': ' + e.message;
+        resultsEl.appendChild(err);
+      });
+  };
+
+  // --- Slider bindings ---
+  function bindSlider(sliderId, valId, decimals) {
+    var s = document.getElementById(sliderId);
+    var v = document.getElementById(valId);
+    if (s && v) s.addEventListener('input', function() {
+      v.textContent = decimals ? parseFloat(this.value).toFixed(decimals) : this.value;
+    });
+  }
+  bindSlider('yoloConfThreshold', 'yoloConfVal', 2);
+  bindSlider('yoloBatchSize', 'yoloBatchVal', 0);
+  bindSlider('yoloFrameInterval', 'yoloFrameVal', 1);
+
+  // Model select change
+  var modelSel = document.getElementById('yoloModelSelect');
+  if (modelSel) {
+    modelSel.addEventListener('change', function() { loadStatus(); });
+  }
+
+  // Enter key on search
+  var searchInput = document.getElementById('yoloSearchInput');
+  if (searchInput) {
+    searchInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); window.yoloSearchClass(); }
+    });
+  }
+
+  // --- SSE via shared engine (window.sseSubscribe from nav.js) ---
+  function initSSE() {
+    if (!window.sseSubscribe) return;
+    window.sseSubscribe('yolo_detect.start', function() { showRunningUI(); });
+    window.sseSubscribe('yolo_detect.progress', function(d) { updateProgress(d.data); });
+    window.sseSubscribe('yolo_detect.complete', function(d) { onDetectComplete(d.data); });
+  }
+
+  // --- Mode toggle ---
+  document.querySelectorAll('input[name="yoloMode"]').forEach(function(r) {
+    r.addEventListener('change', function() {
+      var isArchive = this.value === 'archive';
+      document.getElementById('yoloMediaFilterField').style.display = isArchive ? '' : 'none';
+    });
+  });
+  document.getElementById('yoloMediaFilter').addEventListener('change', function() {
+    document.getElementById('yoloMediaFilterCustom').style.display =
+      this.value === 'custom' ? '' : 'none';
+  });
+
+  var _initialized = false;
+
+  function activateSection() {
+    if (_initialized) return;
+    _initialized = true;
+    loadStatus();
+    initSSE();
+    fetch(BASE + '/labels').then(function(r) { return r.json(); }).then(function(d) {
+      if (d.labels) {
+        var list = document.getElementById('yoloClassList');
+        if (list) {
+          for (var i = 0; i < d.labels.length; i++) {
+            var opt = document.createElement('option');
+            opt.value = d.labels[i];
+            list.appendChild(opt);
+          }
+        }
+      }
+    }).catch(function() {});
+    fetch(BASE + '/detect/status').then(function(r) { return r.json(); }).then(function(d) {
+      if (d.running) showRunningUI();
+    }).catch(function() {});
+  }
+
+  document.addEventListener('tools:activate-section', function(ev) {
+    var detail = ev.detail || {};
+    if (detail.id === 'yoloDetectSection') activateSection();
+  });
+
+  var section = document.getElementById('yoloDetectSection');
+  // Standalone /ext/* pages and direct Tools-page includes have no enclosing
+  // details.tool-item to dispatch 'tools:activate-section', so activate them immediately.
+  var isStandalone = window.location.pathname.indexOf('/ext/') === 0;
+  var isDirectToolsInclude = section && !section.closest('details.tool-item');
+  if (isStandalone || isDirectToolsInclude || (section && section.classList.contains('expanded'))) {
+    activateSection();
+  }
+})();
+</script>

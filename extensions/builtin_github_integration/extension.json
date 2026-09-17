@@ -1,0 +1,47 @@
+{
+  "name": "builtin-github-integration",
+  "version": "1.2.0",
+  "description": "GitHub issue monitoring, triage, PR tracking, notifications, and reporting",
+  "type": "general",
+  "category": "system",
+  "entry": "github_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/",
+  "nav": {
+    "label": "GitHub",
+    "icon": "\ud83d\udccc",
+    "href": "/ext/github"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 300
+  },
+  "config_schema": {
+    "schedule_interval_minutes": {
+      "type": "integer",
+      "label": "Schedule interval (minutes, 0=manual only)",
+      "default": 0
+    },
+    "language_filter": {
+      "type": "string",
+      "label": "Language filter (e.g. 'en', empty=all)",
+      "default": "en"
+    },
+    "poll_interval_minutes": {
+      "type": "integer",
+      "label": "Issue poll interval (minutes)",
+      "default": 60
+    },
+    "auto_close_invalid": {
+      "type": "boolean",
+      "label": "Auto-close invalid issues",
+      "default": false
+    },
+    "notify_on_connect": {
+      "type": "boolean",
+      "label": "Notify pending issues on MCP connect",
+      "default": true
+    }
+  }
+}

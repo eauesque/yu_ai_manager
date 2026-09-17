@@ -1,0 +1,88 @@
+/*
+ * Atelier System (γ) — diagnostics.html
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool.
+ * classic / dark keep their existing pages/diagnostics.css untouched.
+ */
+
+/* ----- Page heading ----- */
+
+body.theme-atelier-light.atelier-tool .diagnostics-header h1,
+body.theme-atelier-dark.atelier-tool .diagnostics-header h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  margin: 4px 0 16px;
+}
+
+/* ----- Safe Mode banner ----- */
+
+body.theme-atelier-light.atelier-tool .diagnostics-safe-mode-banner,
+body.theme-atelier-dark.atelier-tool .diagnostics-safe-mode-banner {
+  background: color-mix(in srgb, var(--accent-warm) 15%, var(--surface));
+  border-color: var(--accent-warm);
+  color: var(--text);
+}
+
+/* ----- Result / pre blocks ----- */
+
+body.theme-atelier-light.atelier-tool .diagnostics-result,
+body.theme-atelier-dark.atelier-tool .diagnostics-result {
+  background: var(--canvas);
+  border-color: var(--border);
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+}
+
+/* ----- Update section separator ----- */
+
+body.theme-atelier-light.atelier-tool .diagnostics-update,
+body.theme-atelier-dark.atelier-tool .diagnostics-update {
+  border-top-color: var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .diagnostics-update h2,
+body.theme-atelier-dark.atelier-tool .diagnostics-update h2 {
+  font-family: var(--font-ui);
+  font-size: var(--fs-h2);
+  color: var(--text);
+}
+
+/* ----- Buttons (.primary-btn / .secondary-btn are diagnostics-specific) ----- */
+
+body.theme-atelier-light.atelier-tool .primary-btn,
+body.theme-atelier-dark.atelier-tool .primary-btn {
+  background: var(--accent-tool);
+  color: #fff;
+  border-color: var(--accent-tool);
+}
+
+body.theme-atelier-light.atelier-tool .primary-btn:hover:not(:disabled),
+body.theme-atelier-dark.atelier-tool .primary-btn:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+body.theme-atelier-light.atelier-tool .secondary-btn,
+body.theme-atelier-dark.atelier-tool .secondary-btn {
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .secondary-btn:hover:not(:disabled),
+body.theme-atelier-dark.atelier-tool .secondary-btn:hover:not(:disabled) {
+  background: var(--canvas);
+}
+
+body.theme-atelier-light.atelier-tool .primary-btn:disabled,
+body.theme-atelier-dark.atelier-tool .primary-btn:disabled,
+body.theme-atelier-light.atelier-tool .secondary-btn:disabled,
+body.theme-atelier-dark.atelier-tool .secondary-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: none;
+}

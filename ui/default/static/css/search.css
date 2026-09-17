@@ -1,0 +1,18 @@
+/* search.css — compatibility wrapper for templates loading search styles directly.
+   Flattened: all leaf files listed here. */
+@import url("./search/search-results-header.css");
+@import url("./search/search-results-grid.css");
+@import url("./search/search-results-cards.css");
+@import url("./search/search-results-modal-nav.css");
+@import url("./search/search-results-prompts-actions.css");
+@import url("./search/search-results-container.css");
+@import url("./search/search-container-view.css");
+@import url("./search/search-skeleton.css");
+@import url("./search/search-states-status.css");
+@import url("./search/search-states-info-button.css");
+@import url("./search/search-controls-mode.css");
+@import url("./search/search-controls-status.css");
+@import url("./search/search-controls-meta.css");
+@import url("./search/search-floating-grid.css");
+@import url("./search/search-collections-sidebar.css");
+@import url("./search/search-util-bar.css");

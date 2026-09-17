@@ -1,0 +1,159 @@
+<style>
+/* Prompt Library — Modal + Folder/Tag Chips + Responsive */
+
+/* Modal overlay */
+.pl-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pl-modal-overlay.hidden {
+  display: none;
+}
+
+.pl-modal {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 24px;
+  width: 560px;
+  max-width: 90vw;
+  max-height: 85vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+}
+
+.pl-modal h3 {
+  margin: 0 0 16px;
+  font-size: 16px;
+}
+
+.pl-modal label {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pl-modal input[type="text"],
+.pl-modal textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: inherit;
+  font-size: 13px;
+  margin-bottom: 12px;
+  box-sizing: border-box;
+  font-family: inherit;
+}
+
+.pl-modal textarea {
+  resize: vertical;
+  min-height: 60px;
+}
+
+.pl-modal-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.pl-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+/* Character prompts in modal (read-only) */
+.pl-modal-chars {
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  font-size: 12px;
+}
+.pl-modal-char-entry {
+  padding: 4px 0;
+  color: var(--muted);
+  line-height: 1.5;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.pl-modal-char-pos {
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 11px;
+}
+
+/* Folder/Tag assignment chips */
+.pl-modal-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-bottom: 12px;
+  min-height: 38px;
+  align-items: center;
+}
+
+.pl-assign-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.pl-assign-chip:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+.pl-assign-chip.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .pl-layout {
+    flex-direction: column;
+  }
+  .pl-sidebar {
+    width: 100%;
+    min-width: 0;
+    max-height: 180px;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    flex-direction: row;
+    padding-top: var(--nav-h, 50px);
+  }
+  .pl-sidebar-section { border-bottom: none; flex: 1; }
+  .pl-toolbar {
+    flex-wrap: wrap;
+  }
+  .pl-search {
+    flex: 1 1 100%;
+    max-width: none;
+  }
+  .pl-modal-row {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

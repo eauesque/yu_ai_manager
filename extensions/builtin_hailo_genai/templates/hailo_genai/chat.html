@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="genai.chat_title">Hailo Chat</title>
+  <link rel="stylesheet" href="/static/css/main.css?v=20260310">
+  <link rel="stylesheet" href="/static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260310">
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+
+  <div class="hc-app">
+    <!-- Sidebar -->
+    <aside class="hc-sidebar" id="hcSidebar">
+      <div class="hc-sidebar-header">
+        <button class="btn btn-primary hc-new-btn" id="hcNewChat" data-i18n="genai.chat_new">+ New Chat</button>
+      </div>
+      <div class="hc-conv-list" id="hcConvList">
+        <div class="hc-muted" data-i18n="genai.chat_loading">読み込み中...</div>
+      </div>
+      <div class="hc-sidebar-footer">
+        <a href="/ext/hailo-genai/" class="hc-back-link" data-i18n="genai.chat_back_tools">&#x2190; GenAI Tools</a>
+      </div>
+    </aside>
+
+    <!-- Sidebar toggle (mobile) -->
+    <button class="hc-sidebar-toggle" id="hcSidebarToggle" aria-label="Toggle sidebar">&#x2630;</button>
+
+    <!-- Main area -->
+    <main class="hc-main">
+      <!-- Welcome screen -->
+      <div class="hc-welcome" id="hcWelcome">
+        <div class="hc-welcome-icon">&#x1F916;</div>
+        <h2 data-i18n="genai.chat_welcome_title">Hailo Chat</h2>
+        <p data-i18n="genai.chat_welcome_desc">ローカル AI とチャットしましょう</p>
+        <div class="hc-model-select-wrap">
+          <label data-i18n="genai.chat_model_label">モデル:</label>
+          <select id="hcModelSelect" class="hc-select"></select>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="hc-messages" id="hcMessages" style="display:none;"></div>
+
+      <!-- Input area -->
+      <div class="hc-input-area" id="hcInputArea">
+        <!-- Image preview (above input) -->
+        <div class="hc-img-preview" id="hcImgPreview" style="display:none;">
+          <span class="hc-img-label" data-i18n="genai.chat_image_label">📷 IMG</span>
+          <img id="hcImgThumb" alt="Preview">
+          <button class="hc-img-remove" id="hcImgRemove" title="Remove image" aria-label="Remove image">&#x2715;</button>
+        </div>
+        <div class="hc-input-row">
+          <button class="hc-tool-btn" id="hcWebSearchBtn"
+                  data-i18n-title="genai.chat_web_search_tooltip" title="Web search"
+                  type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"/>
+              <path d="M21 21l-4.35-4.35"/>
+            </svg>
+          </button>
+          <button class="hc-tool-btn" id="hcAgentBtn"
+                  data-i18n-title="genai.chat_agent_mode_tooltip" title="Agent mode (use tools)"
+                  type="button" aria-pressed="false">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14.7 6.3a1 1 0 000 1.4l1.6 1.6a1 1 0 001.4 0l3.77-3.77a6 6 0 01-7.94 7.94l-6.91 6.91a2.12 2.12 0 01-3-3l6.91-6.91a6 6 0 017.94-7.94l-3.76 3.76z"/>
+            </svg>
+          </button>
+          <button class="hc-tool-btn" id="hcImageBtn"
+                  data-i18n-title="genai.chat_image_upload_tooltip" title="Attach image"
+                  type="button">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2"/>
+              <circle cx="8.5" cy="8.5" r="1.5"/>
+              <polyline points="21 15 16 10 5 21"/>
+            </svg>
+          </button>
+          <input type="file" id="hcImageInput" accept="image/*" style="display:none;">
+          <textarea id="hcInput" class="hc-textarea" rows="1"
+                    data-i18n-ph="genai.chat_input_placeholder"
+                    placeholder="メッセージを入力..."></textarea>
+          <button class="btn btn-primary hc-send-btn" id="hcSendBtn" aria-label="Send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <line x1="22" y1="2" x2="11" y2="13"/>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+            </svg>
+          </button>
+        </div>
+        <div class="hc-input-info">
+          <span class="hc-muted" data-i18n="genai.chat_input_hint">Enter で送信、Shift+Enter で改行</span>
+          <span class="hc-muted" id="hcContextInfo"></span>
+          <select id="hcModelSwitch" class="hc-model-switch hc-muted"
+                  data-i18n-title="genai.chat_model_switch_tooltip" title="Switch model"></select>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Context menu for conversations -->
+  <div class="hc-ctx-menu" id="hcCtxMenu" style="display:none;">
+    <button class="hc-ctx-item" data-action="rename" data-i18n="genai.chat_rename">✏️ 名前変更</button>
+    <button class="hc-ctx-item hc-ctx-danger" data-action="delete" data-i18n="genai.chat_delete">🗑️ 削除</button>
+  </div>
+
+{% include "hailo_genai/_chat_style.html" %}
+
+<script nonce="{{ csp_nonce }}">
+(function() {
+  var BASE = '/ext/hailo-genai/api';
+  var _convId = null;
+  var _sending = false;
+  var _modelAvail = {};
+
+  var $sidebar = document.getElementById('hcSidebar');
+  var $convList = document.getElementById('hcConvList');
+  var $welcome = document.getElementById('hcWelcome');
+  var $messages = document.getElementById('hcMessages');
+  var $input = document.getElementById('hcInput');
+  var $sendBtn = document.getElementById('hcSendBtn');
+  var $ctxMenu = document.getElementById('hcCtxMenu');
+  var $modelSel = document.getElementById('hcModelSelect');
+  var $modelSwitch = document.getElementById('hcModelSwitch');
+  var $ctxInfo = document.getElementById('hcContextInfo');
+  var $webSearchBtn = document.getElementById('hcWebSearchBtn');
+  var $agentBtn = document.getElementById('hcAgentBtn');
+  var $imageBtn = document.getElementById('hcImageBtn');
+  var $imageInput = document.getElementById('hcImageInput');
+  var $imgPreview = document.getElementById('hcImgPreview');
+  var $imgThumb = document.getElementById('hcImgThumb');
+  var $imgRemove = document.getElementById('hcImgRemove');
+  var _webSearchEnabled = false;
+  var _agentModeEnabled = false;
+  var _pendingImage = null; // File object
+
+  /* ── Sidebar toggle ─────────────────────────────── */
+  document.getElementById('hcSidebarToggle').addEventListener('click', function() {
+    $sidebar.classList.toggle('hc-open');
+  });
+  // Close sidebar on message area click (mobile)
+  document.querySelector('.hc-main').addEventListener('click', function() {
+    $sidebar.classList.remove('hc-open');
+  });
+
+  /* ── Web search toggle ──────────────────────────── */
+  $webSearchBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    _webSearchEnabled = !_webSearchEnabled;
+    $webSearchBtn.classList.toggle('hc-active', _webSearchEnabled);
+    $webSearchBtn.setAttribute('aria-pressed', String(_webSearchEnabled));
+    // Inline style fallback -- for environments where CSS classes do not work
+    if (_webSearchEnabled) {
+      $webSearchBtn.style.background = '#667eea';
+      $webSearchBtn.style.color = '#fff';
+      $webSearchBtn.style.borderColor = '#667eea';
+    } else {
+      $webSearchBtn.style.background = '';
+      $webSearchBtn.style.color = '';
+      $webSearchBtn.style.borderColor = '';
+    }
+  });
+
+  /* ── Agent mode toggle ───────────────────────────── */
+  $agentBtn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    _agentModeEnabled = !_agentModeEnabled;
+    $agentBtn.classList.toggle('hc-active', _agentModeEnabled);
+    $agentBtn.setAttribute('aria-pressed', String(_agentModeEnabled));
+    if (_agentModeEnabled) {
+      $agentBtn.style.background = '#667eea';
+      $agentBtn.style.color = '#fff';
+      $agentBtn.style.borderColor = '#667eea';
+      // Auto-switch to coder model for better tool calling
+      if ($modelSwitch.querySelector('option[value="qwen2.5-coder-1.5b"]')) {
+        $modelSwitch.value = 'qwen2.5-coder-1.5b';
+        $modelSel.value = 'qwen2.5-coder-1.5b';
+      }
+    } else {
+      $agentBtn.style.background = '';
+      $agentBtn.style.color = '';
+      $agentBtn.style.borderColor = '';
+    }
+  });
+
+  /* ── Image upload ────────────────────────────────── */
+  $imageBtn.addEventListener('click', function() {
+    $imageInput.click();
+  });
+  $imageInput.addEventListener('change', function() {
+    var file = this.files && this.files[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert(window.tr('genai.chat_image_only', '画像ファイルのみ対応'));
+      return;
+    }
+    _pendingImage = file;
+    $imgThumb.src = URL.createObjectURL(file);
+    $imgPreview.style.display = '';
+    $imageBtn.classList.add('hc-active');
+  });
+  $imgRemove.addEventListener('click', function() {
+    clearPendingImage();
+  });
+  function clearPendingImage() {
+    _pendingImage = null;
+    $imgPreview.style.display = 'none';
+    $imgThumb.src = '';
+    $imageInput.value = '';
+    $imageBtn.classList.remove('hc-active');
+  }
+  // Drag-and-drop on input area
+  var $inputArea = document.getElementById('hcInputArea');
+  $inputArea.addEventListener('dragover', function(e) { e.preventDefault(); });
+  $inputArea.addEventListener('drop', function(e) {
+    e.preventDefault();
+    var file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      _pendingImage = file;
+      $imgThumb.src = URL.createObjectURL(file);
+      $imgPreview.style.display = '';
+      $imageBtn.classList.add('hc-active');
+    }
+  });
+
+  /* ── Load models ────────────────────────────────── */
+  function loadModels() {
+    fetch(BASE + '/model/status').then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status !== 'ok') return;
+      $modelSel["innerHTML"] = '';
+      $modelSwitch["innerHTML"] = '';
+      Object.keys(d.models).forEach(function(name) {
+        var m = d.models[name];
+        if (m.type !== 'llm') return;
+        _modelAvail[name] = m.available;
+        var label = m.description + (m.available ? '' : ' [' + window.tr('hailo_genai.not_downloaded', '未DL') + ']');
+        // Welcome screen select
+        var opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = label;
+        $modelSel.appendChild(opt);
+        // Model switch in input area
+        var opt2 = document.createElement('option');
+        opt2.value = name;
+        opt2.textContent = label;
+        $modelSwitch.appendChild(opt2);
+      });
+    }).catch(function() {});
+  }
+
+  // On model switch change -> also sync welcome screen select
+  $modelSwitch.addEventListener('change', function() {
+    $modelSel.value = $modelSwitch.value;
+  });
+  $modelSel.addEventListener('change', function() {
+    $modelSwitch.value = $modelSel.value;
+  });
+
+  /* ── Load conversations ─────────────────────────── */
+  function loadConversations() {
+    fetch(BASE + '/chat/conversations?limit=100').then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status !== 'ok') return;
+      renderConvList(d.conversations);
+    }).catch(function() {
+      $convList["innerHTML"] = '<div class="hc-muted">Error</div>';
+    });
+  }
+
+  function renderConvList(convs) {
+    $convList["innerHTML"] = '';
+    if (!convs.length) {
+      $convList["innerHTML"] = '<div class="hc-muted" style="padding:12px;font-size:12px;" data-i18n="genai.chat_no_conversations">' + window.tr('genai.chat_no_conversations', '会話がありません') + '</div>';
+      return;
+    }
+    convs.forEach(function(c) {
+      var item = document.createElement('div');
+      item.className = 'hc-conv-item' + (c.id === _convId ? ' hc-active' : '');
+      item.dataset.id = c.id;
+
+      var title = document.createElement('span');
+      title.className = 'hc-conv-title';
+      title.textContent = c.title || 'New Chat';
+
+      var meta = document.createElement('div');
+      meta.className = 'hc-conv-meta';
+      var d = new Date((c.updated_at || c.created_at) * 1000);
+      meta.textContent = (c.model || '') + ' · ' + d.toLocaleDateString();
+
+      item.appendChild(title);
+      item.appendChild(meta);
+
+      item.addEventListener('click', function() { openConversation(c.id); });
+      item.addEventListener('contextmenu', function(e) {
+        e.preventDefault();
+        showCtxMenu(e, c.id);
+      });
+
+      $convList.appendChild(item);
+    });
+  }
+
+  /* ── Open conversation ──────────────────────────── */
+  function openConversation(id) {
+    fetch(BASE + '/chat/conversations/' + id).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status !== 'ok') return;
+      _convId = id;
+      var conv = d.conversation;
+
+      // Update model select (both welcome + input area)
+      if (conv.model && $modelSel.querySelector('option[value="' + conv.model + '"]')) {
+        $modelSel.value = conv.model;
+        $modelSwitch.value = conv.model;
+      }
+
+      // Show messages
+      $welcome.style.display = 'none';
+      $messages.style.display = '';
+      $messages["innerHTML"] = '';
+
+      (conv.messages || []).forEach(function(m) {
+        addMessageBubble(m.role, m.content);
+      });
+      scrollToBottom();
+
+      // Update sidebar selection
+      document.querySelectorAll('.hc-conv-item').forEach(function(el) {
+        el.classList.toggle('hc-active', parseInt(el.dataset.id) === id);
+      });
+
+      // Update info
+      updateContextInfo();
+
+      // Close sidebar on mobile
+      $sidebar.classList.remove('hc-open');
+    }).catch(function() {});
+  }
+
+  /* ── New chat ───────────────────────────────────── */
+  document.getElementById('hcNewChat').addEventListener('click', function() {
+    var model = $modelSel.value;
+    if (!model) return;
+    if (_modelAvail[model] === false) {
+      alert(window.tr('hailo_genai.download_model_first', 'モデルを先にダウンロードしてください'));
+      return;
+    }
+    fetch(BASE + '/chat/new', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({model: model})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status !== 'ok') return;
+      _convId = d.conversation.id;
+      $welcome.style.display = 'none';
+      $messages.style.display = '';
+      $messages["innerHTML"] = '';
+      $modelSwitch.value = model;
+      loadConversations();
+      $input.focus();
+    }).catch(function() {});
+  });
+
+{% include "hailo_genai/_chat_script_render.html" %}
+
+  /* ── Init ────────────────────────────────────────── */
+  loadModels();
+  loadConversations();
+  // Restore active conversation
+  fetch(BASE + '/chat/active').then(function(r) { return r.json(); }).then(function(d) {
+    if (d.conversation_id) openConversation(d.conversation_id);
+  }).catch(function() {});
+})();
+</script>
+</body>
+</html>

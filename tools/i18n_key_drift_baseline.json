@@ -1,0 +1,19 @@
+{
+  "files": {
+    "src/ts/gateway-page/backends-panel.ts": 3,
+    "ui/default/templates/_nav.html": 2,
+    "ui/default/templates/gateway.html": 19,
+    "ui/default/templates/llm_router/_content.html": 4,
+    "extensions/builtin_comfyui_bridge/templates/comfyui_bridge_parts/_script.html": 2,
+    "extensions/builtin_sd_webui_bridge/templates/sd_webui_bridge_parts/_script.html": 2,
+    "ui/default/templates/tools/content/primary/_ocr_advanced.html": 1,
+    "ui/default/templates/tools/content/primary/_system_update.html": 1,
+    "ui/default/templates/tools/content/secondary/_db_info.html": 3,
+    "extensions/builtin_comfyui_bridge/templates/comfyui_bridge_parts/_body.html": 30,
+    "src/ts/apps/bridge-workflow-queue.ts": 8,
+    "src/ts/context-menu/context-menu-build.ts": 1,
+    "src/ts/main/adaptive-runtime-ui.ts": 1,
+    "src/ts/runtime-tools-ui/tools/qr-core.ts": 4,
+    "src/ts/shared/json-schema-validator.ts": 6
+  }
+}

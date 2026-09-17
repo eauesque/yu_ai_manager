@@ -1,0 +1,186 @@
+  // -- Separate load UI toggle -----------------------------------
+
+  function cfbUpdateSeparateLoadUI() {
+    var diff = $("cfbDiffusionModel");
+    var useSeparate = !!(diff && diff.value);
+
+    var modelSel = $("cfbModel");
+    var modelField = modelSel ? modelSel.closest(".cfb-field") : null;
+    if (modelField) modelField.classList.toggle("cfb-field-disabled", useSeparate);
+    if (modelSel) modelSel.disabled = useSeparate;
+
+    var teSec = $("cfbTextEncoderSection");
+    if (teSec) teSec.style.display = useSeparate ? "" : "none";
+
+    var vaeLabel = $("cfbVaeLabel");
+    if (vaeLabel) {
+      vaeLabel.textContent = useSeparate
+        ? window.tr('comfyui_bridge.vae_required', 'VAE (required for separate load)')
+        : window.tr('comfyui_bridge.vae', 'VAE (optional)');
+    }
+
+    if (useSeparate) {
+      _cfbAutoDetectClipType();
+      _cfbAutoDetectVae();
+    } else {
+      // Switching to checkpoint mode: clear separate-load fields so they don't
+      // bleed into checkpoint generation.  A Wan/QWEN VAE left in the selector
+      // would be added as a VAELoader even in checkpoint mode, corrupting output.
+      var vaeSel = $("cfbVae");
+      if (vaeSel) vaeSel.value = "";
+      var clipType = $("cfbClipType");
+      if (clipType) clipType.value = "";
+    }
+  }
+  window.cfbUpdateSeparateLoadUI = cfbUpdateSeparateLoadUI;
+
+  // Auto-detect VAE from diffusion model / text encoder filenames.
+  // Only sets VAE if the user hasn't already chosen one.
+  function _cfbAutoDetectVae() {
+    var vaeSel = $("cfbVae");
+    if (!vaeSel || vaeSel.value) return; // already selected
+    var diff = ($("cfbDiffusionModel") || {}).value || "";
+    var t1   = ($("cfbTextEncoder1")  || {}).value || "";
+    var t2   = ($("cfbTextEncoder2")  || {}).value || "";
+    var combined = (diff + " " + t1 + " " + t2).toLowerCase();
+
+    // Ordered from most-specific to least-specific
+    var candidates = [];
+    if (combined.indexOf("qwen")    >= 0) candidates.push("qwen_image_vae.safetensors");
+    if (combined.indexOf("cosmos")  >= 0) candidates.push("qwen_image_vae.safetensors");
+    if (combined.indexOf("anima")   >= 0) candidates.push("qwen_image_vae.safetensors");
+    if (combined.indexOf("wan2.2")  >= 0) candidates.push("wan2.2_vae.safetensors");
+    if (combined.indexOf("wan")     >= 0) candidates.push("wan_2.1_vae.safetensors", "wan2.2_vae.safetensors");
+    if (combined.indexOf("flux")    >= 0) candidates.push("ae.safetensors");
+    if (combined.indexOf("sdxl")    >= 0 || (combined.indexOf("clip_l") >= 0 && combined.indexOf("clip_g") >= 0))
+                                          candidates.push("sdxl_vae.safetensors");
+
+    for (var c = 0; c < candidates.length; c++) {
+      for (var i = 0; i < vaeSel.options.length; i++) {
+        if (vaeSel.options[i].value === candidates[c]) {
+          vaeSel.value = candidates[c];
+          return;
+        }
+      }
+    }
+  }
+
+  function _cfbAutoDetectClipType() {
+    var clipType = $("cfbClipType");
+    if (!clipType || clipType.value) return; // user already picked one
+    var t1 = ($("cfbTextEncoder1") || {}).value || "";
+    var t2 = ($("cfbTextEncoder2") || {}).value || "";
+    var combined = (t1 + " " + t2).toLowerCase();
+    // Map encoder filename patterns to ComfyUI CLIP type values.
+    // "sdxl" and "flux" were renamed in newer ComfyUI versions.
+    // "qwen_image" is the correct type for Wan image models (Anima etc.); "wan" is for Wan video.
+    var detected = "";
+    if (combined.indexOf("t5") >= 0 && combined.indexOf("flux") >= 0) detected = "flux2";
+    else if (combined.indexOf("t5") >= 0) detected = "sd3";
+    else if (combined.indexOf("clip_l") >= 0 && combined.indexOf("clip_g") >= 0) detected = "stable_diffusion";
+    else if (combined.indexOf("hunyuan") >= 0) detected = "hunyuan_image";
+    else if (combined.indexOf("qwen") >= 0) detected = "qwen_image";
+    else if (combined.indexOf("wan") >= 0) detected = "wan";
+    if (!detected) return;
+    for (var i = 0; i < clipType.options.length; i++) {
+      if (clipType.options[i].value === detected) {
+        clipType.value = detected;
+        return;
+      }
+    }
+  }
+
+  // -- Checkpoint preset (auto-apply on Checkpoint change) ------
+  // Sampler/scheduler/cfg/steps/resolution differ between SD 1.5 and SDXL
+  // families. The 7-node default workflow is structurally identical for both,
+  // but `euler` + `normal` + cfg=8 + 512x768 underperforms badly on SDXL.
+  // Detect the family from the filename and apply matching defaults.
+  var _cfbCheckpointPresets = {
+    sd15: { sampler: "dpmpp_2m", scheduler: "karras", cfg: 7,   steps: 25, resolutionKey: "sd15_512_768" },
+    sdxl: { sampler: "dpmpp_2m", scheduler: "karras", cfg: 6.5, steps: 28, resolutionKey: "sdxl_832_1216" },
+  };
+
+  function _cfbDetectCheckpointFamily(name) {
+    if (!name) return "";
+    // Strip directory + extension before token-matching so "models/SDXL/foo.safetensors" works.
+    var base = String(name).toLowerCase().split(/[\\/]/).pop().replace(/\.[^.]+$/, "");
+    // Match on token boundaries (word/_/-/./space) to avoid false positives like
+    // "pixel" matching "xl" or "mixlora" matching "xl".
+    var SDXL_TOKEN = /(^|[^a-z0-9])(sdxl|xl|pony|illustrious|noob(?:ai)?|animagine|playgroundv\d|pdxl)([^a-z0-9]|$)/;
+    if (SDXL_TOKEN.test(base)) return "sdxl";
+    return "sd15";
+  }
+  window._cfbDetectCheckpointFamily = _cfbDetectCheckpointFamily;
+
+  // Track which fields the user has manually edited so the auto-preset
+  // does not silently overwrite intentional tweaks. Trusted (real user)
+  // input/change events flip the flag; programmatic .value writes don't.
+  var _CFB_PRESET_FIELDS = ["cfbSampler", "cfbScheduler", "cfbCfg", "cfbSteps", "cfbResolutionPreset"];
+  function _cfbInitDirtyTracking() {
+    _CFB_PRESET_FIELDS.forEach(function(id) {
+      var el = $(id);
+      if (!el || el.dataset.cfbDirtyBound) return;
+      el.dataset.cfbDirtyBound = "1";
+      var mark = function(e) { if (e && e.isTrusted) el.dataset.userEdited = "1"; };
+      el.addEventListener("input", mark);
+      el.addEventListener("change", mark);
+    });
+  }
+  function _cfbResetDirty() {
+    _CFB_PRESET_FIELDS.forEach(function(id) {
+      var el = $(id);
+      if (el) delete el.dataset.userEdited;
+    });
+  }
+  window._cfbResetDirty = _cfbResetDirty;
+
+  function _cfbApplyCheckpointPreset(family, opts) {
+    var preset = _cfbCheckpointPresets[family];
+    if (!preset) return null;
+    var force = !!(opts && opts.force);
+    var skipped = [];
+    var setIfClean = function(id, val) {
+      var el = $(id);
+      if (!el) return;
+      if (!force && el.dataset.userEdited) { skipped.push(id); return; }
+      el.value = String(val);
+    };
+    setIfClean("cfbSampler", preset.sampler);
+    setIfClean("cfbScheduler", preset.scheduler);
+    setIfClean("cfbCfg", preset.cfg);
+    setIfClean("cfbSteps", preset.steps);
+    var resSel = $("cfbResolutionPreset");
+    if (resSel && preset.resolutionKey
+        && (force || !resSel.dataset.userEdited)) {
+      for (var i = 0; i < resSel.options.length; i++) {
+        if (resSel.options[i].value === preset.resolutionKey) {
+          resSel.value = preset.resolutionKey;
+          // Defer one frame so BridgeResolutionPresets' change listener
+          // (registered later in init) is guaranteed to be attached.
+          var fire = function() {
+            resSel.dispatchEvent(new Event("change", { bubbles: true }));
+          };
+          if (window.requestAnimationFrame) requestAnimationFrame(fire);
+          else setTimeout(fire, 0);
+          break;
+        }
+      }
+    } else if (resSel && resSel.dataset.userEdited) {
+      skipped.push("cfbResolutionPreset");
+    }
+    return { preset: preset, skipped: skipped };
+  }
+  window._cfbApplyCheckpointPreset = _cfbApplyCheckpointPreset;
+
+  // Safely set a <select> value, appending an option if missing.
+  function _setSelectValue(id, val) {
+    var sel = $(id);
+    if (!sel) return;
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === val) { sel.value = val; return; }
+    }
+    var opt = document.createElement("option");
+    opt.value = val; opt.textContent = val;
+    sel.appendChild(opt);
+    sel.value = val;
+  }

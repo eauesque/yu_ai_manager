@@ -1,0 +1,127 @@
+/* keyboard-help.css — Keyboard shortcut UI (bar + overlay) */
+/* Note: keyboard-help-theme.css is loaded by the aggregator (main.css) */
+
+/* ===== Overlay: container/header ===== */
+.keyboard-help-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.keyboard-help-content {
+  background: white;
+  border-radius: 12px;
+  max-width: 900px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(40px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.keyboard-help-header {
+  padding: 24px 32px;
+  border-bottom: 2px solid #e5e7eb;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.keyboard-help-header h2 {
+  margin: 0;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+.help-close-btn {
+  background: transparent;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 4px 12px;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+/* ===== Overlay: sections/content ===== */
+.keyboard-help-sections {
+  padding: 32px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 32px;
+}
+
+.help-section h3 {
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: #3b82f6;
+}
+
+.help-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid #f3f4f6;
+}
+
+.help-item:last-child {
+  border-bottom: none;
+}
+
+.help-item kbd {
+  background: linear-gradient(180deg, #f9fafb, #f3f4f6);
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 12px;
+  font-family: 'Consolas', 'Monaco', monospace;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 32px;
+  text-align: center;
+}
+
+.help-item span {
+  flex: 1;
+  font-size: 14px;
+  color: #4b5563;
+}
+
+/* ===== Overlay: footer ===== */
+.keyboard-help-footer {
+  padding: 24px 32px;
+  background: #f9fafb;
+  border-top: 2px solid #e5e7eb;
+  text-align: center;
+}
+
+.keyboard-help-footer p {
+  margin: 8px 0;
+  font-size: 13px;
+  color: #6b7280;
+}

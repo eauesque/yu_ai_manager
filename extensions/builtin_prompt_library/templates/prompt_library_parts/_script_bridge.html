@@ -1,0 +1,113 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  "use strict";
+
+  var API = "/ext/prompt-library/api";
+  var _bridges = {
+    sd:    { url: "/ext/sd-webui/",       label: "SD WebUI", crossTabId: "a1111" },
+    comfy: { url: "/ext/comfyui-bridge/", label: "ComfyUI",  crossTabId: "comfyui" },
+    nai:   { url: "/ext/nai-bridge/",     label: "NAI",      crossTabId: "nai" }
+  };
+
+  function apiFetch(path, opts) {
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    if (opts.body && typeof opts.body === "object") {
+      opts.headers["Content-Type"] = "application/json";
+      opts.body = JSON.stringify(opts.body);
+    }
+    return fetch(API + path, opts).then(function(r) { return r.json(); });
+  }
+
+  // Send prompt to a bridge via localStorage
+  // arg may arrive as "id,target" from data-action-arg delegation (single string)
+  // evt is optionally passed as second arg by the event-delegation dispatcher
+  function sendToBridge(promptId, evt) {
+    var target;
+    if (typeof promptId === "string" && promptId.indexOf(",") !== -1) {
+      var parts = promptId.split(",");
+      promptId = parts[0];
+      target = parts[1];
+    }
+    // evt may be the Event object when called via data-action delegation (no target in split)
+    if (evt instanceof Event || (evt && typeof evt.type === "string")) {
+      // evt is a real Event — keep it as-is; target was parsed from the comma-split above
+    } else if (target === undefined && evt !== undefined && typeof evt !== "object") {
+      // Legacy: second arg is target string (direct call)
+      target = evt;
+      evt = undefined;
+    }
+    apiFetch("/prompts/" + promptId).then(function(res) {
+      if (!res.ok || !res.prompt) return;
+      var entry = res.prompt;
+      var bridge = _bridges[target];
+      if (!bridge) return;
+
+      var chars = Array.isArray(entry.characters) ? entry.characters : [];
+      var payload = {
+        prompt: entry.positive || "",
+        negative: entry.negative || "",
+        source: "prompt-library"
+      };
+
+      if (target === "nai" && chars.length > 0) {
+                // NAI Bridge: pass character info in structured format
+        payload.characters = chars.map(function(c) {
+          var ch = { prompt: c.prompt || "", negative: c.negative || "" };
+          if (c.center) ch.center = c.center;
+          return ch;
+        });
+      } else if (chars.length > 0) {
+                // Other bridges: merge character prompts into main prompt
+        var charPositive = chars.map(function(c) { return c.prompt || ""; }).filter(Boolean);
+        if (charPositive.length > 0) {
+          payload.prompt = (payload.prompt ? payload.prompt + ", " : "") + charPositive.join(", ");
+        }
+        var charNegative = chars.map(function(c) { return c.negative || ""; }).filter(Boolean);
+        if (charNegative.length > 0) {
+          payload.negative = (payload.negative ? payload.negative + ", " : "") + charNegative.join(", ");
+        }
+      }
+
+      try {
+        localStorage.setItem("bridge_send_prompt", JSON.stringify(payload));
+      } catch (_e) {}
+
+      window.tauriCrossTab.sendToBridge(bridge.crossTabId, {}, evt);
+    });
+  }
+
+  // Toggle bridge dropdown
+  function toggleBridgeMenu(id) {
+    var el = document.getElementById("plBridge-" + id);
+    if (!el) return;
+    var isOpen = el.style.display !== "none";
+    // Close all open menus
+    var all = document.querySelectorAll(".pl-bridge-menu");
+    for (var i = 0; i < all.length; i++) all[i].style.display = "none";
+    if (!isOpen) el.style.display = "block";
+  }
+
+  // Close menus on outside click
+  document.addEventListener("click", function(e) {
+    if (!e.target.closest(".pl-bridge-wrap")) {
+      var all = document.querySelectorAll(".pl-bridge-menu");
+      for (var i = 0; i < all.length; i++) all[i].style.display = "none";
+    }
+  });
+
+  // auxclick (middle-click) delegation for dynamically-generated bridge items
+  document.addEventListener("auxclick", function(e) {
+    if (e.button !== 1) return;
+    var btn = e.target.closest('[data-action="PLBridge.send"][data-action-arg]');
+    if (!btn) return;
+    e.preventDefault();
+    sendToBridge(btn.getAttribute("data-action-arg"), e);
+  });
+
+  window.PLBridge = {
+    send: sendToBridge,
+    toggle: toggleBridgeMenu,
+  };
+})();
+</script>

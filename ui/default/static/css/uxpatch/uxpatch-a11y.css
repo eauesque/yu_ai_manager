@@ -1,0 +1,220 @@
+/* Focus and tap target hardening */
+input[type="text"]:focus,
+input[type="number"]:focus,
+input[type="date"]:focus,
+select:focus,
+textarea:focus {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.35);
+}
+
+/* Universal :focus-visible — all interactive elements */
+:focus-visible {
+  outline: 2px solid rgba(59, 130, 246, 0.65);
+  outline-offset: 2px;
+}
+/* Suppress outline for mouse clicks on buttons */
+button:focus:not(:focus-visible),
+a:focus:not(:focus-visible),
+summary:focus:not(:focus-visible) {
+  outline: none;
+}
+
+#toggleHeaderInfo,
+button[onclick="toggleRegexCheatDock()"],
+button.clear-btn {
+  min-width: 36px;
+  min-height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button[onclick="toggleRegexCheatDock()"] {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 999px !important;
+  font-size: 14px !important;
+}
+
+button.clear-btn {
+  padding: 0 !important;
+  border-radius: 8px;
+}
+
+#activeConditions {
+  max-height: 140px;
+  overflow: auto;
+  padding-right: 6px;
+}
+
+#conditionMenu {
+  background: var(--card) !important;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+/* Checkbox / range minimum size (WCAG 2.2 AA) */
+input[type="checkbox"],
+input[type="range"] {
+  min-height: 16px;
+  min-width: 16px;
+}
+
+/* ── Touch target hardening (WCAG 2.2 AA: min 24x24, recommended 44x44) ── */
+
+/* Close buttons (x) that may be too small */
+button[aria-label="Close"],
+.wm-btn-sm[aria-label="Close"],
+.copy-btn:last-child {
+  min-width: 28px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Prompt Library sidebar add buttons (+) */
+.pl-sidebar-add {
+  min-width: 28px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Small number inputs in tool panels */
+input[type="number"].hg-num-input,
+input[type="number"].hg-lang-input,
+.ss-slider,
+.yd-slider,
+.hg-slider {
+  min-height: 28px;
+}
+
+/* ── Search page: touch target hardening ── */
+
+/* Small utility buttons that need minimum dimensions */
+#csCollapseBtn,
+#searchUtilOverflowBtn,
+#exportCsvBtn {
+  min-width: 28px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Union checkbox in collections sidebar */
+.cs-union-check {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* Inline utility buttons: random, trash, clipboard, preset, shortcut */
+.search-util-btn {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Collection sidebar action buttons (edit/export/delete) */
+.cs-action-btn {
+  min-width: 24px;
+  min-height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Selection mode button */
+#favSelectModeBtn {
+  min-height: 28px;
+}
+
+/* ── Search page: color contrast fixes (WCAG AA 4.5:1) ── */
+
+/* #addConditionBtn: bump text from #667eea to #839af7 for dark bg,
+   or use a solid readable color on the translucent background */
+#addConditionBtn {
+  color: #a3b3ff !important;
+  border-color: rgba(163, 179, 255, 0.5) !important;
+}
+
+/* #conditionMenuHint and .condition-field > span label: #888 is too low contrast */
+#conditionMenuHint,
+#conditionMenuHint span,
+.condition-field > span {
+  color: var(--muted-accessible, #aab) !important;
+}
+
+/* Light mode overrides */
+@media (prefers-color-scheme: light) {
+  #addConditionBtn {
+    color: #4a5bc7 !important;
+    border-color: rgba(74, 91, 199, 0.5) !important;
+  }
+  #conditionMenuHint,
+  #conditionMenuHint span,
+  .condition-field > span {
+    color: #555 !important;
+  }
+}
+[data-theme="light"] #addConditionBtn {
+  color: #4a5bc7 !important;
+  border-color: rgba(74, 91, 199, 0.5) !important;
+}
+[data-theme="light"] #conditionMenuHint,
+[data-theme="light"] #conditionMenuHint span,
+[data-theme="light"] .condition-field > span {
+  color: #555 !important;
+}
+
+/* ── Safari (WebKit) form element height fix ── */
+/* WebKit renders <select> at 21px, below WCAG 2.2 AA 24px minimum */
+select {
+  min-height: 28px;
+  -webkit-appearance: none; appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 0l6 6 6-6z' fill='%23888'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 8px center;
+  padding-right: 28px !important;
+}
+input[type="range"] {
+  min-height: 28px;
+}
+/* Checkbox minimum 24x24 (WCAG 2.2 AA touch target) */
+input[type="checkbox"] {
+  min-width: 24px;
+  min-height: 24px;
+}
+
+/* ── Generation button contrast fix (white text on accent bg, 5.28:1) ── */
+#nabGenBtn,
+#sdwbGenBtn,
+#cfbGenBtn {
+  background: var(--accent-btn, #4060e0) !important;
+  color: #fff !important;
+  border-color: var(--accent-btn, #4060e0) !important;
+}
+
+/* ── Color contrast fixes for inline #888 text (WCAG AA 4.5:1) ── */
+#aiStats,
+#aiBatchLimitNote,
+#aiEngineSaveStatus,
+#aiKeyStatus,
+#openaiKeyStatus,
+#openaiCompatConnStatus,
+#openaiCompatKeyStatus,
+#ollamaConnStatus,
+#wtModelStatus {
+  color: var(--muted, #aab2c0) !important;
+}
+
+/* Respect system motion preference globally */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "name": "builtin-mcp-client",
+  "version": "1.0.0",
+  "description": "MCP Client -- connect to external MCP servers",
+  "type": "general",
+  "category": "system",
+  "entry": "mcp_client_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/mcp-client",
+  "nav": {
+    "label": "MCP Client",
+    "icon": "\ud83d\udd0c"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 350
+  },
+  "config_schema": {}
+}

@@ -1,0 +1,166 @@
+    <!-- AI analysis -->
+    <details class="tool-item" id="tool-ai-analysis">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.ai_analysis">🤖 AI Analysis</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.ai_analysis_desc">Auto-tagging, quality assessment, style classification, and prompt trend analysis.</p>
+
+      <!-- AI Server Registry -->
+      <details id="aiServersSection">
+        <summary data-i18n="tools.ai_servers">AI Servers</summary>
+        <div id="aiServersContainer">
+          <p>Loading...</p>
+        </div>
+      </details>
+
+      <!-- Legacy single-engine config (shown when no servers registered) -->
+      <div id="aiLegacyConfig">
+      <div>
+        <label class="tool-label" for="aiEngine" data-i18n="tools.ai_engine">Analysis Engine:</label>
+        <select class="tool-select" id="aiEngine" data-action="toolsPageApi.onAiEngineChange" data-action-event="change">
+          <option value="claude_api" data-i18n="tools.engine_claude">Claude Vision API (External API)</option>
+          <option value="openai" data-i18n="tools.engine_openai">OpenAI Vision API (GPT-4o)</option>
+          <option value="openai_compat" data-i18n="tools.engine_openai_compat">OpenAI-Compatible API (Local/Custom)</option>
+          <option value="ollama" data-i18n="tools.engine_ollama">Ollama (Local Vision)</option>
+          <option value="hailo_vlm" data-i18n="tools.engine_hailo_vlm">Hailo VLM (On-device)</option>
+        </select>
+        <div id="aiEngineSaveStatus"></div>
+      </div>
+
+      <div id="aiApiKeySection">
+        <label class="tool-label" for="aiApiKey" data-i18n="tools.api_key_label">Anthropic API Key:</label>
+        <div>
+          <form autocomplete="off" data-no-submit="1"><input class="tool-input" type="password" id="aiApiKey" placeholder="sk-ant-..."></form>
+        </div>
+        <div id="aiKeyStatus"></div>
+        <label class="tool-label" for="claudeModel" data-i18n="tools.claude_model_label">Model:</label>
+        <select class="tool-select" id="claudeModel">
+          <option value="claude-sonnet-4-6" data-i18n="tools.model_claude_sonnet_4_6">Claude Sonnet 4.6 ($3/$15)</option>
+          <option value="claude-opus-4-6" data-i18n="tools.model_claude_opus_4_6">Claude Opus 4.6 ($5/$25)</option>
+          <option value="claude-haiku-4-5" data-i18n="tools.model_claude_haiku_4_5">Claude Haiku 4.5 ($1/$5)</option>
+          <option value="claude-sonnet-4-5" data-i18n="tools.model_claude_sonnet_4_5">Claude Sonnet 4.5 ($3/$15)</option>
+        </select>
+      </div>
+
+      <div id="aiOpenaiSection">
+        <label class="tool-label" for="openaiApiKey" data-i18n="tools.openai_api_key_label">OpenAI API Key:</label>
+        <div>
+          <form autocomplete="off" data-no-submit="1"><input class="tool-input" type="password" id="openaiApiKey" placeholder="sk-..."></form>
+        </div>
+        <div id="openaiKeyStatus"></div>
+        <label class="tool-label" for="openaiModel" data-i18n="tools.openai_model_label">Model:</label>
+        <select class="tool-select" id="openaiModel">
+          <option value="gpt-4o-mini">gpt-4o-mini</option>
+          <option value="gpt-4o">gpt-4o</option>
+          <option value="gpt-4-turbo">gpt-4-turbo</option>
+        </select>
+      </div>
+
+      <div id="aiOpenaiCompatSection">
+        <p data-i18n="tools.openai_compat_desc">Connect to OpenAI-compatible servers such as LM Studio, vLLM, LocalAI, text-generation-webui, Jan.ai, etc.</p>
+        <p id="openaiCompatHailoWarn" data-i18n="tools.openai_compat_hailo_warn">⚠ When using hailo-ollama-vlm, the Hailo device is exclusively held by the external server. CLIP semantic search and other Hailo features cannot be used simultaneously.</p>
+        <label class="tool-label" for="openaiCompatUrl" data-i18n="tools.openai_compat_url_label">Server URL:</label>
+        <div>
+          <input class="tool-input" type="text" id="openaiCompatUrl" placeholder="http://localhost:1234">
+          <button class="btn btn-secondary btn-sm" data-action="toolsPageApi.testOpenaiCompatConnection" data-i18n="tools.openai_compat_test">Test Connection</button>
+        </div>
+        <div id="openaiCompatConnStatus"></div>
+        <label class="tool-label" for="openaiCompatApiKey" data-i18n="tools.openai_compat_api_key_label">API Key (optional):</label>
+        <div>
+          <form autocomplete="off" data-no-submit="1"><input class="tool-input" type="password" id="openaiCompatApiKey" placeholder="sk-..."></form>
+        </div>
+        <div id="openaiCompatKeyStatus"></div>
+        <label class="tool-label" for="openaiCompatModel" data-i18n="tools.openai_compat_model_label">Model:</label>
+        <div>
+          <select class="tool-select" id="openaiCompatModel">
+            <option value="">--</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" data-action="toolsPageApi.loadOpenaiCompatModels" data-i18n="tools.openai_compat_refresh_models">Refresh Models</button>
+        </div>
+      </div>
+
+      <div id="aiOllamaSection">
+        <label class="tool-label" for="ollamaUrl" data-i18n="tools.ollama_url_label">Ollama Server URL:</label>
+        <div>
+          <input class="tool-input" type="text" id="ollamaUrl" value="http://localhost:11434">
+          <button class="btn btn-secondary btn-sm" data-action="toolsPageApi.testOllamaConnection" data-i18n="tools.ollama_test">Test Connection</button>
+        </div>
+        <div id="ollamaConnStatus"></div>
+        <label class="tool-label" for="ollamaModel" data-i18n="tools.ollama_model_label">Vision Model:</label>
+        <div>
+          <select class="tool-select" id="ollamaModel">
+            <option value="llava:latest">llava:latest</option>
+          </select>
+          <button class="btn btn-secondary btn-sm" data-action="toolsPageApi.loadOllamaModels" data-i18n="tools.ollama_refresh_models">Refresh Models</button>
+        </div>
+      </div>
+
+      <div id="aiHailoSection">
+        <p data-i18n="tools.hailo_vlm_desc">On-device image analysis using Hailo-10H NPU. No API key or network required.</p>
+        <p data-i18n="tools.hailo_vlm_note">Note: 2B parameter model -- best for tagging and basic descriptions. For detailed analysis, use Claude or GPT-4o.</p>
+        <p data-i18n="tools.hailo_vlm_device_control">✅ Device managed by yu: VLM, CLIP search, and other Hailo features share the device automatically.</p>
+        <div id="hailoVlmStatus"></div>
+      </div>
+
+      <div>
+        <label class="tool-label">
+          <input class="tool-input" type="checkbox" id="aiFallbackLocalOnly" aria-label="Local engines only" data-action="toolsPageApi.onFallbackLocalOnlyChange" data-action-event="change">
+          <span data-i18n="tools.fallback_local_only">Local engines only (never fall back to cloud APIs)</span>
+        </label>
+        <p data-i18n="tools.fallback_local_only_desc">When enabled, only engines at loopback / private network addresses will be used. Claude API and OpenAI will be blocked.</p>
+      </div>
+
+      <div>
+        <label class="tool-label" for="aiAnalysisLanguage" data-i18n="tools.analysis_language">Response Language:</label>
+        <select class="tool-select" id="aiAnalysisLanguage">
+          <option value="ja">日本語 (Japanese)</option>
+          <option value="en">English</option>
+          <option value="zh">中文 (Chinese)</option>
+          <option value="ko">한국어 (Korean)</option>
+        </select>
+        <p data-i18n="tools.analysis_language_desc">Language for AI analysis descriptions, quality notes, and suggestions.</p>
+      </div>
+
+      <div>
+        <button class="btn btn-secondary" data-action="toolsPageApi.saveAiConfig"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-save"/></svg> <span data-i18n="tools.save">Save</span></button>
+      </div>
+      </div><!-- /aiLegacyConfig -->
+
+      <div id="aiStats"></div>
+
+      <div>
+        <label class="tool-label" for="aiBatchRoot" data-i18n="tools.batch_folder_filter">Analyze folder:</label>
+        <select class="tool-select" id="aiBatchRoot">
+          <option value="" data-i18n="tools.all_folders">All folders</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="tool-label" for="aiBatchLimit" data-i18n="tools.ai_batch_limit">Limit:</label>
+        <select class="tool-select" id="aiBatchLimit">
+          <option value="0" data-i18n="tools.ai_limit_all">All unanalyzed</option>
+          <option value="10" selected>10</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+        </select>
+        <span id="aiBatchLimitNote"></span>
+      </div>
+
+      <div id="aiBatchServers"></div>
+
+      <div class="tool-actions">
+        <button id="aiBatchBtn" class="btn btn-primary" data-action="toolsPageApi.analyzeCurrentBatch">
+          <span aria-hidden="true">🧠</span> <span data-i18n="tools.batch_analyze">Batch Analysis (10 unanalyzed)</span>
+        </button>
+        <button class="btn btn-secondary" data-action="toolsPageApi.analyzePromptTrends">
+          <span aria-hidden="true">📊</span> <span data-i18n="tools.prompt_trends">Prompt Trend Analysis</span>
+        </button>
+      </div>
+
+      <div id="aiAnalysisResult" class="result-box"></div>
+      <div id="trendHistoryContainer"></div>
+      </div>
+</details>

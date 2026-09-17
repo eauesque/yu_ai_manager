@@ -1,0 +1,15 @@
+{
+  "name": "builtin-sns-share",
+  "version": "1.0.0",
+  "description": "SNS sharing (Bluesky, X/Twitter) with template expansion",
+  "type": "general",
+  "category": "system",
+  "entry": "sns_share_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "sns_share_core",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

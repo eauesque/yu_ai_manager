@@ -1,0 +1,10 @@
+{
+  "name": "sample-dashboard",
+  "version": "1.0.0",
+  "description": "Dashboard/admin panel UI — dark sidebar, stat cards, information-dense layout",
+  "author": "YU AI Manager Team",
+  "api_version": "1",
+  "type": "full",
+  "label": "サンプル: ダッシュボード",
+  "is_sample": true
+}

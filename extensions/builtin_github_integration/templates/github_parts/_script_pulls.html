@@ -1,0 +1,138 @@
+<script nonce="{{ csp_nonce }}">
+/* GitHub Integration — Pull Requests tab */
+
+async function ghubLoadPulls() {
+  if (!ghubCurrentLabel) { ghubShowToast(_t('select_first')); return; }
+  var list = ghubEl('ghubPRList');
+  list.innerHTML = '<div class="ghub-loading">' + _t('loading_pulls') + '</div>';
+
+  var repo = ghubEl('ghubPRRepo').value;
+  var state = ghubEl('ghubPRState').value;
+  var url = '/api/github/pulls/' + encodeURIComponent(ghubCurrentLabel) + '?state=' + state;
+  if (repo) url += '&repo=' + encodeURIComponent(repo);
+
+  try {
+    var data = await ghubFetch(url);
+    var result = data.data || data;
+    var pulls = result.pulls || [];
+    var errors = result.errors || [];
+
+    if (errors.length) ghubShowToast(_t('errors_prefix') + errors.join(', '));
+    if (!pulls.length) {
+      list.innerHTML = '<div class="ghub-empty">' + _t('no_pulls') + '</div>';
+      return;
+    }
+    list.innerHTML = pulls.map(ghubRenderPRCard).join('');
+  } catch (e) {
+    list.innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+
+function ghubRenderPRCard(pr) {
+  var merged = pr.merged || false;
+  var draft = pr.draft || false;
+  var html = '<div class="ghub-card" style="cursor:pointer" role="button" tabindex="0"' +
+    ' data-action="ghubShowPRDetail" data-action-arg="' + ghubEsc(pr.repo) + ',' + pr.number + '"' +
+    ' data-action-enter="__click__"' +
+    ' aria-label="PR #' + pr.number + ' ' + ghubEsc(pr.title) + '">';
+  html += '<div class="ghub-card-title">';
+  html += '<span class="' + ghubStateClass(pr.state, merged, draft) + '">';
+  html += ghubStateIcon(pr.state, merged, draft) + '</span>';
+  html += ' #' + pr.number + ' ' + ghubEsc(pr.title);
+  if (draft) html += ' <span class="ghub-label">' + _t('draft') + '</span>';
+  if (merged) html += ' <span class="ghub-label" style="background:#9333ea;color:#fff">' + _t('merged') + '</span>';
+  html += '</div>';
+  html += '<div class="ghub-card-meta">';
+  html += '<span>' + ghubEsc(pr.repo) + '</span>';
+  html += '<span>' + ghubEsc(pr.head_ref) + ' &#x2192; ' + ghubEsc(pr.base_ref) + '</span>';
+  html += '<span>' + _t('by') + ghubEsc(pr.user) + '</span>';
+  if (pr.comments_count > 0 || pr.review_comments > 0) {
+    html += '<span>&#x1F4AC; ' + (pr.comments_count + (pr.review_comments || 0)) + '</span>';
+  }
+  html += '<span>' + ghubTimeAgo(pr.created_at) + '</span>';
+  html += ' ' + ghubLabelsHtml(pr.labels);
+  html += '</div>';
+
+  // Diff stats (available in detail view, show if present)
+  if (pr.additions || pr.deletions) {
+    html += '<div class="ghub-card-meta" style="margin-top:4px">';
+    html += '<span class="ghub-diff-add">+' + pr.additions + '</span>';
+    html += '<span class="ghub-diff-del">-' + pr.deletions + '</span>';
+    if (pr.changed_files) html += '<span>' + pr.changed_files + _t('files') + '</span>';
+    html += '</div>';
+  }
+
+  if (pr.body) {
+    html += '<div class="ghub-card-body">' + ghubEsc(pr.body.substring(0, 200)) + '</div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+async function ghubShowPRDetail(repo, number) {
+  ghubShowDetail('<div class="ghub-loading">' + _t('loading_pr_detail') + '</div>');
+  try {
+    var data = await ghubFetch('/api/github/pull/' + encodeURIComponent(ghubCurrentLabel) +
+      '/' + encodeURIComponent(repo) + '/' + number);
+    var result = data.data || data;
+    var pr = result.pull;
+    var files = result.files || [];
+
+    var merged = pr.merged || false;
+    var draft = pr.draft || false;
+
+    var html = '<h2 style="margin:0 0 8px">';
+    html += '<span class="' + ghubStateClass(pr.state, merged, draft) + '">';
+    html += ghubStateIcon(pr.state, merged, draft) + '</span> ';
+    html += '#' + pr.number + ' ' + ghubEsc(pr.title);
+    html += '</h2>';
+
+    html += '<div class="ghub-card-meta" style="margin-bottom:12px">';
+    html += '<span>' + ghubEsc(pr.head_ref) + ' &#x2192; ' + ghubEsc(pr.base_ref) + '</span>';
+    html += '<span>' + _t('by') + ghubEsc(pr.user) + '</span>';
+    html += '<span>' + ghubTimeAgo(pr.created_at) + '</span>';
+    html += ' ' + ghubLabelsHtml(pr.labels);
+    html += '<a href="' + ghubEsc(pr.html_url) + '" target="_blank" rel="noopener" class="ghub-btn ghub-btn-secondary ghub-btn-small">' + _t('open_github') + '</a>';
+    html += '</div>';
+
+    // Diff summary
+    html += '<div class="ghub-card" style="margin-bottom:16px">';
+    html += '<div class="ghub-card-meta">';
+    html += '<span class="ghub-diff-add">+' + (pr.additions || 0) + _t('additions') + '</span>';
+    html += '<span class="ghub-diff-del">-' + (pr.deletions || 0) + _t('deletions') + '</span>';
+    html += '<span>' + (pr.changed_files || files.length) + _t('files_changed') + '</span>';
+    html += '</div></div>';
+
+    // Description
+    if (pr.body) {
+      html += '<div class="ghub-section-header">' + _t('description') + '</div>';
+      html += '<div style="white-space:pre-wrap;font-size:0.9rem;line-height:1.6;color:var(--text)">';
+      html += ghubEsc(pr.body);
+      html += '</div>';
+    }
+
+    // Changed files
+    if (files.length) {
+      html += '<div class="ghub-section-header">' + _t('changed_files') + ' (' + files.length + ')</div>';
+      html += '<div class="ghub-file-list">';
+      files.forEach(function(f) {
+        var statusIcon = f.status === 'added' ? '&#x1F7E2;' :
+                         f.status === 'removed' ? '&#x1F534;' :
+                         f.status === 'renamed' ? '&#x1F7E1;' : '&#x1F535;';
+        html += '<div class="ghub-file-item">';
+        html += '<span>' + statusIcon + ' ' + ghubEsc(f.filename) + '</span>';
+        html += '<span>';
+        html += '<span class="ghub-diff-add">+' + f.additions + '</span> ';
+        html += '<span class="ghub-diff-del">-' + f.deletions + '</span>';
+        html += '</span>';
+        html += '</div>';
+      });
+      html += '</div>';
+    }
+
+    ghubEl('ghubDetailContent').innerHTML = html;
+  } catch (e) {
+    ghubEl('ghubDetailContent').innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+</script>

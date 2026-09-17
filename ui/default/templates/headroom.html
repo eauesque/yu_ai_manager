@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YU AI Manager - Headroom</title>
+  <link rel="stylesheet" href="/static/css/main.css?v=20260213">
+  <link rel="stylesheet" href="/static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260225">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tokens.css?v=20260507">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-components.css?v=20260507">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-index.css?v=20260507">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tool-tokens.css?v=20260507">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tool-components.css?v=20260507">
+  <script nonce="{{ csp_nonce }}" src="/static/vendor/chart.umd.min.js"></script>
+</head>
+<body class="atelier-tool" data-1p-ignore data-lpignore="true">
+  {% include "_nav.html" %}
+
+  <main id="main-content" class="headroom-page" style="padding: 70px 24px 24px; max-width: 1200px; margin: 0 auto;">
+    <header style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
+      <h1 style="margin:0; font-size:1.5rem;">🗜️ Headroom</h1>
+      <span id="hrStatusBadge" class="headroom-badge headroom-badge--unknown">確認中...</span>
+      <span style="margin-left:auto; font-size:0.8rem; color:var(--muted,#888);">5秒毎に更新</span>
+    </header>
+
+    <!-- Health row -->
+    <section class="headroom-cards-row" style="margin-bottom:24px;">
+      <div class="headroom-card">
+        <div class="headroom-card-label">バージョン</div>
+        <div class="headroom-card-value" id="hrVersion">—</div>
+      </div>
+      <div class="headroom-card">
+        <div class="headroom-card-label">稼働時間</div>
+        <div class="headroom-card-value" id="hrUptime">—</div>
+      </div>
+      <div class="headroom-card">
+        <div class="headroom-card-label">バックエンド</div>
+        <div class="headroom-card-value" id="hrBackend">—</div>
+      </div>
+      <div class="headroom-card">
+        <div class="headroom-card-label">HTTP クライアント</div>
+        <div class="headroom-card-value" id="hrHttpClient">—</div>
+      </div>
+      <div class="headroom-card">
+        <div class="headroom-card-label">キャッシュ</div>
+        <div class="headroom-card-value" id="hrCache">—</div>
+      </div>
+    </section>
+
+    <!-- Cost savings breakdown -->
+    <section style="margin-bottom:24px;">
+      <h2 class="hr-section-title">コスト節約内訳</h2>
+      <div class="headroom-cards-row">
+        <div class="headroom-card headroom-card--accent">
+          <div class="headroom-card-label">合計節約</div>
+          <div class="headroom-card-value headroom-big" id="hrCostTotalSaved">—</div>
+        </div>
+        <div class="headroom-card headroom-card--accent">
+          <div class="headroom-card-label">プレフィックスキャッシュ</div>
+          <div class="headroom-card-value headroom-big" id="hrCostCache">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">圧縮節約</div>
+          <div class="headroom-card-value" id="hrCostCompression">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">入力コスト（総計）</div>
+          <div class="headroom-card-value" id="hrCostInput">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Subscription window -->
+    <section id="hrSubWindowSection" style="margin-bottom:24px; display:none;">
+      <h2 class="hr-section-title">Anthropic サブスクリプションウィンドウ</h2>
+      <div class="headroom-cards-row">
+        <div class="headroom-card">
+          <div class="headroom-card-label">5時間ウィンドウ</div>
+          <div class="headroom-card-value headroom-big" id="hrSub5h">—</div>
+          <div class="headroom-sub-reset" id="hrSub5hReset"></div>
+          <div class="hr-progress-wrap"><div class="hr-progress-bar" id="hrSub5hBar"></div></div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">7日ウィンドウ</div>
+          <div class="headroom-card-value headroom-big" id="hrSub7d">—</div>
+          <div class="headroom-sub-reset" id="hrSub7dReset"></div>
+          <div class="hr-progress-wrap"><div class="hr-progress-bar" id="hrSub7dBar"></div></div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">7日 Sonnet</div>
+          <div class="headroom-card-value headroom-big" id="hrSubSonnet">—</div>
+          <div class="headroom-sub-reset" id="hrSubSonnetReset"></div>
+          <div class="hr-progress-wrap"><div class="hr-progress-bar" id="hrSubSonnetBar"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Provider quotas (OpenAI/Codex and other headroom quota providers) -->
+    <section id="hrProviderQuotaSection" style="margin-bottom:24px; display:none;">
+      <h2 class="hr-section-title">プロバイダー利用量</h2>
+      <div class="headroom-table-wrap">
+        <table class="headroom-table">
+          <thead><tr><th>プロバイダー</th><th>枠</th><th class="hr-num">使用量</th><th class="hr-num">残量</th><th class="hr-num">利用率</th><th>リセット</th><th>状態</th></tr></thead>
+          <tbody id="hrProviderQuotaTbody"><tr><td colspan="7" style="color:var(--muted,#888);">データ取得中...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Prefix cache -->
+    <section style="margin-bottom:24px;">
+      <h2 class="hr-section-title">プレフィックスキャッシュ</h2>
+      <div class="headroom-cards-row">
+        <div class="headroom-card headroom-card--accent">
+          <div class="headroom-card-label">ヒット率</div>
+          <div class="headroom-card-value headroom-big" id="hrCacheHitRate">—</div>
+        </div>
+        <div class="headroom-card headroom-card--accent">
+          <div class="headroom-card-label">純節約額</div>
+          <div class="headroom-card-value headroom-big" id="hrCacheNetSaved">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">キャッシュ読込</div>
+          <div class="headroom-card-value" id="hrCacheReads">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">キャッシュ書込</div>
+          <div class="headroom-card-value" id="hrCacheWrites">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">キャッシュバスト</div>
+          <div class="headroom-card-value" id="hrCacheBusts">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">TTL 1h / 5m</div>
+          <div class="headroom-card-value" id="hrCacheTtl">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Token savings -->
+    <section style="margin-bottom:24px;">
+      <h2 class="hr-section-title">トークン節約</h2>
+      <div class="headroom-cards-row">
+        <div class="headroom-card headroom-card--accent">
+          <div class="headroom-card-label">節約トークン数</div>
+          <div class="headroom-card-value headroom-big" id="hrTokensSaved">—</div>
+        </div>
+        <div class="headroom-card headroom-card--accent">
+          <div class="headroom-card-label">節約率（アクティブ）</div>
+          <div class="headroom-card-value headroom-big" id="hrSavingsPct">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">圧縮前トークン</div>
+          <div class="headroom-card-value" id="hrTokBefore">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">RTK フィルタ済</div>
+          <div class="headroom-card-value" id="hrTokRtk">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">プロキシ圧縮済</div>
+          <div class="headroom-card-value" id="hrTokProxy">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">入力トークン（送信）</div>
+          <div class="headroom-card-value" id="hrTokensIn">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">出力トークン</div>
+          <div class="headroom-card-value" id="hrTokensOut">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Request stats -->
+    <section style="margin-bottom:24px;">
+      <h2 class="hr-section-title">リクエスト</h2>
+      <div class="headroom-cards-row">
+        <div class="headroom-card">
+          <div class="headroom-card-label">合計</div>
+          <div class="headroom-card-value headroom-big" id="hrReqTotal">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">キャッシュヒット</div>
+          <div class="headroom-card-value" id="hrReqCached">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">レート制限</div>
+          <div class="headroom-card-value" id="hrReqRateLimited">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">失敗</div>
+          <div class="headroom-card-value" id="hrReqFailed">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">平均レイテンシ</div>
+          <div class="headroom-card-value" id="hrLatencyAvg">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">レイテンシ範囲</div>
+          <div class="headroom-card-value" id="hrLatencyRange">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Performance detail -->
+    <section style="margin-bottom:24px;">
+      <h2 class="hr-section-title">パフォーマンス詳細</h2>
+      <div class="headroom-cards-row" style="margin-bottom:12px;">
+        <div class="headroom-card">
+          <div class="headroom-card-label">Headroom オーバーヘッド</div>
+          <div class="headroom-card-value" id="hrOhAvg">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">オーバーヘッド範囲</div>
+          <div class="headroom-card-value" id="hrOhRange">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">TTFB 平均</div>
+          <div class="headroom-card-value" id="hrTtfbAvg">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">TTFB 範囲</div>
+          <div class="headroom-card-value" id="hrTtfbRange">—</div>
+        </div>
+      </div>
+      <div class="headroom-table-wrap">
+        <table class="headroom-table">
+          <thead><tr><th>パイプラインステップ</th><th class="hr-num">平均</th><th class="hr-num">最大</th><th class="hr-num">件数</th></tr></thead>
+          <tbody id="hrPipelineTbody"><tr><td colspan="4" style="color:var(--muted,#888);">データ取得中...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Per-model breakdown -->
+    <section style="margin-bottom:24px;">
+      <h2 class="hr-section-title">モデル別統計</h2>
+      <div class="headroom-table-wrap">
+        <table class="headroom-table">
+          <thead><tr><th>モデル</th><th class="hr-num">リクエスト</th><th class="hr-num">節約トークン</th><th class="hr-num">送信トークン</th><th class="hr-num">削減率</th></tr></thead>
+          <tbody id="hrModelTbody"><tr><td colspan="5" style="color:var(--muted,#888);">データ取得中...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Recent requests -->
+    <section style="margin-bottom:24px;">
+      <h2 class="hr-section-title">最近のリクエスト <span style="font-size:0.75rem; font-weight:400; color:var(--muted,#888);">（直近10件）</span></h2>
+      <div class="headroom-table-wrap">
+        <table class="headroom-table">
+          <thead><tr><th>時刻</th><th>モデル</th><th class="hr-num">入力</th><th class="hr-num">出力</th><th class="hr-num">節約率</th><th class="hr-num">レイテンシ</th><th>キャッシュ</th></tr></thead>
+          <tbody id="hrRecentTbody"><tr><td colspan="7" style="color:var(--muted,#888);">データ取得中...</td></tr></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Compression executor -->
+    <section style="margin-bottom:24px;">
+      <h2 class="hr-section-title">圧縮エグゼキュータ</h2>
+      <div class="headroom-cards-row">
+        <div class="headroom-card">
+          <div class="headroom-card-label">最大ワーカー数</div>
+          <div class="headroom-card-value" id="hrExecWorkers">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">キュー中</div>
+          <div class="headroom-card-value" id="hrExecQueued">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">実行中</div>
+          <div class="headroom-card-value" id="hrExecRunning">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">最大同時実行</div>
+          <div class="headroom-card-value" id="hrExecInFlightMax">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">リーク済スレッド</div>
+          <div class="headroom-card-value" id="hrExecLeaked">—</div>
+        </div>
+      </div>
+    </section>
+
+
+    <!-- Readyz runtime detail cards -->
+    <section id="hrReadyz" style="margin-bottom:24px; display:none;">
+      <h2 class="hr-section-title">ランタイム詳細</h2>
+      <div class="headroom-cards-row">
+        <div class="headroom-card">
+          <div class="headroom-card-label">バージョン（readyz）</div>
+          <div class="headroom-card-value" id="hrRzVersion">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">圧縮タイムアウト</div>
+          <div class="headroom-card-value" id="hrRzTimeout">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">最大本文サイズ</div>
+          <div class="headroom-card-value" id="hrRzMaxBody">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">上流 URL</div>
+          <div class="headroom-card-value" id="hrRzUpstream">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">対応コンテンツ型数</div>
+          <div class="headroom-card-value" id="hrRzContentTypes">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Lifetime cumulative big cards -->
+    <section id="hrLifetime" style="margin-bottom:24px;">
+      <h2 class="hr-section-title">ライフタイム累積</h2>
+      <div class="headroom-cards-row">
+        <div class="headroom-card headroom-card--accent">
+          <div class="headroom-card-label">総節約トークン</div>
+          <div class="headroom-card-value headroom-big" id="hrLtTokensSaved">—</div>
+        </div>
+        <div class="headroom-card headroom-card--accent">
+          <div class="headroom-card-label">節約率</div>
+          <div class="headroom-card-value headroom-big" id="hrLtSavingsPct">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">圧縮節約 USD</div>
+          <div class="headroom-card-value" id="hrLtCompressionUsd">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">総節約 USD</div>
+          <div class="headroom-card-value" id="hrLtTotalUsd">—</div>
+        </div>
+        <div class="headroom-card">
+          <div class="headroom-card-label">総リクエスト数</div>
+          <div class="headroom-card-value" id="hrLtRequests">—</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Stats history charts with daily/hourly toggle -->
+    <section id="hrHistory" style="margin-bottom:24px;">
+      <div style="display:flex; align-items:center; gap:12px; margin-bottom:12px;">
+        <h2 class="hr-section-title" style="margin:0;">節約履歴</h2>
+        <div>
+          <button id="hrHistoryDaily" class="hr-toggle-btn hr-toggle-btn--active">日次</button>
+          <button id="hrHistoryHourly" class="hr-toggle-btn">時間次</button>
+        </div>
+        <span id="hrHistoryError" style="font-size:0.8rem; color:var(--error-text,#c53030); display:none;"></span>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+        <div>
+          <div style="font-size:0.8rem; color:var(--text-muted,#888); margin-bottom:4px;">節約トークン</div>
+          <div style="position:relative; height:200px;">
+            <canvas id="hrTokenChart"></canvas>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:0.8rem; color:var(--text-muted,#888); margin-bottom:4px;">コスト節約 USD</div>
+          <div style="position:relative; height:200px;">
+            <canvas id="hrCostChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div id="hrError" style="display:none; padding:12px 16px; border-radius:8px; background:var(--error-bg,#fef2f2); color:var(--error-text,#c53030); font-size:0.875rem;"></div>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/js/headroom-page.js?v=20260626"></script>
+  <style>
+    .hr-toggle-btn { background:transparent; border:1px solid var(--border,#e2e8f0); color:var(--text-muted,#888); padding:4px 12px; border-radius:20px; cursor:pointer; font-size:0.8rem; margin-right:4px; }
+    .hr-toggle-btn--active { background:var(--accent,#6b46c1); border-color:var(--accent,#6b46c1); color:#fff; }
+    .hr-section-title { font-size:1rem; font-weight:600; margin:0 0 12px; }
+    .headroom-badge { display:inline-block; padding:2px 10px; border-radius:12px; font-size:0.8rem; font-weight:600; }
+    .headroom-badge--unknown { background:var(--muted-bg,#e2e8f0); color:var(--muted,#666); }
+    .headroom-badge--healthy { background:#c6f6d5; color:#22543d; }
+    .headroom-badge--unhealthy { background:#fed7d7; color:#c53030; }
+    .headroom-badge--offline { background:#fed7d7; color:#c53030; }
+    .headroom-cards-row { display:flex; flex-wrap:wrap; gap:12px; }
+    .headroom-card { background:var(--card-bg,var(--card,var(--bg-secondary,#f7fafc))); border:1px solid var(--border,#e2e8f0); border-radius:10px; padding:14px 18px; min-width:130px; flex:1; color:var(--text,inherit); }
+    .headroom-card--accent { border-color:var(--accent,#6b46c1); }
+    .headroom-card-label { font-size:0.75rem; color:var(--text-muted,var(--muted,#888)); margin-bottom:6px; }
+    .headroom-card-value { font-size:1rem; font-weight:600; color:var(--text,inherit); }
+    .headroom-big { font-size:1.4rem; }
+    .headroom-sub-reset { font-size:0.75rem; color:var(--muted,#888); margin-top:4px; }
+    .hr-progress-wrap { margin-top:8px; height:6px; background:var(--border,#e2e8f0); border-radius:3px; overflow:hidden; }
+    .hr-progress-bar { height:100%; border-radius:3px; background:var(--accent,#6b46c1); transition:width 0.3s; }
+    .headroom-table-wrap { overflow-x:auto; border:1px solid var(--border,#e2e8f0); border-radius:8px; }
+    .headroom-table { width:100%; border-collapse:collapse; font-size:0.875rem; }
+    .headroom-table thead tr { background:var(--bg-secondary,var(--card-bg,#f7fafc)); }
+    .headroom-table th { padding:8px 12px; text-align:left; border-bottom:2px solid var(--border,#e2e8f0); font-weight:600; color:var(--text-muted,var(--muted,#666)); font-size:0.75rem; text-transform:uppercase; white-space:nowrap; }
+    .headroom-table td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--border,#e2e8f0); }
+    .headroom-table tbody tr:last-child td { border-bottom:none; }
+    .headroom-table th + th, .headroom-table td + td { border-left:1px solid var(--border,#e2e8f0); }
+    .headroom-table tbody tr:hover td { background:var(--hover-bg,rgba(0,0,0,0.025)); }
+    .headroom-table td.hr-num { text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+    .headroom-table th.hr-num { text-align:right; }
+    .hr-cache-hit { color:#22543d; }
+    .hr-cache-miss { color:var(--muted,#888); }
+    @media (prefers-color-scheme: dark) {
+      .headroom-card { background:var(--card-bg,#2d3748); border-color:var(--border,#4a5568); }
+      .headroom-badge--healthy { background:#276749; color:#c6f6d5; }
+      .headroom-badge--unhealthy,.headroom-badge--offline { background:#742a2a; color:#fed7d7; }
+      .headroom-table-wrap { border-color:var(--border,#4a5568); }
+      .headroom-table thead tr { background:var(--card-bg,#2d3748); }
+      .headroom-table th { border-bottom-color:var(--border,#4a5568); }
+      .headroom-table td { border-bottom-color:var(--border,#4a5568); }
+      .headroom-table th + th, .headroom-table td + td { border-left-color:var(--border,#4a5568); }
+      .headroom-table tbody tr:hover td { background:rgba(255,255,255,0.04); }
+      .hr-cache-hit { color:#9ae6b4; }
+    }
+  </style>
+</body>
+</html>

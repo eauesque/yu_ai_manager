@@ -1,0 +1,328 @@
+/*
+ * .modal-toolbar — 詳細モーダル下部統合ツールバー (v4.126.0+)
+ * spec: docs/superpowers/specs/2026-05-04-modal-toolbar-floating-bar-merge-design.md
+ */
+
+.modal-toolbar {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  padding: 5px 10px;
+  background: rgba(15, 15, 18, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  max-width: calc(100vw - 32px);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45), 0 1px 0 rgba(255, 255, 255, 0.04) inset;
+  /* z-index: close=12, modal-toolbar=16, info-panel=20 */
+  z-index: 16;
+  transition: opacity 0.2s ease, transform 0.2s ease, bottom 0.25s ease;
+}
+
+/* When filmstrip is visible, push toolbar above it to avoid overlap.
+   Filmstrip is bottom:0 and ~68px tall (56px thumb + 6+6 padding + border). */
+.modal-image-container:has(.modal-filmstrip.filmstrip-visible) .modal-toolbar {
+  bottom: 80px;
+}
+
+/* Edge handle follows the same rule when filmstrip is visible */
+.modal-image-container:has(.modal-filmstrip.filmstrip-visible) .modal-toolbar-handle {
+  bottom: 68px;
+}
+
+.modal-toolbar.toolbar-collapsed,
+.modal-image-container.toolbar-collapsed .modal-toolbar {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 16px);
+}
+
+/* Cursor-idle auto-hide: fades out after the cursor has been idle for
+   a few seconds. Re-shown on any mousemove / toolbar interaction. The
+   bottom hover zone (handled in controls-hover.ts) keeps it pinned while
+   the cursor is near the toolbar so the user can actually click. */
+.modal-toolbar.toolbar-auto-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 8px);
+  transition: opacity 0.35s ease, transform 0.35s ease, bottom 0.25s ease;
+}
+
+/* セグメント (内 buttons はノードタッチで並び、divider 最小) */
+.modal-toolbar .tb-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.modal-toolbar .tb-divider {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.12);
+  margin: 0 6px;
+}
+
+/* ボタン共通: 円形ピル (icon-only 想定) */
+.modal-toolbar button {
+  background: transparent;
+  color: rgba(255, 255, 255, 0.78);
+  border: none;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  font-size: 14px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, color 0.15s, transform 0.1s;
+}
+
+.modal-toolbar button:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.modal-toolbar button:active {
+  transform: scale(0.92);
+}
+
+.modal-toolbar button:focus-visible {
+  outline: 2px solid #7cc4ff;
+  outline-offset: 1px;
+}
+
+.modal-toolbar button.toggled-off { opacity: 0.4; }
+.modal-toolbar button.toggled-on,
+.modal-toolbar button.tb-mode-active {
+  background: rgba(255, 255, 255, 0.22);
+  color: #fff;
+}
+.modal-toolbar button.muted { opacity: 0.45; text-decoration: line-through; }
+
+/* zoom-readout はテキスト (e.g. "100%") なので幅を広げる */
+.modal-toolbar button.zoom-readout {
+  width: auto;
+  min-width: 44px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  border-radius: 12px;
+}
+
+/* fit mode 5 ボタンは glyph アイコン — 一般 button と同じサイズで OK。
+   active 時の見た目を強調 */
+.modal-toolbar button.tb-mode-btn {
+  font-size: 13px;
+}
+.modal-toolbar button.tb-mode-btn.tb-mode-active {
+  background: rgba(124, 196, 255, 0.28);
+  color: #fff;
+  box-shadow: inset 0 0 0 1px rgba(124, 196, 255, 0.5);
+}
+
+/* fit-custom の数値入力 */
+.modal-toolbar input.tb-custom-h,
+.modal-toolbar input.fit-custom-height-input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border-radius: 12px;
+  padding: 0 6px;
+  height: 24px;
+  width: 56px;
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Bridge Send クラスタ: テキストは残すが小さく、ピル形状で nestle */
+.modal-toolbar .tb-bridge button {
+  width: auto;
+  padding: 0 10px;
+  height: 28px;
+  font-size: 11px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.88);
+  letter-spacing: 0.02em;
+}
+.modal-toolbar .tb-bridge button:hover {
+  background: rgba(124, 196, 255, 0.22);
+  color: #fff;
+}
+.modal-toolbar .tb-bridge .modal-bridge-wrap { display: inline-flex; }
+.modal-toolbar .tb-bridge .ctrl-div { display: none; }
+/* Bridge sub-menu (NAI/SD/ComfyUI) — ensure popup floats above and inherits dark theme.
+   Toolbar lives at the bottom of the modal, so the menu must drop UPWARD; the default
+   `top: calc(100% + 4px)` (modal-viewer-controls.css) would push the popup off-screen. */
+.modal-toolbar .tb-bridge .modal-bridge-menu {
+  top: auto;
+  bottom: calc(100% + 4px);
+  background: rgba(20, 20, 20, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 4px;
+  z-index: 18;
+}
+.modal-toolbar .tb-bridge .modal-bridge-menu button {
+  width: 100%;
+  border-radius: 4px;
+  text-align: left;
+  background: transparent;
+  padding: 6px 10px;
+  height: auto;
+}
+.modal-toolbar .tb-bridge .modal-bridge-menu button:hover {
+  background: rgba(124, 196, 255, 0.22);
+}
+
+/* spread ボタンのレイアウト固定 */
+.modal-toolbar .tb-spread-hidden { visibility: hidden; }
+
+/* 動画/音声モードの 2 段 grid */
+.modal-toolbar.is-media {
+  display: grid;
+  grid-template-rows: auto auto;
+  row-gap: 4px;
+}
+
+.modal-toolbar.is-media .tb-row-seek {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.modal-toolbar.is-media .tb-row-seek .modal-seek {
+  flex: 1 1 auto;
+  max-width: 720px;
+  min-width: 240px;
+}
+
+.modal-toolbar.is-media .tb-row-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  justify-content: center;
+}
+
+/* シーク・音量入力 */
+.modal-toolbar input[type="range"] { height: 16px; cursor: pointer; }
+.modal-toolbar input.modal-volume { width: 90px; }
+.modal-toolbar .modal-time {
+  font-variant-numeric: tabular-nums;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 12px;
+  padding: 0 4px;
+  white-space: nowrap;
+}
+
+/* エッジハンドル (toolbar-collapsed 時のみ表示) */
+.modal-toolbar-handle {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.25);
+  border-radius: 4px 4px 0 0;
+  cursor: pointer;
+  z-index: 16;
+  display: none;
+  border: none;
+  padding: 0;
+}
+
+.modal-toolbar-handle::before {
+  content: "";
+  position: absolute;
+  top: -16px;
+  left: -10px;
+  right: -10px;
+  bottom: 0;
+  /* 不可視ヒットエリア: WCAG 2.5.5 (24x80) */
+}
+
+.modal-toolbar-handle:hover {
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.modal-toolbar-handle:focus-visible {
+  outline: 2px solid #7cc4ff;
+  outline-offset: 2px;
+}
+
+.modal-image-container.toolbar-collapsed .modal-toolbar-handle {
+  display: block;
+}
+
+/* overflow メニューポップオーバー */
+.modal-toolbar-overflow {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  background: rgba(20, 20, 20, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  padding: 4px;
+  display: none;
+  flex-direction: column;
+  gap: 2px;
+  z-index: 17;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+}
+
+.modal-toolbar-overflow.is-open { display: flex; }
+
+.modal-toolbar-overflow [role="menuitem"] {
+  /* Override the 32x32 circular pill geometry inherited from
+     .modal-toolbar button — overflow items are full-width labelled rows. */
+  width: auto;
+  height: auto;
+  min-height: 32px;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.9);
+  border: none;
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.modal-toolbar-overflow [role="menuitem"]:hover,
+.modal-toolbar-overflow [role="menuitem"]:focus-visible {
+  background: rgba(255, 255, 255, 0.12);
+  outline: none;
+}
+
+/* イマーシブ自動非表示との合成 */
+.modal.immersive .modal-image-container.ui-hidden .modal-toolbar {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.5s ease;
+}
+
+/* Narrow viewport */
+@media (max-width: 640px) {
+  .modal-toolbar { padding: 4px 8px; gap: 3px; }
+  .modal-toolbar button { padding: 3px 6px; font-size: 11px; }
+  .modal-toolbar input.modal-volume { width: 60px; }
+  .modal-toolbar.is-media .tb-row-seek .modal-seek { min-width: 160px; }
+}

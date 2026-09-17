@@ -1,0 +1,246 @@
+{# _cat_appearance.html — cat-appearance panel: extensions + appearance + UI management #}
+<section id="cat-appearance" data-settings-panel="cat-appearance"
+         role="tabpanel" aria-labelledby="sidebar-item-cat-appearance"
+         aria-hidden="true" style="display:none">
+  <h2 class="settings-cat-heading">
+    <span data-i18n="settings.cat.appearance">外観</span>
+  </h2>
+
+  <!-- Extensions -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">🧩</span> <span data-i18n="settings.tab_extensions">Extensions</span></h2>
+    <!-- Sub-tab bar -->
+    <div style="display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:14px;">
+      <button type="button" class="ext-sub-tab" data-panel="ext-panel-installed" data-action="settingsPageApi.switchExtSubTab" data-action-arg="ext-panel-installed"
+              style="padding:8px 16px;border:none;border-bottom:2px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-size:13px;font-weight:600;"
+              data-i18n="settings.ext_tab_installed">Installed</button>
+      <button type="button" class="ext-sub-tab" data-panel="ext-panel-install" data-action="settingsPageApi.switchExtSubTab" data-action-arg="ext-panel-install"
+              style="padding:8px 16px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:600;"
+              data-i18n="settings.ext_tab_install">Install</button>
+      <button type="button" class="ext-sub-tab" data-panel="ext-panel-marketplace" data-action="settingsPageApi.switchExtSubTab" data-action-arg="ext-panel-marketplace"
+              style="padding:8px 16px;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;font-weight:600;"
+              data-i18n="settings.ext_tab_marketplace">Marketplace</button>
+    </div>
+    <!-- Installed sub-panel -->
+    <div id="ext-panel-installed" class="ext-sub-panel">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+        <button type="button" data-action="settingsPageApi.updateAllExtensions"
+                style="padding:5px 14px;border:1px solid #3498db;border-radius:6px;background:transparent;color:#3498db;cursor:pointer;font-size:12px;"
+                data-i18n="settings.ext_update_all">Update All</button>
+      </div>
+      <div id="ext-installed-list" style="font-size:13px;color:var(--muted);">Loading...</div>
+    </div>
+    <!-- Install sub-panel -->
+    <div id="ext-panel-install" class="ext-sub-panel" style="display:none;">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.ext_install_desc">Install an extension from a Git repository URL.</p>
+      <div style="display:flex;gap:8px;">
+        <input type="text" id="extInstallUrl" placeholder="https://github.com/user/my-extension.git" data-i18n-placeholder="settings.ext_install_placeholder" aria-label="Extension Git URL"
+               style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+        <button data-action="settingsPageApi.installExtension" class="btn-save" style="padding:8px 16px;" data-i18n="settings.ext_install_btn">Install</button>
+      </div>
+      <div id="extInstallStatus" style="display:none;margin-top:8px;font-size:12px;"></div>
+      <div style="margin-top:12px;padding:10px 14px;border-radius:8px;border:1px solid rgba(243,156,18,0.3);background:rgba(243,156,18,0.06);font-size:12px;color:var(--muted);">
+        <span style="color:#f39c12;font-weight:600;" data-i18n="settings.ext_security_warn_title">Security Notice:</span>
+        <span data-i18n="settings.ext_security_warn_body">Extensions can execute arbitrary code. Only install extensions from trusted sources.</span>
+      </div>
+    </div>
+    <!-- Marketplace sub-panel -->
+    <div id="ext-panel-marketplace" class="ext-sub-panel" style="display:none;">
+      <div style="display:flex;gap:8px;margin-bottom:10px;">
+        <input type="text" id="extMarketSearch" placeholder="Search extensions..." data-i18n-placeholder="settings.ext_marketplace_search_placeholder" aria-label="Search extensions"
+               data-action-enter="searchMarketplace"
+               style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+        <button data-action="settingsPageApi.searchMarketplace" style="padding:8px 14px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;"
+                data-i18n="common.search">Search</button>
+        <button data-action="settingsPageApi.refreshMarketplace" style="padding:8px 14px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:transparent;color:var(--text);cursor:pointer;font-size:12px;"
+                data-i18n="settings.ext_marketplace_refresh">Refresh</button>
+      </div>
+      <div id="ext-marketplace-list" style="font-size:13px;color:var(--muted);" data-i18n="settings.ext_marketplace_hint">Enter a search query or click Search to browse available extensions.</div>
+    </div>
+  </div>
+
+  <!-- Appearance -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">🎨</span> <span data-i18n="settings.appearance_title">Appearance</span></h2>
+    <div id="themeManagerSection" style="margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border);"></div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-accent-color">
+        <span data-i18n="settings.accent_color">Accent Color</span>
+        <small data-i18n="settings.accent_color_hint">Customize link and button highlight color</small>
+      </label>
+      <div class="setting-input" style="display:flex;align-items:center;gap:8px;">
+        <input type="color" id="cfg-accent-color" style="width:40px;height:32px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;padding:2px;cursor:pointer;background:var(--card);">
+        <button type="button" id="accentResetBtn" data-action="settingsPageApi.resetAccentColor" style="border:1px solid rgba(128,128,128,0.3);background:transparent;color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;" data-i18n="common.reset">Reset</button>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-dock-zoom">
+        <span data-i18n="settings.dock_zoom">Dock-style hover zoom</span>
+        <small data-i18n="settings.dock_zoom_hint">macOS Dock-like scale animation on thumbnail hover</small>
+      </label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-dock-zoom" data-action="settingsPageApi.toggleDockZoom" data-action-event="change" data-action-this="1" aria-label="Dock-style hover zoom"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-bg-image">
+        <span data-i18n="settings.bg_image">Background Image URL</span>
+        <small data-i18n="settings.bg_image_hint">http(s):// or data:image/ URL for page background</small>
+      </label>
+      <div class="setting-input" style="display:flex;align-items:center;gap:8px;">
+        <input type="text" id="cfg-bg-image" placeholder="https://example.com/bg.jpg" data-i18n-placeholder="settings.bg_image_placeholder"
+               style="flex:1;max-width:320px;padding:6px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;"
+               data-action="settingsPageApi.setBgImage" data-action-event="change" data-action-this="1">
+        <button type="button" data-action="settingsPageApi.clearBgImage" style="border:1px solid rgba(128,128,128,0.3);background:transparent;color:var(--muted);border-radius:6px;padding:4px 10px;cursor:pointer;font-size:12px;" data-i18n="common.clear">Clear</button>
+      </div>
+    </div>
+    <div class="setting-item" id="bg-image-opacity-row">
+      <label class="setting-label" for="cfg-bg-opacity">
+        <span data-i18n="settings.bg_opacity">Background Image Opacity</span>
+        <small id="bg-opacity-value" style="font-variant-numeric:tabular-nums;">10%</small>
+      </label>
+      <div class="setting-input">
+        <input type="range" id="cfg-bg-opacity" min="0" max="50" step="5" value="10"
+               style="width:160px;cursor:pointer;"
+               data-action="settingsPageApi.setBgOpacity" data-action-event="input" data-action-this="1">
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-retro-mode">
+        <span data-i18n="settings.retro_mode">Retro Neon Mode</span>
+        <small data-i18n="settings.retro_mode_hint">Secret theme (also activated by Konami Code)</small>
+      </label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-retro-mode" data-action="settingsPageApi.toggleRetroMode" data-action-event="change" data-action-this="1" aria-label="Retro Neon Mode"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-atelier-theme">
+        <span data-i18n="settings.atelier_theme">Atelier Theme</span>
+        <small data-i18n="settings.atelier_theme_hint">Editorial visual identity with Fraunces / Inter / JetBrains Mono</small>
+      </label>
+      <div class="setting-input">
+        <select id="cfg-atelier-theme" name="atelier-theme" class="setting-select"
+                data-action="settingsPageApi.setAtelierTheme" data-action-event="change" data-action-this="1"
+                aria-label="Atelier Theme">
+          <option value="off" data-i18n="settings.atelier_theme_off">Off (legacy light/dark)</option>
+          <option value="atelier-light" data-i18n="settings.atelier_theme_light">Atelier Light</option>
+          <option value="atelier-dark" data-i18n="settings.atelier_theme_dark">Atelier Dark</option>
+        </select>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-container-nav-continuous">
+        <span data-i18n="settings.container_nav_continuous">Continue to next folder/ZIP</span>
+        <small data-i18n="settings.container_nav_continuous_hint">Navigate to adjacent folder/ZIP when reaching the end in viewer</small>
+      </label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-container-nav-continuous" data-action="settingsPageApi.toggleContainerNavContinuous" data-action-event="change" data-action-this="1" aria-label="Continue to next folder/ZIP"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item" id="container-nav-order-row" style="display:none;">
+      <label class="setting-label" for="cfg-container-nav-order">
+        <span data-i18n="settings.container_nav_order">Group navigation order</span>
+        <small data-i18n="settings.container_nav_order_hint">Order for navigating between folders/ZIPs</small>
+      </label>
+      <div class="setting-input">
+        <select id="cfg-container-nav-order" data-action="settingsPageApi.setContainerNavOrder" data-action-event="change" data-action-this="1" style="padding:6px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--card);color:var(--text);font-size:13px;">
+          <option value="name" data-i18n="settings.container_nav_order_name">Name order</option>
+          <option value="result" data-i18n="settings.container_nav_order_result">Search result order</option>
+        </select>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-modal-default-analysis">
+        <span data-i18n="settings.modal_default_analysis">Open viewer in analysis mode</span>
+        <small data-i18n="settings.modal_default_analysis_hint">Show metadata panel by default instead of immersive view (double-click image to switch)</small>
+      </label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-modal-default-analysis" data-action="settingsPageApi.toggleModalDefaultAnalysis" data-action-event="change" data-action-this="1" aria-label="Open viewer in analysis mode"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-modal-keep-scroll">
+        <span data-i18n="settings.modal_keep_scroll">Remember scroll position in viewer</span>
+        <small data-i18n="settings.modal_keep_scroll_hint">Keep scroll position when navigating between files (default: scroll to top)</small>
+      </label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-modal-keep-scroll" data-action="settingsPageApi.toggleModalKeepScroll" data-action-event="change" data-action-this="1" aria-label="Remember scroll position in viewer"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-modal-kb-guide">
+        <span data-i18n="settings.modal_kb_guide">Show keyboard guide in viewer</span>
+        <small data-i18n="settings.modal_kb_guide_hint">Display keyboard shortcut hints at the bottom of the modal viewer</small>
+      </label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-modal-kb-guide" data-action="settingsPageApi.toggleModalKbGuide" data-action-event="change" data-action-this="1" aria-label="Show keyboard guide in viewer"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-bridge-nav-newtab">
+        <span data-i18n="settings.bridge_nav.open_in_new_tab">Bridge を新タブで開く</span>
+        <small data-i18n="settings.bridge_nav.open_in_new_tab_hint">OFF: 通常クリックで同タブ、Ctrl/Cmd+クリックで新タブ。ON: 通常クリックで新タブ、Ctrl/Cmd+クリックで同タブ。</small>
+      </label>
+      <div class="setting-input">
+        <!-- NOTE: localStorage 管理のため data-settings-field は付与しない -->
+        <label class="toggle-switch"><input type="checkbox" id="cfg-bridge-nav-newtab" aria-label="Open Bridge in new tab"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <!-- Sound Effects -->
+    <h3 style="margin-top:20px;margin-bottom:8px;font-size:14px;color:var(--text);border-top:1px solid var(--border);padding-top:16px;">
+      <span data-i18n="settings.sound_enabled">Sound Effects</span>
+    </h3>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-sound-enabled">
+        <span data-i18n="settings.sound_enabled">Sound Effects</span>
+        <small data-i18n="settings.sound_enabled_hint">Play short UI sounds on hover, click, and navigation</small>
+      </label>
+      <div class="setting-input">
+        <label class="toggle-switch"><input type="checkbox" id="cfg-sound-enabled" data-action="settingsPageApi.toggleSoundEnabled" data-action-event="change" data-action-this="1" aria-label="Sound Effects"><span class="toggle-slider"></span></label>
+      </div>
+    </div>
+    <div class="setting-item">
+      <label class="setting-label" for="cfg-sound-volume">
+        <span data-i18n="settings.sound_volume">Volume</span>
+        <small id="sound-volume-value" style="font-variant-numeric:tabular-nums;">50%</small>
+      </label>
+      <div class="setting-input" style="display:flex;align-items:center;gap:8px;">
+        <input type="range" id="cfg-sound-volume" min="0" max="100" step="5" value="50"
+               style="width:160px;cursor:pointer;"
+               data-action="settingsPageApi.onSoundVolumeChange" data-action-event="input" data-action-this="1">
+        <button type="button" id="soundMuteBtn" data-action="settingsPageApi.toggleSoundMute"
+                style="border:1px solid rgba(128,128,128,0.3);background:transparent;color:var(--text);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:14px;"
+                data-i18n-title="settings.sound_mute_title">&#x1F50A;</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- UI Management -->
+  <div class="settings-section">
+    <h2><span aria-hidden="true">🖼️</span> <span data-i18n="settings.ui_title">UI Management</span></h2>
+    <p style="font-size:13px;color:var(--muted);" data-i18n="settings.ui_desc">Manage installed frontend UIs. The active UI determines the look and feel of the application.</p>
+    <div id="uiList" style="margin-top:12px;font-size:13px;color:var(--muted);">Loading...</div>
+  </div>
+  <div class="settings-section">
+    <h2><span aria-hidden="true">📥</span> <span data-i18n="settings.ui_install_title">Install UI</span></h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:8px;" data-i18n="settings.ui_install_desc">Install a custom UI from a Git repository URL, ZIP, or 7z archive URL.</p>
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="uiInstallUrl" placeholder="https://github.com/user/my-ui-theme.git" data-i18n-placeholder="settings.ui_install_placeholder" aria-label="UI install URL"
+             style="flex:1;padding:8px 12px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+      <button data-action="settingsPageApi.installUi" class="btn-save" style="padding:8px 16px;" data-i18n="settings.ui_install_btn">Install</button>
+    </div>
+    <div id="uiInstallStatus" style="display:none;margin-top:8px;font-size:12px;"></div>
+  </div>
+
+  <!-- Save bar -->
+  <div class="settings-save-bar">
+    <button type="button" id="save-btn-cat-appearance" class="btn btn-primary">
+      <span data-i18n="settings.save">保存</span>
+    </button>
+    <span id="save-status-cat-appearance" class="save-status"></span>
+    <span id="save-hint-cat-appearance" class="save-hint" hidden>
+      <span data-i18n="settings.unsaved_hint">未保存の変更があります</span>
+    </span>
+  </div>
+</section>

@@ -1,0 +1,174 @@
+{
+  "sd_to_nai": [
+    {
+      "input": "",
+      "output": ""
+    },
+    {
+      "input": "cat, dog",
+      "output": "cat, dog"
+    },
+    {
+      "input": "(cat)",
+      "output": "1.1::cat::"
+    },
+    {
+      "input": "((cat))",
+      "output": "1.21::cat::"
+    },
+    {
+      "input": "(cat:1.2)",
+      "output": "1.2::cat::"
+    },
+    {
+      "input": "(artist:coupe50:1.2)",
+      "output": "1.2::artist:coupe50 ::"
+    },
+    {
+      "input": "[cat]",
+      "output": "0.909091::cat::"
+    },
+    {
+      "input": "[[cat]]",
+      "output": "0.826446::cat::"
+    },
+    {
+      "input": "{cat|dog|bird}",
+      "output": "||cat|dog|bird||"
+    },
+    {
+      "input": "cat AND dog:0.5",
+      "output": "cat|dog:0.5"
+    },
+    {
+      "input": "cat, <lora:test:1>, <lyco:x:0.5>",
+      "output": "cat"
+    },
+    {
+      "input": "cat, <embedding:bad>, (embedding:bad), embedding:bad",
+      "output": "cat,"
+    },
+    {
+      "input": "\\(literal\\), \\[weak\\], \\{brace\\}",
+      "output": "\\(literal\\), \\[weak\\], \\{brace\\}"
+    }
+  ],
+  "nai_to_sd": [
+    {
+      "input": "",
+      "output": ""
+    },
+    {
+      "input": "cat, dog",
+      "output": "cat, dog"
+    },
+    {
+      "input": "1.1::cat::",
+      "output": "(cat:1.1)"
+    },
+    {
+      "input": "1.21::cat::",
+      "output": "(cat:1.21)"
+    },
+    {
+      "input": "1.2::artist:coupe50 ::",
+      "output": "(artist:coupe50:1.2)"
+    },
+    {
+      "input": "{cat}",
+      "output": "(cat:1.05)"
+    },
+    {
+      "input": "{{cat}}",
+      "output": "(cat:1.1025)"
+    },
+    {
+      "input": "[cat]",
+      "output": "(cat:0.952381)"
+    },
+    {
+      "input": "||cat|dog|bird||",
+      "output": "{cat|dog|bird}"
+    },
+    {
+      "input": "cat|dog",
+      "output": "cat AND dog"
+    },
+    {
+      "input": "(cat:0.5)|(dog:0.7)",
+      "output": "(cat:0.5)|(dog:0.7)"
+    },
+    {
+      "input": "\\(literal\\), \\[weak\\], \\{brace\\}",
+      "output": "\\(literal\\), \\[weak\\], \\{brace\\}"
+    }
+  ],
+  "analyze": [
+    {
+      "input": "1.2::cat::, (dog:1.1), __wild__",
+      "payload": {
+        "syntax": "mixed",
+        "indicators": {
+          "nai": 1,
+          "sd": 1,
+          "dp": 1
+        },
+        "warnings": [
+          {
+            "level": "warning",
+            "message": "NAI構文とSD構文が混在しています"
+          }
+        ],
+        "tag_count": 3
+      },
+      "status": 200
+    },
+    {
+      "input": "{cat|dog}, tag",
+      "payload": {
+        "syntax": "dynamic_prompts",
+        "indicators": {
+          "nai": 0,
+          "sd": 0,
+          "dp": 1
+        },
+        "warnings": [],
+        "tag_count": 2
+      },
+      "status": 200
+    },
+    {
+      "input": "(cat",
+      "payload": {
+        "syntax": "unknown",
+        "indicators": {
+          "nai": 0,
+          "sd": 0,
+          "dp": 0
+        },
+        "warnings": [
+          {
+            "level": "error",
+            "message": "丸括弧の数が一致しません（差: +1）"
+          }
+        ],
+        "tag_count": 1
+      },
+      "status": 200
+    },
+    {
+      "input": "cat, dog",
+      "payload": {
+        "syntax": "unknown",
+        "indicators": {
+          "nai": 0,
+          "sd": 0,
+          "dp": 0
+        },
+        "warnings": [],
+        "tag_count": 2
+      },
+      "status": 200
+    }
+  ]
+}

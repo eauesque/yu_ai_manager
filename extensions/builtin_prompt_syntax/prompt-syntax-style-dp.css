@@ -1,0 +1,12 @@
+/** prompt-syntax styles — Dynamic Prompts */
+
+.ps-dp-choice            { background: rgba(255,220,80,0.08); border-radius: 2px; }
+.ps-dp-choice .ps-delim  { color: #ffdd55; font-weight: 700; }
+.ps-dp-choice .ps-pipe   { color: #ffbb33; font-weight: 600; }
+
+.ps-dp-weighted          { background: rgba(255,220,80,0.08); border-radius: 2px; }
+.ps-dp-weighted .ps-delim{ color: #ffdd55; font-weight: 700; }
+.ps-dp-weighted .ps-pipe { color: #ffbb33; font-weight: 600; }
+.ps-dp-wt                { color: #ffaa44; font-weight: 700; }
+
+.ps-wildcard { color: #ff77bb; background: rgba(255,119,187,0.1); border-radius: 3px; box-shadow: inset 4px 0 0 rgba(255,119,187,0.1), inset -4px 0 0 rgba(255,119,187,0.1); font-style: italic; }

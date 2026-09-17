@@ -1,0 +1,31 @@
+<main class="mi-page">
+  <header class="mi-header">
+    <h1 data-i18n="mesh_inference.title">分散推論マトリクス</h1>
+    <p class="mi-subtitle" data-i18n="mesh_inference.subtitle">
+      ピアごと・推論タイプごとに分散推論の有効/無効を切り替えます。
+    </p>
+  </header>
+
+  <div class="mi-toolbar">
+    <button id="miRefreshBtn" class="btn btn-secondary">
+      <span data-i18n="mesh_inference.action.refresh">更新</span>
+    </button>
+    <button id="miLocalOnlyBtn" class="btn btn-secondary" disabled
+            title="" data-i18n-title="mesh_inference.action.local_only_tooltip">
+      <span data-i18n="mesh_inference.action.local_only">ローカルのみモード</span>
+    </button>
+  </div>
+
+  <div id="miMatrixWrap" class="mi-matrix-wrap">
+    <table id="miMatrix" class="mi-matrix">
+      <thead>
+        <tr id="miMatrixHead"></tr>
+      </thead>
+      <tbody id="miMatrixBody"></tbody>
+    </table>
+  </div>
+
+  <div id="miEmpty" class="mi-empty" style="display:none">
+    <p data-i18n="mesh_inference.empty">接続されているピアがありません。</p>
+  </div>
+</main>

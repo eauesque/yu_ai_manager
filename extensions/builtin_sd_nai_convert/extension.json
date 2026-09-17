@@ -1,0 +1,43 @@
+{
+  "name": "builtin-sd-nai-convert",
+  "version": "1.0.0",
+  "description": "SD <-> NovelAI prompt conversion - weight syntax, LoRA removal, and Dynamic Prompts mutual conversion + Web UI",
+  "type": "transformer",
+  "category": "prompt",
+  "entry": "sd_nai_convert.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/convert",
+  "nav": {
+    "label": "SD\u2194NAI Convert",
+    "icon": "\ud83d\udd04"
+  },
+  "core_shim": "sd_nai_core",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  },
+  "config_schema": {
+    "strip_lora": {
+      "type": "bool",
+      "default": true,
+      "label": "Remove LoRA tags when converting to NAI",
+      "cli_flag": "--strip-lora",
+      "description": "Automatically remove <lora:...> tags when converting SD to NAI"
+    },
+    "strip_embedding": {
+      "type": "bool",
+      "default": true,
+      "label": "Remove embedding tags when converting to NAI",
+      "cli_flag": "--strip-embedding",
+      "description": "Automatically remove embedding:... tags when converting SD to NAI"
+    },
+    "convert_emphasis": {
+      "type": "bool",
+      "default": true,
+      "label": "Also convert emphasis syntax",
+      "cli_flag": "--convert-emphasis",
+      "description": "Also convert emphasis syntax between SD ((tag)) and NAI {tag}"
+    }
+  }
+}

@@ -1,0 +1,62 @@
+<script nonce="{{ csp_nonce }}">
+// Listen for messages from the Tauri shell parent window.
+// Spec: docs/superpowers/specs/2026-05-04-tauri-multi-tab-ux-design.md §4.1
+// Attached immediately (not wrapped in DOMContentLoaded) so the listener is
+// ready before the shell's flushPending() fires after tauri-shell:ready.
+(function () {
+  "use strict";
+
+  var ORIGIN = window.location.origin;
+
+  // Write payload into bridgeStorage (IDB-backed) or localStorage fallback,
+  // then invoke the existing receivePrompt / receiveImage pipeline so all
+  // toast / form-fill logic is reused without duplication.
+  async function applyBridgePayload(payload) {
+    if (!payload) return;
+    try {
+      var bs = window.bridgeStorage;
+      if (payload.prompt != null || payload.negative != null) {
+        var promptData = {
+          prompt: payload.prompt || "",
+          negative: payload.negative || "",
+          source: payload.source || "tauri-shell",
+          convert_warning: payload.convert_warning || "",
+        };
+        if (bs) {
+          await bs.set("bridge_send_prompt", promptData);
+        } else {
+          localStorage.setItem("bridge_send_prompt", JSON.stringify(promptData));
+        }
+        if (typeof receivePrompt === "function") await receivePrompt();
+      }
+      if (payload.image_base64 != null) {
+        var imageData = { base64: payload.image_base64 };
+        if (bs) {
+          await bs.set("bridge_send_image", imageData);
+        } else {
+          localStorage.setItem("bridge_send_image", JSON.stringify(imageData));
+        }
+        if (typeof receiveImage === "function") await receiveImage();
+      }
+    } catch (err) {
+      console.error("[comfyui-bridge] applyBridgePayload failed", err);
+    }
+  }
+
+  function handleMessage(e) {
+    if (e.origin !== ORIGIN) return;
+    var m = e.data || {};
+    if (m.type === "bridge:receive") {
+      applyBridgePayload(m.payload);
+    } else if (m.type === "tauri-shell:visible") {
+      // Fired when this tab becomes visible in the Tauri shell.
+      // ComfyUI bridge: trigger canvas/preview resize if needed.
+      if (typeof window.onShellVisible === "function") window.onShellVisible();
+      // If a preview canvas or image element needs relayout, dispatch a resize event.
+      try { window.dispatchEvent(new Event("resize")); } catch (_) {}
+    }
+  }
+
+  window.addEventListener("message", handleMessage);
+})();
+</script>

@@ -1,0 +1,6 @@
+[i18n]
+source_lang = "ja"
+target_langs = ["en", "zh-tw", "zh-cn", "ko", "de", "es", "fr", "it", "pt", "ru"]
+locale_files = ["ui/default/static/i18n/{lang}.json"]
+doc_source_patterns = []
+line_count_tolerance = 0.25

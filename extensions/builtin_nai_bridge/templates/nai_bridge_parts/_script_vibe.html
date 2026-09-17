@@ -1,0 +1,193 @@
+<script nonce="{{ csp_nonce }}">
+  // -- Vibe Transfer ------------------------------------------------
+
+  // Sibling <script> tags don't share scope with _script.html's IIFE,
+  // so re-declare the $ shorthand here.
+  function $(id) { return document.getElementById(id); }
+
+  var _nabVibeData = null;
+
+  window.nabClickVibeFile = function() {
+    var input = $("nabVibeFile");
+    if (input) input.click();
+  };
+
+  function nabUpdateVibeStatus() {
+    $("nabVibeStatus").textContent = _nabVibeData ? "(1 image)" : "";
+    if (typeof window.nabUpdateCost === "function") window.nabUpdateCost();
+  }
+
+  async function nabUploadVibeFileToVibe(file) {
+    var fd = new FormData();
+    fd.append("file", file);
+    var resp, data;
+    try {
+      resp = await fetch("/ext/nai-bridge/api/vibe/upload", {
+        method: "POST",
+        body: fd,
+        headers: {"X-Requested-With": "XMLHttpRequest"},
+        credentials: "same-origin",
+      });
+      data = await resp.json();
+    } catch (e) {
+      window.showToast(window.tr("nai_bridge.vibe_upload_failed", "Vibe ファイル読み込み失敗") + ": " + e.message, true);
+      return;
+    }
+    var payload = data && data.data;
+    if (!payload || !payload.vibes || !payload.vibes.length) {
+      window.showToast(window.tr("nai_bridge.vibe_upload_failed", "Vibe ファイル読み込み失敗") + ": " + (data.error || "no vibes"), true);
+      return;
+    }
+    // Multiple vibes (bundle) → open selection modal
+    if (payload.vibes.length > 1) {
+      window.nabOpenVibeBundleModal(payload.vibes);
+      return;
+    }
+    var v = payload.vibes[0];
+    var dataUrl = "data:" + (v.source_image_mime || "image/jpeg") + ";base64," + v.source_image_b64;
+    _nabVibeData = v.source_image_b64;
+    $("nabVibeImg").src = dataUrl;
+    $("nabVibePlaceholder").style.display = "none";
+    $("nabVibePreview").style.display = "";
+    // Apply the stored info_extracted and strength from the file's importInfo
+    var entry = v.entries && v.entries[0];
+    if (entry) {
+      var infoEl = $("nabVibeInfoExtracted");
+      if (infoEl) {
+        infoEl.value = entry.information_extracted;
+        infoEl.dispatchEvent(new Event("input", {bubbles: true}));
+      }
+      var strEl = $("nabVibeStrength");
+      if (strEl) {
+        strEl.value = entry.strength;
+        strEl.dispatchEvent(new Event("input", {bubbles: true}));
+      }
+    }
+    nabUpdateVibeStatus();
+  }
+
+  window.nabSetVibeFile = function(file) {
+    // data-action-this="1" hands the <input> element itself, not a File.
+    if (file && file.tagName === "INPUT") file = file.files && file.files[0];
+    if (!file) return;
+    if (/\.naiv4vibe(bundle)?$/i.test(file.name)) {
+      nabUploadVibeFileToVibe(file);
+      return;
+    }
+    if (!file.type.startsWith("image/")) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      // Strip data URL prefix to get pure base64
+      _nabVibeData = dataUrl.replace(/^data:image\/[^;]+;base64,/, "");
+      $("nabVibeImg").src = dataUrl;
+      $("nabVibePlaceholder").style.display = "none";
+      $("nabVibePreview").style.display = "";
+      nabUpdateVibeStatus();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Collects every currently active reference image (the single Vibe
+  // Transfer slot plus any Precise Reference cards) — the same set that
+  // nabGenerate() merges into reference_image_multiple for one request.
+  function nabCollectAllVibeItems() {
+    var items = [];
+    if (_nabVibeData) {
+      items.push({
+        reference_image: _nabVibeData,
+        reference_strength: parseFloat($("nabVibeStrength").value) || 0.6,
+        reference_information_extracted: parseFloat($("nabVibeInfoExtracted").value) || 1.0,
+      });
+    }
+    if (typeof nabCollectReferences === "function") {
+      nabCollectReferences().forEach(function(r) {
+        items.push({
+          reference_image: r.image,
+          reference_strength: r.strength,
+          reference_information_extracted: r.information_extracted,
+        });
+      });
+    }
+    return items;
+  }
+
+  window.nabDownloadVibe = async function() {
+    var items = nabCollectAllVibeItems();
+    if (!items.length) return;
+    var body = {
+      model: $("nabModel").value,
+      items: items,
+    };
+    var resp;
+    try {
+      resp = await fetch("/ext/nai-bridge/api/vibe/download", {
+        method: "POST",
+        headers: {"Content-Type": "application/json", "X-Requested-With": "XMLHttpRequest"},
+        credentials: "same-origin",
+        body: JSON.stringify(body),
+      });
+    } catch (e) {
+      window.showToast(window.tr("nai_bridge.vibe_download_failed", "Vibe ダウンロード失敗") + ": " + e.message, true);
+      return;
+    }
+    if (!resp.ok) {
+      var errText = "";
+      try { errText = (await resp.json()).error || ""; } catch (e) { /* ignore */ }
+      window.showToast(window.tr("nai_bridge.vibe_download_failed", "Vibe ダウンロード失敗") + (errText ? ": " + errText : ""), true);
+      return;
+    }
+    var blob = await resp.blob();
+    var url = URL.createObjectURL(blob);
+    var ext = items.length > 1 ? ".naiv4vibebundle" : ".naiv4vibe";
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "vibe_" + Date.now() + ext;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  };
+
+  window.nabClearVibe = function() {
+    _nabVibeData = null;
+    $("nabVibeImg").src = "";
+    $("nabVibePlaceholder").style.display = "";
+    $("nabVibePreview").style.display = "none";
+    $("nabVibeFile").value = "";
+    nabUpdateVibeStatus();
+  };
+
+  // Called by nabGenerate in _script.html
+  window.nabCollectVibe = function() {
+    if (!_nabVibeData) return null;
+    return {
+      reference_image: _nabVibeData,
+      reference_strength: parseFloat($("nabVibeStrength").value) || 0.6,
+      reference_information_extracted: parseFloat($("nabVibeInfoExtracted").value) || 1.0,
+    };
+  };
+
+  // -- Drag & drop --------------------------------------------------
+
+  (function() {
+    var drop = $("nabVibeDrop");
+    if (!drop) return;
+
+    drop.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      drop.classList.add("dragover");
+    });
+    drop.addEventListener("dragleave", function() {
+      drop.classList.remove("dragover");
+    });
+    drop.addEventListener("drop", function(e) {
+      e.preventDefault();
+      drop.classList.remove("dragover");
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files.length > 0) {
+        nabSetVibeFile(files[0]);
+      }
+    });
+  })();
+</script>

@@ -1,0 +1,161 @@
+  // -- Last params save/restore ------------------------------------
+
+  var _cfbSweepIds = [
+    "cfbSweepEnabled", "cfbSweepParam",
+    "cfbSweepMin", "cfbSweepMax", "cfbSweepMode", "cfbSweepCount", "cfbSweepStep",
+    "cfbSweepMacrosSharedCount", "cfbSweepMacrosPadShort",
+    "cfbSweepYEnabled", "cfbSweepYParam",
+    "cfbSweepYMin", "cfbSweepYMax", "cfbSweepYMode", "cfbSweepYCount", "cfbSweepYStep",
+    "cfbSweepYMacrosSharedCount", "cfbSweepYMacrosPadShort",
+    "cfbSweepZEnabled", "cfbSweepZParam",
+    "cfbSweepZMin", "cfbSweepZMax", "cfbSweepZMode", "cfbSweepZCount", "cfbSweepZStep",
+    "cfbSweepZMacrosSharedCount", "cfbSweepZMacrosPadShort",
+    "cfbSweepDeferSave",
+  ];
+
+  var _cfbLastParamsConfig = {
+    storageKey: "cfb_last_params",
+    getParams: function() {
+      var out = {
+        prompt: (typeof _cfbGetPrompt === "function" ? _cfbGetPrompt() : $("cfbPrompt").value),
+        negative: (typeof _cfbGetNegative === "function" ? _cfbGetNegative() : $("cfbNegative").value),
+        ckpt_name: $("cfbModel").value,
+        diffusion_model: ($("cfbDiffusionModel") || {}).value || "",
+        text_encoder_1: ($("cfbTextEncoder1") || {}).value || "",
+        text_encoder_2: ($("cfbTextEncoder2") || {}).value || "",
+        clip_type: ($("cfbClipType") || {}).value || "",
+        weight_dtype: ($("cfbWeightDtype") || {}).value || "default",
+        vae_name: ($("cfbVae") || {}).value || "",
+        steps: $("cfbSteps").value,
+        sampler: $("cfbSampler").value,
+        scheduler: $("cfbScheduler").value,
+        cfg: $("cfbCfg").value,
+        width: $("cfbWidth").value,
+        height: $("cfbHeight").value,
+        seed: $("cfbSeed").value,
+        image_format: $("cfbImageFormat").value,
+        a1111_mode: !!($("cfbA1111Mode") && $("cfbA1111Mode").checked),
+        batch_count: ($("cfbBatchCount") || {}).value || "1",
+        batch_size: ($("cfbBatchSize") || {}).value || "1",
+      };
+      _cfbSweepIds.forEach(function(id) {
+        var el = $(id);
+        if (!el) return;
+        if (el.type === "checkbox") out["sw_" + id] = el.checked ? "1" : "0";
+        else out["sw_" + id] = el.value;
+      });
+      try {
+        if (window._cfbMacroSlots) {
+          ["x", "y", "z"].forEach(function(ax) {
+            if (window._cfbMacroSlots[ax]) {
+              out["sw_macros_" + ax] = JSON.stringify(window._cfbMacroSlots[ax]);
+            }
+          });
+        }
+      } catch (_e) {}
+      return out;
+    },
+    setParams: function(p) {
+      if (p.prompt != null) {
+        if (typeof _cfbSetPrompt === "function") _cfbSetPrompt(p.prompt);
+        else $("cfbPrompt").value = p.prompt;
+      }
+      if (p.negative != null) {
+        if (typeof _cfbSetNegative === "function") _cfbSetNegative(p.negative);
+        else $("cfbNegative").value = p.negative;
+      }
+      if (p.ckpt_name != null) $("cfbModel").value = p.ckpt_name;
+      if (p.diffusion_model != null) _setSelectValue("cfbDiffusionModel", p.diffusion_model);
+      if (p.text_encoder_1 != null) _setSelectValue("cfbTextEncoder1", p.text_encoder_1);
+      if (p.text_encoder_2 != null) _setSelectValue("cfbTextEncoder2", p.text_encoder_2);
+      // Clear clip_type so auto-detect re-runs from text encoder filenames.
+      // Stored values may be stale (e.g. "wan" before the qwen_image fix).
+      var _clipTypeSel = $("cfbClipType");
+      if (_clipTypeSel) _clipTypeSel.value = "";
+      if (p.weight_dtype != null) _setSelectValue("cfbWeightDtype", p.weight_dtype);
+      if (p.vae_name) _setSelectValue("cfbVae", p.vae_name);
+      if (p.steps != null) $("cfbSteps").value = p.steps;
+      if (p.sampler != null) $("cfbSampler").value = p.sampler;
+      if (p.scheduler != null) $("cfbScheduler").value = p.scheduler;
+      if (p.cfg != null) $("cfbCfg").value = p.cfg;
+      if (p.width != null) $("cfbWidth").value = p.width;
+      if (p.height != null) $("cfbHeight").value = p.height;
+      if (p.seed != null) $("cfbSeed").value = p.seed;
+      if (p.image_format != null) $("cfbImageFormat").value = p.image_format;
+      if (p.a1111_mode != null && $("cfbA1111Mode")) $("cfbA1111Mode").checked = !!p.a1111_mode;
+      if (p.batch_count != null && $("cfbBatchCount")) $("cfbBatchCount").value = p.batch_count;
+      if (p.batch_size != null && $("cfbBatchSize")) $("cfbBatchSize").value = p.batch_size;
+      if (typeof window._cfbUpdateBatchTotal === "function") window._cfbUpdateBatchTotal();
+      cfbUpdateSeparateLoadUI();
+      // Restored values are authoritative - clear dirty so a subsequent
+      // Checkpoint change can re-apply its preset cleanly.
+      if (typeof _cfbResetDirty === "function") _cfbResetDirty();
+      _cfbSweepIds.forEach(function(id) {
+        var key = "sw_" + id;
+        if (p[key] == null) return;
+        var el = $(id);
+        if (!el) return;
+        if (el.type === "checkbox") el.checked = p[key] === "1" || p[key] === true;
+        else el.value = p[key];
+      });
+      try {
+        if (window._cfbMacroSlots) {
+          ["x", "y", "z"].forEach(function(ax) {
+            var raw = p["sw_macros_" + ax];
+            if (raw == null) return;
+            var arr = JSON.parse(raw);
+            if (Array.isArray(arr) && arr.length > 0) {
+              window._cfbMacroSlots[ax] = arr;
+              if (typeof window._cfbRenderMacros === "function") {
+                window._cfbRenderMacros(ax);
+              }
+            }
+          });
+          if (typeof window._csweepApplyMacrosVisibility === "function") {
+            window._csweepApplyMacrosVisibility();
+          }
+        }
+      } catch (_e) {
+        console.warn("[cfb/lastparams] sweep macros restore failed:", _e);
+      }
+      if (p.sw_cfbSweepEnabled === "1") {
+        var sec = $("cfbSweepSection");
+        if (sec) sec.open = true;
+      }
+      if (typeof window._cfbSweepUpdateEstimate === "function") {
+        try { window._cfbSweepUpdateEstimate(); } catch (_e) {}
+      }
+    },
+  };
+
+  function cfbSaveLastParams() {
+    if (window.BridgeLastParams) window.BridgeLastParams.save(_cfbLastParamsConfig);
+  }
+  // Expose to other script blocks (e.g. _script_sweep.html) so they can
+  // save current params at sweep start without duplicating the config.
+  window._cfbLastParamsConfig = _cfbLastParamsConfig;
+  window.cfbSaveLastParams = cfbSaveLastParams;
+
+  window.cfbRestoreLast = function() {
+    if (!window.BridgeLastParams) return;
+    if (window.BridgeLastParams.restore(_cfbLastParamsConfig)) {
+      var btn = $("cfbRestoreBtn");
+      if (btn) { btn.textContent = "🔄 OK!"; setTimeout(function() { btn.textContent = window.tr('comfyui_bridge.restore_last', '🔄 前回'); }, 800); }
+    }
+  };
+
+  window.cfbClearPrompts = function() {
+    // Clear via editor API if syntax engine is active, otherwise clear textarea
+    if (typeof _cfbSetPrompt === "function") {
+      _cfbSetPrompt("");
+    } else {
+      var pos = $("cfbPrompt");
+      if (pos) pos.value = "";
+    }
+    if (typeof _cfbSetNegative === "function") {
+      _cfbSetNegative("");
+    } else {
+      var neg = $("cfbNegative");
+      if (neg) neg.value = "";
+    }
+  };

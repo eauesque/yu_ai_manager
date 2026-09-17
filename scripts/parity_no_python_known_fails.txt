@@ -1,0 +1,135 @@
+# Known FAIL allowlist for no_python (python_path=None) parity entries.
+#
+# Background (English, per project convention for source comments):
+# The no_python gate in scripts/verify_rust_compat.py (Result.no_python_ok)
+# was enabled on 2026-08-13 as part of closing a hole where python_path=None
+# entries never reached the exit code. This made 42 pre-existing FAILs
+# visible for the first time. They are pre-existing debt, unrelated to the
+# T9 hailo-yolo stream work that triggered the fix. All 16 hailo-yolo stream
+# entries are clean (no ❌) and must NOT be listed here.
+#
+# Format: one entry per line, "METHOD /path/with/literal/segments"
+#   - METHOD and path must match Result.method / Result.path EXACTLY
+#     (path is the already-substituted literal path used by the harness,
+#     not the {param} template).
+#   - Trailing "# ..." comment is free text: record the observed actual
+#     status and the status the entry's note/accept_statuses claims.
+#   - No wildcards, no prefix matching, no blanket category exclusion.
+#     Every entry is a single, individually-verified route+method pair.
+#
+# Enforcement (scripts/verify_rust_compat.py, main()):
+#   - failing_no_python = the set of (method, path) among CURRENT results
+#     where r.no_python and not r.no_python_ok (i.e. actually FAILing now).
+#   - known = the set of (method, path) parsed from this file.
+#   - The gate requires failing_no_python == known, exactly:
+#       * an entry here that is no longer failing (fixed, or route removed)
+#         -> gate FAILS ("stale allowlist entry, remove it")
+#       * a FAIL not listed here (new regression, or an accidental addition
+#         to this file of something not actually failing)
+#         -> gate FAILS ("new/untracked FAIL")
+#   - This makes the file a forced-shrink allowlist: it can only be edited
+#     by removing entries once fixed, or (rarely, with justification) adding
+#     a genuinely new, individually-verified FAIL.
+#
+# Two categories live in this file (re-measured 2026-08-22). Do not read a
+# line here as "Rust has no implementation":
+#   (a) genuinely unimplemented -- the Rust handler returns 501
+#       NOT_IMPLEMENTED. Identify these by the recorded actual status on the
+#       entry line ("actual 501"); do NOT keep a count or a route list here.
+#       A hand-copied enumeration in this comment drifted three times before
+#       2026-08-22: "analysis servers PUT" was named here for at least four
+#       commits after 75a605fbf retired its entry, the two tagger-servers
+#       entries were never named at all, and two later commits carried the
+#       stale text forward while editing the line right above it. The entry
+#       lines below are enforced by the gate; this prose is not, so it must
+#       not restate them.
+#
+#       Ported out of this category so far: /v1/router/capabilities and
+#       /v1/node/services in v4.639.0; extensions author files/read/write in
+#       v4.635.0, permissions GET/POST in v4.636.0,
+#       scan-results/rescan/tokens/integrity in v4.637.0, and
+#       marketplace/refresh in v4.638.0.
+#
+#       Of the extensions group only author/validate remains, and it is a
+#       deliberate hold rather than a backlog item. Python's verdict runs
+#       CodeVerifier, a Python-AST scanner with no Rust counterpart.
+#       scan-results ships the half that
+#       does port (the ManifestAuthority review) and reports `code_scan:
+#       null` -- the value Python itself emits when it has no directory to
+#       scan -- so the UI can say "not run" instead of "no issues found".
+#       author/validate cannot do the same: its whole contract is a
+#       pass/fail verdict, and a verdict derived from the manifest alone
+#       would read as approval of code nobody parsed.
+#   (b) implemented, but the harness fixture does not match the route -- the
+#       entry FAILs on a 4xx from real validation code. The 9 /api/profiles
+#       routes and POST /api/scan/resume were retired this way in v4.630.1
+#       (see the Type 2 comment below). Retiring such an entry means fixing
+#       the fixture, not writing a handler.
+#
+#       RETIRED in v4.658.0: the two POST /api/tagger-servers/batch* entries.
+#       They were CONFIGURATION-DEPENDENT while the handlers forwarded --
+#       a bare --auto run (no Python, so Config.python_url is empty) got 503
+#       from fwd_post_ts and PASSed, while pre_push's configuration reached
+#       Python and got its 401. v4.657.0 made both handlers native and
+#       deleted fwd_post_ts, so the configuration dependence is gone and
+#       pre_push's own run reports them stale. Removed on that basis.
+#
+#       CONSEQUENCE FOR WHOEVER RUNS THE HARNESS BY HAND: a bare --auto run
+#       still reports unrelated entries as "stale allowlist entry, remove
+#       it", and also reports 8 unrelated entries as untracked FAILs.
+#       Neither signal is trustworthy outside the pre_push configuration;
+#       only pre_push_check.py's own run is. The two entries above were
+#       removed because *that* run said so, not a bare one.
+#
+#       What is NOT established: why the 401 is not shared by sibling
+#       forwarder entries that also omit 401 from accept_statuses. Do not
+#       record these as environment flake -- that was asserted once without
+#       evidence. Also do not repeat the claim that every forwarder carries
+#       the same single credential: as of 2026-08-22 there are 23
+#       `X-Remote-User: yu-proxy-auth` sites in non-test route code across 15
+#       files, and routes/tools_ops.rs attaches an Authorization header as
+#       well.
+# Beware: routes/auto_stubs.rs holds BOTH stubs and complete implementations.
+# The file name is not evidence. Read the handler body.
+#
+# To retire an entry: fix the underlying route (or confirm accept_statuses
+# should be widened with real justification — NOT to hide this list), rerun
+# scripts/parity_harness.py, confirm the entry now no_python_ok, then delete
+# its line here. The gate will fail with a stale-entry error until you do.
+#
+# Recorded 2026-08-13, from tmp/parity-restored.log (post gate-fix run,
+# 281 PASS / 42 FAIL / 300 N/A / 0 ERROR before this allowlist).
+
+# --- Type 1: forwarder-note entries. note claims "Python transfer, 503 if
+# unreachable" (accept_statuses includes 503) but the observed status is a
+# proxy/routing-failure code (in this harness, 501/502 are defined as
+# "Rust proxy failure signals", see Result.passed) rather than 503, 200, or
+# any other status the entry's own accept_statuses lists. This is a live
+# suspicion that these forwarders are simply not wired to their Python
+# targets yet -- NOT a cosmetic parity-note staleness issue. Worth a
+# follow-up bug investigation, not just allowlisting. ---
+
+# --- Type 2: stub-note entries under /api/ocr/*. The /api/profiles/* group
+# that used to live here was retired in v4.630.1: those routes were fully
+# implemented in auto_stubs.rs and only FAILed because their fixtures still
+# expected the long-gone stub 503. The fixtures now send well-formed,
+# NON-MUTATING requests and expect the genuine 400/404, and the happy path is
+# covered by the `profiles_tests` module in auto_stubs.rs. POST
+# /api/scan/resume was retired the same way.
+# The four /api/ocr/* entries below still return 501 (see the Type 1 note on
+# what 501 means in this harness), so their root cause is closer to Type 1's
+# wiring suspicion despite the stub-flavoured note; flagged for the same
+# follow-up investigation. ---
+
+# 2026-08-27: emptied. The four /api/ocr/* entries and author/validate left the
+# failing set once their fixtures accepted the status the route actually
+# returns:
+#   - PUT /api/ocr/profiles/{prefix} became NATIVE (crates/yu-server/src/
+#     routes/ocr.rs); with the fixture's empty body it answers 400
+#     "scores is required", matching Python.
+#   - The other four stay 501 BY POLICY, not as backlog:
+#     BUILTIN_EXTENSIONS_RUST_MIGRATION_PLAN.md keeps real inference
+#     (VLM/OCR execution) on the Python side and lists ocr as Tier D, and
+#     author/validate is the deliberate hold described above.
+# Adding an entry back means a route started failing again -- investigate it,
+# do not re-list it to quiet the gate.

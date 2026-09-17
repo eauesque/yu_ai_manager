@@ -1,0 +1,64 @@
+{
+  "name": "builtin-sd-webui-bridge",
+  "version": "0.1.0",
+  "description": "SD WebUI / Forge integration bridge",
+  "type": "ui_widget",
+  "category": "bridge",
+  "entry": "sd_webui_bridge.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/sd-webui",
+  "nav": {
+    "label": "SD WebUI Bridge",
+    "icon": "\ud83c\udfa8"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 400
+  },
+  "config_schema": {
+    "api_url": {
+      "type": "str",
+      "default": "http://127.0.0.1:7860",
+      "label": "SD WebUI API URL"
+    },
+    "auto_send": {
+      "type": "bool",
+      "default": false,
+      "label": "Skip confirmation dialog"
+    },
+    "default_sampler": {
+      "type": "enum",
+      "default": "Euler a",
+      "options": [
+        "Euler a",
+        "DPM++ 2M Karras",
+        "DPM++ SDE Karras",
+        "DDIM",
+        "UniPC"
+      ],
+      "label": "Default Sampler"
+    },
+    "default_image_format": {
+      "type": "enum",
+      "default": "png",
+      "options": ["png", "webp", "jpg"],
+      "label": "Default Image Format"
+    },
+    "bridge_managed_save": {
+      "type": "bool",
+      "default": false,
+      "label": "Manage saving via the bridge (with Sweep XMP; disables SD WebUI-side saving)"
+    },
+    "gateway_url": {
+      "type": "string",
+      "default": "",
+      "label": "Gateway URL (e.g. http://host:5000/sd)"
+    },
+    "api_key_enc": {
+      "type": "string",
+      "default": "",
+      "label": "Gateway API Key (encrypted)"
+    }
+  }
+}

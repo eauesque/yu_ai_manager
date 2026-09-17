@@ -1,0 +1,27 @@
+    <!-- Cache management -->
+    <details class="tool-item" id="tool-thumbnail-cache">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.thumbnail_cache">🗂️ Thumbnail Cache</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.thumbnail_cache_desc">Manage thumbnail image cache. Caches not accessed for 30+ days are auto-deleted on startup.</p>
+      <div class="stat-row">
+        <span id="cacheInfo">Loading...</span>
+      </div>
+      <div class="stat-row">
+        <button data-action="toolsPageApi.clearThumbnailCache" class="btn"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-trash"/></svg> <span data-i18n="tools.clear_cache">Clear Cache</span></button>
+      </div>
+    </div>
+
+    <!-- Video cache pre-generation -->
+    <div class="tool-section">
+      <h2><span aria-hidden="true">🎬</span> <span data-i18n="tools.faststart_cache_title">Video Faststart Cache</span></h2>
+      <p data-i18n="tools.faststart_cache_desc">Inspects moov atom of all MP4/MOV files and pre-creates streaming cache for non-faststart files. Also runs automatically at server startup and after scan completion.</p>
+      <div class="stat-row">
+        <button data-action="toolsPageApi.startFaststartPrescan" class="btn" id="btnFaststartPrescan" data-i18n="tools.faststart_prescan_btn">Pre-generate Video Cache</button>
+        <span id="faststartPrescanStatus"></span>
+      </div>
+      </div>
+</details>

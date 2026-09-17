@@ -1,0 +1,72 @@
+<!-- Video Analysis Settings -->
+<details class="tool-item" id="tool-video-analysis">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.va_title">&#x1F3AC; Video Analysis Settings</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+  <p data-i18n="tools.va_desc">Configure keyframe extraction strategy for video content analysis (WD-Tagger, CLIP, AI Analysis).</p>
+
+  <!-- Status -->
+  <div id="vaStatus"></div>
+
+  <!-- Enabled -->
+  <div class="checkbox-group">
+    <label class="tool-label">
+      <input class="tool-input" type="checkbox" id="vaEnabled" checked aria-label="Video analysis enabled">
+      <span data-i18n="tools.va_enabled">Enable video analysis</span>
+    </label>
+  </div>
+
+  <!-- Strategy -->
+  <div>
+    <label class="tool-label" for="vaStrategy" data-i18n="tools.va_strategy">Strategy:</label>
+    <select class="tool-select" id="vaStrategy" data-action="toolsPageApi.vaOnStrategyChange" data-action-event="change">
+      <option value="uniform" data-i18n="tools.va_strategy_uniform">uniform (evenly spaced)</option>
+      <option value="scene" data-i18n="tools.va_strategy_scene">scene (scene change detection)</option>
+      <option value="single" data-i18n="tools.va_strategy_single">single (one frame at 25%)</option>
+    </select>
+  </div>
+
+  <!-- Keyframe Count -->
+  <div>
+    <label class="tool-label" for="vaKeyframeCount" data-i18n="tools.va_kf_count">Keyframe Count:</label>
+    <div>
+      <input class="tool-input" type="range" id="vaKeyframeCount" min="1" max="16" step="1" value="4"
+             data-mirror-target="vaKfCountVal"
+            >
+      <span id="vaKfCountVal">4</span>
+    </div>
+    <div data-i18n="tools.va_kf_count_hint">Number of frames to extract (uniform/scene)</div>
+  </div>
+
+  <!-- Scene Threshold -->
+  <div id="vaSceneThresholdGroup">
+    <label class="tool-label" for="vaSceneThreshold" data-i18n="tools.va_scene_threshold">Scene Threshold:</label>
+    <div>
+      <input class="tool-input" type="range" id="vaSceneThreshold" min="0.1" max="0.9" step="0.05" value="0.4"
+             data-mirror-target="vaSceneThVal" data-mirror-format="float2"
+            >
+      <span id="vaSceneThVal">0.40</span>
+    </div>
+    <div data-i18n="tools.va_scene_threshold_hint">Lower = more sensitive scene detection (scene strategy only)</div>
+  </div>
+
+  <!-- Per-keyframe Storage -->
+  <div class="checkbox-group">
+    <label class="tool-label">
+      <input class="tool-input" type="checkbox" id="vaStorePerKeyframe" aria-label="Store per keyframe">
+      <span data-i18n="tools.va_store_per_kf">Store per-keyframe results in DB</span>
+    </label>
+    <div data-i18n="tools.va_store_per_kf_hint">Save individual keyframe tags and vectors (increases DB size)</div>
+  </div>
+
+  <!-- Actions -->
+  <div class="tool-actions">
+    <button class="btn btn-secondary" data-action="toolsPageApi.vaSaveConfig">
+      <span aria-hidden="true">&#x1F4BE;</span> <span data-i18n="tools.save">Save</span>
+    </button>
+  </div>
+  </div>
+</details>

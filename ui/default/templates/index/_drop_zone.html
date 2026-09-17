@@ -1,0 +1,207 @@
+<div id="dndDropOverlay" aria-hidden="true">
+  <div class="dnd-overlay-inner">
+    <div class="dnd-overlay-icon">⬇</div>
+    <div class="dnd-overlay-title" data-i18n="file_drop.overlay_title">ファイルをドロップして登録</div>
+    <div class="dnd-overlay-hint" data-i18n="file_drop.overlay_hint">画像・動画をドロップすると Drop Inbox に保存し、ライブラリへ登録します</div>
+    <div id="dndInboxPath" class="dnd-overlay-inbox"></div>
+  </div>
+</div>
+<style>
+  #dndDropOverlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9000;
+    background: rgba(10, 20, 40, 0.72);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: opacity 120ms ease-out;
+  }
+  #dndDropOverlay.dnd-active {
+    display: flex;
+    pointer-events: auto;
+  }
+  #dndDropOverlay .dnd-overlay-inner {
+    background: var(--color-bg-elevated, #1c2030);
+    color: var(--color-text, #e8ecf1);
+    border: 3px dashed var(--color-accent, #6cbcff);
+    border-radius: 16px;
+    padding: 36px 56px;
+    text-align: center;
+    max-width: 80vw;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  }
+  #dndDropOverlay .dnd-overlay-icon {
+    font-size: 64px;
+    line-height: 1;
+    margin-bottom: 16px;
+  }
+  #dndDropOverlay .dnd-overlay-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  #dndDropOverlay .dnd-overlay-hint {
+    font-size: 14px;
+    opacity: 0.85;
+  }
+  #dndDropOverlay .dnd-overlay-inbox {
+    margin-top: 14px;
+    font-size: 12px;
+    font-family: var(--font-mono, monospace);
+    opacity: 0.7;
+    word-break: break-all;
+  }
+  @media (prefers-color-scheme: light) {
+    #dndDropOverlay {
+      background: rgba(230, 238, 250, 0.85);
+    }
+  }
+  body.theme-light #dndDropOverlay,
+  html[data-theme-mode="light"] #dndDropOverlay {
+    background: rgba(230, 238, 250, 0.85);
+  }
+</style>
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+  (function () {
+    var overlay = document.getElementById("dndDropOverlay");
+    var inboxLabel = document.getElementById("dndInboxPath");
+    if (!overlay) return;
+
+    var dragCounter = 0;
+    var inboxCached = null;
+
+    function hasFiles(e) {
+      if (!e.dataTransfer) return false;
+      var types = e.dataTransfer.types;
+      if (!types) return false;
+      for (var i = 0; i < types.length; i++) {
+        if (types[i] === "Files") return true;
+      }
+      return false;
+    }
+
+    function tr(key, fallback) {
+      return typeof window.tr === "function" ? window.tr(key, fallback) : fallback;
+    }
+
+    function toast(msg, isError) {
+      if (typeof window.showToast === "function") window.showToast(msg, !!isError);
+      else console.log("[dnd]", msg);
+    }
+
+    async function refreshInboxLabel() {
+      if (inboxCached !== null) return;
+      try {
+        var resp = await fetch("/api/dnd-inbox", { headers: { "X-Requested-With": "XMLHttpRequest" } });
+        if (!resp.ok) return;
+        var data = await resp.json();
+        if (data && data.ok && data.inbox) {
+          inboxCached = data.inbox;
+          if (inboxLabel) inboxLabel.textContent = data.inbox;
+        } else if (data && data.error) {
+          inboxCached = "";
+          if (inboxLabel) inboxLabel.textContent = "⚠ " + data.error;
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    }
+
+    function showOverlay() {
+      overlay.classList.add("dnd-active");
+      overlay.setAttribute("aria-hidden", "false");
+      refreshInboxLabel();
+    }
+
+    function hideOverlay() {
+      overlay.classList.remove("dnd-active");
+      overlay.setAttribute("aria-hidden", "true");
+    }
+
+    window.addEventListener("dragenter", function (e) {
+      if (!hasFiles(e)) return;
+      dragCounter += 1;
+      showOverlay();
+    });
+
+    window.addEventListener("dragover", function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+    });
+
+    window.addEventListener("dragleave", function (e) {
+      if (!hasFiles(e)) return;
+      dragCounter -= 1;
+      if (dragCounter <= 0) {
+        dragCounter = 0;
+        hideOverlay();
+      }
+    });
+
+    window.addEventListener("drop", async function (e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      dragCounter = 0;
+      hideOverlay();
+
+      var files = [];
+      if (e.dataTransfer && e.dataTransfer.files) {
+        for (var i = 0; i < e.dataTransfer.files.length; i++) {
+          files.push(e.dataTransfer.files[i]);
+        }
+      }
+      if (files.length === 0) {
+        toast(tr("file_drop.nothing_to_upload", "No files to upload"), true);
+        return;
+      }
+
+      toast(tr("file_drop.uploading", "Uploading...") + " (" + files.length + ")");
+
+      var fd = new FormData();
+      files.forEach(function (f, idx) {
+        fd.append("file_" + idx, f, f.name);
+      });
+
+      try {
+        var resp = await fetch("/api/dnd-upload", {
+          method: "POST",
+          headers: { "X-Requested-With": "XMLHttpRequest" },
+          body: fd,
+        });
+        var data = await resp.json();
+        if (!resp.ok || !data || data.ok === false) {
+          var msg = (data && (data.error || data.code)) || resp.statusText;
+          toast(tr("file_drop.error", "Upload failed") + ": " + msg, true);
+          return;
+        }
+        var success = data.success || 0;
+        var total = data.total || files.length;
+        var failed = total - success;
+        if (success > 0) {
+          toast(
+            tr("file_drop.success", "Registered") + " " + success + "/" + total
+            + (failed > 0 ? " (" + failed + " " + tr("file_drop.failed", "failed") + ")" : "")
+          );
+        } else {
+          var firstErr = (data.results && data.results[0] && (data.results[0].error || data.results[0].code)) || "";
+          toast(tr("file_drop.error", "Upload failed") + (firstErr ? ": " + firstErr : ""), true);
+        }
+      } catch (err) {
+        console.warn("dnd upload failed", err);
+        toast(tr("file_drop.error", "Upload failed") + ": " + (err && err.message ? err.message : err), true);
+      }
+    });
+
+    window.DndDropZone = {
+      show: showOverlay,
+      hide: hideOverlay,
+      refreshInbox: function () {
+        inboxCached = null;
+        return refreshInboxLabel();
+      },
+    };
+  })();
+</script>

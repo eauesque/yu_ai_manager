@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if expired %}Share Expired{% else %}{{ collection_name }}{% endif %}</title>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <link rel="stylesheet" href="/static/css/main.css?v=20260224">
+  <link rel="stylesheet" href="/static/css/pages/lan-share.css?v=20260224">
+</head>
+<body class="ls-body" data-1p-ignore data-lpignore="true">
+{% if expired %}
+  <div class="ls-expired">
+    <div class="ls-expired-icon">&#x23F0;</div>
+    <h1 data-i18n="share.expired_title">Share Expired</h1>
+    <p data-i18n="share.expired_desc">This shared link has expired. Please ask the host to create a new share.</p>
+  </div>
+{% else %}
+  <header class="ls-header">
+    <h1 class="ls-title">{{ collection_name }}</h1>
+    <span class="ls-meta">{{ image_count }} <span data-i18n="share.images">images</span></span>
+    <span class="ls-timer" id="lsTimer" data-remaining="{{ remaining_seconds }}"></span>
+  </header>
+
+  <div class="ls-actions">
+    <a class="ls-download-btn" href="/s/{{ token }}/download.zip" download>
+      <span aria-hidden="true">&#x1F4E6;</span> <span data-i18n="share.download_zip">Download ZIP</span>
+    </a>
+  </div>
+
+  {% include "lan_share/_share_grid.html" %}
+  {% include "lan_share/_share_scripts.html" %}
+{% endif %}
+</body>
+</html>

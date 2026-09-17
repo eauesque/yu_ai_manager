@@ -1,0 +1,106 @@
+    <!-- Additional scan -->
+    <details class="tool-item" id="tool-scan">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.scan">📂 Additional Scan</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.scan_desc">Scan new folders and add to the database.</p>
+
+      <!-- Registered folders list -->
+      <div id="registeredRoots">
+        <h3><span aria-hidden="true">📁</span> <span data-i18n="tools.registered_roots">Registered Folders (config.json)</span></h3>
+        <div id="rootsList">Loading...</div>
+      </div>
+
+      <div>
+        <label class="tool-label" for="scanPath" data-i18n="tools.folder_path">Folder Path:</label>
+        <div>
+          <input class="tool-input" type="text" id="scanPath" autocomplete="off" data-i18n-placeholder="tools.scan_path_placeholder" placeholder="e.g. H:\images\new_folder"
+                >
+          <button class="btn btn-secondary" data-action="toolsPageApi.pickFolderNative" data-i18n-title="tools.pick_folder_native" title="OS folder picker dialog">📂</button>
+          <button class="btn btn-secondary" data-action="toolsPageApi.openServerDirBrowser" data-i18n-title="tools.browse_server_dir" title="Browse server directories">🖥️</button>
+        </div>
+        <div data-i18n="tools.remote_hint">
+          For LAN/remote access, use 🖥️ to select folders on the server.
+        </div>
+      </div>
+
+      <div class="checkbox-group">
+        <label class="tool-label">
+          <input class="tool-input" type="checkbox" id="scanRecursive" checked aria-label="Include subfolders">
+          <span data-i18n="tools.include_subfolders">Include subfolders</span>
+        </label>
+        <label class="tool-label">
+          <input class="tool-input" type="checkbox" id="scanZips" aria-label="Search inside ZIP">
+          <span data-i18n="tools.search_zips">Search inside ZIP files</span>
+        </label>
+        <label class="tool-label">
+          <input class="tool-input" type="checkbox" id="scanForce" aria-label="Force rescan">
+          <span><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-refresh"/></svg> <span data-i18n="tools.force_rescan">Force rescan (reanalyze all files)</span></span>
+        </label>
+        <input class="tool-input" type="hidden" id="scanComputeHash" value="true" aria-hidden="true">
+      </div>
+
+      <div class="tool-actions">
+        <button class="btn btn-primary" data-action="toolsPageApi.startScan">
+          <span aria-hidden="true">🔍</span> <span data-i18n="tools.start_scan">Start Scan</span>
+        </button>
+        <button class="btn btn-secondary" data-action="toolsPageApi.startScanAll" id="scanAllBtn" data-i18n-title="tools.rescan_all_title" title="Rescan all registered folders">
+          <svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-refresh"/></svg> <span data-i18n="tools.rescan_all">Rescan All</span>
+        </button>
+      </div>
+
+      <div id="scanResult" class="result-box"></div>
+    </div>
+
+  <!-- Hash Backfill Panel -->
+  <div class="tool-section">
+    <h2><span aria-hidden="true">🔢</span> <span data-i18n="tools.hash_backfill">Hash Backfill</span></h2>
+    <p data-i18n="tools.hash_backfill_desc">Compute missing file hashes for all library files.</p>
+    <div class="tool-actions">
+      <button id="hashBackfillStartBtn" class="btn btn-primary" data-i18n="tools.hash_backfill_start">Start</button>
+      <button id="hashBackfillCancelBtn" class="btn btn-secondary" data-i18n="tools.hash_backfill_cancel">Cancel</button>
+    </div>
+    <div id="hashBackfillProgress">
+      <div>
+        <div id="hashBackfillBar"></div>
+      </div>
+      <span id="hashBackfillStatus" data-i18n="tools.hash_backfill_idle">Not running</span>
+    </div>
+  </div>
+
+  <!-- SVG Rasterize Panel -->
+  <div class="tool-section">
+    <h2><span aria-hidden="true">🖼️</span> <span data-i18n="tools.svg_rasterize">SVG Rasterize</span></h2>
+    <p data-i18n="tools.svg_rasterize_desc">Convert SVG files to PNG or WebP.</p>
+    <div>
+      <div>
+        <label class="tool-label" for="svgFileInput" data-i18n="tools.svg_select_file">Select SVG file</label>
+        <input class="tool-input" id="svgFileInput" type="file" accept=".svg">
+      </div>
+      <div>
+        <label class="tool-label" for="svgFormat" data-i18n="tools.svg_format">Output format</label>
+        <select class="tool-select" id="svgFormat">
+          <option value="png">PNG</option>
+          <option value="webp">WebP</option>
+        </select>
+      </div>
+      <div>
+        <div>
+          <label class="tool-label" for="svgWidth" data-i18n="tools.svg_width">Width (px)</label>
+          <input class="tool-input" id="svgWidth" type="number" min="1" max="4096" placeholder="auto">
+        </div>
+        <div>
+          <label class="tool-label" for="svgHeight" data-i18n="tools.svg_height">Height (px)</label>
+          <input class="tool-input" id="svgHeight" type="number" min="1" max="4096" placeholder="auto">
+        </div>
+      </div>
+      <div class="tool-actions">
+        <button id="svgConvertBtn" class="btn btn-primary" data-i18n="tools.svg_convert">Convert &amp; Download</button>
+        <span id="svgConvertStatus"></span>
+      </div>
+    </div>
+    </div>
+</details>

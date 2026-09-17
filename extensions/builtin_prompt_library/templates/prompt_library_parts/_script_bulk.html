@@ -1,0 +1,241 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  "use strict";
+
+  var PL = window.PL;
+  var $ = PL._$;
+  var esc = PL._esc;
+  var apiFetch = PL._apiFetch;
+  var showToast = PL._showToast;
+
+  var _selected = {};
+  var _selectMode = false;
+
+  function customAlert(message) {
+    if (typeof window.customAlert === "function") return window.customAlert(message);
+    showToast(message);
+    return Promise.resolve();
+  }
+
+  function customConfirm(message, options) {
+    if (typeof window.customConfirm === "function") return window.customConfirm(message, options);
+    return Promise.resolve(false);
+  }
+
+  function toggleSelectMode() {
+    _selectMode = !_selectMode;
+    document.body.classList.toggle("pl-select-mode", _selectMode);
+    var bar = $("plSelectBar");
+    if (bar) bar.classList.toggle("active", _selectMode);
+    var btn = $("plSelectBtn");
+    if (btn) btn.textContent = _selectMode ? window.tr('prompt_library.done', 'Done') : window.tr('prompt_library.select', 'Select');
+    if (!_selectMode) {
+      deselectAll();
+    }
+    _updateCount();
+  }
+
+  function toggleCard(id) {
+    if (_selected[id]) {
+      delete _selected[id];
+    } else {
+      _selected[id] = true;
+    }
+    var cb = document.querySelector('.pl-select-check[data-id="' + id + '"]');
+    if (cb) cb.checked = !!_selected[id];
+    _updateCount();
+  }
+
+  function selectAll() {
+    var cbs = document.querySelectorAll(".pl-select-check");
+    for (var i = 0; i < cbs.length; i++) {
+      var id = parseInt(cbs[i].getAttribute("data-id"), 10);
+      _selected[id] = true;
+      cbs[i].checked = true;
+    }
+    _updateCount();
+  }
+
+  function deselectAll() {
+    _selected = {};
+    var cbs = document.querySelectorAll(".pl-select-check");
+    for (var i = 0; i < cbs.length; i++) {
+      cbs[i].checked = false;
+    }
+    _updateCount();
+  }
+
+  function _getSelectedIds() {
+    var ids = [];
+    for (var k in _selected) {
+      if (_selected[k]) ids.push(parseInt(k, 10));
+    }
+    return ids;
+  }
+
+  function _updateCount() {
+    var ids = _getSelectedIds();
+    var el = $("plSelectCount");
+    if (el) el.textContent = ids.length + ' ' + window.tr('prompt_library.selected_suffix', 'selected');
+  }
+
+  // -- Bulk delete --
+  async function bulkDelete() {
+    var ids = _getSelectedIds();
+    if (!ids.length) { showToast(window.tr('prompt_library.no_prompts_selected', 'No prompts selected')); return; }
+    if (!(await customConfirm(window.tr('prompt_library.confirm_bulk_delete', 'Delete ' + ids.length + ' prompt(s)?'), { danger: true }))) return;
+    apiFetch("/prompts/bulk-delete", { method: "POST", body: { ids: ids } })
+      .then(function(res) {
+        if (!res.ok) { customAlert(res.error || window.tr('prompt_library.bulk_delete_failed', 'Bulk delete failed')); return; }
+        showToast(window.tr('prompt_library.deleted_count', 'Deleted ' + (res.deleted || ids.length) + ' prompt(s)'));
+        _selected = {};
+        PL._loadList();
+        _updateCount();
+        if (typeof PLSidebar !== "undefined") {
+          PLSidebar.loadFolders();
+          PLSidebar.loadTags();
+        }
+      });
+  }
+
+  // -- Bulk move --
+  var _moveDropdown = null;
+
+  function showMoveDropdown(btn) {
+    _closeBulkDropdowns();
+    var ids = _getSelectedIds();
+    if (!ids.length) { showToast(window.tr('prompt_library.no_prompts_selected', 'No prompts selected')); return; }
+    apiFetch("/folders").then(function(res) {
+      if (!res.ok) return;
+      var folders = res.folders || [];
+      if (!folders.length) { showToast(window.tr('prompt_library.no_folders_available', 'No folders available')); return; }
+      var dd = document.createElement("div");
+      dd.className = "pl-bulk-dropdown";
+      for (var i = 0; i < folders.length; i++) {
+        var f = folders[i];
+        var item = document.createElement("button");
+        item.className = "pl-bulk-dropdown-item";
+        item.textContent = f.name;
+        item.setAttribute("data-fid", String(f.id));
+        item.addEventListener("click", function() {
+          var fid = parseInt(this.getAttribute("data-fid"), 10);
+          _doMove(fid);
+        });
+        dd.appendChild(item);
+      }
+      btn.style.position = "relative";
+      btn.appendChild(dd);
+      _moveDropdown = dd;
+    });
+  }
+
+  function _doMove(folderId) {
+    var ids = _getSelectedIds();
+    apiFetch("/prompts/bulk-move", {
+      method: "POST", body: { ids: ids, folder_id: folderId }
+    }).then(function(res) {
+      if (!res.ok) { customAlert(res.error || window.tr('prompt_library.move_failed', 'Move failed')); return; }
+      showToast(window.tr('prompt_library.moved_count', 'Moved ' + (res.moved || ids.length) + ' prompt(s)'));
+      _closeBulkDropdowns();
+      PL._loadList();
+      if (typeof PLSidebar !== "undefined") PLSidebar.loadFolders();
+    });
+  }
+
+  // -- Bulk tag --
+  var _tagDropdown = null;
+
+  function showTagDropdown(btn) {
+    _closeBulkDropdowns();
+    var ids = _getSelectedIds();
+    if (!ids.length) { showToast(window.tr('prompt_library.no_prompts_selected', 'No prompts selected')); return; }
+    apiFetch("/tags").then(function(res) {
+      if (!res.ok) return;
+      var tags = res.tags || [];
+      if (!tags.length) { showToast(window.tr('prompt_library.no_tags_available', 'No tags available')); return; }
+      var dd = document.createElement("div");
+      dd.className = "pl-bulk-dropdown";
+      for (var i = 0; i < tags.length; i++) {
+        var t = tags[i];
+        var row = document.createElement("label");
+        row.className = "pl-bulk-tag-row";
+        row.innerHTML = '<input type="checkbox" value="' + t.id + '"> ' + esc(t.name);
+        dd.appendChild(row);
+      }
+      var applyBtn = document.createElement("button");
+      applyBtn.className = "pl-bulk-dropdown-item";
+      applyBtn.style.cssText = "font-weight:bold;border-top:1px solid var(--border,#555);" +
+        "margin-top:4px;padding-top:8px;";
+      applyBtn.textContent = window.tr('prompt_library.apply_tags', 'Apply Tags');
+      applyBtn.addEventListener("click", function() { _doTag(dd); });
+      dd.appendChild(applyBtn);
+      btn.style.position = "relative";
+      btn.appendChild(dd);
+      _tagDropdown = dd;
+    });
+  }
+
+  function _doTag(dd) {
+    var ids = _getSelectedIds();
+    var tagIds = [];
+    var cbs = dd.querySelectorAll('input[type="checkbox"]:checked');
+    for (var i = 0; i < cbs.length; i++) {
+      tagIds.push(parseInt(cbs[i].value, 10));
+    }
+    if (!tagIds.length) { showToast(window.tr('prompt_library.no_tags_selected', 'No tags selected')); return; }
+    apiFetch("/prompts/bulk-tag", {
+      method: "POST", body: { ids: ids, tag_ids: tagIds }
+    }).then(function(res) {
+      if (!res.ok) { customAlert(res.error || window.tr('prompt_library.tag_failed', 'Tag failed')); return; }
+      showToast(window.tr('prompt_library.tagged_count', 'Tagged ' + (res.tagged || ids.length) + ' prompt(s)'));
+      _closeBulkDropdowns();
+      PL._loadList();
+      if (typeof PLSidebar !== "undefined") PLSidebar.loadTags();
+    });
+  }
+
+  function _closeBulkDropdowns() {
+    if (_moveDropdown) { _moveDropdown.remove(); _moveDropdown = null; }
+    if (_tagDropdown) { _tagDropdown.remove(); _tagDropdown = null; }
+  }
+
+  // Close dropdowns on outside click
+  document.addEventListener("click", function(e) {
+    if (!e.target.closest(".pl-bulk-dropdown") &&
+        !e.target.closest("#plBulkMoveBtn") &&
+        !e.target.closest("#plBulkTagBtn")) {
+      _closeBulkDropdowns();
+    }
+  });
+
+  // -- Events --
+  var selectBtn = $("plSelectBtn");
+  if (selectBtn) selectBtn.addEventListener("click", toggleSelectMode);
+
+  var selAllBtn = $("plSelAllBtn");
+  if (selAllBtn) selAllBtn.addEventListener("click", selectAll);
+
+  var deselBtn = $("plDeselBtn");
+  if (deselBtn) deselBtn.addEventListener("click", deselectAll);
+
+  var bulkDelBtn = $("plBulkDelBtn");
+  if (bulkDelBtn) bulkDelBtn.addEventListener("click", bulkDelete);
+
+  var bulkMoveBtn = $("plBulkMoveBtn");
+  if (bulkMoveBtn) bulkMoveBtn.addEventListener("click", function() {
+    showMoveDropdown(this);
+  });
+
+  var bulkTagBtn = $("plBulkTagBtn");
+  if (bulkTagBtn) bulkTagBtn.addEventListener("click", function() {
+    showTagDropdown(this);
+  });
+
+  window.PLBulk = {
+    toggle: toggleSelectMode,
+    toggleCard: toggleCard,
+    selectAll: selectAll,
+    deselectAll: deselectAll,
+  };
+})();
+</script>

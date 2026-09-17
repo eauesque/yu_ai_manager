@@ -1,0 +1,779 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+
+  // Part 2 of the sweep runner — split from _script_sweep.html to keep each
+  // file under 800 lines (CLAUDE.md). Top-level vars/functions land on
+  // window so part 1 (defined first) is reachable from here.
+
+  // Substitute $<axis><n> markers in *prompt* with values from
+  // *slotValuesByAxis* (e.g. {x: {1: "a", 2: "b"}, y: {1: "x"}}). For
+  // backward compatibility, $<n> with no axis letter is treated as $x<n>.
+  function _nabSubstitutePromptMacros(prompt, slotValuesByAxis) {
+    if (!prompt || !slotValuesByAxis) return prompt;
+    return prompt.replace(/\$([xyz])?(\d+)/g, function(m, ax, n) {
+      var axis = ax || "x";
+      var bag = slotValuesByAxis[axis];
+      if (!bag) return m;
+      var v = bag[parseInt(n, 10)];
+      return (v != null) ? String(v) : m;
+    });
+  }
+
+  // Toggle the visibility of macros editors and the corresponding numeric
+  // range inputs for each axis based on whether that axis param == "_macros".
+  function _sweepApplyMacrosVisibility() {
+    ["x", "y", "z"].forEach(function(axis) {
+      var ids = _nabAxisIds(axis);
+      var sel = _sweepGet(ids.paramSel);
+      var isMacros = !!(sel && sel.value === "_macros");
+      var editor = _sweepGet(ids.editor);
+      if (editor) editor.style.display = isMacros ? "" : "none";
+      ids.rangeIds.forEach(function(id) {
+        var el = _sweepGet(id);
+        if (!el) return;
+        var label = document.querySelector('label[for="' + id + '"]');
+        var disp = isMacros ? "none" : "";
+        el.style.display = disp;
+        if (label) label.style.display = disp;
+      });
+      if (isMacros) _sweepRenderMacros(axis);
+    });
+    // Re-apply mode toggles for any non-macros axis that just had its
+    // count/step inputs reset to display="" by the loop above.
+    _sweepApplyMode();
+  }
+
+  // ---------- Live total-image estimate -----------------------------
+  // Compute X*Y*Z given current settings. For each axis: macros mode uses
+  // _nabMacroBuildSeries(axis, true) (silent); numeric mode uses
+  // _sweepBuildSeries from min/max/mode/count/step. Returns { total, cap, ok }
+  // where ok=false signals the user is over the safety cap.
+  function _nabSweepCountForAxis(axis, isMacrosCb) {
+    var ids = _nabAxisIds(axis);
+    var sel = _sweepGet(ids.paramSel);
+    var pv = sel ? sel.value : "";
+    if (pv === "_macros") {
+      if (isMacrosCb) isMacrosCb();
+      var built = _nabMacroBuildSeries(axis, true);
+      return built ? built.count : 0;
+    }
+    var minEl = _sweepGet(ids.rangeIds[0]);
+    var maxEl = _sweepGet(ids.rangeIds[1]);
+    var modeEl = _sweepGet(ids.rangeIds[2]);
+    var cntEl = _sweepGet(ids.rangeIds[3]);
+    var stepEl = _sweepGet(ids.rangeIds[4]);
+    if (!minEl || !maxEl || !modeEl || !cntEl || !stepEl) return 0;
+    var mn = parseFloat(minEl.value);
+    var mx = parseFloat(maxEl.value);
+    var md = modeEl.value || "count";
+    var ct = parseInt(cntEl.value, 10) || 0;
+    var sp = parseFloat(stepEl.value) || 0;
+    return _sweepBuildSeries(mn, mx, md, ct, sp).length;
+  }
+
+  function _nabSweepEstimateTotal() {
+    var xCount = _nabSweepCountForAxis("x");
+    if (xCount < 1) return { total: 0, cap: _SWEEP_MAX, ok: false };
+    var total = xCount;
+    var yEn = _sweepGet("nabSweepYEnabled");
+    if (yEn && yEn.checked) {
+      var yCount = _nabSweepCountForAxis("y");
+      if (yCount < 1) return { total: 0, cap: _SWEEP_MAX, ok: false };
+      total *= yCount;
+      var zEn = _sweepGet("nabSweepZEnabled");
+      if (zEn && zEn.checked) {
+        var zCount = _nabSweepCountForAxis("z");
+        if (zCount < 1) return { total: 0, cap: _SWEEP_MAX, ok: false };
+        total *= zCount;
+      }
+    }
+    return { total: total, cap: _SWEEP_MAX, ok: total <= _SWEEP_MAX };
+  }
+
+  function _nabSweepUpdateEstimate() {
+    var el = _sweepGet("nabSweepTotalEstimate");
+    if (!el) return;
+    var est = _nabSweepEstimateTotal();
+    if (est.total < 1) {
+      el.textContent = "—";
+      el.style.color = "";
+      el.title = "";
+      return;
+    }
+    var labelImgs = window.tr ? window.tr('nai_bridge.sweep_total_estimate_unit', '枚') : 'images';
+    var capLabel = window.tr ? window.tr('nai_bridge.sweep_total_estimate_cap', '上限') : 'cap';
+    var text = est.total + " " + labelImgs + " (" + capLabel + " " + est.cap + ")";
+    if (!est.ok) {
+      var warn = window.tr ? window.tr('nai_bridge.sweep_total_over_cap', '⚠ 上限超過 — Run Sweep でブロックされます')
+                            : '⚠ exceeds cap — Run Sweep will block';
+      el.textContent = text + " " + warn;
+      el.style.color = "#f44336";
+      el.title = warn;
+    } else {
+      el.textContent = text;
+      el.style.color = "#4caf50";
+      el.title = "";
+    }
+  }
+
+  // Y-axis fields are only enabled when the user opts into 2-axis sweep.
+  function _sweepApplyYEnabled() {
+    var en = _sweepGet("nabSweepYEnabled");
+    var enabled = !!(en && en.checked);
+    ["nabSweepYParam", "nabSweepYMin", "nabSweepYMax", "nabSweepYMode",
+     "nabSweepYCount", "nabSweepYStep"].forEach(function(id) {
+      var el = _sweepGet(id);
+      if (el) el.disabled = !enabled;
+    });
+  }
+
+  // Z-axis fields are only enabled when both Y and Z opt-ins are checked
+  // (Z without Y would be confusing, and the runtime treats absence of Y
+  // as 2D shape — Z requires Y as the inner axis).
+  function _sweepApplyZEnabled() {
+    var yEn = _sweepGet("nabSweepYEnabled");
+    var zEn = _sweepGet("nabSweepZEnabled");
+    var yChecked = !!(yEn && yEn.checked);
+    var zChecked = !!(zEn && zEn.checked);
+    if (zEn) zEn.disabled = !yChecked;
+    if (!yChecked && zEn && zEn.checked) zEn.checked = false;
+    var enabled = yChecked && zChecked;
+    ["nabSweepZParam", "nabSweepZMin", "nabSweepZMax", "nabSweepZMode",
+     "nabSweepZCount", "nabSweepZStep"].forEach(function(id) {
+      var el = _sweepGet(id);
+      if (el) el.disabled = !enabled;
+    });
+  }
+
+  function _sweepInitModeToggle() {
+    var modeSel = _sweepGet("nabSweepMode");
+    if (modeSel) modeSel.addEventListener("change", _sweepApplyMode);
+    var yModeSel = _sweepGet("nabSweepYMode");
+    if (yModeSel) yModeSel.addEventListener("change", _sweepApplyMode);
+    var zModeSel = _sweepGet("nabSweepZMode");
+    if (zModeSel) zModeSel.addEventListener("change", _sweepApplyMode);
+    var yEn = _sweepGet("nabSweepYEnabled");
+    if (yEn) yEn.addEventListener("change", function() { _sweepApplyYEnabled(); _sweepApplyZEnabled(); });
+    var zEn = _sweepGet("nabSweepZEnabled");
+    if (zEn) zEn.addEventListener("change", _sweepApplyZEnabled);
+    // Wire each axis param dropdown + macros editor controls.
+    ["x", "y", "z"].forEach(function(axis) {
+      var ids = _nabAxisIds(axis);
+      var paramSel = _sweepGet(ids.paramSel);
+      if (paramSel) paramSel.addEventListener("change", _sweepApplyMacrosVisibility);
+      var addBtn = _sweepGet(ids.addBtn);
+      if (addBtn) addBtn.addEventListener("click", function() { _nabMacroAdd(axis); });
+      var padShort = _sweepGet(ids.padShort);
+      if (padShort) padShort.addEventListener("change", function() { _sweepRenderMacros(axis); });
+    });
+    _sweepApplyMode();
+    _sweepApplyYEnabled();
+    _sweepApplyZEnabled();
+    _sweepApplyMacrosVisibility();
+    // Live total-image estimate. Single delegated listener on the sweep
+    // section catches all input/change from min/max/count/step/mode selects,
+    // Y/Z toggles, macros textareas, and add-slot button (which fires
+    // change indirectly via re-render).
+    var sweepSection = _sweepGet("nabSweepSection");
+    if (sweepSection) {
+      sweepSection.addEventListener("input", _nabSweepUpdateEstimate);
+      sweepSection.addEventListener("change", _nabSweepUpdateEstimate);
+    }
+    _nabSweepUpdateEstimate();
+    if (window._sweepLoadAxes) {
+      try { window._sweepLoadAxes(); } catch (_e) {}
+    }
+    if (window._sweepOnAxesReady) {
+      window._sweepOnAxesReady(function() {
+        ["x", "y", "z"].forEach(function(axis) {
+          try { _sweepRenderMacros(axis); } catch (_e) {}
+        });
+        _nabSweepUpdateEstimate();
+      });
+    }
+  }
+
+  function _sweepInitRecovery() {
+    if (!window.SweepBuffer) return;
+    window.SweepBuffer.checkRecovery("nai", "/ext/nai-bridge/api/save-batch", {
+      recovered: window.tr ? window.tr('nai_bridge.sweep_recovered', 'NAI Sweep の未保存 N 枚を自動保存しました') : 'NAI: saved N recovered images',
+      warningTitle: window.tr ? window.tr('nai_bridge.sweep_recovery_title', '⚠ NAI Sweep が中断されました') : '⚠ NAI Sweep was interrupted',
+      warningBody: window.tr ? window.tr('nai_bridge.sweep_recovery_body', '前回の NAI Sweep で N 枚が未保存です。サーバ自動保存に失敗しました。手動で対応してください。') : 'N images from previous NAI Sweep were not saved. Auto-recovery failed.',
+      retryBtn: window.tr ? window.tr('nai_bridge.sweep_recovery_retry', 'サーバへ再保存') : 'Retry server save',
+      downloadBtn: window.tr ? window.tr('nai_bridge.sweep_recovery_download', '個別ダウンロード') : 'Download individually',
+      discardBtn: window.tr ? window.tr('nai_bridge.sweep_recovery_discard', '破棄') : 'Discard',
+    });
+  }
+
+  function _sweepInitResume() {
+    if (!window.SweepResume) return;
+    window.SweepResume.maybeResume({
+      bridge: "nai",
+      prefix: "nab",
+      sectionId: "nabSweepSection",
+      params: ["scale", "cfg_rescale", "steps", "uncond_scale",
+               "img2img_strength", "img2img_noise",
+               "inpaint_strength", "inpaint_noise"],
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function() {
+      _sweepInitModeToggle(); _sweepInitRecovery(); _sweepInitResume();
+    });
+  } else {
+    _sweepInitModeToggle();
+    _sweepInitRecovery();
+    _sweepInitResume();
+  }
+
+  window.nabRunSweep = async function() {
+    if (window._nabIsGenerating && window._nabIsGenerating()) return;
+
+    // Pre-load sweep axis wildcards so the macros-mode synchronous build
+    // step below sees the expanded values. Cheap on warm cache.
+    if (window._sweepLoadAxes) {
+      try { await window._sweepLoadAxes(); } catch (_e) { /* tolerate */ }
+    }
+
+    // ----- X axis (always required) -----
+    // X axis can be either a regular numeric param OR the special "_macros"
+    // param (Prompt macros / S/R). The _macros mode bypasses the numeric
+    // min/max/count fields and instead reads from the macro slots editor.
+    var xParamSel = _sweepGet("nabSweepParam");
+    var xParamValue = xParamSel ? xParamSel.value : "";
+    var xIsMacros = (xParamValue === "_macros");
+    var xSpec = null;
+    var xValues = null;          // numeric mode: array of values; macro mode: array of indices [0..count-1]
+    var xMacroValues = null;     // macro mode only: array of {1: v, 2: v, ...} per iteration
+    var xParamLabel = "";
+
+    if (xIsMacros) {
+      var built = _nabMacroBuildSeries("x");
+      if (!built) return;
+      xMacroValues = built.valuesPerIter;
+      xValues = [];
+      for (var _i = 0; _i < built.count; _i++) xValues.push(_i);
+      xParamLabel = (window.tr ? window.tr('nai_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (X)";
+    } else {
+      xSpec = _SWEEP_PARAMS[xParamValue];
+      if (!xSpec) {
+        window.showToast("Sweep: unknown X parameter", true);
+        return;
+      }
+      var xMin = parseFloat(_sweepGet("nabSweepMin").value);
+      var xMax = parseFloat(_sweepGet("nabSweepMax").value);
+      var xMode = _sweepGet("nabSweepMode").value || "count";
+      var xCount = parseInt(_sweepGet("nabSweepCount").value, 10) || 6;
+      var xStep = parseFloat(_sweepGet("nabSweepStep").value) || 0.5;
+      xValues = _sweepBuildSeries(xMin, xMax, xMode, xCount, xStep);
+      if (xValues.length < 1) {
+        window.showToast(window.tr('nai_bridge.sweep_invalid_range', 'Sweep: invalid range or step'), true);
+        return;
+      }
+    }
+
+    // ----- Y axis (opt-in) -----
+    var yEn = _sweepGet("nabSweepYEnabled");
+    var yEnabled = !!(yEn && yEn.checked);
+    var yParamSel = null, ySpec = null, yValues = null, yParamLabel = "";
+    var yIsMacros = false, yMacroValues = null, yParamValue = "";
+    if (yEnabled) {
+      yParamSel = _sweepGet("nabSweepYParam");
+      yParamValue = yParamSel ? yParamSel.value : "";
+      yIsMacros = (yParamValue === "_macros");
+      if (yIsMacros) {
+        var ybuilt = _nabMacroBuildSeries("y");
+        if (!ybuilt) return;
+        yMacroValues = ybuilt.valuesPerIter;
+        yValues = [];
+        for (var _yi = 0; _yi < ybuilt.count; _yi++) yValues.push(_yi);
+        yParamLabel = (window.tr ? window.tr('nai_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (Y)";
+      } else {
+        ySpec = _SWEEP_PARAMS[yParamValue];
+        if (!ySpec) {
+          window.showToast("Sweep: unknown Y parameter", true);
+          return;
+        }
+        var yMin = parseFloat(_sweepGet("nabSweepYMin").value);
+        var yMax = parseFloat(_sweepGet("nabSweepYMax").value);
+        var yMode = _sweepGet("nabSweepYMode").value || "count";
+        var yCount = parseInt(_sweepGet("nabSweepYCount").value, 10) || 3;
+        var yStep = parseFloat(_sweepGet("nabSweepYStep").value) || 0.5;
+        yValues = _sweepBuildSeries(yMin, yMax, yMode, yCount, yStep);
+        if (yValues.length < 1) {
+          window.showToast(window.tr('nai_bridge.sweep_invalid_range', 'Sweep: invalid range or step') + " (Y)", true);
+          return;
+        }
+        var yKey = "nai_bridge.sweep_param_" + yParamValue;
+        yParamLabel = (window.tr ? window.tr(yKey, ySpec.label) : ySpec.label);
+      }
+    }
+
+    // ----- Z axis (opt-in 3rd axis, requires Y) -----
+    var zEn = _sweepGet("nabSweepZEnabled");
+    var zEnabled = !!(yEnabled && zEn && zEn.checked);
+    var zParamSel = null, zSpec = null, zValues = null, zParamLabel = "";
+    var zIsMacros = false, zMacroValues = null, zParamValue = "";
+    if (zEnabled) {
+      zParamSel = _sweepGet("nabSweepZParam");
+      zParamValue = zParamSel ? zParamSel.value : "";
+      zIsMacros = (zParamValue === "_macros");
+      if (zIsMacros) {
+        var zbuilt = _nabMacroBuildSeries("z");
+        if (!zbuilt) return;
+        zMacroValues = zbuilt.valuesPerIter;
+        zValues = [];
+        for (var _zi = 0; _zi < zbuilt.count; _zi++) zValues.push(_zi);
+        zParamLabel = (window.tr ? window.tr('nai_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (Z)";
+      } else {
+        zSpec = _SWEEP_PARAMS[zParamValue];
+        if (!zSpec) {
+          window.showToast("Sweep: unknown Z parameter", true);
+          return;
+        }
+        var zMin = parseFloat(_sweepGet("nabSweepZMin").value);
+        var zMax = parseFloat(_sweepGet("nabSweepZMax").value);
+        var zMode = _sweepGet("nabSweepZMode").value || "count";
+        var zCount = parseInt(_sweepGet("nabSweepZCount").value, 10) || 3;
+        var zStep = parseFloat(_sweepGet("nabSweepZStep").value) || 0.5;
+        zValues = _sweepBuildSeries(zMin, zMax, zMode, zCount, zStep);
+        if (zValues.length < 1) {
+          window.showToast(window.tr('nai_bridge.sweep_invalid_range', 'Sweep: invalid range or step') + " (Z)", true);
+          return;
+        }
+        var zKey = "nai_bridge.sweep_param_" + zParamValue;
+        zParamLabel = (window.tr ? window.tr(zKey, zSpec.label) : zSpec.label);
+      }
+    }
+
+    // Total iteration cap. _SWEEP_MAX (50) caps the product so multi-axis
+    // sweeps don't accidentally explode.
+    var total = xValues.length;
+    if (yValues) total *= yValues.length;
+    if (zValues) total *= zValues.length;
+    if (total > _SWEEP_MAX) {
+      window.showToast(window.tr('nai_bridge.sweep_total_too_large', 'Sweep total exceeds the safety cap (50). Reduce X / Y / Z count.'), true);
+      return;
+    }
+
+    var seedEl = _sweepGet("nabSeed");
+    var curSeed = parseInt(seedEl.value, 10);
+    if (!isFinite(curSeed) || curSeed < 0) {
+      curSeed = Math.floor(Math.random() * 2147483647);
+      seedEl.value = String(curSeed);
+    }
+
+    if (!xIsMacros) {
+      var xKey = "nai_bridge.sweep_param_" + xParamValue;
+      xParamLabel = (window.tr ? window.tr(xKey, xSpec.label) : xSpec.label);
+    }
+
+    var xDomEl = (!xIsMacros && xSpec && xSpec.dom) ? _sweepGet(xSpec.dom) : null;
+    var xOrigDomVal = xDomEl ? xDomEl.value : null;
+    var yDomEl = (!yIsMacros && ySpec && ySpec.dom) ? _sweepGet(ySpec.dom) : null;
+    var yOrigDomVal = yDomEl ? yDomEl.value : null;
+    var zDomEl = (!zIsMacros && zSpec && zSpec.dom) ? _sweepGet(zSpec.dom) : null;
+    var zOrigDomVal = zDomEl ? zDomEl.value : null;
+
+    var deferSaveEl = _sweepGet("nabSweepDeferSave");
+    var deferSave = !!(deferSaveEl && deferSaveEl.checked);
+    if (deferSave && window.SweepBuffer) {
+      window.SweepBuffer.start("nai", {
+        param: xParamValue,
+        param_y: yEnabled ? yParamValue : null,
+        param_z: zEnabled ? zParamValue : null,
+      });
+    }
+
+    // Helper: build per-axis metadata for sweepRunMeta. For macros axes,
+    // series is the array of {1: v, 2: v, ...} dicts; for numeric axes
+    // it's the raw value array.
+    function _axisMeta(paramVal, isMacros, vals, macroVals) {
+      if (isMacros) {
+        return { param: "_macros", total: vals.length, series: macroVals.slice(), index: 0, value: macroVals[0] };
+      }
+      return { param: paramVal, total: vals.length, series: vals, index: 0, value: vals[0] };
+    }
+    var axes = [_axisMeta(xParamValue, xIsMacros, xValues, xMacroValues)];
+    if (yEnabled) axes.push(_axisMeta(yParamValue, yIsMacros, yValues, yMacroValues));
+    if (zEnabled) axes.push(_axisMeta(zParamValue, zIsMacros, zValues, zMacroValues));
+    var sweepRunMeta = {
+      id: (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID()
+            : ("sw-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10)),
+      bridge: "nai",
+      base_seed: curSeed,
+      created_at: Math.floor(Date.now() / 1000),
+      axes: axes,
+    };
+
+    // Freeze the generate body once at sweep start so that live edits to the
+    // prompt / negative prompt / sampler / etc. while the sweep is running
+    // do not bleed into later iterations. Each iteration deep-clones this
+    // snapshot and only overrides per-axis fields (seed, axis values,
+    // macro substitution, sweep_meta, skip_save).
+    var _frozenBody = window._nabBuildGenerateBody();
+    if (!_frozenBody) {
+      window.showToast(window.tr('nai_bridge.prompt_required', 'Prompt is required'), true);
+      return;
+    }
+    // Capture the *unsubstituted* prompt/negative templates so the re-run
+    // flow can restore `$x1` / `$y1` / S-R tokens instead of the last
+    // iteration's substituted text.
+    if (typeof _frozenBody.prompt === "string") sweepRunMeta.prompt_template = _frozenBody.prompt;
+    if (typeof _frozenBody.negative_prompt === "string") sweepRunMeta.negative_template = _frozenBody.negative_prompt;
+    // NAI: model identifier doubles as the "checkpoint" key for the
+    // history filter on /sweep page. NAI has no separate VAE concept.
+    if (typeof _frozenBody.model === "string") sweepRunMeta.checkpoint = _frozenBody.model;
+    if (typeof _frozenBody.sampler === "string") sweepRunMeta.sampler = _frozenBody.sampler;
+    if (typeof _frozenBody.width === "number") sweepRunMeta.width = _frozenBody.width;
+    if (typeof _frozenBody.height === "number") sweepRunMeta.height = _frozenBody.height;
+    if (typeof _frozenBody.steps === "number") sweepRunMeta.steps = _frozenBody.steps;
+    // NAI uses `scale` for the CFG-equivalent guidance value.
+    if (typeof _frozenBody.scale === "number") sweepRunMeta.cfg = _frozenBody.scale;
+
+    // ---- Sweep quick-jump integration ----
+    if (window.BridgeSweepQuickJump) {
+      window.BridgeSweepQuickJump.registerStart(sweepRunMeta);
+    }
+    var _bsqjOpenBtn = document.getElementById("naib-sweep-open");
+    var _bsqjHistBtn = document.getElementById("naib-sweep-history");
+    var _bsqjFirstFid = null;
+    if (_bsqjOpenBtn) {
+      _bsqjOpenBtn.disabled = true;
+      _bsqjOpenBtn.onclick = function () {
+        if (_bsqjFirstFid != null && window.BridgeSweepQuickJump) {
+          window.BridgeSweepQuickJump.openInNewTab(sweepRunMeta.id, _bsqjFirstFid);
+        }
+      };
+    }
+    if (_bsqjHistBtn && !_bsqjHistBtn._bsqjBound) {
+      _bsqjHistBtn._bsqjBound = true;
+      _bsqjHistBtn.addEventListener("click", function () {
+        if (window.BridgeSweepQuickJump) {
+          window.BridgeSweepQuickJump.renderHistoryPopover(_bsqjHistBtn);
+        }
+      });
+    }
+    // Save current UI parameters as "last params" so 🔄 前回 restores
+    // the sweep's prompt/seed/etc. after navigating away.
+    if (typeof window.nabSaveLastParams === "function") {
+      try { window.nabSaveLastParams(); } catch (_e) {}
+    }
+
+    _sweepCancel = false;
+    _sweepRunning = true;
+    _sweepShowCancelRow(true);
+    if (typeof window._nabShowBatchCancel === "function") window._nabShowBatchCancel(true);
+    if (window._nabSetGenerating) window._nabSetGenerating(true);
+    _sweepClearChildren(_sweepGet("nabResult"));
+    // Build header labels for the grid. Numeric axis: "<param> = <val>".
+    // Macros axis: "$<axis>1=v1, $<axis>2=v2".
+    function _macroEntryLabel(axisLetter, entry) {
+      var parts = [];
+      for (var k in entry) parts.push("$" + axisLetter + k + "=" + entry[k]);
+      return parts.join(", ");
+    }
+    var xLabels = [];
+    for (var _xj = 0; _xj < xValues.length; _xj++) {
+      if (xIsMacros) {
+        xLabels.push(_macroEntryLabel("x", xMacroValues[_xj]));
+      } else {
+        xLabels.push(xParamLabel + " = " + _sweepFormatVal(xValues[_xj], xSpec.int));
+      }
+    }
+    var yLabels = null;
+    if (yEnabled) {
+      yLabels = [];
+      for (var _yj = 0; _yj < yValues.length; _yj++) {
+        if (yIsMacros) {
+          yLabels.push(_macroEntryLabel("y", yMacroValues[_yj]));
+        } else {
+          yLabels.push(yParamLabel + " = " + _sweepFormatVal(yValues[_yj], ySpec.int));
+        }
+      }
+    }
+    var zLabels = null;
+    if (zEnabled) {
+      zLabels = [];
+      for (var _zj = 0; _zj < zValues.length; _zj++) {
+        if (zIsMacros) {
+          zLabels.push(_macroEntryLabel("z", zMacroValues[_zj]));
+        } else {
+          zLabels.push(zParamLabel + " = " + _sweepFormatVal(zValues[_zj], zSpec.int));
+        }
+      }
+    }
+    _sweepInitGrid(xLabels, yLabels, zLabels);
+
+    var doneCount = 0;
+    var xi = 0, yi = 0, zi = 0;
+
+    function _finalizeAndSave(reason) {
+      _sweepRunning = false;
+      _sweepShowCancelRow(false);
+      if (typeof window._nabShowBatchCancel === "function") window._nabShowBatchCancel(false);
+      if (window._nabSetGenerating) window._nabSetGenerating(false);
+      if (xDomEl && xOrigDomVal != null) xDomEl.value = xOrigDomVal;
+      if (yDomEl && yOrigDomVal != null) yDomEl.value = yOrigDomVal;
+      if (zDomEl && zOrigDomVal != null) zDomEl.value = zOrigDomVal;
+      if (window._nabRefreshAnlas) window._nabRefreshAnlas();
+      if (typeof window._nabApplySeedAutoReset === "function") window._nabApplySeedAutoReset();
+      var baseStatus = (reason === "cancelled"
+        ? (window.tr ? window.tr('bridge.status.stopped', 'Stopped') : 'cancelled')
+        : (window.tr ? window.tr('nai_bridge.sweep_done', 'Sweep done') : 'done'))
+        + " (" + doneCount + "/" + total + ")";
+      _sweepUpdateStatus(baseStatus);
+      if (window.BridgeSweepQuickJump) {
+        if (reason === "cancelled") {
+          window.BridgeSweepQuickJump.markCancelled(sweepRunMeta.id);
+        } else {
+          window.BridgeSweepQuickJump.markCompleted(sweepRunMeta.id);
+        }
+      }
+      if (reason !== "cancelled" && _bsqjFirstFid != null && window.BridgeSweepQuickJump) {
+        var _banner = document.createElement("div");
+        _banner.className = "bsqj-complete-banner";
+        var _link = document.createElement("a");
+        _link.href = "#";
+        _link.textContent = (window.tr && window.tr("bridge.sweep.openCompleted")) || "Sweep ページで確認 →";
+        _link.addEventListener("click", function (ev) {
+          ev.preventDefault();
+          window.BridgeSweepQuickJump.openInNewTab(sweepRunMeta.id, _bsqjFirstFid);
+        });
+        _banner.appendChild(_link);
+        document.body.appendChild(_banner);
+        setTimeout(function () { try { _banner.remove(); } catch (_) {} }, 8000);
+      }
+      if (deferSave && window.SweepBuffer && window.SweepBuffer.size("nai") > 0) {
+        var n = window.SweepBuffer.size("nai");
+        _sweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('nai_bridge.sweep_saving_batch', '保存中…') : 'saving…') + " (" + n + ")");
+        window.SweepBuffer.flushToServer("nai", "/ext/nai-bridge/api/save-batch")
+          .then(function(res) {
+            _sweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('nai_bridge.sweep_saved', '保存しました') : 'saved') + " (" + res.saved.length + ")");
+            // Deferred-save: pull the first file_id back so the history popover
+            // can deep-link into /sweep/<id>?from=<fid>.
+            if (_bsqjFirstFid == null && Array.isArray(res.saved_items)) {
+              for (var _bj = 0; _bj < res.saved_items.length; _bj++) {
+                var _itB = res.saved_items[_bj];
+                if (_itB && typeof _itB.file_id === "number") {
+                  _bsqjFirstFid = _itB.file_id;
+                  if (window.BridgeSweepQuickJump) {
+                    window.BridgeSweepQuickJump.registerFirstSavedFileId(sweepRunMeta.id, _bsqjFirstFid);
+                  }
+                  if (_bsqjOpenBtn) _bsqjOpenBtn.disabled = false;
+                  break;
+                }
+              }
+            }
+          })
+          .catch(function(e) {
+            _sweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('nai_bridge.sweep_save_failed', '保存失敗') : 'save failed') + ": " + e.message);
+            if (window.showToast) window.showToast((window.tr ? window.tr('nai_bridge.sweep_save_failed_toast', 'NAI Sweep の一括保存に失敗。次回ロード時に再試行されます。') : 'NAI batch save failed. Will retry on next load.'), true);
+            if (window.BridgeSweepQuickJump) window.BridgeSweepQuickJump.markFailed(sweepRunMeta.id);
+          });
+      }
+    }
+
+    function runOne() {
+      var done = zEnabled ? (zi >= zValues.length) : (xi >= xValues.length);
+      if (_sweepCancel || done) {
+        _finalizeAndSave(_sweepCancel ? "cancelled" : "done");
+        return;
+      }
+      var xValue = xValues[xi];
+      var xDisplay;
+      var xMacroEntry = null;  // macros mode: {1: val1, 2: val2, ...}
+      if (xIsMacros) {
+        xMacroEntry = xMacroValues[xi];
+        xDisplay = _macroEntryLabel("x", xMacroEntry);
+      } else {
+        xDisplay = _sweepFormatVal(xValue, xSpec.int);
+      }
+      var yValue = yEnabled ? yValues[yi] : null;
+      var yDisplay = null;
+      var yMacroEntry = null;
+      if (yEnabled) {
+        if (yIsMacros) {
+          yMacroEntry = yMacroValues[yi];
+          yDisplay = _macroEntryLabel("y", yMacroEntry);
+        } else {
+          yDisplay = _sweepFormatVal(yValue, ySpec.int);
+        }
+      }
+      var zValue = zEnabled ? zValues[zi] : null;
+      var zDisplay = null;
+      var zMacroEntry = null;
+      if (zEnabled) {
+        if (zIsMacros) {
+          zMacroEntry = zMacroValues[zi];
+          zDisplay = _macroEntryLabel("z", zMacroEntry);
+        } else {
+          zDisplay = _sweepFormatVal(zValue, zSpec.int);
+        }
+      }
+      var statusLabel = "(" + (doneCount + 1) + "/" + total + ") " +
+        xParamLabel + " = " + xDisplay +
+        (yEnabled ? "  /  " + yParamLabel + " = " + yDisplay : "") +
+        (zEnabled ? "  /  " + zParamLabel + " = " + zDisplay : "");
+      _sweepUpdateStatus(statusLabel);
+
+      if (xDomEl) {
+        xDomEl.value = xDisplay;
+        try { xDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+      }
+      if (yDomEl) {
+        yDomEl.value = yDisplay;
+        try { yDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+      }
+      if (zDomEl) {
+        zDomEl.value = zDisplay;
+        try { zDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+      }
+
+      // Deep-clone the frozen sweep-start snapshot — keeps the run isolated
+      // from any UI edits the user makes while the sweep is in progress.
+      var body = JSON.parse(JSON.stringify(_frozenBody));
+      // Substitute $x*/$y*/$z* (and the $* alias) in prompt + negative_prompt
+      // when any axis is in macros mode. Per-axis numeric values still go to
+      // their body[spec.body] field below.
+      var slotValuesByAxis = {};
+      if (xIsMacros) slotValuesByAxis.x = xMacroEntry;
+      if (yIsMacros) slotValuesByAxis.y = yMacroEntry;
+      if (zIsMacros) slotValuesByAxis.z = zMacroEntry;
+      if (xIsMacros || yIsMacros || zIsMacros) {
+        if (typeof body.prompt === "string") {
+          body.prompt = _nabSubstitutePromptMacros(body.prompt, slotValuesByAxis);
+        }
+        if (typeof body.negative_prompt === "string") {
+          body.negative_prompt = _nabSubstitutePromptMacros(body.negative_prompt, slotValuesByAxis);
+        }
+        // Also substitute in per-character prompts (キャラクタスクリプト).
+        // Without this, $x1/$y1/... in character prompts/negatives are sent
+        // verbatim to NAI and the sweep produces identical images per axis.
+        if (Array.isArray(body.characters)) {
+          for (var _ci = 0; _ci < body.characters.length; _ci++) {
+            var _ch = body.characters[_ci];
+            if (!_ch) continue;
+            if (typeof _ch.prompt === "string") {
+              _ch.prompt = _nabSubstitutePromptMacros(_ch.prompt, slotValuesByAxis);
+            }
+            if (typeof _ch.negative === "string") {
+              _ch.negative = _nabSubstitutePromptMacros(_ch.negative, slotValuesByAxis);
+            }
+          }
+        }
+      }
+      if (!xIsMacros) body[xSpec.body] = xSpec.int ? Math.round(xValue) : xValue;
+      if (yEnabled && !yIsMacros) body[ySpec.body] = ySpec.int ? Math.round(yValue) : yValue;
+      if (zEnabled && !zIsMacros) body[zSpec.body] = zSpec.int ? Math.round(zValue) : zValue;
+      body.seed = curSeed;
+      body.n_samples = 1;
+      if (deferSave) body.skip_save = true;
+
+      var perIterMeta = JSON.parse(JSON.stringify(sweepRunMeta));
+      perIterMeta.axes[0].index = xi;
+      perIterMeta.axes[0].value = xIsMacros ? xMacroEntry : xValue;
+      if (yEnabled) {
+        perIterMeta.axes[1].index = yi;
+        perIterMeta.axes[1].value = yIsMacros ? yMacroEntry : yValue;
+      }
+      if (zEnabled) {
+        perIterMeta.axes[2].index = zi;
+        perIterMeta.axes[2].value = zIsMacros ? zMacroEntry : zValue;
+      }
+      body.sweep_meta = perIterMeta;
+
+      var capturedXi = xi, capturedYi = yi, capturedZi = zi;
+      var capturedDisplay = (xParamLabel + " = " + xDisplay) +
+        (yEnabled ? " / " + yParamLabel + "=" + yDisplay : "") +
+        (zEnabled ? " / " + zParamLabel + "=" + zDisplay : "");
+
+      var t0 = Date.now();
+      window.bridgeFetch("nai", "generate", body, {}).then(function(r) { return r.json(); }).then(function(d) {
+        var elapsed = Date.now() - t0;
+        if (_bsqjFirstFid == null && d && Array.isArray(d.saved_items)) {
+          for (var _bi = 0; _bi < d.saved_items.length; _bi++) {
+            var _it = d.saved_items[_bi];
+            if (_it && typeof _it.file_id === "number") {
+              _bsqjFirstFid = _it.file_id;
+              if (window.BridgeSweepQuickJump) {
+                window.BridgeSweepQuickJump.registerFirstSavedFileId(sweepRunMeta.id, _bsqjFirstFid);
+              }
+              if (_bsqjOpenBtn) _bsqjOpenBtn.disabled = false;
+              break;
+            }
+          }
+        }
+        if (!d.ok) {
+          _sweepAppendError(capturedDisplay, "", d.error || "generation failed");
+          _sweepMarkGridError(capturedZi, capturedXi, capturedYi, d.error || "failed");
+        } else {
+          var images = d.images || [];
+          var mimeMap = {"png": "image/png", "webp": "image/webp", "jpg": "image/jpeg"};
+          var fmt = mimeMap[d.image_format] || mimeMap[_sweepGet("nabImageFormat").value] || "image/png";
+          if (images.length === 0) {
+            _sweepAppendError(capturedDisplay, "", window.tr ? window.tr('nai_bridge.no_images_returned', 'No images returned.') : 'no images');
+            _sweepMarkGridError(capturedZi, capturedXi, capturedYi, "no image");
+          } else {
+            _sweepAppendBlock(capturedDisplay, "", fmt, images[0], d.elapsed_ms || elapsed, d);
+            _sweepFillGridCell(capturedZi, capturedXi, capturedYi, fmt, images[0]);
+            if (deferSave && window.SweepBuffer) {
+              window.SweepBuffer.add("nai", {
+                base64: images[0].base64,
+                seed: images[0].seed,
+                image_format: d.image_format || _sweepGet("nabImageFormat").value || "png",
+                value: xValue,
+                label: capturedDisplay,
+                sweep_meta: perIterMeta,
+              });
+            }
+          }
+        }
+        // Advance: innermost = Y, middle = X, outermost = Z
+        doneCount++;
+        _advanceIndices();
+        runOne();
+      }).catch(function(e) {
+        // Aborted by user — don't show as an error.
+        if (e && (e.name === "AbortError" || /aborted/i.test(e.message || ""))) {
+          _sweepMarkGridError(capturedZi, capturedXi, capturedYi, "aborted");
+        } else {
+          _sweepAppendError(capturedDisplay, "", (e && e.message) || String(e));
+          _sweepMarkGridError(capturedZi, capturedXi, capturedYi, (e && e.message) || "error");
+        }
+        doneCount++;
+        _advanceIndices();
+        runOne();
+      });
+    }
+
+    function _advanceIndices() {
+      // Innermost loop = Y, middle = X, outermost = Z. Mirrors the cell
+      // ID layout (zi/xi/yi) so the user sees rows fill before columns
+      // and grids fill before tabs.
+      if (yEnabled) {
+        yi++;
+        if (yi >= yValues.length) {
+          yi = 0;
+          xi++;
+          if (zEnabled && xi >= xValues.length) {
+            xi = 0;
+            zi++;
+          }
+        }
+      } else {
+        xi++;
+        // Defensive: today the UI gates Z behind Y (zEnabled = yEnabled && ...)
+        // so this branch with zEnabled=true should not occur, but advance Z
+        // here too so a future "Z without Y" extension can't silently stall.
+        if (zEnabled && xi >= xValues.length) {
+          xi = 0;
+          zi++;
+        }
+      }
+    }
+
+    runOne();
+  };
+</script>

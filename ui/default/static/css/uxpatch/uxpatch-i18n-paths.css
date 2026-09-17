@@ -1,0 +1,53 @@
+/* i18n language menu */
+.lang-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.lang-menu .lang-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.lang-menu:focus-within .lang-toggle {
+  outline: 2px solid rgba(77, 144, 226, 0.9);
+  outline-offset: 2px;
+}
+
+/* Long path UX: horizontal scroll for file paths */
+.file-path-container {
+  min-width: 0;
+}
+
+.file-path-clickable {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-gutter: stable both-edges;
+}
+
+.file-path-container .file-path-clickable {
+  flex: 1 1 auto;
+}
+
+@media (max-width: 720px) {
+  .file-path-clickable {
+    padding: 4px 8px;
+  }
+}
+
+.file-path-clickable {
+  word-break: normal !important;
+}

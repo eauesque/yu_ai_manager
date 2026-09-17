@@ -1,0 +1,661 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+
+  // Sweep axis wildcard expansion (shared installer; see NAI bridge for design).
+  if (typeof window._sweepLoadAxes !== "function") {
+    window._sweepAxesCache = null;
+    window._sweepAxesPromise = null;
+    window._sweepAxesReadyCallbacks = [];
+    window._sweepOnAxesReady = function(cb) {
+      if (typeof cb !== "function") return;
+      if (window._sweepAxesCache) { try { cb(); } catch (_e) {} return; }
+      window._sweepAxesReadyCallbacks.push(cb);
+    };
+    window._sweepLoadAxes = function() {
+      if (window._sweepAxesCache) return Promise.resolve(window._sweepAxesCache);
+      if (window._sweepAxesPromise) return window._sweepAxesPromise;
+      window._sweepAxesPromise = fetch("/ext/prompt-sim/sweep-axes", { credentials: "same-origin" })
+        .then(function(r) { return r.ok ? r.json() : { axes: {} }; })
+        .then(function(d) { window._sweepAxesCache = (d && d.axes) || {}; return window._sweepAxesCache; })
+        .catch(function() { window._sweepAxesCache = {}; return {}; })
+        .then(function(c) {
+          var cbs = window._sweepAxesReadyCallbacks.splice(0);
+          for (var i = 0; i < cbs.length; i++) { try { cbs[i](); } catch (_e) {} }
+          return c;
+        });
+      return window._sweepAxesPromise;
+    };
+    window._sweepBuildAxisInsertSelect = function(targetTextarea) {
+      var sel = document.createElement("select");
+      sel.style.cssText = "font-size:11px;max-width:160px;";
+      sel.title = window.tr ? window.tr('sweep_axes.insert_axis_title', '軸ファイルを挿入 (__name__ として追加)') : 'insert axis file';
+      function refill() {
+        while (sel.firstChild) sel.removeChild(sel.firstChild);
+        var head = document.createElement("option");
+        head.value = "";
+        head.textContent = window.tr ? window.tr('sweep_axes.insert_axis', '+ 軸ファイル挿入') : '+ insert axis';
+        sel.appendChild(head);
+        var axes = window._sweepAxesCache || {};
+        var names = Object.keys(axes).sort();
+        if (names.length === 0) {
+          var none = document.createElement("option");
+          none.disabled = true;
+          none.textContent = window.tr ? window.tr('sweep_axes.no_axes', '(軸ファイル無し)') : '(no axis files)';
+          sel.appendChild(none);
+          return;
+        }
+        for (var i = 0; i < names.length; i++) {
+          var name = names[i];
+          var opt = document.createElement("option");
+          opt.value = name;
+          var n = (axes[name] || []).length;
+          opt.textContent = "__" + name + "__ (" + n + ")";
+          sel.appendChild(opt);
+        }
+      }
+      refill();
+      window._sweepOnAxesReady(refill);
+      sel.addEventListener("change", function() {
+        var name = sel.value;
+        if (!name) return;
+        var token = "__" + name + "__";
+        var cur = targetTextarea.value || "";
+        var insert = (cur && !/\n$/.test(cur) ? "\n" : "") + token;
+        targetTextarea.value = cur + insert;
+        try { targetTextarea.dispatchEvent(new Event("input", { bubbles: true })); } catch (_e) {}
+        sel.value = "";
+      });
+      return sel;
+    };
+    window._sweepExpandRefValues = function(values, axes) {
+      if (!axes) axes = window._sweepAxesCache || {};
+      var out = [];
+      var pat = /^__([\w\/\-]+)__$/;
+      for (var i = 0; i < values.length; i++) {
+        var v = String(values[i]).trim();
+        var m = v.match(pat);
+        if (m && Object.prototype.hasOwnProperty.call(axes, m[1]) && Array.isArray(axes[m[1]])) {
+          var lines = axes[m[1]];
+          for (var j = 0; j < lines.length; j++) out.push(lines[j]);
+        } else {
+          out.push(values[i]);
+        }
+      }
+      return out;
+    };
+  }
+
+  // 1-axis parameter sweep runner for SD WebUI Bridge.
+  // For denoising_strength the displayed slider depends on whether Hires Fix
+  // is enabled (sdwbHiresDenoising) or img2img is loaded (sdwbDenoising); the
+  // body-level field is the same so we just override body.denoising_strength
+  // and best-effort sync whichever DOM input is visible.
+
+  var _SSWEEP_PARAMS = {
+    "cfg_scale":          { body: "cfg_scale",          dom: "sdwbCfg",      int: false, label: "CFG Scale" },
+    "steps":              { body: "steps",              dom: "sdwbSteps",    int: true,  label: "Steps"     },
+    "denoising_strength": { body: "denoising_strength", dom: null,           int: false, label: "Denoising Strength" },
+    "hr_scale":           { body: "hr_scale",           dom: "sdwbHiresScale", int: false, label: "Hires Scale" },
+  };
+
+  // Default safety cap for non-local SD WebUI endpoints. Local (loopback /
+  // RFC1918 / *.local) gets a much higher cap because there is no per-request
+  // cost or rate-limit pressure on a self-hosted instance — the user can
+  // legitimately want a 22×22 grid (484 cells) etc.
+  var _SSWEEP_MAX_DEFAULT = 50;
+  var _SSWEEP_MAX_LOCAL   = 500;
+  var _ssweepCancel = false;
+  var _ssweepRunning = false;
+  var _ssweepAbort = null;
+
+  function _ssweepGet(id) { return document.getElementById(id); }
+
+  function _ssweepEffectiveMax() {
+    try {
+      var urlEl = _ssweepGet("sdwbCfgUrl");
+      if (urlEl && urlEl.value && typeof isLocalUrl === "function" && isLocalUrl(urlEl.value)) {
+        return _SSWEEP_MAX_LOCAL;
+      }
+    } catch (_) { /* fall through */ }
+    return _SSWEEP_MAX_DEFAULT;
+  }
+
+  function _ssweepBuildSeries(min, max, mode, count, step) {
+    if (!isFinite(min) || !isFinite(max)) return [];
+    if (min === max) return [min];
+    var lo = Math.min(min, max);
+    var hi = Math.max(min, max);
+    var cap = _ssweepEffectiveMax();
+    var values = [];
+    if (mode === "step") {
+      if (!(step > 0)) return [];
+      for (var k = 0; k <= cap; k++) {
+        var val = lo + k * step;
+        if (val > hi + 1e-9) break;
+        values.push(parseFloat(val.toFixed(6)));
+      }
+    } else {
+      var n = Math.max(2, Math.min(cap, Math.floor(count)));
+      for (var j = 0; j < n; j++) {
+        values.push(parseFloat((lo + (hi - lo) * j / (n - 1)).toFixed(6)));
+      }
+    }
+    return values;
+  }
+
+  function _ssweepFormatVal(val, isInt) {
+    if (isInt) return String(Math.round(val));
+    return String(val);
+  }
+
+  function _ssweepAppendBlock(value, paramLabel, mime, imgObj, elapsedMs, serverData) {
+    var label = paramLabel + " = " + value;
+    if (window._sdwbThumbStrip && typeof window._sdwbThumbStrip.update === "function") {
+      var sd = serverData || {};
+      var prompt = sd.expanded_prompt || "";
+      window._sdwbThumbStrip.update([imgObj], mime, {
+        elapsed_ms: elapsedMs,
+        expanded_prompt: "[Sweep] " + label + (prompt ? "\n\n" + prompt : ""),
+        original_prompt: sd.original_prompt,
+        final_negative: sd.final_negative,
+        adetailer: sd.adetailer,
+        saved: sd.saved,
+      });
+    }
+  }
+
+  function _ssweepUpdateStatus(text) {
+    var s = _ssweepGet("sdwbSweepStatus");
+    if (s) s.textContent = text || "";
+  }
+
+  function _ssweepClearChildren(el) {
+    while (el && el.firstChild) el.removeChild(el.firstChild);
+  }
+
+  // ``xLabels`` / ``yLabels`` are pre-computed header strings — numeric
+  // axes pass `<param> = <formatted_value>`, the macros axis can pass a
+  // multi-key summary like `$1=happy, $2=0.5`.
+  function _ssweepInitGrid(xLabels, yLabels, zLabels) {
+    var host = _ssweepGet("sdwbSweepGrid");
+    if (!host) return;
+    _ssweepClearChildren(host);
+    host.style.display = "";
+    var zCount = zLabels ? zLabels.length : 1;
+
+    if (zLabels && zLabels.length > 1) {
+      var tabs = document.createElement("div");
+      tabs.className = "sdwb-sweep-z-tabs";
+      tabs.style.cssText = "display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px;";
+      zLabels.forEach(function(label, zi) {
+        var btn = document.createElement("button");
+        btn.type = "button";
+        btn.textContent = label;
+        btn.className = "sdwb-btn small";
+        btn.style.cssText = "font-size:11px;" + (zi === 0 ? "background:#4fc3f7;color:#000;" : "");
+        btn.addEventListener("click", function() {
+          for (var k = 0; k < zCount; k++) {
+            var g = _ssweepGet("sdwbSweepGridZ_" + k);
+            if (g) g.style.display = (k === zi) ? "" : "none";
+          }
+          Array.prototype.forEach.call(tabs.querySelectorAll("button"), function(b, k) {
+            b.style.background = (k === zi) ? "#4fc3f7" : "";
+            b.style.color = (k === zi) ? "#000" : "";
+          });
+        });
+        tabs.appendChild(btn);
+      });
+      host.appendChild(tabs);
+    }
+
+    for (var zi = 0; zi < zCount; zi++) {
+      var grid = document.createElement("div");
+      grid.id = "sdwbSweepGridZ_" + zi;
+      if (zCount > 1 && zi > 0) grid.style.display = "none";
+      var table = document.createElement("table");
+      table.className = "sdwb-sweep-grid-table";
+      table.style.cssText = "border-collapse:separate;border-spacing:6px;";
+
+      var headRow = document.createElement("tr");
+      if (yLabels) headRow.appendChild(document.createElement("th"));
+      for (var xi = 0; xi < xLabels.length; xi++) {
+        var th = document.createElement("th");
+        th.style.cssText = "font-size:12px;font-weight:600;text-align:center;padding:2px 6px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;max-width:160px;line-height:1.25;";
+        th.title = xLabels[xi];
+        th.textContent = xLabels[xi];
+        headRow.appendChild(th);
+      }
+      table.appendChild(headRow);
+
+      var rowsCount = yLabels ? yLabels.length : 1;
+      for (var yi = 0; yi < rowsCount; yi++) {
+        var row = document.createElement("tr");
+        if (yLabels) {
+          var rowHead = document.createElement("th");
+          rowHead.style.cssText = "font-size:12px;font-weight:600;text-align:right;padding:2px 6px;white-space:normal;overflow-wrap:anywhere;word-break:break-word;max-width:140px;line-height:1.25;";
+          rowHead.title = yLabels[yi];
+          rowHead.textContent = yLabels[yi];
+          row.appendChild(rowHead);
+        }
+        for (var xi2 = 0; xi2 < xLabels.length; xi2++) {
+          var td = document.createElement("td");
+          td.style.cssText = "width:160px;height:160px;background:rgba(127,127,127,0.12);border-radius:4px;text-align:center;vertical-align:middle;font-size:11px;opacity:0.6;";
+          td.id = "sdwbSweepGridCell_" + zi + "_" + xi2 + "_" + yi;
+          td.textContent = "…";
+          row.appendChild(td);
+        }
+        table.appendChild(row);
+      }
+      grid.appendChild(table);
+      host.appendChild(grid);
+    }
+  }
+
+  function _ssweepFillGridCell(zIdx, xIdx, yIdx, mime, imgObj) {
+    var cell = _ssweepGet("sdwbSweepGridCell_" + zIdx + "_" + xIdx + "_" + yIdx);
+    if (!cell || !imgObj || !imgObj.base64) return;
+    _ssweepClearChildren(cell);
+    cell.style.opacity = "1";
+    cell.style.padding = "0";
+    var img = document.createElement("img");
+    img.src = "data:" + mime + ";base64," + imgObj.base64;
+    img.alt = "sweep cell " + xIdx + "/" + yIdx;
+    img.style.cssText = "width:100%;height:100%;object-fit:contain;cursor:zoom-in;border-radius:4px;";
+    img.addEventListener("click", function() {
+      // Use the in-page overlay (window.bridgeOpenFullsize from
+      // bridge-app.ts) instead of window.open — Tauri / mobile in-app
+      // browsers don't open new tabs, so a blob: + window.open path
+      // produces a blank screen there. The data: URL is fine for an
+      // inline <img>; the new-tab Blob detour is no longer needed.
+      try {
+        var dataUrl = "data:" + (mime || "image/png") + ";base64," + imgObj.base64;
+        if (typeof window.bridgeOpenFullsize === "function") {
+          window.bridgeOpenFullsize(dataUrl);
+        }
+      } catch (_) {}
+    });
+    cell.appendChild(img);
+  }
+
+  function _ssweepMarkGridError(zIdx, xIdx, yIdx, message) {
+    var cell = _ssweepGet("sdwbSweepGridCell_" + zIdx + "_" + xIdx + "_" + yIdx);
+    if (!cell) return;
+    _ssweepClearChildren(cell);
+    cell.style.color = "#f44336";
+    cell.style.opacity = "1";
+    cell.textContent = "✗ " + (message || "error");
+  }
+
+  function _ssweepApplyMode() {
+    [
+      { mode: "sdwbSweepMode", count: "sdwbSweepCount", step: "sdwbSweepStep", paramSel: "sdwbSweepParam" },
+      { mode: "sdwbSweepYMode", count: "sdwbSweepYCount", step: "sdwbSweepYStep", paramSel: "sdwbSweepYParam" },
+      { mode: "sdwbSweepZMode", count: "sdwbSweepZCount", step: "sdwbSweepZStep", paramSel: "sdwbSweepZParam" },
+    ].forEach(function(g) {
+      var paramSel = _ssweepGet(g.paramSel);
+      if (paramSel && paramSel.value === "_macros") return;
+      var modeSel = _ssweepGet(g.mode);
+      if (!modeSel) return;
+      var mode = modeSel.value || "count";
+      [
+        { id: g.count, show: mode === "count" },
+        { id: g.step,  show: mode === "step"  },
+      ].forEach(function(p) {
+        var input = _ssweepGet(p.id);
+        if (!input) return;
+        var label = document.querySelector('label[for="' + p.id + '"]');
+        input.style.display = p.show ? "" : "none";
+        if (label) label.style.display = p.show ? "" : "none";
+      });
+    });
+  }
+
+  // ---------- Prompt macros (S/R) -------------------------------
+  // Per-axis state. See NAI bridge _script_sweep.html for design notes.
+  // Substitution markers: $x1/$y1/$z1 (and $1 as alias for $x1).
+  var _sdwbMacroSlots = {
+    x: [{ type: "number", min: 0.4, max: 1.0, mode: "count", count: 6, step: 0.1 }],
+    y: [{ type: "number", min: 0.4, max: 1.0, mode: "count", count: 3, step: 0.1 }],
+    z: [{ type: "number", min: 0.4, max: 1.0, mode: "count", count: 3, step: 0.1 }],
+  };
+
+  function _sdwbAxisIds(axis) {
+    var p = axis === "x" ? "" : axis.toUpperCase();
+    return {
+      editor:         "sdwbSweep" + p + "MacrosEditor",
+      list:           "sdwbSweep" + p + "MacrosList",
+      addBtn:         "sdwbSweep" + p + "MacroAddBtn",
+      sharedCount:    "sdwbSweep" + p + "MacrosSharedCount",
+      sharedCountRow: "sdwbSweep" + p + "MacrosSharedCountRow",
+      padShort:       "sdwbSweep" + p + "MacrosPadShort",
+      paramSel:       axis === "x" ? "sdwbSweepParam" : ("sdwbSweep" + p + "Param"),
+      rangeIds:       (axis === "x"
+        ? ["sdwbSweepMin", "sdwbSweepMax", "sdwbSweepMode", "sdwbSweepCount", "sdwbSweepStep"]
+        : ["sdwbSweep" + p + "Min", "sdwbSweep" + p + "Max", "sdwbSweep" + p + "Mode", "sdwbSweep" + p + "Count", "sdwbSweep" + p + "Step"]),
+    };
+  }
+
+  function _sdwbMacroParseTextValues(text) {
+    if (!text) return [];
+    var raw = /\n/.test(text) ? text.split("\n") : text.split(",");
+    var out = [];
+    for (var i = 0; i < raw.length; i++) {
+      var v = raw[i].trim();
+      if (v.length > 0) out.push(v);
+    }
+    if (window._sweepExpandRefValues) out = window._sweepExpandRefValues(out);
+    return out;
+  }
+  function _sdwbMacroTextLength(s) { return _sdwbMacroParseTextValues((s && s.text) || "").length; }
+  function _sdwbMacroDerivedCount(axis) {
+    var slots = _sdwbMacroSlots[axis];
+    var textSlots = slots.filter(function(s){ return s.type === "text"; });
+    if (textSlots.length === 0) return null;
+    var lens = textSlots.map(_sdwbMacroTextLength);
+    var pad = _ssweepGet(_sdwbAxisIds(axis).padShort);
+    if (pad && pad.checked) return Math.max.apply(null, lens);
+    return Math.min.apply(null, lens);
+  }
+
+  function _sdwbRenderMacros(axis) {
+    var ids = _sdwbAxisIds(axis);
+    var slots = _sdwbMacroSlots[axis];
+    var list = _ssweepGet(ids.list);
+    if (!list) return;
+    _ssweepClearChildren(list);
+    var multi = slots.length > 1 || slots.some(function(s){return s.type==="text";});
+    var sharedRow = _ssweepGet(ids.sharedCountRow);
+    if (sharedRow) sharedRow.style.display = multi ? "" : "none";
+    var sharedInput = _ssweepGet(ids.sharedCount);
+    var derived = _sdwbMacroDerivedCount(axis);
+    if (sharedInput) {
+      if (derived != null) {
+        sharedInput.value = String(derived);
+        sharedInput.readOnly = true;
+        sharedInput.title = window.tr ? window.tr('sd_bridge.sweep_macros_count_from_text', 'テキスト slot のカンマ数から自動算出') : 'auto from text slot comma count';
+        sharedInput.style.opacity = "0.7";
+      } else {
+        sharedInput.readOnly = false;
+        sharedInput.title = "";
+        sharedInput.style.opacity = "";
+      }
+    }
+
+    slots.forEach(function(slot, idx) {
+      var row = document.createElement("div");
+      row.className = "sdwb-macro-slot";
+      row.style.cssText = "display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px;background:rgba(127,127,127,0.06);border-radius:4px;";
+      var marker = document.createElement("span");
+      marker.style.cssText = "font-family:monospace;font-weight:600;color:#4fc3f7;min-width:36px;";
+      marker.textContent = "$" + axis + (idx + 1);
+      row.appendChild(marker);
+
+      var typeSel = document.createElement("select");
+      typeSel.style.cssText = "font-size:12px;";
+      ["number", "text"].forEach(function(t) {
+        var o = document.createElement("option");
+        o.value = t;
+        o.textContent = t === "number" ? "数値" : "テキスト";
+        if (slot.type === t) o.selected = true;
+        typeSel.appendChild(o);
+      });
+      typeSel.addEventListener("change", function() {
+        slot.type = typeSel.value;
+        if (slot.type === "number") {
+          if (typeof slot.min !== "number") slot.min = 0;
+          if (typeof slot.max !== "number") slot.max = 1;
+          if (typeof slot.step !== "number") slot.step = 0.1;
+        } else {
+          if (typeof slot.text !== "string") slot.text = "";
+        }
+        _sdwbRenderMacros(axis);
+      });
+      row.appendChild(typeSel);
+
+      if (slot.type === "number") {
+        var lblMin = document.createElement("span"); lblMin.textContent = "min"; lblMin.style.fontSize = "11px"; row.appendChild(lblMin);
+        var minIn = document.createElement("input");
+        minIn.type = "number"; minIn.value = slot.min; minIn.step = "0.1"; minIn.style.width = "70px";
+        minIn.addEventListener("input", function() { slot.min = parseFloat(minIn.value); });
+        row.appendChild(minIn);
+        var lblMax = document.createElement("span"); lblMax.textContent = "max"; lblMax.style.fontSize = "11px"; row.appendChild(lblMax);
+        var maxIn = document.createElement("input");
+        maxIn.type = "number"; maxIn.value = slot.max; maxIn.step = "0.1"; maxIn.style.width = "70px";
+        maxIn.addEventListener("input", function() { slot.max = parseFloat(maxIn.value); });
+        row.appendChild(maxIn);
+
+        if (!multi) {
+          if (slot.mode !== "step" && slot.mode !== "count") slot.mode = "count";
+          var modeSel = document.createElement("select");
+          modeSel.style.cssText = "font-size:12px;";
+          [
+            { v: "count", label: window.tr ? window.tr('sd_bridge.sweep_mode_count', '枚数で等分割') : 'count' },
+            { v: "step",  label: window.tr ? window.tr('sd_bridge.sweep_mode_step',  '間隔で刻む')   : 'step'  },
+          ].forEach(function(opt) {
+            var o = document.createElement("option");
+            o.value = opt.v; o.textContent = opt.label;
+            if (slot.mode === opt.v) o.selected = true;
+            modeSel.appendChild(o);
+          });
+          modeSel.addEventListener("change", function() { slot.mode = modeSel.value; _sdwbRenderMacros(axis); });
+          row.appendChild(modeSel);
+          if (slot.mode === "step") {
+            var lblStep = document.createElement("span"); lblStep.textContent = "step"; lblStep.style.fontSize = "11px"; row.appendChild(lblStep);
+            var stepIn = document.createElement("input");
+            stepIn.type = "number"; stepIn.value = slot.step != null ? slot.step : 0.1;
+            stepIn.step = "0.1"; stepIn.min = "0.0001"; stepIn.style.width = "70px";
+            stepIn.addEventListener("input", function() { slot.step = parseFloat(stepIn.value); });
+            row.appendChild(stepIn);
+          } else {
+            var lblCount = document.createElement("span"); lblCount.textContent = "count"; lblCount.style.fontSize = "11px"; row.appendChild(lblCount);
+            var countIn = document.createElement("input");
+            countIn.type = "number"; countIn.value = slot.count != null ? slot.count : 6;
+            countIn.min = "2"; countIn.max = "500"; countIn.style.width = "70px";
+            countIn.addEventListener("input", function() { slot.count = parseInt(countIn.value, 10) || 6; });
+            row.appendChild(countIn);
+          }
+        }
+      } else {
+        var taPlaceholder = window.tr
+          ? window.tr('sd_bridge.sweep_macros_text_placeholder', '1 行 1 値 (改行区切り)、または 1 行のとき , で区切り\n例:\n  a, b, c\n  d')
+          : 'one value per line (newline-separated), or comma-separated when single line\nexample:\n  a, b, c\n  d';
+        var taWrap = document.createElement("div");
+        taWrap.className = "sdwb-editor-wrap";
+        taWrap.style.cssText = "flex:1;min-width:200px;";
+        var ta;
+        if (typeof PromptSyntaxWidget !== "undefined" && PromptSyntaxWidget.createEditor) {
+          try {
+            var _ed = PromptSyntaxWidget.createEditor(taWrap, {
+              value: slot.text || "",
+              placeholder: taPlaceholder,
+              rows: 5,
+              showSyntaxBar: false,
+              showErrors: false,
+            });
+            ta = _ed.getTextarea();
+          } catch (_e) { ta = null; }
+        }
+        if (!ta) {
+          ta = document.createElement("textarea");
+          ta.placeholder = taPlaceholder;
+          ta.value = slot.text || "";
+          ta.style.cssText = "width:100%;min-height:104px;font-size:12px;font-family:monospace;";
+          taWrap.appendChild(ta);
+        }
+        var lenLabel = document.createElement("span");
+        lenLabel.style.cssText = "font-size:11px;opacity:0.7;min-width:96px;align-self:flex-start;margin-top:4px;white-space:nowrap;";
+        function _sdwbMacroRenderLen() {
+          var raw = slot.text || "";
+          var lines = raw.length === 0 ? 0 : raw.split("\n").length;
+          lenLabel.textContent = "行=" + lines + " 値=" + _sdwbMacroTextLength(slot);
+        }
+        _sdwbMacroRenderLen();
+        ta.addEventListener("input", function() {
+          slot.text = ta.value;
+          var sInput = _ssweepGet(ids.sharedCount);
+          var d = _sdwbMacroDerivedCount(axis);
+          if (sInput && d != null) sInput.value = String(d);
+          _sdwbMacroRenderLen();
+        });
+        row.appendChild(taWrap);
+        if (window._sweepBuildAxisInsertSelect) {
+          row.appendChild(window._sweepBuildAxisInsertSelect(ta));
+        }
+        row.appendChild(lenLabel);
+      }
+
+      var rmBtn = document.createElement("button");
+      rmBtn.type = "button"; rmBtn.textContent = "×"; rmBtn.title = "remove";
+      rmBtn.style.cssText = "background:transparent;border:1px solid rgba(127,127,127,0.3);color:inherit;cursor:pointer;width:24px;height:24px;border-radius:4px;";
+      rmBtn.addEventListener("click", function() {
+        slots.splice(idx, 1);
+        if (slots.length === 0) {
+          slots.push({ type: "number", min: 0.4, max: 1.0, mode: "count", count: 6, step: 0.1 });
+        }
+        _sdwbRenderMacros(axis);
+      });
+      row.appendChild(rmBtn);
+      list.appendChild(row);
+    });
+  }
+
+  // axis defaults to "x" for backward compatibility with older saved sweeps.
+  window._sdwbRestoreSweepMacros = function(series, axis) {
+    if (!axis) axis = "x";
+    var diag = "[sdwb/restore-macros] axis=" + axis;
+    if (!Array.isArray(series) || series.length === 0) {
+      console.warn(diag + " — empty series, skipping");
+      return;
+    }
+    if (!_sdwbMacroSlots[axis]) {
+      console.warn(diag + " — _sdwbMacroSlots['" + axis + "'] missing");
+      return;
+    }
+    console.log(diag + " — restoring " + series.length + " entries");
+    var first = series[0];
+    if (typeof first !== "object" || first === null) return;
+    var keys = Object.keys(first)
+      .map(function(k) { return parseInt(k, 10); })
+      .filter(function(n) { return !isNaN(n); })
+      .sort(function(a, b) { return a - b; });
+    if (keys.length === 0) return;
+    var newSlots = [];
+    keys.forEach(function(k) {
+      var vals = series.map(function(s) { return s ? s[k] : undefined; });
+      var firstVal = vals[0];
+      if (typeof firstVal === "string") {
+        // Newline-join (not ", ") so values containing commas survive a
+        // round trip. The macros parser treats newline as the slot
+        // separator when present.
+        newSlots.push({ type: "text", text: vals.join("\n") });
+      } else {
+        var nums = vals
+          .map(function(v) { return Number(v); })
+          .filter(function(n) { return !isNaN(n); });
+        if (nums.length === 0) {
+          newSlots.push({ type: "number", min: 0, max: 1, mode: "count", count: 6, step: 0.1 });
+        } else {
+          var mn = Math.min.apply(null, nums);
+          var mx = Math.max.apply(null, nums);
+          newSlots.push({
+            type: "number", min: mn, max: mx,
+            mode: "count", count: nums.length, step: 0.1,
+          });
+        }
+      }
+    });
+    _sdwbMacroSlots[axis] = newSlots;
+    _sdwbRenderMacros(axis);
+    _ssweepApplyMacrosVisibility();
+  };
+
+  function _sdwbMacroAdd(axis) {
+    _sdwbMacroSlots[axis].push({ type: "number", min: 0, max: 1, mode: "count", count: 6 });
+    _sdwbRenderMacros(axis);
+  }
+
+  function _sdwbMacroBuildSeries(axis, silent) {
+    var ids = _sdwbAxisIds(axis);
+    var slots = _sdwbMacroSlots[axis];
+    var axisLabel = axis.toUpperCase();
+    if (slots.length === 0) {
+      if (!silent) window.showToast((window.tr ? window.tr('sd_bridge.sweep_macros_empty', 'マクロ slot がありません') : 'no macro slots') + " (" + axisLabel + ")", true);
+      return null;
+    }
+    var multi = slots.length > 1 || slots.some(function(s){return s.type==="text";});
+    var padShortEl = _ssweepGet(ids.padShort);
+    var padShort = !!(padShortEl && padShortEl.checked);
+    var sharedCount;
+    if (multi) {
+      var textSlots = slots.filter(function(s){ return s.type === "text"; });
+      var derivedFromText = _sdwbMacroDerivedCount(axis);
+      if (derivedFromText != null) {
+        if (!padShort && textSlots.length >= 2) {
+          var lens = textSlots.map(_sdwbMacroTextLength);
+          var allSame = lens.every(function(L){ return L === lens[0]; });
+          if (!allSame) {
+            if (!silent) window.showToast(
+              (window.tr ? window.tr('sd_bridge.sweep_macros_text_length_mismatch',
+                'テキスト slot のカンマ数が一致しません。揃えるか「短い slot は空白で埋める」をオン: ')
+                : 'Text slots have different comma counts. Match them or enable pad-short: ') +
+              lens.join(" / ") + " (" + axisLabel + ")",
+              true,
+            );
+            return null;
+          }
+        }
+        sharedCount = derivedFromText;
+      } else {
+        var sc = _ssweepGet(ids.sharedCount);
+        sharedCount = parseInt(sc ? sc.value : "6", 10) || 6;
+      }
+    } else {
+      var only = slots[0];
+      if (only.type === "number" && only.mode === "step" && typeof only.step === "number" && only.step > 0) {
+        var derived = _ssweepBuildSeries(only.min, only.max, "step", 0, only.step);
+        sharedCount = derived.length;
+      } else if (typeof only.count === "number" && only.count >= 2) {
+        sharedCount = only.count;
+      } else {
+        sharedCount = 6;
+      }
+    }
+    if (sharedCount < 1) sharedCount = 1;
+
+    var perSlot = [];
+    for (var i = 0; i < slots.length; i++) {
+      var s = slots[i];
+      var arr;
+      if (s.type === "number") {
+        if (!multi && s.mode === "step" && typeof s.step === "number" && s.step > 0) {
+          arr = _ssweepBuildSeries(s.min, s.max, "step", 0, s.step);
+        } else {
+          arr = _ssweepBuildSeries(s.min, s.max, "count", sharedCount, 0.1);
+        }
+      } else {
+        arr = _sdwbMacroParseTextValues(s.text || "");
+        if (padShort && arr.length < sharedCount) {
+          while (arr.length < sharedCount) arr.push("");
+        }
+      }
+      if (arr.length < 1) {
+        if (!silent) window.showToast((window.tr ? window.tr('sd_bridge.sweep_macros_slot_empty', 'マクロ slot $') : 'macro slot $') + axis + (i + 1) + (window.tr ? window.tr('sd_bridge.sweep_macros_slot_empty_suffix', ' に値がありません') : ' has no values'), true);
+        return null;
+      }
+      perSlot.push(arr);
+    }
+    var actualCount = sharedCount;
+    for (var j = 0; j < perSlot.length; j++) {
+      if (perSlot[j].length < actualCount) actualCount = perSlot[j].length;
+    }
+    var valuesPerIter = [];
+    for (var k = 0; k < actualCount; k++) {
+      var entry = {};
+      for (var s2 = 0; s2 < perSlot.length; s2++) {
+        entry[s2 + 1] = perSlot[s2][k];
+      }
+      valuesPerIter.push(entry);
+    }
+    return { count: actualCount, valuesPerIter: valuesPerIter };
+  }
+</script>

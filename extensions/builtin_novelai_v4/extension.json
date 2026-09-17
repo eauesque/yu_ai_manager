@@ -1,0 +1,34 @@
+{
+  "name": "builtin-novelai-v4",
+  "version": "1.1.0",
+  "description": "NovelAI V4 metadata extraction (builtin) - supports Character Prompts and Vibe Transfer in PNG/WebP and produces structured inspect output",
+  "type": "importer",
+  "category": "metadata",
+  "entry": "novelai_v4.py",
+  "hooks": [
+    "on_scan_file",
+    "on_build_sections"
+  ],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/novelai-v4",
+  "config": {
+    "enabled": true,
+    "priority": 50
+  },
+  "config_schema": {
+    "extract_vibe_transfer": {
+      "type": "bool",
+      "default": true,
+      "label": "Also extract Vibe Transfer information",
+      "cli_flag": "--extract-vibe",
+      "description": "Extract the strength/description of Vibe Transfer"
+    },
+    "merge_character_prompts": {
+      "type": "bool",
+      "default": true,
+      "label": "Merge character prompts into the base",
+      "cli_flag": "--merge-chars",
+      "description": "Join base_caption + char_captions with commas"
+    }
+  }
+}

@@ -1,0 +1,34 @@
+.prompt-label {
+  font-weight: 600;
+  color: #4a90e2;
+  margin-right: 5px;
+}
+
+.prompt-negative {
+  color: #e94b3c;
+}
+
+.result-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.btn-small {
+  padding: 5px 10px;
+  font-size: 12px;
+  background: #f0f0f0;
+  color: #333;
+  border: 1px solid var(--border);
+}
+
+.btn-small:hover {
+  background: #e0e0e0;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  color: #999;
+}

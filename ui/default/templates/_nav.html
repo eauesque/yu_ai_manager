@@ -1,0 +1,89 @@
+<!-- Skip link (WCAG 2.2 AA) -->
+<a href="#main-content" class="skip-link" data-i18n="nav.skip_to_content">Skip to main content</a>
+<!-- Fixed navbar (shared across all pages) -->
+<link rel="stylesheet" href="/static/css/nav/nav.css?v=20260506a">
+<link rel="stylesheet" href="/static/css/nav/ext-launcher.css?v=20260310">
+<link rel="stylesheet" href="/static/css/nav/textarea-drag.css?v=20260228">
+<nav id="fixedNav">
+  <a href="/" class="nav-brand"><svg class="eauesque-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="20" height="20" role="img" aria-label="YU AI Manager"><defs><mask id="eauesque-notch"><rect width="100" height="100" fill="white"/><path fill="black" d="M 50 50 Q 39.67 27.10 25.00 6.70 A 50 50 0 0 1 48.82 0.01 Q 46.91 25.07 50 50 Z"/></mask></defs><g mask="url(#eauesque-notch)"><path fill="currentColor" fill-rule="evenodd" d="M50 18 A32 32 0 1 1 49.999 18 Z M50 31 A19 19 0 1 0 50.001 31 Z"/><g stroke="currentColor" stroke-width="3.2" stroke-linecap="round" fill="none"><path d="M50,31 Q53.5,35.0 50,39"/><path d="M50,31 Q53.5,35.0 50,39" transform="rotate(45 50 50)"/><path d="M50,31 Q53.5,35.0 50,39" transform="rotate(90 50 50)"/><path d="M50,31 Q53.5,35.0 50,39" transform="rotate(135 50 50)"/><path d="M50,31 Q53.5,35.0 50,39" transform="rotate(180 50 50)"/><path d="M50,31 Q53.5,35.0 50,39" transform="rotate(225 50 50)"/><path d="M50,31 Q53.5,35.0 50,39" transform="rotate(270 50 50)"/><path d="M50,31 Q53.5,35.0 50,39" transform="rotate(315 50 50)"/></g></g><g fill="currentColor" opacity="0.90"><path d="M58.70,14.64 A5.5,5.5,0,1,1,68.86,18.85 Q65.24,14.64 66.46,10.27 Q64.23,14.22 58.70,14.64Z"/><path d="M81.15,31.14 A5.5,5.5,0,1,1,85.36,41.30 Q85.78,35.77 89.73,33.54 Q85.36,34.76 81.15,31.14Z"/><path d="M85.36,58.70 A5.5,5.5,0,1,1,81.15,68.86 Q85.36,65.24 89.73,66.46 Q85.78,64.23 85.36,58.70Z"/><path d="M68.86,81.15 A5.5,5.5,0,1,1,58.70,85.36 Q64.23,85.78 66.46,89.73 Q65.24,85.36 68.86,81.15Z"/><path d="M41.30,85.36 A5.5,5.5,0,1,1,31.14,81.15 Q34.76,85.36 33.54,89.73 Q35.77,85.78 41.30,85.36Z"/><path d="M18.85,68.86 A5.5,5.5,0,1,1,14.64,58.70 Q14.22,64.23 10.27,66.46 Q14.64,65.24 18.85,68.86Z"/></g><circle cx="50" cy="50" r="8.5" fill="currentColor"/><circle cx="50" cy="50" r="6.2" fill="none" stroke="white" stroke-width="1.1" opacity="0.32"/><circle cx="50" cy="50" r="4.0" fill="none" stroke="white" stroke-width="0.9" opacity="0.27"/><circle cx="50" cy="50" r="2.0" fill="none" stroke="white" stroke-width="0.7" opacity="0.22"/><circle cx="50" cy="50" r="0.7" fill="white" opacity="0.40"/></svg><span class="nav-brand-legacy"> YU AI Manager</span><span class="nav-brand-atelier" aria-hidden="true"><span class="brand-yu">yu</span><span class="brand-eauesque">eauesque</span></span></a>
+  <button id="navHamburger" type="button" aria-label="Menu" aria-expanded="false">☰</button>
+  <div class="nav-links" id="navLinks">
+    <a href="/" class="nav-link{% if active == 'search' %} active{% endif %}"{% if active == 'search' %} aria-current="page"{% endif %}>🔎 <span class="nav-label" data-i18n="nav.search">検索</span></a>
+    <a href="/stats" class="nav-link{% if active == 'stats' %} active{% endif %}"{% if active == 'stats' %} aria-current="page"{% endif %}>📊 <span class="nav-label" data-i18n="nav.stats">統計</span></a>
+    <a href="/story" class="nav-link{% if active == 'story' %} active{% endif %}"{% if active == 'story' %} aria-current="page"{% endif %}>📖 <span class="nav-label" data-i18n="nav.story">ストーリー</span></a>
+    <a href="/report" class="nav-link{% if active == 'report' %} active{% endif %}"{% if active == 'report' %} aria-current="page"{% endif %}>📋 <span class="nav-label" data-i18n="nav.report">レポート</span></a>
+    <a href="/inspect" class="nav-link{% if active == 'inspect' %} active{% endif %}"{% if active == 'inspect' %} aria-current="page"{% endif %}>🔬 <span class="nav-label" data-i18n="nav.inspect">検査</span></a>
+    <a href="/tools" class="nav-link{% if active == 'tools' %} active{% endif %}"{% if active == 'tools' %} aria-current="page"{% endif %}><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-wrench"/></svg> <span class="nav-label" data-i18n="nav.tools">ツール</span></a>
+    <a href="/scheduler" class="nav-link{% if active == 'scheduler' %} active{% endif %}"{% if active == 'scheduler' %} aria-current="page"{% endif %}>&#x23F0; <span class="nav-label" data-i18n="scheduler.title">スケジューラ</span></a>
+    <a href="/settings" class="nav-link{% if active == 'settings' %} active{% endif %}"{% if active == 'settings' %} aria-current="page"{% endif %}><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-settings"/></svg> <span class="nav-label" data-i18n="nav.settings">設定</span></a>
+    <a href="/diagnostics" class="nav-link{% if active == 'diagnostics' %} active{% endif %}"{% if active == 'diagnostics' %} aria-current="page"{% endif %}>🩺 <span class="nav-label">診断</span></a>
+    <a href="/help" class="nav-link{% if active == 'help' %} active{% endif %}"{% if active == 'help' %} aria-current="page"{% endif %}>❓ <span class="nav-label" data-i18n="nav.help">ヘルプ</span></a>
+  </div>
+  <div class="nav-utils">
+    <button id="agentKillBtn" type="button" class="nav-btn agent-kill-btn" data-i18n-title="nav.agent_kill" data-i18n-aria-label="nav.agent_kill" title="Agent 緊急停止" aria-label="Agent 緊急停止" style="display:none;"><svg class="agent-kill-icon agent-kill-icon--stop" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path class="agent-kill-icon__plate" d="M9.05 2.75h5.9l4.3 4.3v5.9l-4.3 4.3h-5.9l-4.3-4.3v-5.9z"/><path class="agent-kill-icon__bolt" d="M12.8 5.75 8.4 12h3.05l-.35 6.25 4.55-7.15h-3.1z"/><path class="agent-kill-icon__stop" d="M8.15 19.15h7.7v1.85h-7.7z"/></svg></button>
+    <button id="safeSearchToggleNav" type="button" class="nav-btn" data-i18n-title="nav.safe_search" data-i18n-aria-label="nav.safe_search" title="SafeSearch (NSFW ぼかし)" aria-label="SafeSearch (NSFW ぼかし)" aria-pressed="false">🔞</button>
+    <button id="themeToggleNav" type="button" class="nav-btn">🌙</button>
+    <div class="lang-menu">
+      <button id="langMenuBtn" type="button" class="nav-btn lang-toggle" data-i18n-aria-label="header.toggleLang" data-i18n-title="header.toggleLang" aria-label="Language" title="Language">🌐</button>
+      <select id="langSelect" class="lang-select" data-i18n-aria-label="header.selectLang" aria-label="Language">
+        <option value="en">English</option>
+        <option value="ja">日本語</option>
+        <option value="zh-tw">繁體中文</option>
+        <option value="zh-cn">简体中文</option>
+        <option value="ko">한국어</option>
+        <option value="fr">Français</option>
+        <option value="es">Español</option>
+        <option value="pt">Português</option>
+        <option value="it">Italiano</option>
+        <option value="de">Deutsch</option>
+        <option value="ru">Русский</option>
+      </select>
+    </div>
+    <!-- ⋯ overflow menu for less-used nav utilities -->
+    <div class="nav-overflow-wrap">
+      <button id="navOverflowBtn" type="button" class="nav-btn" aria-haspopup="menu" aria-expanded="false" data-i18n-title="nav.more_menu" data-i18n-aria-label="nav.more_menu" title="その他のメニュー" aria-label="その他のメニュー">&#x22EF;<span id="navOverflowBadge" class="nav-overflow-badge" style="display:none;" aria-hidden="true"></span></button>
+      <div id="navOverflowMenu" class="nav-overflow-popup" style="display:none;" role="menu">
+        <button id="navExtBtn" type="button" class="nav-overflow-item" title="Extensions (E)" aria-label="Extensions">🧩 <span data-i18n="settings.tab_extensions">Extensions</span></button>
+        <a href="/settings#cat-server" class="nav-overflow-item" style="font-size:12px;padding-left:28px;color:var(--muted,#888);" data-i18n-title="nav.extensions_settings" title="Extensions設定"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-settings"/></svg> <span data-i18n="nav.extensions_settings">Extensions 設定</span></a>
+        <a id="navAgentJournalItem" href="/agent-journal" class="nav-overflow-item" title="Agent Journal">🛡️ <span>Agent Journal</span><span id="navAgentJournalBadge" style="display:none;margin-left:6px;background:#e53e3e;color:#fff;border-radius:9px;padding:1px 6px;font-size:10px;font-weight:700;vertical-align:middle;"></span><span id="navBudgetBadge" style="display:none;margin-left:4px;font-size:12px;vertical-align:middle;" title="Budget warning">⚠️</span></a>
+        <a href="/llm-router" class="nav-overflow-item{% if active == 'llm_router' %} active{% endif %}"{% if active == 'llm_router' %} aria-current="page"{% endif %} data-i18n-title="nav.llm_router" title="LLM Router">🤖 <span data-i18n="nav.llm_router">LLM Router</span></a>
+        <a href="/gateway" class="nav-overflow-item{% if active == 'gateway' %} active{% endif %}"{% if active == 'gateway' %} aria-current="page"{% endif %} data-i18n-title="nav.gateway" title="Gateway">🔌 <span data-i18n="nav.gateway">Gateway</span></a>
+        <a href="/headroom" class="nav-overflow-item{% if active == 'headroom' %} active{% endif %}"{% if active == 'headroom' %} aria-current="page"{% endif %} title="Headroom">🗜️ <span>Headroom</span></a>
+        <a href="/scan-jobs" class="nav-overflow-item{% if active == 'scan_jobs' %} active{% endif %}"{% if active == 'scan_jobs' %} aria-current="page"{% endif %} data-i18n-title="nav.scan_jobs" title="スキャン履歴">📋 <span data-i18n="nav.scan_jobs">スキャン履歴</span></a>
+        <a href="/mesh-inference" class="nav-overflow-item{% if active == 'mesh_inference' %} active{% endif %}"{% if active == 'mesh_inference' %} aria-current="page"{% endif %} data-i18n-title="nav.mesh_inference" title="分散推論">🕸️ <span data-i18n="nav.mesh_inference">分散推論</span></a>
+        <a href="/lan-cowork" class="nav-overflow-item{% if active == 'lan_cowork' %} active{% endif %}"{% if active == 'lan_cowork' %} aria-current="page"{% endif %} data-i18n-title="nav.lan_cowork" title="LAN Cowork"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-link"/></svg> <span data-i18n="nav.lan_cowork">LAN Cowork</span></a>
+        <a href="/agent-memory" class="nav-overflow-item{% if active == 'agent_memory' %} active{% endif %}"{% if active == 'agent_memory' %} aria-current="page"{% endif %} title="Agent Memory">🧠 <span>Agent Memory</span></a>
+        <a href="/crypto-tools" class="nav-overflow-item{% if active == 'crypto_tools' %} active{% endif %}"{% if active == 'crypto_tools' %} aria-current="page"{% endif %} title="Crypto Tools">🔐 <span>暗号化ツール</span></a>
+        <button id="navSearchBtn" type="button" class="nav-overflow-item" data-action="navApi.navSearchFocus" data-i18n-title="nav.to_search" title="検索欄へ (/)">/🔍 <span data-i18n="nav.to_search">検索欄へ (/)</span></button>
+        <div class="nav-overflow-divider"></div>
+        <button id="navLockBtn" type="button" class="nav-overflow-item" data-action="navApi.activateQuickLockFromNav" data-i18n-title="nav.lock_title" data-i18n-aria-label="nav.lock_title" title="画面ロック / ボスモード" aria-label="画面ロック / ボスモード" style="display:none;">🔐 <span data-i18n="nav.lock_title">画面ロック</span></button>
+        <button id="navLogoutBtn" type="button" class="nav-overflow-item" data-action="navApi.logoutFromNav" data-i18n-title="nav.logout_title" data-i18n-aria-label="nav.logout_title" title="ログアウト" aria-label="ログアウト" style="display:none;">🚪 <span data-i18n="nav.logout_title">ログアウト</span></button>
+      </div>
+    </div>
+  </div>
+</nav>
+{% if pin_policy_warn %}
+<div id="pinPolicyWarnOverlay" role="dialog" aria-modal="true" aria-labelledby="pinPolicyWarnTitle"
+     style="position:fixed;inset:0;z-index:20000;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.62);padding:20px;">
+  <div style="width:min(560px,100%);border:1px solid rgba(245,158,11,0.55);border-radius:8px;background:var(--bg,#fff);color:var(--fg,#222);box-shadow:0 24px 60px rgba(0,0,0,0.35);padding:22px 24px;">
+    <h2 id="pinPolicyWarnTitle" style="margin:0 0 10px;font-size:1.1rem;">PIN を 8桁以上に変更してください</h2>
+    <p style="margin:0 0 14px;line-height:1.65;color:var(--muted,#555);">
+      現在の WebUI ログイン PIN は 8桁未満です。移行のためログインは許可されていますが、
+      変更するまでこの警告が表示されます。
+    </p>
+    <a href="/settings#cat-server" class="btn btn-primary" style="display:inline-flex;text-decoration:none;">設定を開く</a>
+  </div>
+</div>
+{% endif %}
+<!-- Import Maps: allows module extensions to `import { ... } from 'yu-api'` -->
+<script type="importmap" nonce="{{ csp_nonce }}">
+{"imports":{"yu-api":"/static/dist/extension-api.js"}}
+</script>
+<script nonce="{{ csp_nonce }}">/* tr-shim: immediate fallback so inline scripts can call window.tr() before module loads */
+if(typeof window.tr!=='function'){window.tr=function(p,a,b){var fn=window.adaptiveRuntime&&window.adaptiveRuntime.tr;if(typeof fn==='function')return fn(p,a,b);return typeof a==='string'?a:typeof b==='string'?b:String(p||'')}}</script>
+<!-- In-app dialog helpers (window.customConfirm / customAlert / customPrompt). See docs/development/development_docs/UI_DIALOG_POLICY.md -->
+<script nonce="{{ csp_nonce }}" src="/static/dialog.js?v=20260515a"></script>
+<script nonce="{{ csp_nonce }}" type="module" src="/static/dist/nav.js?v={{ dist_v }}"></script>
+<script nonce="{{ csp_nonce }}">if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js',{scope:'/'}).catch(function(){})}</script>
+<!-- Scroll-back-to-position button (shared across all pages) -->
+<button id="scrollBackBtn" type="button" class="scroll-back-btn" data-action="runtimeInitApi.scrollBackToPosition">↓ <span data-i18n="nav.scroll_back">元の位置に戻る</span></button>

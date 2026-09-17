@@ -1,0 +1,177 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Hailo GenAI: VLM / S2T / Video transcription ── */
+(function() {
+  var BASE = '/ext/hailo-genai/api'; // also declared in _genai_script.html — keep in sync
+
+  /* ── VLM ───────────────────────────────────────────── */
+  window.hgVlmSend = function() {
+    var prompt = document.getElementById('hgVlmPrompt').value.trim();
+    if (!prompt) return;
+
+    var imageInput = document.getElementById('hgVlmImage');
+    var output = document.getElementById('hgVlmOutput');
+    var sendBtn = document.getElementById('hgVlmSendBtn');
+    output.textContent = window.tr('hailo_genai.analyzing', '解析中...');
+    output.classList.remove('hg-output-placeholder');
+    sendBtn.disabled = true;
+
+    var fd = new FormData();
+    fd.append('prompt', prompt);
+    if (imageInput.files[0]) fd.append('image', imageInput.files[0]);
+
+    fetch(BASE + '/vlm/generate', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'},
+      body: fd
+    }).then(function(resp) {
+      var reader = resp.body.getReader();
+      var decoder = new TextDecoder();
+      var buf = '';
+      output.textContent = '';
+
+      function read() {
+        reader.read().then(function(result) {
+          if (result.done) { sendBtn.disabled = false; return; }
+          buf += decoder.decode(result.value, {stream: true});
+          var lines = buf.split('\n');
+          buf = lines.pop();
+          lines.forEach(function(line) {
+            if (!line.startsWith('data: ')) return;
+            try {
+              var d = JSON.parse(line.slice(6));
+              if (d.token) output.textContent += d.token;
+              if (d.error) output.textContent += '\n[Error: ' + d.error + ']';
+            } catch(e) {}
+          });
+          read();
+        }).catch(function(err) {
+          output.textContent += '\n[Stream interrupted: ' + err.message + ']';
+          sendBtn.disabled = false;
+        });
+      }
+      read();
+    }).catch(function(err) {
+      output.textContent = 'Error: ' + err.message;
+      sendBtn.disabled = false;
+    });
+  };
+
+  /* ── S2T ───────────────────────────────────────────── */
+  window.hgS2tTranscribe = function() {
+    var audioInput = document.getElementById('hgS2tAudio');
+    if (!audioInput.files[0]) {
+      var el = document.getElementById('hgS2tOutput');
+      el.textContent = window.tr('hailo_genai.select_audio_file', '音声ファイルを選択してください。');
+      el.classList.remove('hg-output-placeholder');
+      return;
+    }
+
+    var output = document.getElementById('hgS2tOutput');
+    var btn = document.getElementById('hgS2tBtn');
+    output.textContent = window.tr('hailo_genai.transcribing', '文字起こし中...');
+    output.classList.remove('hg-output-placeholder');
+    btn.disabled = true;
+
+    var fd = new FormData();
+    fd.append('audio', audioInput.files[0]);
+    fd.append('model', document.getElementById('hgS2tModel').value);
+    fd.append('language', document.getElementById('hgS2tLang').value || 'en');
+
+    fetch(BASE + '/s2t/transcribe', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'},
+      body: fd
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      btn.disabled = false;
+      if (d.status === 'ok') {
+        output.textContent = d.text || window.tr('hailo_genai.no_text', '(テキストなし)');
+        if (d.segments && d.segments.length > 1) {
+          output.textContent += '\n\n--- ' + window.tr('hailo_genai.segments', 'セグメント') + ' ---';
+          d.segments.forEach(function(s) {
+            output.textContent += '\n[' + (s.start || 0).toFixed(1) + window.tr('hailo_genai.sec', '秒') + ' - ' + (s.end || 0).toFixed(1) + window.tr('hailo_genai.sec', '秒') + '] ' + s.text;
+          });
+        }
+      } else {
+        output.textContent = window.tr('hailo_genai.error', 'エラー') + ': ' + (d.message || 'unknown');
+      }
+    }).catch(function(err) {
+      output.textContent = window.tr('hailo_genai.error', 'エラー') + ': ' + err.message;
+      btn.disabled = false;
+    });
+  };
+
+  /* ── Video transcription ──────────────────────────── */
+  window.hgVideoTranscribe = function() {
+    var fileId = parseInt(document.getElementById('hgVideoFileId').value);
+    if (!fileId || fileId <= 0) {
+      var el = document.getElementById('hgVideoS2tOutput');
+      el.textContent = window.tr('hailo_genai.enter_valid_file_id', '有効なファイル ID を入力してください。');
+      el.style.display = '';
+      return;
+    }
+    var videoLangSel = document.getElementById('hgVideoLang');
+    var lang = (function() {
+      if (videoLangSel.value === 'custom') {
+        var ci = videoLangSel.parentElement.querySelector('.s2t-custom-lang');
+        return ci ? ci.value.trim() || 'ja' : 'ja';
+      }
+      return videoLangSel.value || 'ja';
+    })();
+    var model = document.getElementById('hgS2tModel').value || 'whisper-base';
+    var output = document.getElementById('hgVideoS2tOutput');
+    output.textContent = window.tr('hailo_genai.extracting_transcribing', '音声抽出・文字起こし中...');
+    output.style.display = '';
+
+    fetch(BASE + '/s2t/transcribe-video', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({file_id: fileId, model: model, language: lang})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status === 'ok') {
+        output.textContent = d.text || window.tr('hailo_genai.no_text', '(テキストなし)');
+        if (d.segments && d.segments.length > 1) {
+          output.textContent += '\n\n--- ' + window.tr('hailo_genai.segments', 'セグメント') + ' ---';
+          d.segments.forEach(function(s) {
+            output.textContent += '\n[' + (s.start || 0).toFixed(1) + window.tr('hailo_genai.sec', '秒') + ' - ' + (s.end || 0).toFixed(1) + window.tr('hailo_genai.sec', '秒') + '] ' + s.text;
+          });
+        }
+      } else {
+        output.textContent = window.tr('hailo_genai.error', 'エラー') + ': ' + (d.message || 'unknown');
+      }
+    }).catch(function(err) {
+      output.textContent = window.tr('hailo_genai.error', 'エラー') + ': ' + err.message;
+    });
+  };
+
+  window.hgVideoGetTranscript = function() {
+    var fileId = parseInt(document.getElementById('hgVideoFileId').value);
+    if (!fileId || fileId <= 0) {
+      var el = document.getElementById('hgVideoS2tOutput');
+      el.textContent = window.tr('hailo_genai.enter_valid_file_id', '有効なファイル ID を入力してください。');
+      el.style.display = '';
+      return;
+    }
+    var output = document.getElementById('hgVideoS2tOutput');
+    output.textContent = window.tr('hailo_genai.loading', '読み込み中...');
+    output.style.display = '';
+
+    fetch(BASE + '/s2t/transcript/' + fileId, {
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status === 'ok') {
+        output.textContent = d.text || window.tr('hailo_genai.no_text', '(テキストなし)');
+        if (d.segments && d.segments.length > 1) {
+          output.textContent += '\n\n--- ' + window.tr('hailo_genai.segments', 'セグメント') + ' ---';
+          d.segments.forEach(function(s) {
+            output.textContent += '\n[' + (s.start || 0).toFixed(1) + window.tr('hailo_genai.sec', '秒') + ' - ' + (s.end || 0).toFixed(1) + window.tr('hailo_genai.sec', '秒') + '] ' + s.text;
+          });
+        }
+      } else {
+        output.textContent = d.message || window.tr('hailo_genai.transcript_not_found', '文字起こしデータが見つかりません');
+      }
+    }).catch(function(err) {
+      output.textContent = window.tr('hailo_genai.error', 'エラー') + ': ' + err.message;
+    });
+  };
+})();
+</script>

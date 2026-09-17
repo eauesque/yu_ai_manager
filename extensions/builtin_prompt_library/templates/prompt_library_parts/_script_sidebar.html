@@ -1,0 +1,234 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  "use strict";
+
+  var API = "/ext/prompt-library/api";
+  var _currentFolder = null;  // null = all
+  var _currentTag = null;
+
+  function $(id) { return document.getElementById(id); }
+
+  function apiFetch(path, opts) {
+    opts = opts || {};
+    opts.headers = opts.headers || {};
+    if (opts.body && typeof opts.body === "object") {
+      opts.headers["Content-Type"] = "application/json";
+      opts.body = JSON.stringify(opts.body);
+    }
+    return fetch(API + path, opts).then(function(r) { return r.json(); });
+  }
+
+  function customAlert(message) {
+    if (typeof window.customAlert === "function") return window.customAlert(message);
+    return Promise.resolve();
+  }
+
+  function customConfirm(message, options) {
+    if (typeof window.customConfirm === "function") return window.customConfirm(message, options);
+    return Promise.resolve(false);
+  }
+
+  // -- Folders --
+
+  function loadFolders() {
+    apiFetch("/folders").then(function(res) {
+      if (!res.ok) return;
+      renderFolders(res.folders || []);
+    });
+  }
+
+  function renderFolders(folders) {
+    var list = $("plFolderList");
+    var html = '<div class="pl-folder-item' + (_currentFolder === null ? " active" : "") +
+               '" data-folder-id="" data-action="PLSidebar.selectFolder">' +
+               '<span class="pl-folder-name">All</span></div>';
+
+    for (var i = 0; i < folders.length; i++) {
+      var f = folders[i];
+      var cls = (_currentFolder === f.id) ? " active" : "";
+      html += '<div class="pl-folder-item' + cls + '" data-folder-id="' + f.id + '">' +
+              '<span class="pl-folder-name" data-action="PLSidebar.selectFolder" data-action-arg="' + f.id + '">' +
+              escHtml(f.name) + '</span>' +
+              '<span class="pl-folder-count">' + (f.count || 0) + '</span>' +
+              '<span class="pl-folder-actions">' +
+              '<button class="pl-sidebar-btn" data-action="PLSidebar.renameFolder" data-action-arg="' + f.id + '" title="Rename">R</button>' +
+              '<button class="pl-sidebar-btn" data-action="PLSidebar.delFolder" data-action-arg="' + f.id + '" title="Delete">x</button>' +
+              '</span></div>';
+    }
+    list.innerHTML = html;
+  }
+
+  function selectFolder(id) {
+    _currentFolder = id === undefined || id === "" || id === null ? null : Number(id);
+    _currentTag = null;
+    loadFolders();
+    loadTags();
+    // Trigger main list reload with folder filter
+    if (typeof window.PL !== "undefined" && window.PL.reload) {
+      window.PL.reload({ folder_id: _currentFolder, tag_id: null });
+    }
+  }
+
+  function openFolderModal(editId, currentName) {
+    $("plFolderEditId").value = editId || "";
+    $("plFolderModalTitle").textContent = editId ? "Rename Folder" : "New Folder";
+    $("plFolderName").value = currentName || "";
+    $("plFolderModalSave").textContent = editId ? "Save" : "Create";
+    $("plFolderModalOverlay").classList.remove("hidden");
+    $("plFolderName").focus();
+  }
+
+  function saveFolderModal() {
+    var name = $("plFolderName").value.trim();
+    if (!name) return;
+    var editId = $("plFolderEditId").value;
+
+    if (editId) {
+      apiFetch("/folders/" + editId, { method: "PUT", body: { name: name } }).then(function(res) {
+        if (!res.ok) { customAlert(res.error || "Failed"); return; }
+        $("plFolderModalOverlay").classList.add("hidden");
+        loadFolders();
+      });
+    } else {
+      apiFetch("/folders", { method: "POST", body: { name: name } }).then(function(res) {
+        if (!res.ok) { customAlert(res.error || "Failed"); return; }
+        $("plFolderModalOverlay").classList.add("hidden");
+        loadFolders();
+      });
+    }
+  }
+
+  async function deleteFolder(id) {
+    if (!(await customConfirm("Delete this folder? Prompts will not be deleted.", { danger: true }))) return;
+    apiFetch("/folders/" + id, { method: "DELETE" }).then(function(res) {
+      if (!res.ok) { customAlert(res.error || "Failed"); return; }
+      if (_currentFolder === id) selectFolder(null);
+      else loadFolders();
+    });
+  }
+
+  // -- Tags --
+
+  function loadTags() {
+    apiFetch("/tags").then(function(res) {
+      if (!res.ok) return;
+      renderTags(res.tags || []);
+    });
+  }
+
+  function renderTags(tags) {
+    var list = $("plTagList");
+    if (!tags.length) {
+      list.innerHTML = '<div class="pl-tag-empty">No tags</div>';
+      return;
+    }
+    var html = "";
+    for (var i = 0; i < tags.length; i++) {
+      var t = tags[i];
+      var cls = (_currentTag === t.id) ? " active" : "";
+      html += '<div class="pl-tag-chip' + cls + '" data-action="PLSidebar.selectTag" data-action-arg="' + t.id + '">' +
+              escHtml(t.name) +
+              '<span class="pl-tag-count">' + (t.count || 0) + '</span>' +
+              '<button class="pl-tag-del" data-action="PLSidebar.delTag" data-action-arg="' + t.id +
+              '" title="Delete">x</button>' +
+              '</div>';
+    }
+    list.innerHTML = html;
+  }
+
+  function selectTag(id) {
+    var tagId = id === undefined || id === "" || id === null ? null : Number(id);
+    _currentTag = (_currentTag === tagId) ? null : tagId;
+    _currentFolder = null;
+    loadFolders();
+    loadTags();
+    if (typeof window.PL !== "undefined" && window.PL.reload) {
+      window.PL.reload({ folder_id: null, tag_id: _currentTag });
+    }
+  }
+
+  function openTagModal() {
+    $("plTagName").value = "";
+    $("plTagModalOverlay").classList.remove("hidden");
+    $("plTagName").focus();
+  }
+
+  function saveTagModal() {
+    var name = $("plTagName").value.trim();
+    if (!name) return;
+    apiFetch("/tags", { method: "POST", body: { name: name } }).then(function(res) {
+      if (!res.ok) { customAlert(res.error || "Failed"); return; }
+      $("plTagModalOverlay").classList.add("hidden");
+      loadTags();
+    });
+  }
+
+  async function deleteTag(id) {
+    if (!(await customConfirm("Delete this tag?", { danger: true }))) return;
+    apiFetch("/tags/" + id, { method: "DELETE" }).then(function(res) {
+      if (!res.ok) { customAlert(res.error || "Failed"); return; }
+      if (_currentTag === id) selectTag(null);
+      else loadTags();
+    });
+  }
+
+  // -- Helpers --
+  function escHtml(s) {
+    var d = document.createElement("div");
+    d.textContent = s;
+    return d.innerHTML;
+  }
+  function escAttr(s) {
+    return s.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+  }
+
+  // -- Events --
+  $("plAddFolder").addEventListener("click", function() { openFolderModal(); });
+  $("plFolderModalCancel").addEventListener("click", function() {
+    $("plFolderModalOverlay").classList.add("hidden");
+  });
+  $("plFolderModalSave").addEventListener("click", saveFolderModal);
+  $("plFolderModalOverlay").addEventListener("click", function(e) {
+    if (e.target === this) this.classList.add("hidden");
+  });
+  $("plFolderName").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") saveFolderModal();
+  });
+
+  $("plAddTag").addEventListener("click", openTagModal);
+  $("plTagModalCancel").addEventListener("click", function() {
+    $("plTagModalOverlay").classList.add("hidden");
+  });
+  $("plTagModalSave").addEventListener("click", saveTagModal);
+  $("plTagModalOverlay").addEventListener("click", function(e) {
+    if (e.target === this) this.classList.add("hidden");
+  });
+  $("plTagName").addEventListener("keydown", function(e) {
+    if (e.key === "Enter") saveTagModal();
+  });
+
+  // -- Public API --
+  window.PLSidebar = {
+    selectFolder: selectFolder,
+    renameFolder: function(id) {
+      var name = "";
+      var trigger = document.querySelector('.pl-sidebar-btn[data-action="PLSidebar.renameFolder"][data-action-arg="' + id + '"]');
+      var item = trigger ? trigger.closest(".pl-folder-item") : null;
+      var nameEl = item ? item.querySelector(".pl-folder-name") : null;
+      if (nameEl) name = nameEl.textContent || "";
+      openFolderModal(id, name.trim());
+    },
+    delFolder: deleteFolder,
+    selectTag: selectTag,
+    delTag: deleteTag,
+    loadFolders: loadFolders,
+    loadTags: loadTags,
+    getCurrentFolder: function() { return _currentFolder; },
+    getCurrentTag: function() { return _currentTag; },
+  };
+
+  // -- Init --
+  loadFolders();
+  loadTags();
+})();
+</script>

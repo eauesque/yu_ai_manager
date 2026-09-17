@@ -1,0 +1,242 @@
+<style>
+/* ── MD rendering ───────────────────────────────────── */
+.mdv-rendered h1, .mdv-rendered h2, .mdv-rendered h3,
+.mdv-rendered h4, .mdv-rendered h5, .mdv-rendered h6 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 4px;
+}
+.mdv-rendered h1 { font-size: 1.8em; }
+.mdv-rendered h2 { font-size: 1.4em; }
+.mdv-rendered h3 { font-size: 1.2em; }
+.mdv-rendered p { margin: 0.8em 0; line-height: 1.7; }
+.mdv-rendered a { color: var(--accent); }
+.mdv-rendered code {
+  background: var(--bg-hover);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.9em;
+}
+.mdv-rendered pre {
+  background: var(--bg);
+  padding: 16px;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid var(--border);
+}
+.mdv-rendered pre code {
+  background: none;
+  padding: 0;
+}
+.mdv-rendered blockquote {
+  border-left: 3px solid var(--accent);
+  margin: 1em 0;
+  padding: 8px 16px;
+  color: var(--muted);
+  background: var(--accent-bg);
+}
+.mdv-rendered ul, .mdv-rendered ol {
+  padding-left: 1.5em;
+  margin: 0.5em 0;
+}
+.mdv-rendered li { margin: 0.3em 0; line-height: 1.6; }
+.mdv-rendered table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1em 0;
+}
+.mdv-rendered th, .mdv-rendered td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+.mdv-rendered th {
+  background: var(--card);
+}
+.mdv-rendered img {
+  max-width: 100%;
+  border-radius: 8px;
+}
+.mdv-rendered hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 1.5em 0;
+}
+/* タイトル重複非表示 */
+.mdv-rendered > h1.mdv-dup-title {
+  display: none;
+}
+
+/* ── Raw text ───────────────────────────────────────── */
+.mdv-raw {
+  white-space: pre-wrap;
+  font-family: 'Cascadia Code', 'Fira Code', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* ── Empty state guidance ─────────────────────────────── */
+.mdv-empty-guide {
+  padding: 24px 16px;
+  text-align: center;
+}
+.mdv-empty-guide-icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+.mdv-empty-guide-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.mdv-empty-steps {
+  text-align: left;
+  max-width: 260px;
+  margin: 0 auto;
+}
+.mdv-empty-step {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--muted);
+  line-height: 1.5;
+}
+.mdv-empty-step-num {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.mdv-empty-step-text {
+  flex: 1;
+  padding-top: 1px;
+}
+
+/* ── Scan roots management ─────────────────────────── */
+.mdv-roots-section {
+  border-bottom: 1px solid var(--border);
+}
+.mdv-roots-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--muted);
+  user-select: none;
+  transition: background 0.15s;
+}
+.mdv-roots-header:hover {
+  background: var(--bg-hover);
+}
+.mdv-roots-arrow {
+  font-size: 10px;
+  transition: transform 0.2s;
+  display: inline-block;
+}
+.mdv-roots-arrow.open {
+  transform: rotate(90deg);
+}
+.mdv-roots-count {
+  margin-left: auto;
+  background: var(--bg);
+  padding: 1px 7px;
+  border-radius: 10px;
+  font-size: 11px;
+}
+.mdv-roots-body {
+  padding: 0 12px 8px;
+}
+.mdv-roots-list {
+  max-height: 160px;
+  overflow-y: auto;
+  margin-bottom: 6px;
+}
+.mdv-roots-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.mdv-roots-item-path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--text);
+}
+.mdv-roots-item-icon {
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.mdv-roots-item-icon.ok { color: var(--success); }
+.mdv-roots-item-icon.ng { color: var(--error); }
+.mdv-roots-item-del {
+  background: none;
+  border: none;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 16px;
+  padding: 4px 8px;
+  min-width: 28px;
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  line-height: 1;
+  flex-shrink: 0;
+  transition: background 0.15s, color 0.15s;
+}
+.mdv-roots-item-del:hover {
+  color: var(--error);
+  background: rgba(244,67,54,0.1);
+}
+.mdv-roots-actions {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+.mdv-btn-sm {
+  padding: 3px 8px;
+  font-size: 12px;
+}
+.mdv-roots-input-row {
+  display: flex;
+  gap: 4px;
+  margin-top: 4px;
+}
+.mdv-roots-input {
+  flex: 1;
+  padding: 4px 8px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg-input);
+  color: var(--text);
+  font-size: 12px;
+  min-width: 0;
+}
+.mdv-roots-fallback {
+  font-size: 11px;
+  color: var(--muted);
+  padding: 4px 0;
+  font-style: italic;
+}
+</style>

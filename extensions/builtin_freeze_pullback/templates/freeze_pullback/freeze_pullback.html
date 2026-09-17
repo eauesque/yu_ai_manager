@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="fpb.page_title">Freeze & Pull-back Generator</title>
+  {% include "freeze_pullback/_style.html" %}
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+    <div class="fpb-layout">
+      {% include "freeze_pullback/_sidebar.html" %}
+      {% include "freeze_pullback/_content.html" %}
+    </div>
+  </main>
+  {% include "freeze_pullback/_script.html" %}
+</body>
+</html>

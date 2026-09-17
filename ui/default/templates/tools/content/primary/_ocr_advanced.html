@@ -1,0 +1,48 @@
+<!-- OCR Advanced Features (PR-4) -->
+<details class="tool-item" id="tool-ocr-advanced">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.ocr_benchmark">🔍 OCR Benchmark</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+  <p data-i18n="tools.ocr_benchmark_short_desc">Measure OCR accuracy across engines and NPU/CPU backends.</p>
+
+  <!-- NPU Status -->
+  <div>
+    <span data-i18n="tools.ocr_npu_status">NPU Status</span>
+    <span id="ocrNpuBadge">—</span>
+    <div id="ocrNpuSuggestion"></div>
+  </div>
+
+  <!-- Benchmark -->
+  <div>
+    <p data-i18n="tools.ocr_benchmark_desc">Measure OCR accuracy across engines.</p>
+    <div>
+      <label class="tool-label" for="ocrBenchmarkTask" data-i18n="tools.ocr_benchmark_task">Task</label>
+      <select class="tool-select" id="ocrBenchmarkTask">
+        <option value="ocr">ocr</option>
+        <option value="ocr_document">ocr_document</option>
+        <option value="ocr_manga">ocr_manga</option>
+      </select>
+      <button id="ocrBenchmarkRunBtn" class="btn btn-primary" data-action="toolsPageApi.ocrRunBenchmark" data-i18n="tools.ocr_benchmark_run">Run Benchmark</button>
+    </div>
+    <div id="ocrBenchmarkResults">
+      <div data-i18n="tools.ocr_benchmark_empty">No results yet</div>
+    </div>
+  </div>
+
+  <!-- Model Profiles -->
+  <div>
+    <h3 data-i18n="tools.ocr_profiles">Model Profiles</h3>
+    <p data-i18n="tools.ocr_profiles_desc">Manage OCR model capability scores.</p>
+    <div id="ocrProfilesList">—</div>
+    <div>
+      <input class="tool-input" id="ocrProfilesFetchUrl" type="url" placeholder="https://..." aria-label="Profile URL"
+            >
+      <button id="ocrProfilesFetchBtn" class="btn btn-secondary" data-action="toolsPageApi.ocrFetchProfiles" data-i18n="tools.ocr_profiles_fetch_btn">Fetch</button>
+      <span id="ocrProfilesFetchStatus"></span>
+    </div>
+  </div>
+  </div>
+</details>

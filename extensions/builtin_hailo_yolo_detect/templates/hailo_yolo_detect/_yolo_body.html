@@ -1,0 +1,189 @@
+<!-- YOLO Object Detection Tool Section (Tools Page) -->
+<div class="tool-section" id="yoloDetectSection">
+  <h2>
+    <span aria-hidden="true">&#x1f50d;</span>
+    <span data-i18n="yolo_detect.heading">YOLO 物体検出</span>
+  </h2>
+  <p data-i18n="yolo_detect.description">YOLO 物体検出を実行します（Hailo / ONNX / OpenCV 対応）。画像・動画の 80 COCO クラスを検出します。</p>
+
+  <!-- Unified health (source of truth: /api/extensions health field) -->
+  <div id="yoloHealth" class="yd-health" style="margin-bottom:8px;"></div>
+  <script nonce="{{ csp_nonce }}">
+    (function(){
+      var run = function(){
+        if (window.extensionHealthApi && typeof window.extensionHealthApi.renderInto === 'function') {
+          window.extensionHealthApi.renderInto('yoloHealth', 'builtin-hailo-yolo-detect', 'details');
+        }
+      };
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', run, { once: true });
+      } else { run(); }
+    })();
+  </script>
+
+  <!-- Runtime counts. Unified health above owns backend/device health. -->
+  <div id="yoloStatus" class="yd-status">
+    <span class="yd-muted" data-i18n="yolo_detect.loading_status">ステータス読み込み中...</span>
+  </div>
+
+  <!-- Model Selection -->
+  <div class="yd-field">
+    <label class="yd-label" for="yoloModelSelect" data-i18n="yolo_detect.model">モデル:</label>
+    <div class="yd-model-row">
+      <select id="yoloModelSelect" class="yd-select">
+        <option value="yolov8n" data-i18n="yolo_detect.yolov8n_option">YOLOv8 Nano (高速)</option>
+        <option value="yolov11n" data-i18n="yolo_detect.yolov11n_option">YOLOv11 Nano</option>
+        <option value="yolov5m" data-i18n="yolo_detect.yolov5m_option">YOLOv5 Medium (高精度)</option>
+      </select>
+      <button class="btn btn-secondary" id="yoloDownloadBtn" data-action="yoloDownloadModel">
+        <span aria-hidden="true">&#x2b07;</span> <span data-i18n="yolo_detect.download">ダウンロード</span>
+      </button>
+    </div>
+    <div id="yoloModelInfo" class="yd-model-info"></div>
+  </div>
+
+  <!-- Settings -->
+  <div class="yd-field">
+    <label class="yd-label" for="yoloConfThreshold" data-i18n="yolo_detect.confidence_threshold">信頼度しきい値:</label>
+    <div class="yd-slider-row">
+      <input type="range" id="yoloConfThreshold" min="0.05" max="0.95" step="0.05" value="0.25" class="yd-slider">
+      <span id="yoloConfVal" class="yd-slider-val">0.25</span>
+    </div>
+  </div>
+
+  <div class="yd-field">
+    <label class="yd-label" for="yoloBatchSize" data-i18n="yolo_detect.batch_size">バッチサイズ:</label>
+    <div class="yd-slider-row">
+      <input type="range" id="yoloBatchSize" min="1" max="256" step="1" value="64" class="yd-slider">
+      <span id="yoloBatchVal" class="yd-slider-val">16</span>
+    </div>
+  </div>
+
+  <div class="yd-field">
+    <label class="yd-label" for="yoloFrameInterval" data-i18n="yolo_detect.frame_interval">動画フレーム間隔 (秒):</label>
+    <div class="yd-slider-row">
+      <input type="range" id="yoloFrameInterval" min="0.5" max="10" step="0.5" value="2.0" class="yd-slider">
+      <span id="yoloFrameVal" class="yd-slider-val">2.0</span>
+    </div>
+  </div>
+
+  <div class="checkbox-group yd-checkbox">
+    <label>
+      <input type="checkbox" id="yoloAutoDetect" aria-label="Auto-detect after scan" data-i18n-aria-label="yolo_detect.auto_detect_aria">
+      <span data-i18n="yolo_detect.auto_detect_after_scan">スキャン後に自動検出</span>
+    </label>
+  </div>
+  <div class="checkbox-group yd-checkbox">
+    <label>
+      <input type="checkbox" id="yoloDistributed" aria-label="Distributed inference" data-i18n-aria-label="yolo_detect.distributed_aria">
+      <span data-i18n="yolo_detect.distributed">分散推論（リモートワーカー使用）</span>
+    </label>
+  </div>
+  <div class="yd-field" id="yoloModeField">
+    <label class="yd-label" data-i18n="yolo_detect.detection_mode">検出モード:</label>
+    <div class="yd-radio-group">
+      <label>
+        <input type="radio" name="yoloMode" value="normal" checked>
+        <span data-i18n="yolo_detect.mode_normal">通常（ディスク上のファイル）</span>
+      </label>
+      <label>
+        <input type="radio" name="yoloMode" value="archive">
+        <span data-i18n="yolo_detect.mode_archive">アーカイブ内（ZIP/7z/RAR）</span>
+      </label>
+    </div>
+  </div>
+  <div class="yd-field" id="yoloMediaFilterField" style="display:none;">
+    <label class="yd-label" for="yoloMediaFilter" data-i18n="yolo_detect.media_filter">メディアフィルタ:</label>
+    <select id="yoloMediaFilter" class="yd-select">
+      <option value="all" data-i18n="yolo_detect.filter_all">画像+動画（全て）</option>
+      <option value="image" data-i18n="yolo_detect.filter_image">画像のみ</option>
+      <option value="video" data-i18n="yolo_detect.filter_video">動画のみ</option>
+      <option value="custom" data-i18n="yolo_detect.filter_custom">拡張子指定...</option>
+    </select>
+    <input type="text" id="yoloMediaFilterCustom" class="yd-search-input" placeholder=".jpg,.png,.webp"
+      data-i18n-placeholder="yolo_detect.filter_custom_placeholder" style="display:none;margin-top:6px;">
+  </div>
+
+  <!-- Detection Progress -->
+  <div id="yoloProgress" style="display:none;" class="yd-progress-wrap">
+    <div class="yd-progress-header">
+      <span id="yoloProgressLabel" data-i18n="yolo_detect.detecting">検出中...</span>
+      <span id="yoloProgressPct">0%</span>
+    </div>
+    <div class="yd-progress-track">
+      <div id="yoloProgressBar" class="yd-progress-fill" style="width:0%;"></div>
+    </div>
+    <div id="yoloProgressDetail" class="yd-progress-detail"></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="tool-actions">
+    <button class="btn btn-primary" id="yoloStartBtn" data-action="yoloStartDetect">
+      <span aria-hidden="true">&#x25b6;</span>
+      <span data-i18n="yolo_detect.start_detection">検出開始</span>
+    </button>
+    <button class="btn btn-secondary" id="yoloStopBtn" data-action="yoloStopDetect" style="display:none;">
+      <span aria-hidden="true">&#x23f9;</span>
+      <span data-i18n="yolo_detect.stop">停止</span>
+    </button>
+    <button class="btn btn-danger" id="yoloClearBtn" data-action="yoloClearResults">
+      <span aria-hidden="true">&#x1f5d1;</span>
+      <span data-i18n="yolo_detect.clear_results">結果を削除</span>
+    </button>
+  </div>
+
+  <!-- Quick Search -->
+  <div class="yd-search-section">
+    <label class="yd-label" for="yoloSearchInput" data-i18n="yolo_detect.search_by_class">クラス名で検索:</label>
+    <div class="yd-search-row">
+      <input type="text" id="yoloSearchInput" list="yoloClassList" placeholder="例: person, car, dog..."
+        data-i18n-placeholder="yolo_detect.search_placeholder" class="yd-search-input">
+      <datalist id="yoloClassList"></datalist>
+      <button class="btn btn-secondary" data-action="yoloSearchClass" data-i18n="yolo_detect.search">検索</button>
+    </div>
+  </div>
+
+  <!-- Search Results -->
+  <div id="yoloSearchResults" style="display:none;" class="yd-search-results"></div>
+
+  <!-- Result -->
+  <div id="yoloResult" class="result-box" style="display:none;"></div>
+</div>
+
+<style>
+/* YOLO Detect scoped styles (yd- prefix) */
+.yd-status{margin:12px 0;font-size:13px;background:var(--bg,#f5f6f8);padding:4px 8px;border-radius:4px;}
+.yd-muted{color:var(--muted,#aab2c0);}
+.yd-ok{color:#166534;}
+.yd-err{color:#b91c1c;}
+.yd-field{margin:12px 0;}
+.yd-label{display:block;margin-bottom:5px;font-weight:600;}
+.yd-model-row{display:flex;align-items:center;gap:8px;}
+.yd-select{flex:1;padding:8px;padding-right:28px;border-radius:4px;border:1px solid var(--border,#555);background:var(--bg-secondary,#f8f8f8);color:var(--text,#333);min-height:28px;-webkit-appearance:none;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='6'%3E%3Cpath d='M0 0l6 6 6-6z' fill='%23888'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 8px center;}
+body.dark .yd-select{background:var(--bg-secondary,#2a2a2a);color:var(--text,#eee);}
+.yd-model-info{font-size:11px;color:var(--muted,#aab2c0);margin-top:4px;}
+.yd-slider-row{display:flex;align-items:center;gap:8px;}
+.yd-slider{flex:1;}
+.yd-slider-val{font-size:12px;min-width:36px;text-align:right;}
+.yd-radio-group{display:flex;flex-direction:column;gap:6px;}
+.yd-radio-group label{display:flex;align-items:center;gap:6px;cursor:pointer;}
+.yd-checkbox{margin:8px 0;}
+.yd-progress-wrap{margin:12px 0;}
+.yd-progress-header{display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;}
+.yd-progress-track{height:6px;border-radius:3px;background:rgba(128,128,128,0.2);overflow:hidden;}
+.yd-progress-fill{height:100%;width:0%;background:var(--accent,#667eea);border-radius:3px;transition:width 0.3s;}
+.yd-progress-detail{font-size:11px;color:var(--muted,#aab2c0);margin-top:4px;}
+.yd-search-section{margin:16px 0 8px;}
+.yd-search-row{display:flex;align-items:center;gap:8px;}
+.yd-search-input{flex:1;padding:6px 10px;border-radius:4px;border:1px solid var(--border,#555);background:var(--bg-secondary,#f8f8f8);color:var(--text,#333);}
+body.dark .yd-search-input{background:var(--bg-secondary,#2a2a2a);color:var(--text,#eee);}
+.yd-search-results{margin:8px 0;max-height:300px;overflow-y:auto;font-size:13px;}
+.yd-search-results-header{margin-bottom:4px;font-weight:600;}
+.yd-search-results-grid{display:flex;flex-wrap:wrap;gap:4px;}
+.yd-search-tag{display:inline-block;padding:4px 8px;background:var(--bg-secondary,#f0f0f0);border:1px solid var(--border,#555);border-radius:4px;font-size:12px;text-decoration:none;color:var(--text,#333);}
+body.dark .yd-search-tag{background:var(--bg-secondary,#2a2a2a);color:var(--text,#eee);}
+.yd-search-tag:hover{background:var(--accent,#667eea);color:#fff;}
+.yd-conf-badge{color:var(--success,#4caf50);}
+/* Disabled button visual feedback */
+#yoloDetectSection .btn:disabled{opacity:0.5;cursor:not-allowed;}
+</style>

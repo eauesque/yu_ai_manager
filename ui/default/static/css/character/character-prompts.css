@@ -1,0 +1,5 @@
+/* NovelAI V4 Character Prompts Styles entrypoint */
+@import url("./character-prompts-section.css");
+@import url("./character-prompts-cards.css");
+@import url("./character-prompts-negative.css");
+@import url("./character-position-grid.css");

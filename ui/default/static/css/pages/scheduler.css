@@ -1,0 +1,342 @@
+/* Scheduler page styles */
+
+.sched-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+
+.sched-header h1 {
+  margin: 0;
+  font-size: 22px;
+}
+
+.sched-status-card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+}
+
+.sched-status-card h2 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.sched-status-indicator {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.sched-dot {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--muted);
+  flex-shrink: 0;
+}
+
+.sched-dot.running {
+  background: #22c55e;
+  box-shadow: 0 0 6px rgba(34, 197, 94, 0.5);
+}
+
+.sched-dot.stopped {
+  background: #ef4444;
+}
+
+.sched-section {
+  margin-bottom: 24px;
+}
+
+.sched-section h2 {
+  font-size: 16px;
+  margin: 0 0 10px 0;
+  color: var(--text);
+}
+
+.sched-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.sched-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  font-size: 13px;
+}
+
+.sched-table th,
+.sched-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.sched-table th {
+  background: var(--card);
+  font-weight: 600;
+  color: var(--muted);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.sched-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.sched-table tbody tr:hover {
+  background: var(--hover, rgba(0, 0, 0, 0.03));
+}
+
+/* Status badges */
+.sched-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.sched-badge.active {
+  background: #e6f7ec;
+  color: #166534;
+}
+
+.sched-badge.paused {
+  background: #fef9e7;
+  color: #92400e;
+}
+
+.sched-badge.success {
+  background: #e6f7ec;
+  color: #166534;
+}
+
+.sched-badge.failed {
+  background: #fde8e8;
+  color: #991b1b;
+}
+
+/* Action buttons */
+.sched-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.sched-btn {
+  padding: 10px 14px;
+  font-size: 12px;
+  min-height: 44px;
+  min-width: 44px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.15s, border-color 0.15s;
+  box-sizing: border-box;
+}
+
+.sched-btn:hover {
+  background: var(--hover, rgba(0, 0, 0, 0.05));
+  border-color: var(--accent, #3b82f6);
+}
+
+/* Safari/WebKit focus fallback: :focus then undo for non-keyboard via :focus:not(:focus-visible) */
+.sched-btn:focus {
+  outline: 2px solid var(--accent, #3b82f6);
+  outline-offset: 2px;
+}
+.sched-btn:focus:not(:focus-visible) {
+  outline: none;
+}
+.sched-btn:focus-visible {
+  outline: 2px solid var(--accent, #3b82f6);
+  outline-offset: 2px;
+}
+
+.sched-btn.primary {
+  background: var(--accent, #3b82f6);
+  color: #fff;
+  border-color: var(--accent, #3b82f6);
+}
+/* Dark mode: use darker accent for button text contrast (AA 4.5:1+) */
+body.dark .sched-btn.primary {
+  background: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.sched-btn.primary:hover {
+  opacity: 0.9;
+}
+
+.sched-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Job description subtitle */
+.sched-job-desc {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 400;
+  margin-top: 2px;
+}
+
+/* Empty state */
+.sched-empty {
+  text-align: center;
+  color: var(--muted);
+  padding: 20px;
+  font-style: italic;
+}
+
+/* Header actions */
+.sched-header-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* Delete button (danger) */
+.sched-btn.danger {
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.sched-btn.danger:hover {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: #dc2626;
+}
+
+/* Dialog */
+.sched-dialog {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--card);
+  color: var(--text);
+  padding: 24px;
+  max-width: 440px;
+  width: 90vw;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.sched-dialog::backdrop {
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.sched-dialog h3 {
+  margin: 0 0 16px 0;
+  font-size: 17px;
+}
+
+.sched-form-group {
+  margin-bottom: 12px;
+}
+
+.sched-form-group label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+
+.sched-form-group input,
+.sched-form-group select {
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--card);
+  color: var(--text);
+  box-sizing: border-box;
+}
+
+.sched-form-group input:focus,
+.sched-form-group select:focus {
+  outline: 2px solid var(--accent, #3b82f6);
+  outline-offset: -1px;
+}
+
+.sched-form-row {
+  display: flex;
+  gap: 10px;
+}
+
+.sched-form-narrow {
+  flex: 1;
+  min-width: 0;
+}
+
+.sched-field-hint {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.sched-dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+/* Dark mode: opaque badge backgrounds for reliable contrast */
+body.dark .sched-badge.active {
+  background: #1a3a2a;
+  color: #86efac;
+}
+body.dark .sched-badge.success {
+  background: #1a3a2a;
+  color: #86efac;
+}
+body.dark .sched-badge.paused {
+  background: #3a2e1a;
+  color: #fcd34d;
+}
+body.dark .sched-badge.failed {
+  background: #3a1a1a;
+  color: #fca5a5;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .sched-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .sched-table th,
+  .sched-table td {
+    padding: 8px 10px;
+    font-size: 12px;
+  }
+
+  .sched-actions {
+    flex-direction: column;
+  }
+}

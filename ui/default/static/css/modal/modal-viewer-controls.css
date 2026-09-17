@@ -1,0 +1,104 @@
+/* Modal viewer controls (zoom-mini-bar, badges, ctrl utilities) */
+
+/* Button group wrapper (Fix C) */
+.ctrl-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Divider between groups */
+.ctrl-div {
+  width: 1px;
+  height: 18px;
+  background: rgba(255, 255, 255, 0.15);
+  margin: 0 2px;
+}
+
+/* Autoplay countdown badge (Fix I) */
+.autoplay-badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #7ef;
+  font-size: 13px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  z-index: 3;
+  pointer-events: none;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Position badge overlay (folder/ZIP scope) */
+.modal-pos-badge {
+  position: absolute;
+  top: 14px;
+  right: 100px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #e0e8ff;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  padding: 4px 10px;
+  border-radius: 6px;
+  z-index: 2;
+  pointer-events: none;
+  white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+
+/* Narrow viewport: reposition pos-badge to bottom (Fix D/L) */
+@media (max-width: 640px) {
+  .modal-pos-badge {
+    top: auto;
+    bottom: 10px;
+    right: 10px;
+    font-size: 11px;
+    padding: 2px 8px;
+  }
+}
+
+/* Toggle state classes for icon buttons (Fix J) */
+.zoom-btn.toggled-off { opacity: 0.45; }
+.zoom-btn.muted { opacity: 0.45; text-decoration: line-through; }
+
+/* Bridge-send dropdown clusters */
+.modal-bridge-wrap { position: relative; display: inline-block; }
+.modal-bridge-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: rgba(20, 20, 20, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 4px;
+  padding: 4px 0;
+  min-width: 140px;
+  z-index: 10;
+  display: none;
+}
+.modal-bridge-menu button {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  background: transparent;
+  color: #fff;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  font-size: 13px;
+}
+.modal-bridge-menu button:hover { background: rgba(255, 255, 255, 0.15); }
+.modal-bridge-menu .modal-bridge-menu-opt {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  margin-bottom: 2px;
+  cursor: pointer;
+  user-select: none;
+}
+.modal-bridge-menu .modal-bridge-menu-opt input { margin: 0; }

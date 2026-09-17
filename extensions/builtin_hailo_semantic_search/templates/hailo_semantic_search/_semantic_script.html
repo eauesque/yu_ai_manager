@@ -1,0 +1,600 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  var BASE = '/ext/hailo-semantic/api';
+
+  // --- Fallback polling for index progress ---
+  var _pollTimer = null;
+  var _pollInterval = 5000; // 5 seconds
+
+  function _resetPollTimer() {
+    if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+  }
+
+  function _startPollTimer() {
+    _resetPollTimer();
+    _pollTimer = setInterval(function() {
+      fetch(BASE + '/index/status').then(function(r) { return r.json(); }).then(function(d) {
+        if (!d.running) {
+          // Indexing finished while SSE was down
+          _resetPollTimer();
+          onIndexComplete({
+            reason: d.message || 'complete',
+            processed: d.processed || 0,
+            errors: d.errors || 0,
+            elapsed_seconds: d.elapsed || 0
+          });
+          loadStatus();
+          return;
+        }
+        // Update progress from poll data
+        updateProgress({
+          processed: d.processed || 0,
+          total: d.total || 0,
+          errors: d.errors || 0,
+          elapsed: d.elapsed || 0,
+          message: d.message || ''
+        });
+      }).catch(function() {});
+    }, _pollInterval);
+  }
+
+  // --- Client-side elapsed countup ---
+  var _indexElapsedBase = 0;
+  var _indexElapsedAt = 0;
+  var _indexTickTimer = null;
+  var _indexLastProcessed = 0;
+  var _indexLastTotal = 0;
+  var _indexLastErrors = 0;
+
+  function _fmtElapsed(sec) {
+    sec = Math.round(sec);
+    var h = Math.floor(sec / 3600);
+    var m = Math.floor((sec % 3600) / 60);
+    var s = sec % 60;
+    return h > 0 ? h + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0')
+                  : m + ':' + String(s).padStart(2,'0');
+  }
+
+  function _indexDetailText(processed, total, errors, elapsed) {
+    return processed + '/' + total + ' ' + window.tr('semantic_search.done', '完了')
+      + ', ' + errors + ' ' + window.tr('semantic_search.skipped', 'スキップ')
+      + ', ' + _fmtElapsed(elapsed) + ' ' + window.tr('semantic_search.elapsed', '経過');
+  }
+
+  function _indexTickUpdate() {
+    var detEl = document.getElementById('semanticProgressDetail');
+    if (!detEl) return;
+    var now = performance.now();
+    var elapsed = _indexElapsedBase + (now - _indexElapsedAt) / 1000;
+    detEl.textContent = _indexDetailText(_indexLastProcessed, _indexLastTotal, _indexLastErrors, elapsed);
+  }
+
+  function _startIndexTick() {
+    if (_indexTickTimer) return;
+    _indexTickTimer = setInterval(_indexTickUpdate, 1000);
+  }
+
+  function _stopIndexTick() {
+    if (_indexTickTimer) { clearInterval(_indexTickTimer); _indexTickTimer = null; }
+  }
+
+  // --- Progress update (called from SSE or poll) ---
+  function updateProgress(data) {
+    var processed = data.processed || 0;
+    var total = data.total || 0;
+    var errors = data.errors || 0;
+    var pct = total > 0 ? Math.round(processed / total * 100) : 0;
+    var pctEl = document.getElementById('semanticProgressPct');
+    var barEl = document.getElementById('semanticProgressBar');
+    var detEl = document.getElementById('semanticProgressDetail');
+    var labelEl = document.getElementById('semanticProgressLabel');
+    if (labelEl) labelEl.textContent = data.message || window.tr('semantic_search.indexing', 'インデックス構築中...');
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (barEl) barEl.style.width = pct + '%';
+
+    // Reset poll timer on each SSE/poll update to avoid double-updates
+    _startPollTimer();
+
+    // Update snapshot for client-side countup
+    _indexLastProcessed = processed;
+    _indexLastTotal = total;
+    _indexLastErrors = errors;
+    _indexElapsedBase = data.elapsed || Math.round((Date.now() / 1000) - (_startedAt || Date.now() / 1000));
+    _indexElapsedAt = performance.now();
+    _startIndexTick();
+
+    if (detEl) {
+      detEl.textContent = _indexDetailText(processed, total, errors, _indexElapsedBase);
+    }
+  }
+
+  function showRunningUI() {
+    document.getElementById('semanticStartBtn').style.display = 'none';
+    document.getElementById('semanticStopBtn').style.display = '';
+    document.getElementById('semanticProgress').style.display = '';
+    document.getElementById('semanticProgressLabel').textContent = window.tr('semantic_search.indexing', 'インデックス構築中...');
+    var resultEl = document.getElementById('semanticResult');
+    if (resultEl) resultEl.style.display = 'none';
+    // Start fallback polling in case SSE connection drops
+    _startPollTimer();
+  }
+
+  function onIndexComplete(data) {
+    _resetPollTimer();
+    _stopIndexTick();
+    document.getElementById('semanticStartBtn').style.display = '';
+    document.getElementById('semanticStopBtn').style.display = 'none';
+    var label = document.getElementById('semanticProgressLabel');
+    var reason = data.reason || 'complete';
+    if (label) label.textContent = reason === 'stopped' ? window.tr('semantic_search.stopped', '停止しました') : window.tr('semantic_search.complete', '完了');
+    var processed = data.processed || 0;
+    var errors = data.errors || 0;
+    var elapsed = data.elapsed_seconds || 0;
+    var resultEl = document.getElementById('semanticResult');
+    if (resultEl) {
+      resultEl.style.display = '';
+      resultEl.textContent = processed + ' ' + window.tr('semantic_search.files_indexed_in', 'ファイルを') + ' ' + _fmtElapsed(elapsed) + ' ' + window.tr('semantic_search.elapsed_suffix', 'でインデックス') + (errors > 0 ? ' (' + errors + ' ' + window.tr('semantic_search.skipped', 'スキップ') + ')' : '');
+    }
+    loadStatus();
+  }
+
+  // --- Backend dropdown change handler ---
+  var _cachedBackends = [];
+
+  function updateBackendOptionStatus(backends) {
+    var statusEl = document.getElementById('semanticBackendStatus');
+    if (!statusEl || !backends) return;
+    var selEl = document.getElementById('semanticBackend');
+    var selected = selEl ? selEl.value : 'auto';
+    // Clear previous content
+    while (statusEl.firstChild) statusEl.removeChild(statusEl.firstChild);
+    var span = document.createElement('span');
+    if (selected === 'auto') {
+      var best = null;
+      for (var i = 0; i < backends.length; i++) {
+        if (backends[i].available) { best = backends[i].name; break; }
+      }
+      if (best) {
+        span.className = 'ss-avail';
+        span.textContent = window.tr('semantic_search.backend_auto_will_use', '自動選択:') + ' ' + best;
+      } else {
+        span.className = 'ss-unavail';
+        span.textContent = window.tr('semantic_search.backend_none_available', '利用可能なバックエンドがありません');
+      }
+    } else {
+      var found = null;
+      for (var j = 0; j < backends.length; j++) {
+        if (backends[j].name.indexOf(selected) !== -1) { found = backends[j]; break; }
+      }
+      if (found && found.available) {
+        span.className = 'ss-avail';
+        span.textContent = window.tr('semantic_search.backend_available', '利用可能');
+      } else {
+        span.className = 'ss-unavail';
+        span.textContent = window.tr('semantic_search.backend_unavailable', '利用不可');
+      }
+    }
+    statusEl.appendChild(span);
+  }
+
+  var backendSel = document.getElementById('semanticBackend');
+  if (backendSel) {
+    backendSel.addEventListener('change', function() {
+      updateBackendOptionStatus(_cachedBackends);
+    });
+  }
+
+  // --- Model Status ---
+  function loadModelStatus() {
+    fetch(BASE + '/model/status').then(function(r) { return r.json(); }).then(function(d) {
+      var el = document.getElementById('semanticModelStatus');
+      var btn = document.getElementById('semanticModelDownloadBtn');
+      if (!el) return;
+      while (el.firstChild) el.removeChild(el.firstChild);
+      var span = document.createElement('span');
+      if (d.ready) {
+        span.className = 'ss-ok';
+        span.textContent = 'CLIP ONNX: ' + window.tr('semantic_search.model_downloaded', 'ダウンロード済') + ' (' + d.size_mb + ' MB)';
+        if (btn) btn.style.display = 'none';
+      } else {
+        span.className = 'ss-err';
+        span.textContent = 'CLIP ONNX: ' + window.tr('semantic_search.model_not_downloaded', '未ダウンロード');
+        if (btn) btn.style.display = '';
+      }
+      el.appendChild(span);
+    }).catch(function() {
+      var el = document.getElementById('semanticModelStatus');
+      if (el) el.textContent = window.tr('semantic_search.status_load_failed', 'ステータスの読み込みに失敗');
+    });
+  }
+
+  // --- Model Download ---
+  window.semanticDownloadModel = function() {
+    var btn = document.getElementById('semanticModelDownloadBtn');
+    var progressWrap = document.getElementById('semanticModelProgress');
+    var resultEl = document.getElementById('semanticModelResult');
+    if (btn) {
+      btn.disabled = true;
+      btn.querySelector('[data-i18n]').textContent = window.tr('semantic_search.model_downloading', 'ダウンロード中...');
+    }
+    if (progressWrap) {
+      progressWrap.style.display = '';
+      var bar = document.getElementById('semanticModelProgressBar');
+      if (bar) bar.style.width = '0%';
+    }
+    if (resultEl) resultEl.style.display = 'none';
+
+    fetch(BASE + '/model/download', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'}
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (progressWrap) {
+        var bar = document.getElementById('semanticModelProgressBar');
+        if (bar) bar.style.width = '100%';
+      }
+      if (btn) {
+        btn.disabled = false;
+        btn.querySelector('[data-i18n]').textContent = window.tr('semantic_search.model_download', 'ダウンロード');
+      }
+      if (resultEl) {
+        resultEl.style.display = '';
+        if (d.status === 'ok' || d.status === 'already_downloaded') {
+          resultEl.className = 'ss-model-result ss-ok';
+          resultEl.textContent = window.tr('semantic_search.model_download_complete', 'ダウンロード完了');
+        } else {
+          resultEl.className = 'ss-model-result ss-err';
+          resultEl.textContent = d.message || window.tr('semantic_search.model_download_failed', 'ダウンロードに失敗しました');
+        }
+      }
+      // Refresh model status, main status, and unified health badge
+      loadModelStatus();
+      loadStatus();
+      if (window.extensionHealthApi && typeof window.extensionHealthApi.renderInto === 'function') {
+        window.extensionHealthApi.renderInto('semanticHealth', 'builtin-hailo-semantic-search', 'details');
+      }
+    }).catch(function(e) {
+      if (progressWrap) progressWrap.style.display = 'none';
+      if (btn) {
+        btn.disabled = false;
+        btn.querySelector('[data-i18n]').textContent = window.tr('semantic_search.model_download', 'ダウンロード');
+      }
+      if (resultEl) {
+        resultEl.style.display = '';
+        resultEl.className = 'ss-model-result ss-err';
+        resultEl.textContent = window.tr('semantic_search.model_download_failed', 'ダウンロードに失敗しました') + ': ' + e.message;
+      }
+    });
+  };
+
+  // --- Status ---
+  function loadStatus() {
+    fetch(BASE + '/runtime').then(function(r) { return r.json(); }).then(function(d) {
+      var el = document.getElementById('semanticStatus');
+      if (!el) return;
+
+      while (el.firstChild) el.removeChild(el.firstChild);
+      var backends = d.backends || [];
+      _cachedBackends = backends;
+
+      var countB = document.createElement('b');
+      countB.textContent = d.indexed_count;
+      el.appendChild(countB);
+      el.appendChild(document.createTextNode(' ' + window.tr('semantic_search.indexed', '構築済') + ' / '));
+      var countB2 = document.createElement('b');
+      countB2.textContent = d.unindexed_count;
+      el.appendChild(countB2);
+      el.appendChild(document.createTextNode(' ' + window.tr('semantic_search.unindexed', '未構築')));
+
+      // Set auto-index checkbox
+      var autoEl = document.getElementById('semanticAutoIndex');
+      if (autoEl) autoEl.checked = !!d.auto_index_on_scan;
+
+      // Set backend dropdown to saved preference
+      var selEl = document.getElementById('semanticBackend');
+      if (selEl && d.preferred_backend) selEl.value = d.preferred_backend;
+
+      // Update per-option availability hints
+      updateBackendOptionStatus(backends);
+    }).catch(function() {
+      var el = document.getElementById('semanticStatus');
+      if (el) el.textContent = window.tr('semantic_search.status_load_failed', 'ステータスの読み込みに失敗');
+    });
+  }
+
+  // --- Index Start ---
+  var _startedAt = 0;
+  window.semanticStartIndex = function() {
+    var batchSize = parseInt(document.getElementById('semanticBatchSize').value) || 32;
+    var backendSel = document.getElementById('semanticBackend');
+    var backend = backendSel ? backendSel.value : 'auto';
+    var resultEl = document.getElementById('semanticResult');
+    fetch(BASE + '/index/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({batch_size: batchSize, backend: backend})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status === 'already_running') {
+        showRunningUI();
+        if (resultEl) { resultEl.style.display = ''; resultEl.textContent = window.tr('semantic_search.already_running', 'インデックス構築は既に実行中です'); }
+        return;
+      }
+      if (d.status === 'no_files') {
+        if (resultEl) { resultEl.style.display = ''; resultEl.textContent = d.message || window.tr('semantic_search.no_files', '未インデックスのファイルがありません'); }
+        return;
+      }
+      _startedAt = Date.now() / 1000;
+      showRunningUI();
+    }).catch(function(e) {
+      if (resultEl) { resultEl.style.display = ''; resultEl.textContent = window.tr('semantic_search.index_start_failed', 'インデックス開始に失敗') + ': ' + e.message; }
+    });
+  };
+
+  // --- Index Stop ---
+  window.semanticStopIndex = function() {
+    fetch(BASE + '/index/stop', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).catch(function() {});
+  };
+
+  // --- Clear Index ---
+  window.semanticClearIndex = function() {
+    if (!confirm(window.tr('semantic_search.confirm_clear', '全てのインデックスベクトルを削除しますか？この操作は取り消せません。'))) return;
+    fetch(BASE + '/index/clear', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      var el = document.getElementById('semanticResult');
+      if (el) {
+        el.style.display = '';
+        el.textContent = d.deleted + ' ' + window.tr('semantic_search.vectors_deleted', '件のベクトルを削除しました');
+      }
+      loadStatus();
+    }).catch(function(e) {
+      var el = document.getElementById('semanticResult');
+      if (el) { el.style.display = ''; el.textContent = window.tr('semantic_search.index_clear_failed', 'インデックス削除に失敗') + ': ' + e.message; }
+    });
+  };
+
+  // --- Batch size slider ---
+  var slider = document.getElementById('semanticBatchSize');
+  var valDisplay = document.getElementById('semanticBatchSizeVal');
+  if (slider && valDisplay) {
+    slider.addEventListener('input', function() {
+      valDisplay.textContent = this.value;
+    });
+  }
+
+  var _captionPollTimer = null;
+
+  function _resetCaptionPollTimer() {
+    if (_captionPollTimer) { clearInterval(_captionPollTimer); _captionPollTimer = null; }
+  }
+
+  function _startCaptionPollTimer() {
+    _resetCaptionPollTimer();
+    _captionPollTimer = setInterval(function() {
+      fetch(BASE + '/caption/status').then(function(r) { return r.json(); }).then(function(d) {
+        if (!d.running) {
+          _resetCaptionPollTimer();
+          onCaptionComplete({
+            reason: d.message || 'complete',
+            processed: d.processed || 0,
+            errors: d.errors || 0,
+            total: d.total || 0,
+            elapsed_seconds: d.elapsed || 0
+          });
+          return;
+        }
+        updateCaptionProgress({
+          processed: d.processed || 0,
+          total: d.total || 0,
+          errors: d.errors || 0,
+          elapsed: d.elapsed || 0
+        });
+      }).catch(function() {});
+    }, _pollInterval);
+  }
+  // --- Caption: client-side elapsed countup ---
+  var _captionElapsedBase = 0;
+  var _captionElapsedAt = 0;
+  var _captionTickTimer = null;
+  var _captionLastProcessed = 0;
+  var _captionLastTotal = 0;
+  var _captionLastErrors = 0;
+
+  function _captionTickUpdate() {
+    var detEl = document.getElementById('captionProgressDetail');
+    if (!detEl) return;
+    var now = performance.now();
+    var elapsed = _captionElapsedBase + (now - _captionElapsedAt) / 1000;
+    detEl.textContent = _captionLastProcessed + ' ' + window.tr('semantic_search.generated', '生成') + ', ' + _captionLastErrors + ' ' + window.tr('semantic_search.skipped', 'スキップ') + ' / ' + _captionLastTotal + ' ' + window.tr('semantic_search.items_total', '件中') + ', ' + _fmtElapsed(elapsed) + ' ' + window.tr('semantic_search.elapsed', '経過');
+  }
+
+  function _startCaptionTick() {
+    if (_captionTickTimer) return;
+    _captionTickTimer = setInterval(_captionTickUpdate, 1000);
+  }
+
+  function _stopCaptionTick() {
+    if (_captionTickTimer) { clearInterval(_captionTickTimer); _captionTickTimer = null; }
+  }
+
+  // --- Caption: progress update ---
+  function updateCaptionProgress(data) {
+    var processed = data.processed || 0;
+    var total = data.total || 0;
+    var errors = data.errors || 0;
+    var pct = total > 0 ? Math.round((processed + errors) / total * 100) : 0;
+    var pctEl = document.getElementById('captionProgressPct');
+    var barEl = document.getElementById('captionProgressBar');
+    var detEl = document.getElementById('captionProgressDetail');
+    if (pctEl) pctEl.textContent = pct + '%';
+    if (barEl) barEl.style.width = pct + '%';
+
+    // Update snapshot for client-side countup
+    _captionLastProcessed = processed;
+    _captionLastTotal = total;
+    _captionLastErrors = errors;
+    _captionElapsedBase = data.elapsed || 0;
+    _captionElapsedAt = performance.now();
+    _startCaptionTick();
+
+    if (detEl) {
+      detEl.textContent = processed + ' ' + window.tr('semantic_search.generated', '生成') + ', ' + errors + ' ' + window.tr('semantic_search.skipped', 'スキップ') + ' / ' + total + ' ' + window.tr('semantic_search.items_total', '件中') + ', ' + _fmtElapsed(_captionElapsedBase) + ' ' + window.tr('semantic_search.elapsed', '経過');
+    }
+  }
+
+  function showCaptionRunningUI() {
+    _startCaptionPollTimer();
+    document.getElementById('captionStartBtn').style.display = 'none';
+    document.getElementById('captionStopBtn').style.display = '';
+    document.getElementById('captionProgress').style.display = '';
+    document.getElementById('captionProgressLabel').textContent = window.tr('semantic_search.generating_captions', 'キャプション生成中...');
+    var hintEl = document.getElementById('captionHint');
+    if (hintEl) hintEl.style.display = 'none';
+    var resultEl = document.getElementById('captionResult');
+    if (resultEl) resultEl.style.display = 'none';
+  }
+
+  function onCaptionComplete(data) {
+    _resetCaptionPollTimer();
+    _stopCaptionTick();
+    document.getElementById('captionStartBtn').style.display = '';
+    document.getElementById('captionStopBtn').style.display = 'none';
+    var label = document.getElementById('captionProgressLabel');
+    var reason = data.reason || 'complete';
+    if (label) label.textContent = reason === 'stopped' ? window.tr('semantic_search.stopped', '停止しました') : window.tr('semantic_search.complete', '完了');
+    var processed = data.processed || 0;
+    var errors = data.errors || 0;
+    var elapsed = data.elapsed_seconds || 0;
+    var resultEl = document.getElementById('captionResult');
+    if (resultEl) {
+      resultEl.style.display = '';
+      resultEl.textContent = processed + ' ' + window.tr('semantic_search.files_captioned_in', 'ファイルを') + ' ' + _fmtElapsed(elapsed) + ' ' + window.tr('semantic_search.elapsed_suffix', 'でキャプション生成') + (errors > 0 ? ' (' + errors + ' ' + window.tr('semantic_search.skipped', 'スキップ') + ')' : '');
+    }
+  }
+
+  // --- Caption: start batch ---
+  var _lastSearchFileIds = [];
+
+  window.captionStartBatch = function() {
+    if (!_lastSearchFileIds.length) {
+      var el = document.getElementById('captionResult');
+      if (el) { el.style.display = ''; el.textContent = window.tr('semantic_search.no_caption_targets', 'キャプション対象がありません。先にセマンティック検索を実行してください。'); }
+      return;
+    }
+    var prompt = (document.getElementById('captionPrompt').value || '').trim() || 'Describe this image in detail.';
+    fetch(BASE + '/caption/start', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({file_ids: _lastSearchFileIds, prompt: prompt})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status === 'already_running') {
+        var el = document.getElementById('captionResult');
+        if (el) { el.style.display = ''; el.textContent = window.tr('semantic_search.caption_already_running', 'キャプション生成は既に実行中です'); }
+        return;
+      }
+      showCaptionRunningUI();
+    }).catch(function(e) {
+      var el = document.getElementById('captionResult');
+      if (el) { el.style.display = ''; el.textContent = window.tr('semantic_search.caption_start_failed', 'キャプション開始に失敗') + ': ' + e.message; }
+    });
+  };
+
+  // --- Caption: stop ---
+  window.captionStop = function() {
+    fetch(BASE + '/caption/stop', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).catch(function() {});
+  };
+
+  // Hook to capture search results for captioning
+  window._semanticSetSearchFileIds = function(ids) {
+    _lastSearchFileIds = ids || [];
+    var btn = document.getElementById('captionStartBtn');
+    var hint = document.getElementById('captionHint');
+    if (btn) btn.disabled = !_lastSearchFileIds.length;
+    if (hint) hint.style.display = _lastSearchFileIds.length ? 'none' : '';
+  };
+
+  function _bindSemanticAction(id, fn) {
+    var el = document.getElementById(id);
+    if (!el || el.dataset.semanticBound === '1' || typeof fn !== 'function') return;
+    el.dataset.semanticBound = '1';
+    el.addEventListener('click', function(ev) {
+      ev.preventDefault();
+      ev.stopPropagation();
+      fn();
+    });
+  }
+
+  function bindSemanticActions() {
+    _bindSemanticAction('semanticModelDownloadBtn', window.semanticDownloadModel);
+    _bindSemanticAction('semanticStartBtn', window.semanticStartIndex);
+    _bindSemanticAction('semanticStopBtn', window.semanticStopIndex);
+    _bindSemanticAction('semanticClearBtn', window.semanticClearIndex);
+    _bindSemanticAction('captionStartBtn', window.captionStartBatch);
+    _bindSemanticAction('captionStopBtn', window.captionStop);
+  }
+  // --- SSE via shared engine (window.sseSubscribe from nav.js) ---
+  function initSSE() {
+    if (!window.sseSubscribe) return;
+    window.sseSubscribe('semantic_index.start', function() { showRunningUI(); });
+    window.sseSubscribe('semantic_index.progress', function(d) { updateProgress(d.data); });
+    window.sseSubscribe('semantic_index.complete', function(d) { onIndexComplete(d.data); });
+    window.sseSubscribe('vlm_caption.start', function() { showCaptionRunningUI(); });
+    window.sseSubscribe('vlm_caption.progress', function(d) { updateCaptionProgress(d.data); });
+    window.sseSubscribe('vlm_caption.complete', function(d) { onCaptionComplete(d.data); });
+  }
+
+  var _initialized = false;
+
+  function activateSection() {
+    if (_initialized) return;
+    _initialized = true;
+    bindSemanticActions();
+    loadStatus();
+    loadModelStatus();
+    initSSE();
+    fetch(BASE + '/index/status').then(function(r) { return r.json(); }).then(function(d) {
+      if (d.running) {
+        showRunningUI();
+        updateProgress({
+          processed: d.processed || 0,
+          total: d.total || 0,
+          errors: d.errors || 0,
+          elapsed: d.elapsed || 0,
+          message: d.message || ''
+        });
+      }
+    }).catch(function() {});
+    fetch(BASE + '/caption/status').then(function(r) { return r.json(); }).then(function(d) {
+      if (d.running) {
+        showCaptionRunningUI();
+        updateCaptionProgress({
+          processed: d.processed || 0,
+          total: d.total || 0,
+          errors: d.errors || 0,
+          elapsed: d.elapsed || 0
+        });
+      }
+    }).catch(function() {});
+  }
+
+  document.addEventListener('tools:activate-section', function(ev) {
+    var detail = ev.detail || {};
+    if (detail.id === 'semanticSearchSection') activateSection();
+  });
+
+  var section = document.getElementById('semanticSearchSection');
+  // Standalone /ext/* pages and direct Tools-page includes have no enclosing
+  // details.tool-item to dispatch 'tools:activate-section', so activate them immediately.
+  var isStandalone = window.location.pathname.indexOf('/ext/') === 0;
+  var isDirectToolsInclude = section && !section.closest('details.tool-item');
+  if (isStandalone || isDirectToolsInclude || (section && section.classList.contains('expanded'))) {
+    activateSection();
+  }
+})();
+</script>

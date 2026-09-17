@@ -1,0 +1,327 @@
+/* nav.css — Fixed top navigation bar */
+/* Icon sizing for nav-internal sprites (.icon). Self-contained so extension
+ * pages that include _nav.html without loading base-icons.css still get
+ * properly sized icons (otherwise <svg class="icon"> renders at intrinsic
+ * size and balloons to fill the flex row). */
+#fixedNav .icon,
+#fixedNav .nav-overflow-popup .icon {
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.125em;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+#fixedNav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 900;
+  background: var(--card, #1e1e3a);
+  border-bottom: 1px solid rgba(128,128,128,0.15);
+  padding: 6px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: nowrap;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+#fixedNav .nav-brand {
+  font-weight: bold;
+  font-size: 14px;
+  color: var(--accent, #2563eb);
+  text-decoration: none;
+  margin-right: auto;
+  padding: 6px 4px;
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+#fixedNav .nav-link {
+  font-size: 12px;
+  text-decoration: none;
+  color: var(--muted, #888);
+  padding: 6px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+#fixedNav .nav-link:hover {
+  background: rgba(128,128,128,0.1);
+}
+#fixedNav .nav-link.active {
+  color: var(--accent, #2563eb);
+  font-weight: bold;
+}
+
+#fixedNav .nav-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 6px;
+  min-width: 32px;
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#fixedNav .nav-utils {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
+#fixedNav .nav-btn-outline {
+  background: none;
+  border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  color: var(--muted, #888);
+  padding: 4px 8px;
+  min-height: 32px;
+}
+
+/* YU AI Manager brand icon (nav-brand) */
+.eauesque-icon {
+  color: var(--icon-brand, #0077bb);
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+  display: block;
+  transition: color 0.2s;
+}
+.nav-brand:hover .eauesque-icon {
+  opacity: 0.8;
+}
+
+/* Extension launcher styles moved to ext-launcher.css */
+
+/* Nav overflow (⋯) menu */
+.nav-overflow-wrap { position: relative; }
+.nav-overflow-popup {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 200px;
+  background: var(--card, #1e1e3a);
+  border: 1px solid rgba(128,128,128,0.2);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  z-index: 900;
+  padding: 6px 0;
+}
+.nav-overflow-item {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  font-size: 13px;
+  background: none;
+  border: none;
+  color: var(--text, #e7eaf0);
+  text-decoration: none;
+  text-align: left;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.nav-overflow-item:hover { background: rgba(128,128,128,0.12); }
+.nav-overflow-item.active { color: #667eea; font-weight: 600; background: rgba(102,126,234,0.08); }
+.nav-overflow-divider { border-top: 1px solid rgba(128,128,128,0.15); margin: 4px 0; }
+/* Overflow badge: shows visible item count */
+.nav-overflow-badge {
+  position: absolute;
+  top: 0; right: -2px;
+  min-width: 15px; height: 15px;
+  font-size: 9px; line-height: 15px;
+  text-align: center;
+  background: var(--accent, #2563eb);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0 3px;
+  pointer-events: none;
+}
+/* WCAG AA: dark/retro themes — --accent light-blue + white text fails 3:1 */
+body.dark .nav-overflow-badge,
+body.theme-atelier-dark .nav-overflow-badge,
+body.theme-retro .nav-overflow-badge {
+  color: #000;
+}
+/* (Extension launcher is in ext-launcher.css) */
+
+/* Hamburger toggle — hidden on desktop */
+#navHamburger {
+  display: none;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  padding: 4px 6px;
+  color: var(--muted, #888);
+  min-width: 36px;
+  min-height: 36px;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Nav links group */
+#fixedNav .nav-links {
+  display: contents;
+}
+
+/* ===== Mobile: collapse nav links behind hamburger ===== */
+@media (max-width: 640px) {
+  #navHamburger {
+    display: flex;
+  }
+
+  #fixedNav {
+    flex-wrap: nowrap;
+    padding: 6px 12px;
+  }
+
+  #fixedNav .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--card, #1e1e3a);
+    border-bottom: 1px solid rgba(128,128,128,0.15);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    padding: 8px 12px;
+    flex-direction: column;
+    gap: 2px;
+    z-index: 801;
+  }
+
+  #fixedNav .nav-links.open {
+    display: flex;
+  }
+
+  /* Backdrop: dim content behind open hamburger menu */
+  #fixedNav .nav-links.open::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.35);
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  #fixedNav .nav-link {
+    font-size: 14px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    display: block;
+  }
+  #fixedNav .nav-link:hover {
+    background: rgba(128,128,128,0.12);
+  }
+
+  /* Hide utility buttons in the top row to declutter */
+  #fixedNav .nav-utils {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+  }
+}
+
+/* Scroll-back button */
+.scroll-back-btn {
+  display: none;
+  position: fixed;
+  z-index: 900;
+  left: 20px;
+  bottom: 80px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  background: rgba(102, 126, 234, 0.85);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  font-size: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: opacity 0.3s;
+}
+
+/* ===== Tablet tweaks ===== */
+@media (max-width: 820px) and (min-width: 641px) {
+  #fixedNav .nav-link {
+    padding: 8px 10px;
+    font-size: 11px;
+    min-width: 36px;
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* Hide text labels, show only emoji icons */
+  #fixedNav .nav-link .nav-label {
+    display: none;
+  }
+}
+
+/* ================================================================
+   View Transitions — dynamically injected via nav/index.ts (initViewTransition)
+   @view-transition at-rule causes parse errors in Firefox, so it is
+   separated from CSS and injected via JS after feature detection
+   ================================================================ */
+
+/* Agent Kill Switch button */
+.agent-kill-btn {
+  min-width: 32px;
+  min-height: 32px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+}
+.agent-kill-icon {
+  width: 19px;
+  height: 19px;
+  display: block;
+}
+.agent-kill-icon__plate,
+.agent-kill-icon__stop,
+.agent-kill-icon__play {
+  fill: currentColor;
+}
+.agent-kill-icon__bolt {
+  fill: var(--nav-bg, #111827);
+}
+.agent-kill-btn:hover {
+  background: rgba(220, 38, 38, 0.15);
+}
+.agent-kill-btn.killed {
+  background: rgba(220, 38, 38, 0.25);
+  color: #ef4444;
+  animation: agent-kill-pulse 1.5s ease-in-out infinite;
+}
+.agent-kill-btn.circuit-open {
+  background: rgba(245, 158, 11, 0.25);
+  color: #f59e0b;
+  animation: agent-kill-pulse 1.5s ease-in-out infinite;
+}
+@keyframes agent-kill-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Theme toggle: circular reveal (JS drives clip-path animation).
+   Disable default cross-fade only for theme-change transitions. */
+:root:active-view-transition-type(theme-change) {
+  &::view-transition-old(root),
+  &::view-transition-new(root) {
+    animation: none;
+    mix-blend-mode: normal;
+  }
+}

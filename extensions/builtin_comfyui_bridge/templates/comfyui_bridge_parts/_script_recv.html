@@ -1,0 +1,137 @@
+  // -- Receive prompt from other tools ----------------------------
+
+  var _cfbReceivedPrompt = false;
+
+  // bridge-app.js (type=module) registers window.bridgeStorage; its load is
+  // deferred so this inline script may run first. Wait briefly, fall through
+  // to legacy localStorage if the module never registers.
+  function _cfbWaitBridgeStorage() {
+    return new Promise(function(resolve) {
+      if (window.bridgeStorage) return resolve(window.bridgeStorage);
+      var tries = 0;
+      var iv = setInterval(function() {
+        if (window.bridgeStorage) { clearInterval(iv); resolve(window.bridgeStorage); }
+        else if (++tries >= 100) { clearInterval(iv); resolve(null); }
+      }, 30);
+    });
+  }
+
+  async function _cfbRead(key) {
+    var bs = await _cfbWaitBridgeStorage();
+    if (bs) {
+      var v = await bs.get(key);
+      if (v !== undefined && v !== null) {
+        await bs.remove(key);
+        return v;
+      }
+    }
+    var raw = localStorage.getItem(key);
+    if (!raw) return null;
+    localStorage.removeItem(key);
+    try { return JSON.parse(raw); } catch (_e) { return null; }
+  }
+
+  async function receivePrompt() {
+    try {
+      var data = await _cfbRead('bridge_send_prompt');
+      if (!data) return;
+      _cfbReceivedPrompt = true;
+      if (typeof data.convert_warning === "string" && data.convert_warning && typeof window.showToast === "function") {
+        window.showToast(data.convert_warning, true);
+      }
+      if (data.prompt) {
+        if (typeof _cfbSetPrompt === "function") _cfbSetPrompt(data.prompt);
+        else $("cfbPrompt").value = data.prompt;
+      }
+      if (data.negative) {
+        if (typeof _cfbSetNegative === "function") _cfbSetNegative(data.negative);
+        else $("cfbNegative").value = data.negative;
+      }
+      var paramsApplied = false;
+      if (typeof data.seed === "number" && isFinite(data.seed) && data.seed >= 0) {
+        var seedEl = $("cfbSeed");
+        if (seedEl) {
+          seedEl.value = String(data.seed);
+          try { seedEl.dispatchEvent(new Event("change", { bubbles: true })); } catch (_e) {}
+          try { seedEl.dispatchEvent(new Event("input", { bubbles: true })); } catch (_e) {}
+          paramsApplied = true;
+        }
+      }
+      if (typeof data.steps === "number" && isFinite(data.steps) && data.steps > 0) {
+        var stepsEl = $("cfbSteps");
+        if (stepsEl) { stepsEl.value = String(Math.round(data.steps)); paramsApplied = true; }
+      }
+      if (typeof data.scale === "number" && isFinite(data.scale)) {
+        var cfgEl = $("cfbCfg");
+        if (cfgEl) { cfgEl.value = String(data.scale); paramsApplied = true; }
+      }
+      if (typeof data.sampler === "string" && data.sampler) {
+        // Use _setSelectValue so the value is preserved even when cfbLoadSamplers()
+        // later rebuilds the options list (it saves/restores cur = sel.value).
+        if (typeof _setSelectValue === "function") { _setSelectValue("cfbSampler", data.sampler); paramsApplied = true; }
+      }
+      if (typeof data.scheduler === "string" && data.scheduler) {
+        if (typeof _setSelectValue === "function") { _setSelectValue("cfbScheduler", data.scheduler); paramsApplied = true; }
+      }
+      if (typeof data.model === "string" && data.model) {
+        if (typeof _setSelectValue === "function") { _setSelectValue("cfbModel", data.model); paramsApplied = true; }
+      }
+      if (typeof data.width === "number" && isFinite(data.width) && data.width > 0) {
+        var widthEl = $("cfbWidth");
+        if (widthEl) { widthEl.value = String(Math.round(data.width)); paramsApplied = true; }
+      }
+      if (typeof data.height === "number" && isFinite(data.height) && data.height > 0) {
+        var heightEl = $("cfbHeight");
+        if (heightEl) { heightEl.value = String(Math.round(data.height)); paramsApplied = true; }
+      }
+      if (typeof data.diffusion_model === "string" && data.diffusion_model) {
+        if (typeof _setSelectValue === "function") { _setSelectValue("cfbDiffusionModel", data.diffusion_model); paramsApplied = true; }
+      }
+      if (typeof data.vae === "string" && data.vae) {
+        if (typeof _setSelectValue === "function") { _setSelectValue("cfbVae", data.vae); paramsApplied = true; }
+      }
+      if (typeof data.text_encoder_1 === "string" && data.text_encoder_1) {
+        if (typeof _setSelectValue === "function") { _setSelectValue("cfbTextEncoder1", data.text_encoder_1); paramsApplied = true; }
+      }
+      if (typeof data.text_encoder_2 === "string" && data.text_encoder_2) {
+        if (typeof _setSelectValue === "function") { _setSelectValue("cfbTextEncoder2", data.text_encoder_2); paramsApplied = true; }
+      }
+      if (typeof data.clip_type === "string" && data.clip_type) {
+        if (typeof _setSelectValue === "function") { _setSelectValue("cfbClipType", data.clip_type); paramsApplied = true; }
+      }
+      // Refresh separate-load UI visibility after applying loader fields
+      if (typeof cfbUpdateSeparateLoadUI === "function") cfbUpdateSeparateLoadUI();
+      if ((data.prompt || data.negative || paramsApplied) && typeof window.showToast === "function") {
+        var cfbToastKey = data.source === "recipe_import" ? 'bridge.received_recipe_comfy' : (paramsApplied ? 'bridge.received_hint_prompt_with_seed' : 'bridge.received_hint_prompt');
+        var cfbToastFb = data.source === "recipe_import"
+          ? 'レシピからパラメータを読み込みました'
+          : (paramsApplied ? 'プロンプトとパラメータを反映しました' : 'プロンプトを反映しました');
+        window.showToast(window.tr(cfbToastKey, cfbToastFb));
+      }
+    } catch (_e) {}
+  }
+
+  async function receiveImage() {
+    try {
+      var data = await _cfbRead('bridge_send_image');
+      if (!data) return;
+      if (data.base64 && typeof window.cfbSetImg2ImgFile === "function") {
+        var byteStr = atob(data.base64);
+        var arr = new Uint8Array(byteStr.length);
+        for (var i = 0; i < byteStr.length; i++) arr[i] = byteStr.charCodeAt(i);
+        var mime = (arr[0] === 0xFF && arr[1] === 0xD8) ? "image/jpeg"
+                 : (arr[0] === 0x52 && arr[8] === 0x57) ? "image/webp"
+                 : "image/png";
+        var ext = mime === "image/jpeg" ? "jpg" : mime === "image/webp" ? "webp" : "png";
+        var blob = new Blob([arr], { type: mime });
+        var file = new File([blob], "from_bridge." + ext, { type: mime });
+        window.cfbSetImg2ImgFile(file);
+        var section = $("cfbImg2ImgSection");
+        if (section && !section.open) section.open = true;
+        if (typeof window.showToast === "function") {
+          window.showToast(window.tr('bridge.received_hint_image',
+            'img2img に画像をセットしました（生成パラメータは手動で調整してください）'));
+        }
+      }
+    } catch (_e) {}
+  }

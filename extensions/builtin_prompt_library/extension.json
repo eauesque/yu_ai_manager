@@ -1,0 +1,19 @@
+{
+  "name": "builtin-prompt-library",
+  "version": "1.0.0",
+  "description": "Prompt Library & Organization",
+  "type": "ui_widget",
+  "category": "prompt",
+  "entry": "prompt_library.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/prompt-library",
+  "nav": {
+    "label": "Prompt Library",
+    "icon": "\ud83d\udcda"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 250
+  }
+}

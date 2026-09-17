@@ -1,0 +1,755 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+
+  // Part 2 of the sweep runner — split from _script_sweep.html to keep each
+  // file under 800 lines (CLAUDE.md). Top-level vars/functions land on
+  // window so part 1 (defined first) is reachable from here.
+
+  function _cfbSubstitutePromptMacros(prompt, slotValuesByAxis) {
+    if (!prompt || !slotValuesByAxis) return prompt;
+    return prompt.replace(/\$([xyz])?(\d+)/g, function(m, ax, n) {
+      var axis = ax || "x";
+      var bag = slotValuesByAxis[axis];
+      if (!bag) return m;
+      var v = bag[parseInt(n, 10)];
+      return (v != null) ? String(v) : m;
+    });
+  }
+
+  function _csweepApplyMacrosVisibility() {
+    ["x", "y", "z"].forEach(function(axis) {
+      var ids = _cfbAxisIds(axis);
+      var sel = _csweepGet(ids.paramSel);
+      var isMacros = !!(sel && sel.value === "_macros");
+      var editor = _csweepGet(ids.editor);
+      if (editor) editor.style.display = isMacros ? "" : "none";
+      ids.rangeIds.forEach(function(id) {
+        var el = _csweepGet(id);
+        if (!el) return;
+        var label = document.querySelector('label[for="' + id + '"]');
+        var disp = isMacros ? "none" : "";
+        el.style.display = disp;
+        if (label) label.style.display = disp;
+      });
+      if (isMacros) _cfbRenderMacros(axis);
+    });
+    _csweepApplyMode();
+  }
+
+  // ---------- Live total-image estimate ----------------------------
+  function _cfbSweepCountForAxis(axis) {
+    var ids = _cfbAxisIds(axis);
+    var sel = _csweepGet(ids.paramSel);
+    var pv = sel ? sel.value : "";
+    if (pv === "_macros") {
+      var built = _cfbMacroBuildSeries(axis, true);
+      return built ? built.count : 0;
+    }
+    var minEl = _csweepGet(ids.rangeIds[0]);
+    var maxEl = _csweepGet(ids.rangeIds[1]);
+    var modeEl = _csweepGet(ids.rangeIds[2]);
+    var cntEl = _csweepGet(ids.rangeIds[3]);
+    var stepEl = _csweepGet(ids.rangeIds[4]);
+    if (!minEl || !maxEl || !modeEl || !cntEl || !stepEl) return 0;
+    var mn = parseFloat(minEl.value);
+    var mx = parseFloat(maxEl.value);
+    var md = modeEl.value || "count";
+    var ct = parseInt(cntEl.value, 10) || 0;
+    var sp = parseFloat(stepEl.value) || 0;
+    return _csweepBuildSeries(mn, mx, md, ct, sp).length;
+  }
+
+  function _cfbSweepEstimateTotal() {
+    var cap = (typeof _csweepEffectiveMax === "function") ? _csweepEffectiveMax() : 50;
+    var xCount = _cfbSweepCountForAxis("x");
+    if (xCount < 1) return { total: 0, cap: cap, ok: false };
+    var total = xCount;
+    var yEn = _csweepGet("cfbSweepYEnabled");
+    if (yEn && yEn.checked) {
+      var yCount = _cfbSweepCountForAxis("y");
+      if (yCount < 1) return { total: 0, cap: cap, ok: false };
+      total *= yCount;
+      var zEn = _csweepGet("cfbSweepZEnabled");
+      if (zEn && zEn.checked) {
+        var zCount = _cfbSweepCountForAxis("z");
+        if (zCount < 1) return { total: 0, cap: cap, ok: false };
+        total *= zCount;
+      }
+    }
+    return { total: total, cap: cap, ok: total <= cap };
+  }
+
+  function _cfbSweepUpdateEstimate() {
+    var el = _csweepGet("cfbSweepTotalEstimate");
+    if (!el) return;
+    var est = _cfbSweepEstimateTotal();
+    if (est.total < 1) {
+      el.textContent = "—";
+      el.style.color = "";
+      el.title = "";
+      return;
+    }
+    var labelImgs = window.tr ? window.tr('comfyui_bridge.sweep_total_estimate_unit', '枚') : 'images';
+    var capLabel = window.tr ? window.tr('comfyui_bridge.sweep_total_estimate_cap', '上限') : 'cap';
+    var text = est.total + " " + labelImgs + " (" + capLabel + " " + est.cap + ")";
+    if (!est.ok) {
+      var warn = window.tr ? window.tr('comfyui_bridge.sweep_total_over_cap', '⚠ 上限超過 — Run Sweep でブロックされます')
+                            : '⚠ exceeds cap — Run Sweep will block';
+      el.textContent = text + " " + warn;
+      el.style.color = "#f44336";
+      el.title = warn;
+    } else {
+      el.textContent = text;
+      el.style.color = "#4caf50";
+      el.title = "";
+    }
+  }
+
+  function _csweepApplyYEnabled() {
+    var en = _csweepGet("cfbSweepYEnabled");
+    var enabled = !!(en && en.checked);
+    ["cfbSweepYParam", "cfbSweepYMin", "cfbSweepYMax", "cfbSweepYMode",
+     "cfbSweepYCount", "cfbSweepYStep"].forEach(function(id) {
+      var el = _csweepGet(id);
+      if (el) el.disabled = !enabled;
+    });
+  }
+
+  function _csweepApplyZEnabled() {
+    var yEn = _csweepGet("cfbSweepYEnabled");
+    var zEn = _csweepGet("cfbSweepZEnabled");
+    var yChecked = !!(yEn && yEn.checked);
+    var zChecked = !!(zEn && zEn.checked);
+    if (zEn) zEn.disabled = !yChecked;
+    if (!yChecked && zEn && zEn.checked) zEn.checked = false;
+    var enabled = yChecked && zChecked;
+    ["cfbSweepZParam", "cfbSweepZMin", "cfbSweepZMax", "cfbSweepZMode",
+     "cfbSweepZCount", "cfbSweepZStep"].forEach(function(id) {
+      var el = _csweepGet(id);
+      if (el) el.disabled = !enabled;
+    });
+  }
+
+  function _csweepInitModeToggle() {
+    var modeSel = _csweepGet("cfbSweepMode");
+    if (modeSel) modeSel.addEventListener("change", _csweepApplyMode);
+    var yModeSel = _csweepGet("cfbSweepYMode");
+    if (yModeSel) yModeSel.addEventListener("change", _csweepApplyMode);
+    var zModeSel = _csweepGet("cfbSweepZMode");
+    if (zModeSel) zModeSel.addEventListener("change", _csweepApplyMode);
+    var yEn = _csweepGet("cfbSweepYEnabled");
+    if (yEn) yEn.addEventListener("change", function() { _csweepApplyYEnabled(); _csweepApplyZEnabled(); });
+    var zEn = _csweepGet("cfbSweepZEnabled");
+    if (zEn) zEn.addEventListener("change", _csweepApplyZEnabled);
+    ["x", "y", "z"].forEach(function(axis) {
+      var ids = _cfbAxisIds(axis);
+      var paramSel = _csweepGet(ids.paramSel);
+      if (paramSel) paramSel.addEventListener("change", _csweepApplyMacrosVisibility);
+      var addBtn = _csweepGet(ids.addBtn);
+      if (addBtn) addBtn.addEventListener("click", function() { _cfbMacroAdd(axis); });
+      var padShort = _csweepGet(ids.padShort);
+      if (padShort) padShort.addEventListener("change", function() { _cfbRenderMacros(axis); });
+    });
+    _csweepApplyMode();
+    _csweepApplyYEnabled();
+    _csweepApplyZEnabled();
+    _csweepApplyMacrosVisibility();
+    var sweepSection = _csweepGet("cfbSweepSection");
+    if (sweepSection) {
+      sweepSection.addEventListener("input", _cfbSweepUpdateEstimate);
+      sweepSection.addEventListener("change", _cfbSweepUpdateEstimate);
+    }
+    _cfbSweepUpdateEstimate();
+    if (window._sweepLoadAxes) {
+      try { window._sweepLoadAxes(); } catch (_e) {}
+    }
+    if (window._sweepOnAxesReady) {
+      window._sweepOnAxesReady(function() {
+        ["x", "y", "z"].forEach(function(axis) {
+          try { _cfbRenderMacros(axis); } catch (_e) {}
+        });
+        _cfbSweepUpdateEstimate();
+      });
+    }
+  }
+
+  function _csweepInitRecovery() {
+    if (!window.SweepBuffer) return;
+    window.SweepBuffer.checkRecovery("comfyui", "/ext/comfyui-bridge/api/save-batch", {
+      recovered: window.tr ? window.tr('comfyui_bridge.sweep_recovered', 'ComfyUI Sweep の未保存 N 枚を自動保存しました') : 'ComfyUI: saved N recovered images',
+      warningTitle: window.tr ? window.tr('comfyui_bridge.sweep_recovery_title', '⚠ ComfyUI Sweep が中断されました') : '⚠ ComfyUI Sweep was interrupted',
+      warningBody: window.tr ? window.tr('comfyui_bridge.sweep_recovery_body', '前回の ComfyUI Sweep で N 枚が未保存です。サーバ自動保存に失敗しました。手動で対応してください。') : 'N images from previous ComfyUI Sweep were not saved. Auto-recovery failed.',
+      retryBtn: window.tr ? window.tr('comfyui_bridge.sweep_recovery_retry', 'サーバへ再保存') : 'Retry server save',
+      downloadBtn: window.tr ? window.tr('comfyui_bridge.sweep_recovery_download', '個別ダウンロード') : 'Download individually',
+      discardBtn: window.tr ? window.tr('comfyui_bridge.sweep_recovery_discard', '破棄') : 'Discard',
+    });
+  }
+
+  function _csweepInitResume() {
+    if (!window.SweepResume) return;
+    window.SweepResume.maybeResume({
+      bridge: "comfyui",
+      prefix: "cfb",
+      sectionId: "cfbSweepSection",
+      params: ["cfg", "steps", "denoise", "controlnet_strength"],
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function() {
+      _csweepInitModeToggle(); _csweepInitRecovery(); _csweepInitResume();
+    });
+  } else {
+    _csweepInitModeToggle();
+    _csweepInitRecovery();
+    _csweepInitResume();
+  }
+
+  function _csweepShowCancelRow(show) {
+    var row = _csweepGet("cfbSweepCancelRow");
+    if (row) row.style.display = show ? "flex" : "none";
+  }
+
+  window.cfbStopSweepGraceful = function() {
+    if (!_csweepRunning) return;
+    _csweepCancel = true;
+    _csweepUpdateStatus(window.tr ? window.tr('bridge.status.stopping_graceful', 'Stopping after current generation…') : 'stopping…');
+  };
+  window.cfbStopSweepImmediate = function() {
+    if (!_csweepRunning) return;
+    _csweepCancel = true;
+    if (_csweepAbort) { try { _csweepAbort.abort(); } catch(_) {} }
+    // Also tell the ComfyUI server to interrupt the current run.
+    try {
+      window.bridgeFetch("comfyui", "cancel", {});
+    } catch(_) {}
+    _csweepUpdateStatus(window.tr ? window.tr('bridge.status.aborting', 'Aborting…') : 'aborting…');
+  };
+  window.cfbCancelSweep = window.cfbStopSweepGraceful;
+
+  window.cfbRunSweep = async function() {
+    if (_csweepRunning) return;
+    if (window._cfbIsGenerating && window._cfbIsGenerating()) return;
+
+    // Hard-stop: Sweep XMP write target must be configured before launching.
+    // Otherwise the bridge silently drops XMP and images pile up in
+    // ComfyUI's output dir without metadata.
+    try {
+      var cfgResp = await getJSON("/api/config");
+      if (cfgResp && cfgResp.ok && cfgResp.bridge_managed_save) {
+        var sameAsSave = !!cfgResp.comfy_output_same_as_save_folder;
+        var target = sameAsSave
+          ? (cfgResp.save_folder || "").trim()
+          : (cfgResp.comfy_output_root || "").trim();
+        if (!target) {
+          var msg = window.tr
+            ? window.tr('comfyui_bridge.sweep_xmp_target_missing',
+                'Sweep XMP 埋め込み先 (ComfyUI 側 output ディレクトリ) が未設定です。設定タブで指定してから生成してください。')
+            : 'Sweep XMP target path is not configured. Please set it in the Settings tab.';
+          window.showToast(msg, true);
+          if (typeof window.customAlert === "function") { window.customAlert(msg); }
+          return;
+        }
+      }
+    } catch (_e) { /* network error: fall through, server will reject */ }
+
+    // Pre-load sweep axis wildcards (cheap on warm cache).
+    if (window._sweepLoadAxes) {
+      try { await window._sweepLoadAxes(); } catch (_e) { /* tolerate */ }
+    }
+
+    // ----- X axis -----
+    // X axis can be either a regular numeric param OR `_macros` (Prompt
+    // S/R macros). The _macros mode bypasses the numeric range fields
+    // and reads from the macro slots editor.
+    var xParamSel = _csweepGet("cfbSweepParam");
+    var xParamValue = xParamSel ? xParamSel.value : "";
+    var xIsMacros = (xParamValue === "_macros");
+    var xSpec = null;
+    var xValues = null;
+    var xMacroValues = null;
+    var xParamLabel = "";
+
+    if (xIsMacros) {
+      var built = _cfbMacroBuildSeries("x");
+      if (!built) return;
+      xMacroValues = built.valuesPerIter;
+      xValues = [];
+      for (var _i = 0; _i < built.count; _i++) xValues.push(_i);
+      xParamLabel = (window.tr ? window.tr('comfyui_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (X)";
+    } else {
+      xSpec = _CSWEEP_PARAMS[xParamValue];
+      if (!xSpec) {
+        window.showToast("Sweep: unknown X parameter", true);
+        return;
+      }
+      var xMin = parseFloat(_csweepGet("cfbSweepMin").value);
+      var xMax = parseFloat(_csweepGet("cfbSweepMax").value);
+      var xMode = _csweepGet("cfbSweepMode").value || "count";
+      var xCount = parseInt(_csweepGet("cfbSweepCount").value, 10) || 6;
+      var xStep = parseFloat(_csweepGet("cfbSweepStep").value) || 0.5;
+      xValues = _csweepBuildSeries(xMin, xMax, xMode, xCount, xStep);
+      if (xValues.length < 1) {
+        window.showToast(window.tr('comfyui_bridge.sweep_invalid_range', 'Sweep: invalid range or step'), true);
+        return;
+      }
+    }
+
+    // ----- Y axis (opt-in) -----
+    var yEn = _csweepGet("cfbSweepYEnabled");
+    var yEnabled = !!(yEn && yEn.checked);
+    var yParamSel = null, ySpec = null, yValues = null, yParamLabel = "";
+    var yIsMacros = false, yMacroValues = null, yParamValue = "";
+    if (yEnabled) {
+      yParamSel = _csweepGet("cfbSweepYParam");
+      yParamValue = yParamSel ? yParamSel.value : "";
+      yIsMacros = (yParamValue === "_macros");
+      if (yIsMacros) {
+        var ybuilt = _cfbMacroBuildSeries("y");
+        if (!ybuilt) return;
+        yMacroValues = ybuilt.valuesPerIter;
+        yValues = [];
+        for (var _yi = 0; _yi < ybuilt.count; _yi++) yValues.push(_yi);
+        yParamLabel = (window.tr ? window.tr('comfyui_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (Y)";
+      } else {
+        ySpec = _CSWEEP_PARAMS[yParamValue];
+        if (!ySpec) {
+          window.showToast("Sweep: unknown Y parameter", true);
+          return;
+        }
+        var yMin = parseFloat(_csweepGet("cfbSweepYMin").value);
+        var yMax = parseFloat(_csweepGet("cfbSweepYMax").value);
+        var yMode = _csweepGet("cfbSweepYMode").value || "count";
+        var yCount = parseInt(_csweepGet("cfbSweepYCount").value, 10) || 3;
+        var yStep = parseFloat(_csweepGet("cfbSweepYStep").value) || 0.5;
+        yValues = _csweepBuildSeries(yMin, yMax, yMode, yCount, yStep);
+        if (yValues.length < 1) {
+          window.showToast(window.tr('comfyui_bridge.sweep_invalid_range', 'Sweep: invalid range or step') + " (Y)", true);
+          return;
+        }
+        var yKey = "comfyui_bridge.sweep_param_" + yParamValue;
+        yParamLabel = (window.tr ? window.tr(yKey, ySpec.label) : ySpec.label);
+      }
+    }
+
+    // ----- Z axis (opt-in 3rd axis, requires Y) -----
+    var zEn = _csweepGet("cfbSweepZEnabled");
+    var zEnabled = !!(yEnabled && zEn && zEn.checked);
+    var zParamSel = null, zSpec = null, zValues = null, zParamLabel = "";
+    var zIsMacros = false, zMacroValues = null, zParamValue = "";
+    if (zEnabled) {
+      zParamSel = _csweepGet("cfbSweepZParam");
+      zParamValue = zParamSel ? zParamSel.value : "";
+      zIsMacros = (zParamValue === "_macros");
+      if (zIsMacros) {
+        var zbuilt = _cfbMacroBuildSeries("z");
+        if (!zbuilt) return;
+        zMacroValues = zbuilt.valuesPerIter;
+        zValues = [];
+        for (var _zi = 0; _zi < zbuilt.count; _zi++) zValues.push(_zi);
+        zParamLabel = (window.tr ? window.tr('comfyui_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (Z)";
+      } else {
+        zSpec = _CSWEEP_PARAMS[zParamValue];
+        if (!zSpec) {
+          window.showToast("Sweep: unknown Z parameter", true);
+          return;
+        }
+        var zMin = parseFloat(_csweepGet("cfbSweepZMin").value);
+        var zMax = parseFloat(_csweepGet("cfbSweepZMax").value);
+        var zMode = _csweepGet("cfbSweepZMode").value || "count";
+        var zCount = parseInt(_csweepGet("cfbSweepZCount").value, 10) || 3;
+        var zStep = parseFloat(_csweepGet("cfbSweepZStep").value) || 0.5;
+        zValues = _csweepBuildSeries(zMin, zMax, zMode, zCount, zStep);
+        if (zValues.length < 1) {
+          window.showToast(window.tr('comfyui_bridge.sweep_invalid_range', 'Sweep: invalid range or step') + " (Z)", true);
+          return;
+        }
+        var zKey = "comfyui_bridge.sweep_param_" + zParamValue;
+        zParamLabel = (window.tr ? window.tr(zKey, zSpec.label) : zSpec.label);
+      }
+    }
+
+    var total = xValues.length;
+    if (yValues) total *= yValues.length;
+    if (zValues) total *= zValues.length;
+    var _cap = _csweepEffectiveMax();
+    if (total > _cap) {
+      window.showToast(window.tr('comfyui_bridge.sweep_total_too_large', 'Sweep total exceeds the safety cap. Reduce X / Y / Z count.'), true);
+      return;
+    }
+
+    // Lock seed.
+    var seedEl = _csweepGet("cfbSeed");
+    var curSeed = parseInt(seedEl.value, 10);
+    if (!isFinite(curSeed) || curSeed < 0) {
+      curSeed = Math.floor(Math.random() * 2147483647);
+      seedEl.value = String(curSeed);
+    }
+
+    if (!xIsMacros) {
+      var xKey = "comfyui_bridge.sweep_param_" + xParamValue;
+      xParamLabel = (window.tr ? window.tr(xKey, xSpec.label) : xSpec.label);
+    }
+
+    var xDomEl = (!xIsMacros && xSpec && xSpec.dom) ? _csweepGet(xSpec.dom) : null;
+    var xOrigDomVal = xDomEl ? xDomEl.value : null;
+    var yDomEl = (!yIsMacros && ySpec && ySpec.dom) ? _csweepGet(ySpec.dom) : null;
+    var yOrigDomVal = yDomEl ? yDomEl.value : null;
+    var zDomEl = (!zIsMacros && zSpec && zSpec.dom) ? _csweepGet(zSpec.dom) : null;
+    var zOrigDomVal = zDomEl ? zDomEl.value : null;
+
+    var deferSaveEl = _csweepGet("cfbSweepDeferSave");
+    var deferSave = !!(deferSaveEl && deferSaveEl.checked);
+    if (deferSave && window.SweepBuffer) {
+      window.SweepBuffer.start("comfyui", {
+        param: xParamValue,
+        param_y: yEnabled ? yParamValue : null,
+        param_z: zEnabled ? zParamValue : null,
+      });
+    }
+
+    function _axisMeta(paramVal, isMacros, vals, macroVals) {
+      if (isMacros) {
+        return { param: "_macros", total: vals.length, series: macroVals.slice(), index: 0, value: macroVals[0] };
+      }
+      return { param: paramVal, total: vals.length, series: vals, index: 0, value: vals[0] };
+    }
+    var axes = [_axisMeta(xParamValue, xIsMacros, xValues, xMacroValues)];
+    if (yEnabled) axes.push(_axisMeta(yParamValue, yIsMacros, yValues, yMacroValues));
+    if (zEnabled) axes.push(_axisMeta(zParamValue, zIsMacros, zValues, zMacroValues));
+    var sweepRunMeta = {
+      id: (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID()
+            : ("sw-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10)),
+      bridge: "comfyui",
+      base_seed: curSeed,
+      created_at: Math.floor(Date.now() / 1000),
+      axes: axes,
+    };
+
+    // ---- Sweep quick-jump integration ----
+    if (window.BridgeSweepQuickJump) {
+      window.BridgeSweepQuickJump.registerStart(sweepRunMeta);
+    }
+    var _bsqjOpenBtn = document.getElementById("cfb-sweep-open");
+    var _bsqjHistBtn = document.getElementById("cfb-sweep-history");
+    var _bsqjFirstFid = null;
+    if (_bsqjOpenBtn) {
+      _bsqjOpenBtn.disabled = true;
+      _bsqjOpenBtn.onclick = function () {
+        if (_bsqjFirstFid != null && window.BridgeSweepQuickJump) {
+          window.BridgeSweepQuickJump.openInNewTab(sweepRunMeta.id, _bsqjFirstFid);
+        }
+      };
+    }
+    if (_bsqjHistBtn && !_bsqjHistBtn._bsqjBound) {
+      _bsqjHistBtn._bsqjBound = true;
+      _bsqjHistBtn.addEventListener("click", function () {
+        if (window.BridgeSweepQuickJump) {
+          window.BridgeSweepQuickJump.renderHistoryPopover(_bsqjHistBtn);
+        }
+      });
+    }
+
+    // Freeze the generate body once at sweep start so live UI edits to the
+    // prompt / negative prompt / sampler / etc. don't bleed into later
+    // iterations. Each runOne deep-clones this snapshot.
+    var _frozenBody = window._cfbBuildSimpleBody();
+    if (!_frozenBody) {
+      // _cfbBuildSimpleBody already toasted on validation failure.
+      return;
+    }
+    // Capture the *unsubstituted* prompt/negative templates so the re-run
+    // flow can restore `$x1` / `$y1` / S-R tokens instead of the last
+    // iteration's substituted text.
+    if (typeof _frozenBody.prompt === "string") sweepRunMeta.prompt_template = _frozenBody.prompt;
+    if (typeof _frozenBody.negative_prompt === "string") sweepRunMeta.negative_template = _frozenBody.negative_prompt;
+    // Save current UI parameters as "last params" so 🔄 前回 restores
+    // the sweep's prompt/seed/etc. after navigating away.
+    if (typeof window.cfbSaveLastParams === "function") {
+      try { window.cfbSaveLastParams(); } catch (_e) {}
+    }
+
+    _csweepCancel = false;
+    _csweepRunning = true;
+    _csweepShowCancelRow(true);
+    function _macroEntryLabel(axisLetter, entry) {
+      var parts = [];
+      for (var k in entry) parts.push("$" + axisLetter + k + "=" + entry[k]);
+      return parts.join(", ");
+    }
+    var xLabels = [];
+    for (var _xj = 0; _xj < xValues.length; _xj++) {
+      if (xIsMacros) {
+        xLabels.push(_macroEntryLabel("x", xMacroValues[_xj]));
+      } else {
+        xLabels.push(xParamLabel + " = " + _csweepFormatVal(xValues[_xj], xSpec.int));
+      }
+    }
+    var yLabels = null;
+    if (yEnabled) {
+      yLabels = [];
+      for (var _yj = 0; _yj < yValues.length; _yj++) {
+        if (yIsMacros) {
+          yLabels.push(_macroEntryLabel("y", yMacroValues[_yj]));
+        } else {
+          yLabels.push(yParamLabel + " = " + _csweepFormatVal(yValues[_yj], ySpec.int));
+        }
+      }
+    }
+    var zLabels = null;
+    if (zEnabled) {
+      zLabels = [];
+      for (var _zj = 0; _zj < zValues.length; _zj++) {
+        if (zIsMacros) {
+          zLabels.push(_macroEntryLabel("z", zMacroValues[_zj]));
+        } else {
+          zLabels.push(zParamLabel + " = " + _csweepFormatVal(zValues[_zj], zSpec.int));
+        }
+      }
+    }
+    _csweepInitGrid(xLabels, yLabels, zLabels);
+
+    var doneCount = 0;
+    var xi = 0, yi = 0, zi = 0;
+
+    function _finalizeAndSave(reason) {
+      _csweepRunning = false;
+      _csweepShowCancelRow(false);
+      _csweepAbort = null;
+      if (xDomEl && xOrigDomVal != null) xDomEl.value = xOrigDomVal;
+      if (yDomEl && yOrigDomVal != null) yDomEl.value = yOrigDomVal;
+      if (zDomEl && zOrigDomVal != null) zDomEl.value = zOrigDomVal;
+      if (typeof window._cfbApplySeedAutoReset === "function") window._cfbApplySeedAutoReset();
+      var baseStatus = (reason === "cancelled"
+        ? (window.tr ? window.tr('bridge.status.stopped', 'Stopped') : 'cancelled')
+        : (window.tr ? window.tr('comfyui_bridge.sweep_done', 'Sweep done') : 'done'))
+        + " (" + doneCount + "/" + total + ")";
+      _csweepUpdateStatus(baseStatus);
+      if (window.BridgeSweepQuickJump) {
+        if (reason === "cancelled") {
+          window.BridgeSweepQuickJump.markCancelled(sweepRunMeta.id);
+        } else {
+          window.BridgeSweepQuickJump.markCompleted(sweepRunMeta.id);
+        }
+      }
+      if (reason !== "cancelled" && _bsqjFirstFid != null && window.BridgeSweepQuickJump) {
+        var _banner = document.createElement("div");
+        _banner.className = "bsqj-complete-banner";
+        var _link = document.createElement("a");
+        _link.href = "#";
+        _link.textContent = (window.tr && window.tr("bridge.sweep.openCompleted")) || "Sweep ページで確認 →";
+        _link.addEventListener("click", function (ev) {
+          ev.preventDefault();
+          window.BridgeSweepQuickJump.openInNewTab(sweepRunMeta.id, _bsqjFirstFid);
+        });
+        _banner.appendChild(_link);
+        document.body.appendChild(_banner);
+        setTimeout(function () { try { _banner.remove(); } catch (_) {} }, 8000);
+      }
+      if (deferSave && window.SweepBuffer && window.SweepBuffer.size("comfyui") > 0) {
+        var n = window.SweepBuffer.size("comfyui");
+        _csweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('comfyui_bridge.sweep_saving_batch', '保存中…') : 'saving…') + " (" + n + ")");
+        window.SweepBuffer.flushToServer("comfyui", "/ext/comfyui-bridge/api/save-batch")
+          .then(function(res) {
+            _csweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('comfyui_bridge.sweep_saved', '保存しました') : 'saved') + " (" + res.saved.length + ")");
+            if (_bsqjFirstFid == null && Array.isArray(res.saved_items)) {
+              for (var _bj = 0; _bj < res.saved_items.length; _bj++) {
+                var _itB = res.saved_items[_bj];
+                if (_itB && typeof _itB.file_id === "number") {
+                  _bsqjFirstFid = _itB.file_id;
+                  if (window.BridgeSweepQuickJump) {
+                    window.BridgeSweepQuickJump.registerFirstSavedFileId(sweepRunMeta.id, _bsqjFirstFid);
+                  }
+                  if (_bsqjOpenBtn) _bsqjOpenBtn.disabled = false;
+                  break;
+                }
+              }
+            }
+          })
+          .catch(function(e) {
+            _csweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('comfyui_bridge.sweep_save_failed', '保存失敗') : 'save failed') + ": " + e.message);
+            if (window.showToast) window.showToast((window.tr ? window.tr('comfyui_bridge.sweep_save_failed_toast', 'ComfyUI Sweep の一括保存に失敗。次回ロード時に再試行されます。') : 'ComfyUI batch save failed. Will retry on next load.'), true);
+            if (window.BridgeSweepQuickJump) window.BridgeSweepQuickJump.markFailed(sweepRunMeta.id);
+          });
+      }
+    }
+
+    function runOne() {
+      var done = zEnabled ? (zi >= zValues.length) : (xi >= xValues.length);
+      if (_csweepCancel || done) {
+        _finalizeAndSave(_csweepCancel ? "cancelled" : "done");
+        return;
+      }
+      var xValue = xValues[xi];
+      var xDisplay;
+      var xMacroEntry = null;
+      if (xIsMacros) {
+        xMacroEntry = xMacroValues[xi];
+        xDisplay = _macroEntryLabel("x", xMacroEntry);
+      } else {
+        xDisplay = _csweepFormatVal(xValue, xSpec.int);
+      }
+      var yValue = yEnabled ? yValues[yi] : null;
+      var yDisplay = null, yMacroEntry = null;
+      if (yEnabled) {
+        if (yIsMacros) { yMacroEntry = yMacroValues[yi]; yDisplay = _macroEntryLabel("y", yMacroEntry); }
+        else { yDisplay = _csweepFormatVal(yValue, ySpec.int); }
+      }
+      var zValue = zEnabled ? zValues[zi] : null;
+      var zDisplay = null, zMacroEntry = null;
+      if (zEnabled) {
+        if (zIsMacros) { zMacroEntry = zMacroValues[zi]; zDisplay = _macroEntryLabel("z", zMacroEntry); }
+        else { zDisplay = _csweepFormatVal(zValue, zSpec.int); }
+      }
+      var statusLabel = "(" + (doneCount + 1) + "/" + total + ") " +
+        xParamLabel + " = " + xDisplay +
+        (yEnabled ? "  /  " + yParamLabel + " = " + yDisplay : "") +
+        (zEnabled ? "  /  " + zParamLabel + " = " + zDisplay : "");
+      _csweepUpdateStatus(statusLabel);
+
+      if (xDomEl) {
+        xDomEl.value = xDisplay;
+        try { xDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+        if (xSpec.dom === "cfbDenoiseNum") {
+          var xSlider = _csweepGet("cfbDenoise");
+          if (xSlider) { xSlider.value = xDisplay; try { xSlider.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {} }
+        }
+      }
+      if (yDomEl) {
+        yDomEl.value = yDisplay;
+        try { yDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+        if (ySpec.dom === "cfbDenoiseNum") {
+          var ySlider = _csweepGet("cfbDenoise");
+          if (ySlider) { ySlider.value = yDisplay; try { ySlider.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {} }
+        }
+      }
+      if (zDomEl) {
+        zDomEl.value = zDisplay;
+        try { zDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+        if (zSpec.dom === "cfbDenoiseNum") {
+          var zSlider = _csweepGet("cfbDenoise");
+          if (zSlider) { zSlider.value = zDisplay; try { zSlider.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {} }
+        }
+      }
+
+      // Deep-clone the frozen sweep-start snapshot so UI edits during the
+      // run don't affect subsequent iterations.
+      var body = JSON.parse(JSON.stringify(_frozenBody));
+      var slotValuesByAxis = {};
+      if (xIsMacros) slotValuesByAxis.x = xMacroEntry;
+      if (yIsMacros) slotValuesByAxis.y = yMacroEntry;
+      if (zIsMacros) slotValuesByAxis.z = zMacroEntry;
+      if (xIsMacros || yIsMacros || zIsMacros) {
+        if (typeof body.prompt === "string") body.prompt = _cfbSubstitutePromptMacros(body.prompt, slotValuesByAxis);
+        if (typeof body.negative_prompt === "string") body.negative_prompt = _cfbSubstitutePromptMacros(body.negative_prompt, slotValuesByAxis);
+      }
+      if (!xIsMacros) body[xSpec.body] = xSpec.int ? Math.round(xValue) : xValue;
+      if (yEnabled && !yIsMacros) body[ySpec.body] = ySpec.int ? Math.round(yValue) : yValue;
+      if (zEnabled && !zIsMacros) body[zSpec.body] = zSpec.int ? Math.round(zValue) : zValue;
+      body.seed = curSeed;
+      body.bridge = "comfyui";
+      if (deferSave) body.skip_save = true;
+
+      var perIterMeta = JSON.parse(JSON.stringify(sweepRunMeta));
+      perIterMeta.axes[0].index = xi;
+      perIterMeta.axes[0].value = xIsMacros ? xMacroEntry : xValue;
+      if (yEnabled) {
+        perIterMeta.axes[1].index = yi;
+        perIterMeta.axes[1].value = yIsMacros ? yMacroEntry : yValue;
+      }
+      if (zEnabled) {
+        perIterMeta.axes[2].index = zi;
+        perIterMeta.axes[2].value = zIsMacros ? zMacroEntry : zValue;
+      }
+      body.sweep_meta = perIterMeta;
+
+      var capturedXi = xi, capturedYi = yi, capturedZi = zi;
+      var capturedDisplay = (xParamLabel + " = " + xDisplay) +
+        (yEnabled ? " / " + yParamLabel + "=" + yDisplay : "") +
+        (zEnabled ? " / " + zParamLabel + "=" + zDisplay : "");
+
+      var t0 = Date.now();
+      _csweepAbort = (typeof AbortController !== "undefined") ? new AbortController() : null;
+      window.bridgeFetch("comfyui", "generate", body, {
+        signal: _csweepAbort ? _csweepAbort.signal : undefined,
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        var elapsed = Date.now() - t0;
+        if (_bsqjFirstFid == null && d && Array.isArray(d.saved_items)) {
+          for (var _bi = 0; _bi < d.saved_items.length; _bi++) {
+            var _it = d.saved_items[_bi];
+            if (_it && typeof _it.file_id === "number") {
+              _bsqjFirstFid = _it.file_id;
+              if (window.BridgeSweepQuickJump) {
+                window.BridgeSweepQuickJump.registerFirstSavedFileId(sweepRunMeta.id, _bsqjFirstFid);
+              }
+              if (_bsqjOpenBtn) _bsqjOpenBtn.disabled = false;
+              break;
+            }
+          }
+        }
+        if (!d.ok) {
+          window.showToast(capturedDisplay + " : " + (d.error || "generation failed"), true);
+          _csweepMarkGridError(capturedZi, capturedXi, capturedYi, d.error || "failed");
+        } else {
+          var images = d.images || [];
+          var mimeMap = { png: "image/png", webp: "image/webp", jpg: "image/jpeg" };
+          var mime = mimeMap[d.image_format] || "image/png";
+          if (images.length > 0) {
+            _csweepAppendBlock(capturedDisplay, "", mime, images[0], d.elapsed_ms || elapsed, d);
+            _csweepFillGridCell(capturedZi, capturedXi, capturedYi, mime, images[0]);
+            // Skip the SweepBuffer / batch-save path when the server tells
+            // us bridge_managed_save is on — XMP is already written into
+            // ComfyUI's own outputs, batch-save would create a duplicate.
+            if (deferSave && window.SweepBuffer && !d.bridge_managed_save) {
+              window.SweepBuffer.add("comfyui", {
+                base64: images[0].base64,
+                seed: images[0].seed,
+                image_format: d.image_format || "png",
+                value: xValue,
+                label: capturedDisplay,
+                sweep_meta: perIterMeta,
+              });
+            }
+          }
+        }
+        doneCount++;
+        _advanceIndices();
+        runOne();
+      }).catch(function(e) {
+        if (!(e && (e.name === "AbortError" || /aborted/i.test(e.message || "")))) {
+          window.showToast(capturedDisplay + " : " + ((e && e.message) || String(e)), true);
+          _csweepMarkGridError(capturedZi, capturedXi, capturedYi, (e && e.message) || "error");
+        } else {
+          _csweepMarkGridError(capturedZi, capturedXi, capturedYi, "aborted");
+        }
+        doneCount++;
+        _advanceIndices();
+        runOne();
+      });
+    }
+
+    function _advanceIndices() {
+      if (yEnabled) {
+        yi++;
+        if (yi >= yValues.length) {
+          yi = 0;
+          xi++;
+          if (zEnabled && xi >= xValues.length) {
+            xi = 0;
+            zi++;
+          }
+        }
+      } else {
+        xi++;
+        // Defensive: UI gates Z behind Y today, but advance Z here too so a
+        // future "Z without Y" extension cannot silently stall the loop.
+        if (zEnabled && xi >= xValues.length) {
+          xi = 0;
+          zi++;
+        }
+      }
+    }
+
+    runOne();
+  };
+</script>

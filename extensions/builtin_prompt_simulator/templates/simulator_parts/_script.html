@@ -1,0 +1,492 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Prompt Simulator JS — Core (editor, cheatsheet, convert, analyze, parse, simulate) ── */
+
+/* ── Syntax-highlighted editor ── */
+var _simEditor = null;
+(function() {
+  var initValue = '';
+  try {
+    var data = sessionStorage.getItem('prompt_sim_data');
+    if (data) { sessionStorage.removeItem('prompt_sim_data'); initValue = data; }
+    else {
+      var ls = localStorage.getItem('prompt_sim_input');
+      if (ls) initValue = ls;
+    }
+  } catch (_e) { /* ignore */ }
+
+  var container = document.getElementById('simEditorContainer');
+  if (typeof PromptSyntaxWidget !== 'undefined' && container) {
+    _simEditor = PromptSyntaxWidget.createEditor(container, {
+      value: initValue,
+      placeholder: _st('placeholder'),
+      rows: 6,
+      showSyntaxBar: true,
+      showErrors: true,
+    });
+  } else if (container) {
+    /* Fallback: plain textarea if widget not loaded */
+    var ta = document.createElement('textarea');
+    ta.id = 'simInput';
+    ta.rows = 6;
+    ta.placeholder = _st('placeholder');
+    ta.value = initValue;
+    ta.style.cssText = 'width:100%;min-height:120px;padding:10px;border-radius:8px;border:1px solid rgba(128,128,128,0.2);background:rgba(30,30,50,0.8);color:var(--text,#e0e0e0);font-family:monospace;font-size:13px;resize:vertical;line-height:1.5;';
+    container.appendChild(ta);
+  }
+})();
+
+/* ── Emacs/Vim keybindings for editor textarea ── */
+/* NOTE: power-vim-edit.js is type="module" (deferred), so window.keyboardPowerVimEdit
+   is not set yet when this inline script runs. Resolve it lazily inside keydown. */
+(function() {
+  var ta = _simEditor ? _simEditor.getTextarea() : document.getElementById('simInput');
+  if (!ta) return;
+  ta.addEventListener('keydown', function(e) {
+    var edit = window.keyboardPowerVimEdit;
+    if (!edit) return;
+    if (e.altKey && !e.ctrlKey && !e.shiftKey) edit.handleVimNavigation(e, ta);
+    if (e.ctrlKey && !e.altKey) edit.handleCtrlShortcuts(e, ta);
+  });
+})();
+
+/* ── Prompt Linter ── */
+(function() {
+  if (typeof PromptLinter === 'undefined') return;
+  var ta = _simEditor ? _simEditor.getTextarea() : document.getElementById('simInput');
+  if (ta) PromptLinter.attach(ta, { syntaxMode: 'unknown', hasSyntaxWidget: !!_simEditor });
+})();
+
+/* ── localStorage persistence for input ── */
+(function() {
+  var _simPersistTimer;
+  var ta = _simEditor ? _simEditor.getTextarea() : document.getElementById('simInput');
+  if (ta) {
+    ta.addEventListener('input', function() {
+      clearTimeout(_simPersistTimer);
+      _simPersistTimer = setTimeout(function() {
+        try { localStorage.setItem('prompt_sim_input', ta.value); } catch(_e) {}
+      }, 500);
+    });
+  }
+})();
+
+function getInput() {
+  if (_simEditor) return _simEditor.getValue().trim();
+  var el = document.getElementById('simInput');
+  return el ? el.value.trim() : '';
+}
+
+function simClearInput() {
+  if (_simEditor) { _simEditor.setValue(''); }
+  else {
+    var el = document.getElementById('simInput');
+    if (el) { el.focus(); el.select(); document.execCommand('insertText', false, ''); }
+  }
+  clearAllSections();
+  try { localStorage.removeItem('prompt_sim_input'); } catch(_e) {}
+}
+
+function clearAllSections() {
+  ['simSimSection', 'simOutputSection', 'simDpSection', 'simWeightSection', 'simParseSection'].forEach(function(id) {
+    document.getElementById(id).hidden = true;
+  });
+}
+
+/* ── Cheatsheet side panel ── */
+function simToggleCheat(tab) {
+  var panel = document.getElementById('simCheatPanel');
+  var isOpen = panel.classList.contains('open');
+  if (isOpen) {
+    var current = document.getElementById('simCheatDp').style.display !== 'none' ? 'dp' : 'nai';
+    if (current === tab) { panel.classList.remove('open'); document.body.classList.remove('sim-cheat-open'); return; }
+  } else {
+    panel.classList.add('open');
+    document.body.classList.add('sim-cheat-open');
+  }
+  simSwitchCheatTab(tab);
+}
+
+function simSwitchCheatTab(tab) {
+  document.getElementById('simCheatDp').style.display = tab === 'dp' ? '' : 'none';
+  document.getElementById('simCheatNai').style.display = tab === 'nai' ? '' : 'none';
+  document.getElementById('simCheatTabDp').classList.toggle('active', tab === 'dp');
+  document.getElementById('simCheatTabNai').classList.toggle('active', tab === 'nai');
+}
+
+function simCloseCheat() {
+  document.getElementById('simCheatPanel').classList.remove('open');
+  document.body.classList.remove('sim-cheat-open');
+}
+
+/* ── Utility ── */
+function escHtml(s) {
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+function escAttr(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Convert ── */
+async function simConvert(mode) {
+  var input = getInput();
+  if (!input) return;
+  clearAllSections();
+  var labels = {
+    nai_to_sd: _st('label_nai_to_sd'),
+    sd_to_nai: _st('label_sd_to_nai'),
+    expand: _st('label_expand'),
+  };
+  var label = labels[mode] || _st('output');
+  try {
+    var res = await fetch('/ext/prompt-sim/convert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: input, mode: mode, wildcards: (mode === 'expand' && Object.keys(_simWildcards).length > 0) ? _simWildcards : undefined }),
+    });
+    var data = await res.json();
+    if (data.error) {
+      showOutput(label, '\u274c ' + _st('error_prefix') + ': ' + data.error);
+    } else {
+      var text = '';
+      if (data.warnings && data.warnings.length) {
+        var warnMsgs = {
+          mixed_syntax: _st('warn_mixed'),
+          already_sd: _st('warn_already_sd'),
+          already_nai: _st('warn_already_nai'),
+        };
+        for (var i = 0; i < data.warnings.length; i++) {
+          text += (warnMsgs[data.warnings[i].message] || data.warnings[i].message) + '\n';
+        }
+      }
+      showOutput(label, text + data.result);
+    }
+  } catch (err) {
+    showOutput(label, '\u274c ' + _st('network_error') + ': ' + err.message);
+  }
+}
+
+/* ── DP Analyze ── */
+async function simDpAnalyze() {
+  var input = getInput();
+  if (!input) return;
+  clearAllSections();
+  try {
+    var res = await fetch('/ext/prompt-sim/dp-analyze', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: input }),
+    });
+    var data = await res.json();
+    if (data.error) {
+      showOutput(_st('btn_dp_analyze'), '\u274c ' + data.error);
+      return;
+    }
+    renderDpResults(data.groups || []);
+  } catch (err) {
+    showOutput(_st('btn_dp_analyze'), '\u274c ' + _st('network_error') + ': ' + err.message);
+  }
+}
+
+function renderDpResults(groups) {
+  var section = document.getElementById('simDpSection');
+  var content = document.getElementById('simDpContent');
+  if (!groups.length) {
+    content.innerHTML = '<div style="color:var(--muted,#aab2c0);font-size:12px;">' + escHtml(_st('no_dp')) + '</div>';
+    section.hidden = false;
+    return;
+  }
+  var html = '';
+  for (var g = 0; g < groups.length; g++) {
+    var grp = groups[g];
+    html += '<div class="dp-group">';
+    html += '<div class="dp-group-header">' + escHtml(grp.expression) + '</div>';
+    if (grp.type === 'pick_n' || grp.type === 'pick_range') {
+      var pickLabel = grp.type === 'pick_range'
+        ? _st('pick_range_from').replace('{0}', grp.pick_min).replace('{1}', grp.pick_max).replace('{2}', grp.total)
+        : _st('pick_from').replace('{0}', grp.pick).replace('{1}', grp.total);
+      html += '<div class="dp-group-meta">' + pickLabel + ' \u2014 ' + grp.combinations + ' ' + _st('combinations') + '</div>';
+    }
+    for (var c = 0; c < grp.choices.length; c++) {
+      var ch = grp.choices[c];
+      var pct = (ch.probability * 100).toFixed(1);
+      var barW = Math.max(2, ch.probability * 100);
+      var weightInfo = ch.weight !== undefined ? ' (w:' + ch.weight + ')' : '';
+      html += '<div class="prob-bar-wrap">';
+      html += '<span class="prob-text" title="' + escAttr(ch.text) + '">' + escHtml(ch.text) + weightInfo + '</span>';
+      html += '<div style="flex:1;background:rgba(128,128,128,0.1);border-radius:3px;height:16px;">';
+      html += '<div class="prob-bar" style="width:' + barW + '%;"></div>';
+      html += '</div>';
+      html += '<span class="prob-pct">' + pct + '%</span>';
+      html += '</div>';
+    }
+    html += '</div>';
+  }
+  content.innerHTML = html;
+  section.hidden = false;
+}
+
+/* ── Weight Calc ── */
+async function simWeightCalc() {
+  var input = getInput();
+  if (!input) return;
+  clearAllSections();
+  try {
+    var res = await fetch('/ext/prompt-sim/emphasis', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: input }),
+    });
+    var data = await res.json();
+    if (data.error) {
+      showOutput(_st('btn_weight'), '\u274c ' + data.error);
+      return;
+    }
+    renderWeightResults(data.tokens || []);
+  } catch (err) {
+    showOutput(_st('btn_weight'), '\u274c ' + _st('network_error') + ': ' + err.message);
+  }
+}
+
+function renderWeightResults(tokens) {
+  var section = document.getElementById('simWeightSection');
+  var content = document.getElementById('simWeightContent');
+  if (!tokens.length) {
+    content.innerHTML = '<div style="color:var(--muted,#aab2c0);font-size:12px;">' + escHtml(_st('no_emphasis')) + '</div>';
+    section.hidden = false;
+    return;
+  }
+  /* Detect bracket-weaken pairs */
+  var hasBracketWeaken = tokens.some(function(t) { return t.syntax === 'sd_weaken' || t.syntax === 'nai_weaken'; });
+  var syntaxLabels = { sd: 'SD', nai: 'NAI', sd_weaken: 'SD (weaken)', nai_weaken: 'NAI (weaken)' };
+  var html = '';
+  if (hasBracketWeaken) {
+    html += '<div class="weight-note">' + escHtml(_st('bracket_weaken_note')) + '</div>';
+  }
+  html += '<table class="weight-table">';
+  html += '<thead><tr><th>' + escHtml(_st('th_token')) + '</th><th>' + escHtml(_st('th_syntax')) + '</th><th>' + escHtml(_st('th_depth')) + '</th><th>' + escHtml(_st('th_weight')) + '</th></tr></thead><tbody>';
+  for (var i = 0; i < tokens.length; i++) {
+    var t = tokens[i];
+    /* Determine grouping class for consecutive sd_weaken + nai_weaken pairs */
+    var groupCls = '';
+    if (t.syntax === 'sd_weaken' && i + 1 < tokens.length && tokens[i + 1].syntax === 'nai_weaken' && tokens[i + 1].token === t.token) {
+      groupCls = ' class="weight-group-first"';
+    } else if (t.syntax === 'nai_weaken' && i - 1 >= 0 && tokens[i - 1].syntax === 'sd_weaken' && tokens[i - 1].token === t.token) {
+      groupCls = ' class="weight-group-last"';
+    }
+    html += '<tr' + groupCls + '>';
+    html += '<td class="token-cell" title="' + escAttr(t.token) + '">' + escHtml(t.token) + '</td>';
+    html += '<td class="syntax-cell">' + (syntaxLabels[t.syntax] || t.syntax) + '</td>';
+    html += '<td class="syntax-cell">' + t.depth + '</td>';
+    html += '<td class="weight-cell">\u00d7' + t.weight.toFixed(4) + '</td>';
+    html += '</tr>';
+  }
+  html += '</tbody></table>';
+  content.innerHTML = html;
+  section.hidden = false;
+}
+
+/* ── Parse ── */
+function simParse() {
+  var input = getInput();
+  if (!input) return;
+  clearAllSections();
+  var section = document.getElementById('simParseSection');
+  var content = document.getElementById('simParseContent');
+  var html = '';
+
+  var hasSteps = /Steps:\s*\d+/.test(input);
+  var hasNeg = /Negative prompt:/.test(input);
+  var sizeMatch = input.match(/Size:\s*(\d+)\s*x\s*(\d+)/);
+
+  if (hasSteps || hasNeg) {
+    html += '<div class="meta-section"><h3>' + escHtml(_st('fmt_a1111')) + '</h3>';
+    var positive = input;
+    if (hasNeg) {
+      positive = input.split(/\nNegative prompt:/)[0].trim();
+    } else if (hasSteps) {
+      positive = input.split(/\nSteps:/)[0].trim();
+    }
+    html += '<div class="meta-row"><span class="meta-key">Positive</span><span class="meta-val" style="font-size:12px;">' + escHtml(positive) + '</span></div>';
+    if (hasNeg) {
+      var negMatch = input.match(/Negative prompt:\s*([\s\S]*?)(?=\nSteps:|$)/);
+      if (negMatch) {
+        html += '<div class="meta-row"><span class="meta-key">Negative</span><span class="meta-val" style="font-size:12px;color:#e74c3c;">' + escHtml(negMatch[1].trim()) + '</span></div>';
+      }
+    }
+    if (sizeMatch) html += '<div class="meta-row"><span class="meta-key">Resolution</span><span class="meta-val">' + sizeMatch[1] + ' \u00d7 ' + sizeMatch[2] + '</span></div>';
+    var stepsMatch = input.match(/Steps:\s*(\d+)/);
+    if (stepsMatch) html += '<div class="meta-row"><span class="meta-key">Steps</span><span class="meta-val">' + stepsMatch[1] + '</span></div>';
+    var samplerMatch = input.match(/Sampler:\s*([^,]+)/);
+    if (samplerMatch) html += '<div class="meta-row"><span class="meta-key">Sampler</span><span class="meta-val">' + samplerMatch[1].trim() + '</span></div>';
+    var seedMatch = input.match(/Seed:\s*(\d+)/);
+    if (seedMatch) html += '<div class="meta-row"><span class="meta-key">Seed</span><span class="meta-val">' + seedMatch[1] + '</span></div>';
+    var modelMatch = input.match(/Model:\s*([^,]+)/);
+    if (modelMatch) html += '<div class="meta-row"><span class="meta-key">Model</span><span class="meta-val">' + modelMatch[1].trim() + '</span></div>';
+    var tags = positive.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+    html += '<div class="meta-row"><span class="meta-key">' + escHtml(_st('tag_count')) + '</span><span class="meta-val">' + tags.length + '</span></div>';
+    html += '<div style="margin-top:6px;">';
+    tags.slice(0, 50).forEach(function(t) {
+      html += '<span class="tag-chip">' + escHtml(t) + '</span>';
+    });
+    if (tags.length > 50) html += '<span style="color:var(--muted,#aab2c0);font-size:11px;"> +' + (tags.length - 50) + '</span>';
+    html += '</div></div>';
+  } else if (/\{[^{}|]+\}/.test(input) || /\d*\.?\d+::[^:]+::/.test(input) || /\[\[[^\[\]]+\]\]/.test(input) || /\[[^\[\]:]+\]/.test(input)) {
+    /* NAI format detected: {emphasis}, weight::text::, or [[alternatives]] */
+    html += '<div class="meta-section"><h3>' + escHtml(_st('fmt_nai')) + '</h3>';
+    var tags = input.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+    html += '<div class="meta-row"><span class="meta-key">' + escHtml(_st('tag_count')) + '</span><span class="meta-val">' + tags.length + '</span></div>';
+    html += '<div style="margin-top:6px;">';
+    tags.forEach(function(t) {
+      html += '<span class="tag-chip">' + escHtml(t) + '</span>';
+    });
+    html += '</div></div>';
+  } else {
+    try {
+      var obj = JSON.parse(input);
+      html += '<div class="meta-section"><h3>' + escHtml(_st('fmt_json')) + '</h3>';
+      html += '<pre style="font-size:11px;max-height:300px;overflow:auto;">' + escHtml(JSON.stringify(obj, null, 2)) + '</pre>';
+      html += '</div>';
+    } catch (_e) {
+      html += '<div class="meta-section"><h3>' + escHtml(_st('fmt_plain')) + '</h3>';
+      var tags = input.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
+      html += '<div class="meta-row"><span class="meta-key">' + escHtml(_st('tag_count')) + '</span><span class="meta-val">' + tags.length + '</span></div>';
+      html += '<div style="margin-top:6px;">';
+      tags.forEach(function(t) {
+        html += '<span class="tag-chip">' + escHtml(t) + '</span>';
+      });
+      html += '</div></div>';
+    }
+  }
+  content.innerHTML = html;
+  section.hidden = false;
+}
+
+/* ── Send to Bridge ── */
+function simSendToBridge(target) {
+  var prompt = getInput();
+  if (!prompt) { alert(window.tr('prompt_sim.prompt_empty', 'Prompt is empty')); return; }
+  var urls = { nai: '/ext/nai-bridge/', sd: '/ext/sd-webui/', comfy: '/ext/comfyui-bridge/' };
+  var url = urls[target] || '/ext/nai-bridge/';
+  try {
+    localStorage.setItem('bridge_send_prompt', JSON.stringify({
+      prompt: prompt, negative: '', source: 'prompt-simulator',
+    }));
+  } catch (_e) {}
+  window.location.href = url;
+}
+
+/* ── Send output result to Bridge (Bug 1 fix + Proposal 1) ── */
+function simSendOutputToBridge(bridgeType, evt) {
+  var output = '';
+  // Simulate section
+  var simSec = document.getElementById('simSimSection');
+  if (simSec && !simSec.hidden) {
+    var simText = document.getElementById('simSimText');
+    output = simText ? simText.innerText : '';
+  }
+  // Convert/Output section
+  if (!output) {
+    var outSec = document.getElementById('simOutputSection');
+    if (outSec && !outSec.hidden) {
+      var outText = document.getElementById('simOutputText');
+      output = outText ? outText.textContent : '';
+    }
+  }
+  if (!output || !output.trim()) {
+    if (window.showToast) window.showToast(_st('empty_output'), true);
+    else alert(_st('empty_output'));
+    return;
+  }
+  var data = { prompt: output.trim(), negative: '', source: 'simulator-output' };
+  try { localStorage.setItem('bridge_send_prompt', JSON.stringify(data)); } catch(_e) {}
+  // Map simulator bridge keys to cross_tab.js bridge IDs
+  var bridgeIdMap = { nai: 'nai', sd: 'a1111', comfyui: 'comfyui' };
+  var bridgeId = bridgeIdMap[bridgeType] || 'a1111';
+  window.tauriCrossTab.sendToBridge(bridgeId, {}, evt);
+}
+
+/* ── Output helpers ── */
+function showOutput(label, text) {
+  var section = document.getElementById('simOutputSection');
+  document.getElementById('simOutputLabel').textContent = label;
+  document.getElementById('simOutputText').textContent = text;
+  section.hidden = false;
+}
+
+function simCopyOutput() {
+  var text = document.getElementById('simOutputText').textContent || '';
+  if (text) navigator.clipboard.writeText(text);
+}
+
+function simOutputToInput() {
+  var text = document.getElementById('simOutputText').textContent || '';
+  if (!text) return;
+  if (_simEditor) { _simEditor.setValue(text); }
+  else {
+    var el = document.getElementById('simInput');
+    if (el) el.value = text;
+  }
+}
+
+/* ── Simulate ── */
+async function simSimulate(opts) {
+  var input = getInput();
+  if (!input) return;
+  var keepOutput = opts && opts.keepOutput;
+  if (keepOutput) {
+    ['simSimSection', 'simDpSection', 'simWeightSection', 'simParseSection'].forEach(function(id) {
+      document.getElementById(id).hidden = true;
+    });
+  } else {
+    clearAllSections();
+  }
+  try {
+    var res = await fetch('/ext/prompt-sim/convert', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: input, mode: 'expand', wildcards: Object.keys(_simWildcards).length > 0 ? _simWildcards : undefined }),
+    });
+    var data = await res.json();
+    var simEl = document.getElementById('simSimText');
+    if (data.error) {
+      simEl.textContent = '\u274c ' + _st('error_prefix') + ': ' + data.error;
+    } else {
+      if (typeof PromptSyntaxWidget !== 'undefined' && PromptSyntaxWidget.renderDisplay) {
+        PromptSyntaxWidget.renderDisplay(simEl, data.result, { showSyntaxBadge: false });
+      } else {
+        simEl.textContent = data.result;
+      }
+    }
+    document.getElementById('simSimSection').hidden = false;
+  } catch (err) {
+    document.getElementById('simSimText').textContent = '\u274c ' + _st('network_error') + ': ' + err.message;
+    document.getElementById('simSimSection').hidden = false;
+  }
+}
+
+function simCopySimResult() {
+  var text = document.getElementById('simSimText').innerText || '';
+  if (text) navigator.clipboard.writeText(text);
+}
+
+function simSimToInput() {
+  var text = document.getElementById('simSimText').innerText || '';
+  if (!text) return;
+  if (_simEditor) { _simEditor.setValue(text); }
+  else {
+    var el = document.getElementById('simInput');
+    if (el) el.value = text;
+  }
+}
+
+// auxclick (middle-click) delegation for send-to-bridge buttons
+document.addEventListener("auxclick", function(e) {
+  if (e.button !== 1) return;
+  var btn = e.target.closest('[data-action="simSendOutputToBridge"][data-action-arg]');
+  if (!btn) return;
+  e.preventDefault();
+  simSendOutputToBridge(btn.getAttribute("data-action-arg"), e);
+});
+</script>

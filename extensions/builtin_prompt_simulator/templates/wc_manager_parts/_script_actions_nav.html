@@ -1,0 +1,115 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Wildcard Manager JS — Navigation / Init ── */
+
+/* ── Sed reference ── */
+function wmShowSedRef() {
+  var el = document.getElementById('wmSedRefOverlay');
+  el.classList.add('active');
+  if (window.FocusTrap) FocusTrap.activate(el, wmHideSedRef);
+}
+function wmHideSedRef() {
+  var el = document.getElementById('wmSedRefOverlay');
+  el.classList.remove('active');
+  if (window.FocusTrap) FocusTrap.deactivate(el);
+}
+
+/* ── Go to Line ── */
+function wmToggleGotoLine() {
+  var bar = document.getElementById('wmGotoBar');
+  if (bar.style.display === 'none') {
+    document.getElementById('wmReplaceBar').style.display = 'none';
+    document.getElementById('wmReplaceCount').textContent = '';
+    document.getElementById('wmSedBar').style.display = 'none';
+    bar.style.display = '';
+    var gi = document.getElementById('wmGotoInput');
+    gi.value = '';
+    gi.focus();
+  } else {
+    wmHideGotoLine();
+  }
+}
+
+function wmHideGotoLine() {
+  document.getElementById('wmGotoBar').style.display = 'none';
+}
+
+function wmGotoLine() {
+  var input = document.getElementById('wmGotoInput');
+  var lineNum = parseInt(input.value, 10);
+  if (!lineNum || lineNum < 1) return;
+  var ta = _wmGetTextarea();
+  if (!ta) return;
+  var lines = ta.value.split('\n');
+  if (lineNum > lines.length) lineNum = lines.length;
+  var offset = 0;
+  for (var i = 0; i < lineNum - 1; i++) {
+    offset += lines[i].length + 1;
+  }
+  ta.selectionStart = ta.selectionEnd = offset;
+  ta.focus();
+  /* Scroll into view */
+  var lineHeight = parseFloat(getComputedStyle(ta).lineHeight) || 20;
+  var targetScroll = (lineNum - 1) * lineHeight - ta.clientHeight / 2;
+  ta.scrollTop = Math.max(0, targetScroll);
+  wmHideGotoLine();
+  if (typeof _wmUpdateLineInfo === 'function') _wmUpdateLineInfo();
+}
+
+/* ── Keyboard shortcuts for editor ── */
+(function initWmEditorShortcuts() {
+  var ta = _wmGetTextarea();
+  if (!ta) return;
+  ta.addEventListener('keydown', function(e) {
+    /* Ctrl+S → save */
+    if (e.ctrlKey && !e.altKey && !e.shiftKey && e.key === 's') {
+      e.preventDefault();
+      wmSave();
+    }
+    /* Ctrl+H → open replace bar */
+    if (e.ctrlKey && !e.altKey && !e.shiftKey && e.key === 'h') {
+      e.preventDefault();
+      wmShowReplace();
+    }
+    /* Ctrl+G → go to line */
+    if (e.ctrlKey && !e.altKey && !e.shiftKey && e.key === 'g') {
+      e.preventDefault();
+      wmToggleGotoLine();
+    }
+    /* Escape → close open bars */
+    if (e.key === 'Escape') {
+      if (document.getElementById('wmGotoBar').style.display !== 'none') {
+        wmHideGotoLine();
+        e.preventDefault();
+      } else if (document.getElementById('wmReplaceBar').style.display !== 'none') {
+        wmHideReplace();
+        e.preventDefault();
+      } else if (document.getElementById('wmSedBar').style.display !== 'none') {
+        wmHideSed();
+        e.preventDefault();
+      }
+    }
+  });
+})();
+
+/* ── Global Escape handler for modals (fallback when FocusTrap unavailable) ── */
+document.addEventListener('keydown', function(e) {
+  if (e.key !== 'Escape') return;
+  var dirOverlay = document.getElementById('wmDirOverlay');
+  if (dirOverlay.classList.contains('active')) {
+    wmHideDirConfig();
+    e.preventDefault();
+    return;
+  }
+  var sedRefOverlay = document.getElementById('wmSedRefOverlay');
+  if (sedRefOverlay.classList.contains('active')) {
+    wmHideSedRef();
+    e.preventDefault();
+    return;
+  }
+});
+
+/* ── Init ── */
+wmRenderTree();
+/* Auto-load wildcards from configured dirs on page load (silent — no toast) */
+wmLoadFromDirs(true);
+</script>

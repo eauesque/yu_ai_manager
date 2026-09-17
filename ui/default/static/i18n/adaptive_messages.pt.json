@@ -1,0 +1,109 @@
+{
+  "loadingTipsByTime": {
+    "common": [
+      "Dica: Pressione `/` para acessar a barra de pesquisa a qualquer momento.",
+      "Dica: Pressione `Ctrl+Shift+A` para abrir o menu de adicionar condição.",
+      "Dica: Pressione `Ctrl+/` para abrir a folha de referência de regex.",
+      "Dica: Use `🎲 Aleatório` para ir rapidamente a um resultado.",
+      "Dica: Se as condições forem muitas, use `🗑️` para limpar tudo.",
+      "Dica: Você pode excluir tags com `-tag` (exemplo: `-nsfw`).",
+      "Dica: Tente condições `OR` para ampliar resultados antes de refinar.",
+      "Dica: Adicione uma condição `checkpoint` para exploração reprodutível."
+    ],
+    "late_night": [
+      "Modo noturno: remover uma condição pode revelar resultados ocultos.",
+      "À noite, a navegação aleatória frequentemente revela descobertas inesperadas."
+    ],
+    "early_morning": [
+      "Dica de madrugada: comece amplo no intervalo de datas e depois refine."
+    ],
+    "morning": [
+      "Dica da manhã: modelo + intervalo de datas é uma combinação eficaz."
+    ],
+    "noon": [
+      "Dica do meio-dia: adicionar `in_prompt` pode melhorar a precisão."
+    ],
+    "afternoon": [
+      "Dica da tarde: ajuste as colunas para comparar imagens mais facilmente."
+    ],
+    "evening": [
+      "Dica do anoitecer: regex ajuda quando a memória está confusa."
+    ],
+    "night": [
+      "Dica noturna: busca reversa por checkpoint pode ser útil."
+    ],
+    "weekday": [
+      "Dica de dia útil: filtros de modelo são ótimos para buscas rápidas e focadas.",
+      "Dica de dia útil: manter a contagem de resultados em 50-100 deixa tudo mais fluido."
+    ],
+    "weekend": [
+      "Dica de fim de semana: pesquise amplo primeiro, depois refine com filtros adicionais.",
+      "Dica de fim de semana: `🎲 Aleatório` é ótimo para redescobrir trabalhos antigos."
+    ],
+    "spring": ["Dica de primavera: após um novo scan, execute a pesquisa novamente para mais resultados."],
+    "summer": ["Dica de verão: se a renderização estiver pesada, reduza a quantidade de 100 para 50."],
+    "autumn": ["Dica de outono: amplie com OR, depois refine para um fluxo melhor."],
+    "winter": ["Dica de inverno: para zero resultados, tente variantes de tags com underscore/espaço."],
+    "new_year": [
+      "Dica de Ano Novo: revise o trabalho do ano passado com um filtro de datas amplo."
+    ],
+    "golden_week": [
+      "Dica de Golden Week: salve as condições para sessões de pesquisa mais longas."
+    ],
+    "summer_holiday": [
+      "Dica de férias de verão: o modo aleatório pode redescobrir favoritos esquecidos."
+    ],
+    "year_end": [
+      "Dica de fim de ano: revise por modelo para identificar tendências anuais."
+    ]
+  },
+  "emptySearchCheersByTime": {
+    "common": [
+      "Você está perto. Remover uma condição geralmente ajuda.",
+      "Quase lá. Ampliar o intervalo de datas pode melhorar a taxa de resultados.",
+      "Tente variantes de tags (underscore vs espaço).",
+      "Se o modo regex estiver ativo, tente `.*palavra.*` para uma correspondência mais ampla.",
+      "Um pequeno ajuste nas condições pode desbloquear correspondências.",
+      "Zero resultados está ok. Mude um eixo de busca e tente novamente.",
+      "Tente remover primeiro os tags de exclusão e verifique novamente."
+    ],
+    "late_night": [
+      "Ótima sessão noturna. Relaxar um pouco as condições pode revelar resultados.",
+      "Ainda pesquisando firme. Tente `🎲 Aleatório` para mudar de direção."
+    ],
+    "early_morning": [
+      "Bom começo de madrugada. Tente ampliar o intervalo de datas primeiro."
+    ],
+    "morning": [
+      "Bom impulso matinal. Adicione um filtro de modelo para a próxima tentativa."
+    ],
+    "noon": [
+      "Pesquisa do almoço quase encontrou. Tente primeiro um tag de cada vez."
+    ],
+    "afternoon": [
+      "Boa retentativa da tarde. Remova temporariamente os tags de exclusão e teste novamente."
+    ],
+    "evening": [
+      "Sessão do anoitecer: um filtro `in_prompt` pode capturar mais resultados."
+    ],
+    "night": [
+      "Último esforço do dia. Um intervalo de 1 mês pode trazer resultados de volta."
+    ],
+    "weekday": [
+      "Você está progredindo bem. Relaxe apenas uma condição e tente novamente.",
+      "Dica de dia corrido: consultas mais simples geralmente funcionam melhor."
+    ],
+    "weekend": [
+      "A pesquisa do fim de semana está boa. Tente busca OR para ampliar candidatos.",
+      "Com tempo extra, recomeçar do aleatório pode funcionar bem."
+    ],
+    "spring": ["Modo primavera: alivie um pouco os filtros e mantenha a leveza."],
+    "summer": ["Modo calor: comece simples com 1-2 tags."],
+    "autumn": ["Modo outono: amplie com OR, depois aperte."],
+    "winter": ["Modo inverno: encurte as palavras-chave e tente novamente com cuidado."],
+    "new_year": ["Faxina de Ano Novo: pesquise no ano passado para recuperar itens."],
+    "golden_week": ["Modo Golden Week: escolha primeiro o modelo, depois refine as condições."],
+    "summer_holiday": ["Modo férias de verão: aumente a contagem de resultados para explorar amplamente."],
+    "year_end": ["Esforço final do ano: reduza as exclusões para capturar itens perdidos."]
+  }
+}

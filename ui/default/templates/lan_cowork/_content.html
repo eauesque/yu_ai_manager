@@ -1,0 +1,103 @@
+<!-- PIN entry modal for main-page pairing flow -->
+<div id="lcMainPinModal" class="lc-pin-modal-overlay" hidden aria-modal="true" role="dialog">
+  <div class="lc-pin-modal">
+    <h3 id="lcMainPinModalTitle" class="lc-pin-modal-title" data-i18n="lan_cowork.pin_modal.title">PIN 入力</h3>
+    <p id="lcMainPinModalMsg" class="lc-pin-modal-msg"></p>
+    <div id="lcMainPairSas" class="lc-pin-sas" hidden>
+      <span class="lc-pin-sas-label">認証コード</span>
+      <span id="lcMainPairSasCode" class="lc-pin-sas-code"></span>
+      <span class="lc-pin-sas-label">↑ このコードを相手ノードの管理者に確認してもらってください</span>
+    </div>
+    <div class="lc-pin-field">
+      <label for="lcMainPinInput" data-i18n="lan_cowork.pin_modal.label">PIN（8桁）</label>
+      <input type="text" id="lcMainPinInput" name="pin" maxlength="8"
+             inputmode="numeric" pattern="[0-9]{8}"
+             autocomplete="off" autocorrect="off" spellcheck="false"
+             class="lc-pin-input" placeholder="00000000">
+    </div>
+    <div id="lcMainPinError" class="lc-pin-error" hidden></div>
+    <div class="lc-pin-modal-actions">
+      <button type="button" id="lcMainPinCancelBtn" class="btn btn-secondary"
+              data-i18n="lan_cowork.pin_modal.cancel">キャンセル</button>
+      <button type="button" id="lcMainPinConfirmBtn" class="btn btn-primary"
+              data-i18n="lan_cowork.pin_modal.confirm">確認</button>
+    </div>
+  </div>
+</div>
+
+<main id="main-content" class="lc-page">
+  <header class="lc-header">
+    <h1 data-i18n="lan_cowork.title">LAN Cowork</h1>
+    <nav class="lc-subnav" aria-label="LAN Cowork navigation">
+      <a href="/ext/lan_cowork/peers" class="lc-subnav-link"
+         data-i18n="lan_cowork.nav.peers">Peer 管理</a>
+    </nav>
+  </header>
+
+  <!-- Peers section -->
+  <section class="lc-section">
+    <div class="lc-section-header">
+      <h2 data-i18n="lan_cowork.peers.title">接続ピア</h2>
+      <button id="lcRefreshBtn" type="button" class="btn btn-secondary">
+        <span data-i18n="lan_cowork.peers.refresh">更新</span>
+      </button>
+    </div>
+    <div id="lcPeerGrid" class="lc-peer-grid">
+      <p class="lc-empty" data-i18n="lan_cowork.peers.empty">接続されているピアがありません</p>
+    </div>
+  </section>
+
+  <!-- Import section -->
+  <section class="lc-section">
+    <h2 data-i18n="lan_cowork.import.title">リモートインポート</h2>
+    <div class="lc-import-form">
+
+      <div class="lc-field">
+        <label for="lcPeerSelect" data-i18n="lan_cowork.import.peer">インポート元ピア</label>
+        <select id="lcPeerSelect" name="peer_id"></select>
+      </div>
+
+      <div class="lc-field">
+        <label for="lcModeSelect" data-i18n="lan_cowork.import.mode">モード</label>
+        <select id="lcModeSelect" name="mode">
+          <option value="full"  data-i18n="lan_cowork.import.mode.full">全件</option>
+          <option value="diff"  data-i18n="lan_cowork.import.mode.diff">差分</option>
+        </select>
+      </div>
+
+      <div class="lc-field">
+        <label for="lcFolderInput" data-i18n="lan_cowork.import.folder">インポートフォルダ</label>
+        <div class="lc-folder-input-row">
+          <input type="text" id="lcFolderInput" name="import_folder"
+                 placeholder="例: C:\Users\me\Pictures または /home/me/Pictures"
+                 data-i18n-placeholder="lan_cowork.import.folder_placeholder">
+          <button type="button" id="lcFolderPickBtn" class="btn btn-secondary"
+                  data-i18n-title="lan_cowork.import.folder.pick"
+                  title="フォルダを選択">&#x1F4C1;</button>
+        </div>
+      </div>
+
+      <div class="lc-field lc-options">
+        <label>
+          <input type="checkbox" id="lcOptFavorites" name="include_favorites">
+          <span data-i18n="lan_cowork.import.opt.favorites">favorites を含める</span>
+        </label>
+        <label>
+          <input type="checkbox" id="lcOptMerge" name="merge_metadata">
+          <span data-i18n="lan_cowork.import.opt.merge">メタデータをマージ</span>
+        </label>
+      </div>
+
+      <div class="lc-actions">
+        <button id="lcImportStartBtn" type="button" class="btn btn-primary" disabled
+                data-i18n="lan_cowork.import.start">インポート開始</button>
+      </div>
+
+      <div class="lc-progress-wrap">
+        <progress id="lcProgressBar" class="lc-progress-bar" hidden max="100"></progress>
+        <span id="lcProgressLabel" class="lc-progress-label"></span>
+      </div>
+
+    </div>
+  </section>
+</main>

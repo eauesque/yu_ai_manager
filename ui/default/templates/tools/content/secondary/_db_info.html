@@ -1,0 +1,39 @@
+    <!-- Database info -->
+    <details class="tool-item" id="tool-db-info">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.db_info">📊 Database Info</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.db_info_desc">View database statistics, file counts, and storage usage.</p>
+      <div id="dbInfo">Loading...</div>
+    </div>
+
+    <!-- Inference engine info -->
+    <div class="tool-section">
+      <h2><span aria-hidden="true">🖥️</span> <span data-i18n="tools.inference_info">Inference Info (GPU / ORT)</span></h2>
+      <p data-i18n="tools.inference_info_desc">ONNX Runtime device and GPU/NPU settings for local inference.</p>
+      <div id="inferenceInfo">Loading...</div>
+    </div>
+
+    <!-- Scan errors -->
+    <div class="tool-section">
+      <h2><span aria-hidden="true">⚠️</span> <span data-i18n="tools.scan_errors">Scan Errors</span></h2>
+      <p data-i18n="tools.scan_errors_desc">Files that failed or were skipped during the last scan run.</p>
+      <div id="scanErrorsList">Loading...</div>
+    </div>
+
+    <!-- Debug SQL Console -->
+    <div class="tool-section" id="debugSqlSection">
+      <h2><span aria-hidden="true">🔍</span> <span data-i18n="tools.debug_sql_console">Debug SQL Console</span></h2>
+      <p data-i18n="tools.debug_sql_hint">Read-only SQL queries on the database. Requires YU_DEBUG_MODE=1.</p>
+      <textarea class="tool-textarea" id="debugSqlInput" rows="3" placeholder="SELECT id, path FROM files WHERE is_deleted=0 LIMIT 10"
+               ></textarea>
+      <div class="atelier-form-row">
+        <button class="btn btn-secondary atelier-btn-primary" data-action="toolsPageApi.executeDebugSql" data-i18n="tools.execute_btn">Execute</button>
+        <span id="debugSqlStatus"></span>
+      </div>
+      <div id="debugSqlResult"></div>
+      </div>
+</details>

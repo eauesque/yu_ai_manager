@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YU AI Manager - Diagnostics</title>
+  <link rel="stylesheet" href="static/css/main.css?v=20260215">
+  <link rel="stylesheet" href="static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260225">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tokens.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-components.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-index.css?v=20260507">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tool-tokens.css?v=20260525">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tool-components.css?v=20260525">
+  <link rel="stylesheet" href="static/css/atelier/atelier-diagnostics.css?v=20260525">
+  <link rel="stylesheet" href="static/css/pages/diagnostics.css?v=20260518">
+</head>
+<body class="atelier-tool" data-1p-ignore data-lpignore="true">
+  {% include "_nav.html" %}
+  <main id="main-content" class="diagnostics-page">
+    <section id="diagnosticsSafeModeBanner" class="diagnostics-safe-mode-banner" hidden>
+      <strong>Safe Mode</strong>
+      <span>Extensions, GPU/ONNX, background jobs, external communication, and automatic migrations are disabled. Only files/ update packages are permitted.</span>
+    </section>
+    <section class="diagnostics-panel">
+      <header class="diagnostics-header">
+        <h1>Diagnostics</h1>
+      </header>
+      <div class="diagnostics-actions">
+        <button id="diagnosticsCreateBugReport" type="button" class="primary-btn">問題を報告する</button>
+        <button id="diagnosticsRunDoctor" type="button" class="secondary-btn">環境診断</button>
+        <button id="diagnosticsOpenFolder" type="button" class="secondary-btn" disabled>フォルダを開く</button>
+        <button id="diagnosticsZipRepair" type="button" class="secondary-btn" disabled>ZIPにする</button>
+        <button id="diagnosticsCopyDiscord" type="button" class="secondary-btn" disabled>Discord 用メッセージをコピー</button>
+      </div>
+      <pre id="diagnosticsDoctorPreview" class="diagnostics-result diagnostics-doctor-preview" aria-live="polite"></pre>
+      <pre id="diagnosticsResult" class="diagnostics-result" aria-live="polite"></pre>
+      <section class="diagnostics-update" aria-labelledby="diagnosticsUpdateHeading">
+        <h2 id="diagnosticsUpdateHeading">アップデートを適用</h2>
+        <div class="diagnostics-actions">
+          <input id="diagnosticsUpdateFile" type="file" accept=".zip,application/zip" />
+          <button id="diagnosticsVerifyUpdate" type="button" class="secondary-btn">検証</button>
+          <button id="diagnosticsApplyUpdate" type="button" class="primary-btn" disabled>適用</button>
+          <button id="diagnosticsRollbackUpdate" type="button" class="secondary-btn">ロールバック</button>
+        </div>
+        <pre id="diagnosticsUpdateResult" class="diagnostics-result" aria-live="polite"></pre>
+      </section>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/diagnostics-app.js?v={{ dist_v }}"></script>
+</body>
+</html>

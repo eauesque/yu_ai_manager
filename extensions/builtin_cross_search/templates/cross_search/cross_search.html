@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="cross_search.title">Cross Search - YU AI Manager</title>
+  {% include "cross_search/_style.html" %}
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+    <div class="cxs-layout">
+      {% include "cross_search/_sidebar.html" %}
+      {% include "cross_search/_content.html" %}
+    </div>
+    <button class="cxs-drawer-toggle" id="cxsDrawerToggle" aria-label="Toggle sidebar" data-i18n-aria-label="cross_search.toggle_sidebar_aria">&#9776;</button>
+    <div class="cxs-backdrop" id="cxsBackdrop"></div>
+  </main>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/md-viewer-vendor.js"></script>
+  {% include "cross_search/_script_utils.html" %}
+  {% include "cross_search/_script.html" %}
+</body>
+</html>

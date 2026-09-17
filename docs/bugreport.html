@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bug Report — yu_ai_manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f3f1eb; --bg-2: #ebe8e0;
+    --ink: #111111; --ink-2: #2a2a2a;
+    --mute: #6b6b66; --mute-2: #9c9a92;
+    --rule: #1111111a; --rule-strong: #11111130;
+    --accent: #1a47ff;
+    --warn: #d4441a;
+    --ok: #0f8f4a;
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --cond: 'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
+  }
+  html[data-theme="dark"] {
+    --bg: #0d0d0e; --bg-2: #141416;
+    --ink: #f1efe9; --ink-2: #dcd9d1;
+    --mute: #8a8880; --mute-2: #55534c;
+    --rule: #ffffff14; --rule-strong: #ffffff2e;
+    --accent: #7aa6ff;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--bg); }
+  body {
+    background: var(--bg); color: var(--ink);
+    font-family: var(--sans); font-weight: 400; line-height: 1.55;
+    min-height: 100vh; -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; text-underline-offset: 3px; }
+  ul { list-style: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 3; opacity: .035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  .sysbar {
+    position: sticky; top: 0; z-index: 40;
+    background: var(--ink); color: var(--bg);
+    font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  }
+  .sysbar-inner {
+    max-width: 1440px; margin: 0 auto;
+    padding: 0 clamp(1rem, 3vw, 3rem);
+    display: flex; align-items: center; gap: 2rem; height: 28px;
+  }
+  .sysbar-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #e6a93b; flex: none;
+    animation: pulse 1.8s infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: .4; } }
+  .sysbar-metric b { color: #fff; font-weight: 500; }
+  .sysbar .right { margin-left: auto; opacity: .6; }
+  @media (max-width: 640px) { .sysbar-metric:nth-of-type(n+3), .sysbar .right { display: none; } }
+
+  header.chrome {
+    border-bottom: 1px solid var(--rule);
+    background: var(--bg);
+    position: sticky; top: 28px; z-index: 30;
+  }
+  .chrome-inner {
+    max-width: 1440px; margin: 0 auto;
+    padding: 1rem clamp(1rem, 3vw, 3rem);
+    display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+  }
+  .brand {
+    display: flex; align-items: baseline; gap: .6rem;
+    font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--ink);
+  }
+  .brand .mark { width: 10px; height: 10px; background: var(--ink); transform: rotate(45deg); margin-right: .25rem; display:inline-block; }
+  .brand em { color: var(--mute); font-style: normal; font-weight: 400; }
+  .back {
+    font-family: var(--mono); font-size: 12px; color: var(--mute);
+    transition: color .2s;
+  }
+  .back:hover { color: var(--accent); text-decoration: none; }
+
+  main {
+    max-width: 1440px; margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1rem, 3vw, 3rem) 4rem;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+  }
+
+  .page-head { grid-column: 1 / -1; margin-bottom: 2.5rem; }
+  .meta {
+    font-family: var(--mono); font-size: 11px;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--mute);
+    display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem;
+  }
+  .meta .num { color: var(--ink); font-weight: 500; }
+  .meta .rule { flex: 1; height: 1px; background: var(--rule-strong); }
+
+  h1.display {
+    font-family: var(--cond);
+    font-weight: 700;
+    font-size: clamp(2.5rem, 7.5vw, 6rem);
+    line-height: 0.95; letter-spacing: -0.025em;
+    margin-bottom: 1rem;
+  }
+  h1.display .accent { color: var(--accent); font-style: italic; font-weight: 600; }
+  .page-sub {
+    font-family: var(--mono); font-size: 12px; color: var(--mute);
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    border-top: 1px solid var(--rule-strong); padding-top: 1rem;
+  }
+  .page-sub b { color: var(--ink); font-weight: 500; }
+
+  /* Stepper sidebar */
+  aside.steps {
+    grid-column: 1 / span 4;
+    position: sticky; top: 100px; align-self: start;
+  }
+  aside.steps h4 {
+    font-family: var(--mono); font-size: 10px; letter-spacing: .15em;
+    text-transform: uppercase; color: var(--mute); font-weight: 500;
+    margin-bottom: 1rem; padding-bottom: .5rem;
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .step {
+    display: grid; grid-template-columns: 40px 1fr;
+    gap: .8rem; padding: .85rem 0;
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--mono); font-size: 12px;
+    align-items: start;
+  }
+  .step .s-num {
+    font-size: 10px; letter-spacing: .1em;
+    color: var(--mute-2);
+    padding-top: 3px;
+  }
+  .step .s-body b { display: block; color: var(--ink); font-weight: 500; font-size: 12.5px; margin-bottom: 2px; }
+  .step .s-body span { color: var(--mute); font-size: 11.5px; line-height: 1.55; }
+  .step.done .s-num { color: var(--ok); }
+  .step.done .s-num::after { content: ' ✓'; }
+  .step.active { background: var(--bg-2); margin: 0 -1rem; padding-left: 1rem; padding-right: 1rem; border-bottom-color: var(--rule-strong); }
+  .step.active .s-num { color: var(--accent); }
+
+  .content { grid-column: 6 / -1; display: flex; flex-direction: column; gap: 1.25rem; }
+
+  .notice {
+    border-left: 3px solid var(--accent);
+    background: var(--bg-2);
+    padding: 1.1rem 1.4rem;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--ink-2); line-height: 1.7;
+  }
+  .notice strong { color: var(--ink); font-weight: 500; }
+  .notice.muted { border-left-color: var(--mute-2); }
+  .notice p { margin-bottom: .4rem; }
+  .notice p:last-child { margin-bottom: 0; }
+
+  /* Report fields */
+  .field {
+    border: 1px solid var(--rule-strong);
+    background: var(--bg-2);
+  }
+  .field-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .6rem .85rem;
+    border-bottom: 1px solid var(--rule-strong);
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--mute);
+  }
+  .field-head .copy {
+    color: var(--mute);
+    border: 1px solid var(--rule-strong);
+    padding: 2px 8px; font-size: 10px;
+    background: var(--bg);
+    letter-spacing: .1em;
+    transition: all .15s;
+  }
+  .field-head .copy:hover { color: var(--ink); border-color: var(--ink); }
+  .field-head .copy.ok { color: var(--ok); border-color: var(--ok); }
+  .field-body {
+    padding: .9rem 1rem;
+    font-family: var(--mono); font-size: 12px;
+    color: var(--ink-2); line-height: 1.65;
+    white-space: pre-wrap; word-break: break-all;
+    max-height: 180px; overflow-y: auto;
+  }
+  .field-body::-webkit-scrollbar { width: 6px; }
+  .field-body::-webkit-scrollbar-track { background: transparent; }
+  .field-body::-webkit-scrollbar-thumb { background: var(--rule-strong); }
+  .field-body.empty { color: var(--mute-2); font-style: italic; }
+
+  textarea {
+    width: 100%;
+    background: var(--bg-2);
+    border: 1px solid var(--rule-strong);
+    color: var(--ink);
+    font-family: var(--mono); font-size: 12px;
+    padding: .9rem 1rem;
+    line-height: 1.65; resize: vertical; min-height: 110px;
+    outline: none; transition: border-color .2s;
+  }
+  textarea:focus { border-color: var(--accent); }
+  textarea::placeholder { color: var(--mute-2); }
+
+  .field-label {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: var(--mono); font-size: 10.5px;
+    letter-spacing: .12em; text-transform: uppercase;
+    color: var(--mute); margin-bottom: .4rem;
+  }
+  .field-label .count { color: var(--mute-2); font-size: 10px; }
+
+  /* Summary card */
+  .summary {
+    border: 1px solid var(--ink);
+    background: var(--bg);
+    padding: 1.25rem;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center; gap: 1.25rem;
+  }
+  .summary .tally {
+    display: flex; gap: 1.5rem; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 11px; color: var(--mute);
+  }
+  .summary .tally b { color: var(--ink); font-weight: 500; }
+
+  .actions { display: flex; gap: .75rem; flex-wrap: wrap; margin-top: .5rem; }
+  .btn {
+    font-family: var(--mono); font-size: 12px; font-weight: 500;
+    letter-spacing: .04em; padding: .85rem 1.5rem;
+    display: inline-flex; align-items: center; gap: .6rem;
+    border: 1px solid var(--ink);
+    transition: all .18s ease;
+  }
+  .btn .arrow { transition: transform .2s; }
+  .btn:hover .arrow { transform: translateX(3px); }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-primary:disabled { background: var(--mute-2); border-color: var(--mute-2); cursor: not-allowed; }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { background: var(--ink); color: var(--bg); text-decoration: none; }
+
+  .status {
+    font-family: var(--mono); font-size: 12px;
+    padding: .75rem 1rem;
+    display: none; align-items: center; gap: .5rem;
+    border-left: 3px solid;
+  }
+  .status.success { display: flex; color: var(--ok); border-left-color: var(--ok); background: color-mix(in oklab, var(--ok) 6%, transparent); }
+  .status.error   { display: flex; color: var(--warn); border-left-color: var(--warn); background: color-mix(in oklab, var(--warn) 6%, transparent); }
+
+  .no-params {
+    border: 1px dashed var(--rule-strong);
+    padding: 2rem; font-family: var(--mono); font-size: 13px;
+    color: var(--mute); line-height: 1.7;
+    display: none;
+  }
+  .no-params code {
+    background: var(--bg-2); border: 1px solid var(--rule-strong);
+    color: var(--accent); padding: 2px 8px; font-size: .9em;
+  }
+
+  @media (max-width: 900px) {
+    aside.steps { grid-column: 1 / -1; position: static; margin-bottom: 2rem; }
+    .content { grid-column: 1 / -1; }
+  }
+
+  footer {
+    background: var(--ink); color: var(--bg); margin-top: 4rem;
+  }
+  .footer-inner {
+    max-width: 1440px; margin: 0 auto;
+    padding: clamp(2rem, 4vw, 3rem) clamp(1rem, 3vw, 3rem) 1.5rem;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem;
+    font-family: var(--mono); font-size: 11px;
+    color: color-mix(in oklab, var(--bg) 60%, transparent);
+  }
+  .footer-inner a { color: color-mix(in oklab, var(--bg) 85%, transparent); }
+  .footer-inner a:hover { color: #fff; text-decoration: none; }
+
+  ::selection { background: var(--accent); color: #fff; }
+
+  /* Tweaks */
+  .tweaks {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 80;
+    background: var(--bg); border: 1px solid var(--ink);
+    padding: .9rem 1rem; font-family: var(--mono); font-size: 11px;
+    display: none; width: 220px;
+  }
+  .tweaks.on { display: block; }
+  .tweaks h5 { font-size: 10px; letter-spacing: .15em; text-transform: uppercase; margin-bottom: .85rem; display: flex; justify-content: space-between; }
+  .tweaks h5 .x { cursor: pointer; color: var(--mute); }
+  .tweaks .two { display: grid; grid-template-columns: 1fr 1fr; border: 1px solid var(--rule-strong); }
+  .tweaks .two button { padding: .5rem; border-right: 1px solid var(--rule-strong); color: var(--mute); }
+  .tweaks .two button:last-child { border-right: 0; }
+  .tweaks .two button.on { background: var(--ink); color: var(--bg); }
+</style>
+</head>
+<body>
+
+<div class="grain" aria-hidden="true"></div>
+
+<div class="sysbar">
+  <div class="sysbar-inner">
+    <span class="sysbar-dot"></span>
+    <span class="sysbar-metric">PAGE <b>BUG REPORT</b></span>
+    <span class="sysbar-metric">STATE <b id="sys-state">draft</b></span>
+    <span class="right">§ SUPPORT</span>
+  </div>
+</div>
+
+<header class="chrome">
+  <div class="chrome-inner">
+    <a href="index.html" class="brand">
+      <span class="mark"></span>yu_ai_manager <em>/ by eauesque</em>
+    </a>
+    <a href="index.html" class="back">← back to home</a>
+  </div>
+</header>
+
+<main>
+  <div class="page-head">
+    <div class="meta">
+      <span class="num">§</span><span>SUPPORT · BUG REPORT</span><span class="rule"></span><span>doc 02</span>
+    </div>
+    <h1 class="display">Report a<br/><span class="accent">bug.</span></h1>
+    <div class="page-sub">
+      <span>Requires <b>one free GitHub account</b></span>
+      <span>Transport <b>github.com · your browser</b></span>
+      <span>Additional data collected <b>zero</b></span>
+    </div>
+  </div>
+
+  <aside class="steps" aria-label="steps">
+    <h4>Process</h4>
+    <div class="step" id="step-1">
+      <div class="s-num">01</div>
+      <div class="s-body"><b>GitHub account</b><span>Sign up at github.com/join — free, 2 min. Username can be anything; a throwaway is fine.</span></div>
+    </div>
+    <div class="step" id="step-2">
+      <div class="s-num">02</div>
+      <div class="s-body"><b>Review diagnostics</b><span>Inspect what will be sent. This page only includes what you see on-screen.</span></div>
+    </div>
+    <div class="step" id="step-3">
+      <div class="s-num">03</div>
+      <div class="s-body"><b>Submit to GitHub Issues</b><span>Opens a new tab with a pre-filled issue. Click "Submit new issue" there. Alternatively, copy the bundle JSON and paste it into an AI coding assistant — git clone + AI is often the fastest path to a fix.</span></div>
+    </div>
+    <div class="step" id="step-4">
+      <div class="s-num">04</div>
+      <div class="s-body"><b>Attach screenshot</b><span>If reached via QR, upload a photo of it, or a screenshot of the error screen. No camera? Save the error screen as an image file and upload that instead.</span></div>
+    </div>
+  </aside>
+
+  <div class="content" id="report-form">
+    <div class="notice">
+      <p><strong>What gets sent:</strong> only what appears on this page. No additional data is collected.</p>
+      <p>Submission goes directly to GitHub Issues via your browser. GitHub's privacy policy applies once submitted.</p>
+    </div>
+
+    <div class="summary">
+      <div class="tally">
+        <span>Fields <b id="tally-fields">0 / 4</b></span>
+        <span>Diagnostic size <b id="tally-size">0 B</b></span>
+        <span>Ready <b id="tally-ready">no</b></span>
+      </div>
+      <span class="meta" style="margin:0;gap:.5rem;"><span class="num">#</span><span>PAYLOAD</span></span>
+    </div>
+
+    <div class="field">
+      <div class="field-head">
+        <span>// version</span>
+        <button class="copy" data-target="field-version">copy</button>
+      </div>
+      <div class="field-body" id="field-version">—</div>
+    </div>
+
+    <div class="field">
+      <div class="field-head">
+        <span>// request path · platform</span>
+        <button class="copy" data-target="field-platform">copy</button>
+      </div>
+      <div class="field-body" id="field-platform">—</div>
+    </div>
+
+    <div class="field">
+      <div class="field-head">
+        <span>// error message</span>
+        <button class="copy" data-target="field-error">copy</button>
+      </div>
+      <div class="field-body" id="field-error">—</div>
+    </div>
+
+    <div class="field">
+      <div class="field-head">
+        <span>// stack trace</span>
+        <button class="copy" data-target="field-trace">copy</button>
+      </div>
+      <div class="field-body" id="field-trace">—</div>
+    </div>
+
+    <div class="field">
+      <div class="field-head">
+        <span>// ai error bundle</span>
+        <button class="copy" data-target="field-bundle">copy</button>
+      </div>
+      <div class="field-body" id="field-bundle">—</div>
+    </div>
+
+    <div>
+      <div class="field-label">
+        <span>// additional context (optional)</span>
+        <span class="count"><span id="comment-count">0</span> chars</span>
+      </div>
+      <textarea id="user-comment" placeholder="What were you doing when this happened?"></textarea>
+    </div>
+
+    <div class="actions">
+      <button class="btn btn-primary" id="submit-btn">Submit to GitHub Issues <span class="arrow">↗</span></button>
+      <a href="index.html" class="btn btn-ghost">Cancel</a>
+    </div>
+
+    <div class="status" id="status-msg"></div>
+  </div>
+
+  <div class="content">
+    <div class="no-params" id="no-params">
+      This page is intended to be reached via QR code from yu_ai_manager when an error occurs.<br><br>
+      If you need to report a bug manually, please visit:<br>
+      <code>github.com/eauesque/yu_ai_manager/issues</code>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <span>© 2026 eauesque · MIT License</span>
+    <span><a href="index.html">yu_ai_manager</a> · <a href="privacy.html">privacy</a> · <a href="https://github.com/eauesque/yu_ai_manager">github</a></span>
+  </div>
+</footer>
+
+<div class="tweaks" id="tweaks">
+  <h5>Tweaks <span class="x" id="tweaks-close">×</span></h5>
+  <div class="tweak">
+    <label style="display:block;font-size:10px;letter-spacing:.05em;color:var(--mute);margin-bottom:.35rem;">Theme</label>
+    <div class="two" id="t-theme">
+      <button class="on" data-v="light">light</button>
+      <button data-v="dark">dark</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* Tweaks */
+const TWEAKS = /*EDITMODE-BEGIN*/{ "theme": "light" }/*EDITMODE-END*/;
+function applyTweaks(t) {
+  document.documentElement.dataset.theme = t.theme;
+  document.querySelectorAll('#t-theme button').forEach(b => b.classList.toggle('on', b.dataset.v === t.theme));
+}
+applyTweaks(TWEAKS);
+document.getElementById('t-theme').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  TWEAKS.theme = b.dataset.v; applyTweaks(TWEAKS);
+  try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { theme: TWEAKS.theme } }, '*'); } catch(_) {}
+});
+document.getElementById('tweaks-close').addEventListener('click', () => {
+  document.getElementById('tweaks').classList.remove('on');
+  try { window.parent.postMessage({ type: '__deactivate_edit_mode' }, '*'); } catch(_) {}
+});
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === '__activate_edit_mode') document.getElementById('tweaks').classList.add('on');
+  if (t === '__deactivate_edit_mode') document.getElementById('tweaks').classList.remove('on');
+});
+try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch(_) {}
+
+let reportData = {
+  version: '',
+  platform: '',
+  error: '',
+  trace: '',
+  bundleObject: null,
+  bundleText: '',
+};
+
+function setField(id, val) {
+  const el = document.getElementById(id);
+  if (val) { el.textContent = val; el.classList.remove('empty'); }
+  else { el.textContent = '(not provided)'; el.classList.add('empty'); }
+}
+
+function updateTally() {
+  const { version, platform, error, trace, bundleText } = reportData;
+  const filled = [version, platform, error, trace, bundleText].filter(Boolean).length;
+  const size = (version.length + platform.length + error.length + trace.length + bundleText.length);
+  document.getElementById('tally-fields').textContent = `${filled} / 5`;
+  document.getElementById('tally-size').textContent = size < 1024 ? `${size} B` : `${(size/1024).toFixed(1)} KB`;
+  document.getElementById('tally-ready').textContent = filled > 0 ? 'yes' : 'no';
+}
+
+function b64UrlToBytes(input) {
+  const normalized = input.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = normalized + '='.repeat((4 - normalized.length % 4) % 4);
+  const binary = atob(padded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+async function gunzipToString(input) {
+  if (typeof DecompressionStream === 'undefined') {
+    throw new Error('This browser cannot decode compressed reports');
+  }
+  const stream = new Blob([b64UrlToBytes(input)]).stream().pipeThrough(new DecompressionStream('gzip'));
+  const text = await new Response(stream).text();
+  return text;
+}
+
+async function initReport() {
+  const params = new URLSearchParams(window.location.search);
+  const packed = params.get('d') || '';
+  let payload = null;
+  if (packed) {
+    try {
+      payload = JSON.parse(await gunzipToString(packed));
+    } catch (err) {
+      console.warn('packed payload decode failed:', err);
+    }
+  }
+
+  if (payload && payload.schema === 'yu://error-bundle/1') {
+    reportData = {
+      version: payload.app && payload.app.version || '',
+      platform: [
+        payload.capture_mode ? `mode: ${payload.capture_mode}` : '',
+        payload.request ? [payload.request.method, payload.request.path].filter(Boolean).join(' ') : '',
+        payload.request && payload.request.request_id ? `request_id: ${payload.request.request_id}` : '',
+        payload.request && payload.request.endpoint ? `endpoint: ${payload.request.endpoint}` : '',
+        payload.captured_at ? `time: ${payload.captured_at}` : '',
+        payload.request && payload.request.headers && payload.request.headers.referer ? `referrer: ${payload.request.headers.referer}` : '',
+        payload.request && payload.request.headers && payload.request.headers.user_agent ? `ua: ${payload.request.headers.user_agent}` : '',
+      ].filter(Boolean).join('\n'),
+      error: payload.error && payload.error.class
+        ? `${payload.error.class}: ${payload.error && payload.error.message || ''}`.trim()
+        : (payload.error && payload.error.message || ''),
+      trace: payload.error && payload.error.traceback || '',
+      bundleObject: payload,
+      bundleText: JSON.stringify(payload, null, 2),
+    };
+  } else if (payload && payload.schema === 'yu://bug/2') {
+    reportData = {
+      version: payload.v || '',
+      platform: [
+        [payload.m, payload.p].filter(Boolean).join(' '),
+        payload.q ? `query: ${payload.q}` : '',
+        payload.rid ? `request_id: ${payload.rid}` : '',
+        payload.ep ? `endpoint: ${payload.ep}` : '',
+        payload.ts ? `time: ${payload.ts}` : '',
+        payload.ref ? `referrer: ${payload.ref}` : '',
+        payload.ua ? `ua: ${payload.ua}` : '',
+      ].filter(Boolean).join('\n'),
+      error: payload.e || '',
+      trace: payload.tr || '',
+      bundleObject: payload,
+      bundleText: JSON.stringify(payload, null, 2),
+    };
+  } else {
+    const legacyPayload = {
+      schema: 'yu://error-bundle/1',
+      capture_mode: 'legacy-relay',
+      app: { version: params.get('v') || '' },
+      request: { path: params.get('p') || '' },
+      error: {
+        message: params.get('e') || '',
+        traceback: params.get('tr') || '',
+      },
+    };
+    reportData = {
+      version: params.get('v') || '',
+      platform: params.get('p') || '',
+      error: params.get('e') || '',
+      trace: params.get('tr') || '',
+      bundleObject: legacyPayload,
+      bundleText: JSON.stringify(legacyPayload, null, 2),
+    };
+  }
+
+  if (!reportData.version && !reportData.platform && !reportData.error && !reportData.trace && !reportData.bundleText) {
+    document.getElementById('report-form').style.display = 'none';
+    document.getElementById('no-params').style.display = 'block';
+    document.querySelectorAll('aside.steps').forEach(e => e.style.display = 'none');
+    document.getElementById('sys-state').textContent = 'awaiting';
+    return;
+  }
+
+  setField('field-version', reportData.version);
+  setField('field-platform', reportData.platform);
+  setField('field-error', reportData.error);
+  setField('field-trace', reportData.trace);
+  setField('field-bundle', reportData.bundleText);
+  updateTally();
+  document.getElementById('step-1').classList.add('done');
+  document.getElementById('step-2').classList.add('active');
+  document.getElementById('sys-state').textContent = 'ready';
+}
+
+/* comment char count */
+const ta = document.getElementById('user-comment');
+const cc = document.getElementById('comment-count');
+if (ta) ta.addEventListener('input', () => { cc.textContent = ta.value.length; });
+
+/* copy buttons */
+document.querySelectorAll('.copy').forEach(btn => {
+  btn.addEventListener('click', async () => {
+    const txt = document.getElementById(btn.dataset.target).textContent;
+    try {
+      await navigator.clipboard.writeText(txt);
+      btn.textContent = 'copied';
+      btn.classList.add('ok');
+      setTimeout(() => { btn.textContent = 'copy'; btn.classList.remove('ok'); }, 1400);
+    } catch(_) {
+      btn.textContent = 'select manually';
+      setTimeout(() => { btn.textContent = 'copy'; }, 1400);
+    }
+  });
+});
+
+function buildIssueBody() {
+  const { version, platform, error, trace, bundleText } = reportData;
+  const comment = (ta && ta.value.trim()) || '';
+  let body = `## Bug Report\n\n`;
+  body += `**Version:** ${version || '(not provided)'}\n`;
+  body += `**Platform:** ${platform || '(not provided)'}\n\n`;
+  body += `### Error Message\n\`\`\`\n${error || '(not provided)'}\n\`\`\`\n\n`;
+  if (trace) body += `### Stack Trace\n\`\`\`\n${trace}\n\`\`\`\n\n`;
+  if (comment) body += `### Additional Context\n${comment}\n`;
+  if (bundleText) body += `\n<details>\n<summary>AI Error Bundle</summary>\n\n\`\`\`json\n${bundleText}\n\`\`\`\n</details>\n`;
+  body += `\n---\n*Submitted via bug report page*`;
+  return body;
+}
+
+function submitReport() {
+  const btn = document.getElementById('submit-btn');
+  const status = document.getElementById('status-msg');
+  const titleSource = reportData.error || 'Error report';
+  btn.disabled = true;
+  btn.innerHTML = 'Opening GitHub… <span class="arrow">↗</span>';
+  const title = encodeURIComponent(`[Bug] ${titleSource.substring(0, 80)}`);
+  const body  = encodeURIComponent(buildIssueBody());
+  const url   = `https://github.com/eauesque/yu_ai_manager/issues/new?title=${title}&body=${body}&labels=bug`;
+  window.open(url, '_blank');
+  status.className = 'status success';
+  status.textContent = '→ GitHub opened in new tab. Review and click "Submit new issue" there.';
+  btn.textContent = 'Submitted ✓';
+  document.getElementById('step-2').classList.remove('active');
+  document.getElementById('step-2').classList.add('done');
+  document.getElementById('step-3').classList.add('active');
+  document.getElementById('sys-state').textContent = 'dispatched';
+}
+
+const submitBtn = document.getElementById('submit-btn');
+if (submitBtn) submitBtn.addEventListener('click', submitReport);
+void initReport();
+</script>
+
+</body>
+</html>

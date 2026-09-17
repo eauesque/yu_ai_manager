@@ -1,0 +1,55 @@
+<div class="mdv-sidebar">
+  <div class="mdv-sidebar-header">
+    <input type="text" class="mdv-search-input" id="mdvSearch"
+           placeholder="全文検索..." data-i18n-placeholder="md_viewer.fulltext_search_placeholder" autocomplete="off"
+           aria-label="全文検索" data-i18n-aria-label="md_viewer.fulltext_search_aria">
+    <input type="text" class="mdv-path-filter" id="mdvPathFilter"
+           placeholder="パスフィルタ..." data-i18n-placeholder="md_viewer.path_filter_placeholder" autocomplete="off"
+           aria-label="パスフィルタ" data-i18n-aria-label="md_viewer.path_filter_aria">
+    <select class="mdv-lang-filter" id="mdvLangFilter"
+            aria-label="言語フィルタ" data-i18n-aria-label="md_viewer.lang_filter_aria">
+      <option value="" data-i18n="md_viewer.all_languages">全言語</option>
+    </select>
+  </div>
+
+  <!-- Scan directory management -->
+  <div class="mdv-roots-section" id="mdvRootsSection">
+    <div class="mdv-roots-header" id="mdvRootsToggle" role="button" tabindex="0"
+         aria-expanded="false" aria-controls="mdvRootsBody">
+      <span class="mdv-roots-arrow" id="mdvRootsArrow" aria-hidden="true">&#9654;</span>
+      <span data-i18n="md_viewer.scan_directories">スキャンディレクトリ</span>
+      <span class="mdv-roots-count" id="mdvRootsCount">0</span>
+    </div>
+    <div class="mdv-roots-body" id="mdvRootsBody" style="display:none" aria-hidden="true">
+      <div class="mdv-roots-list" id="mdvRootsList"></div>
+      <div class="mdv-roots-actions">
+        <button class="mdv-btn mdv-btn-sm" id="mdvRootBrowse"
+                title="OS ダイアログでフォルダを選択" data-i18n-title="md_viewer.browse_folder_title" aria-label="フォルダ選択ダイアログを開く" data-i18n-aria-label="md_viewer.browse_folder_aria" data-i18n="md_viewer.browse_folder">+ フォルダ選択</button>
+        <button class="mdv-btn mdv-btn-sm" id="mdvRootManual"
+                title="パスを手入力で追加" data-i18n-title="md_viewer.manual_input_title" aria-label="パスを手入力で追加" data-i18n-aria-label="md_viewer.manual_input_aria" data-i18n="md_viewer.manual_input">+ 手入力</button>
+      </div>
+      <div class="mdv-roots-input-row" id="mdvRootInputRow" style="display:none" aria-hidden="true">
+        <input type="text" class="mdv-roots-input" id="mdvRootInput"
+               placeholder="パスを入力..." data-i18n-placeholder="md_viewer.path_input_placeholder" autocomplete="off"
+               aria-label="ディレクトリパスを入力" data-i18n-aria-label="md_viewer.path_input_aria">
+        <button class="mdv-btn mdv-btn-sm mdv-btn-primary" id="mdvRootInputOk" aria-label="パスを追加" data-i18n-aria-label="md_viewer.add_path_aria" data-i18n="md_viewer.add">追加</button>
+        <button class="mdv-btn mdv-btn-sm" id="mdvRootInputCancel" aria-label="入力を取り消す" data-i18n-aria-label="md_viewer.cancel_input_aria" data-i18n="md_viewer.cancel_input">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="mdv-sidebar-actions">
+    <button class="mdv-btn mdv-btn-primary" id="mdvScanBtn"
+            title="登録ディレクトリ配下の MD ファイルをスキャン" data-i18n-title="md_viewer.scan_title" aria-label="MD ファイルをスキャン" data-i18n-aria-label="md_viewer.scan_aria" data-i18n="md_viewer.scan">スキャン</button>
+    <span class="mdv-file-count" id="mdvFileCount" data-i18n="md_viewer.file_count">0 件</span>
+  </div>
+  <div class="mdv-scan-bar" id="mdvScanBar">
+    <span id="mdvScanMsg" data-i18n="md_viewer.scanning">スキャン中...</span>
+    <div class="mdv-scan-progress">
+      <div class="mdv-scan-progress-fill" id="mdvScanFill"></div>
+    </div>
+  </div>
+  <div class="mdv-file-list" id="mdvFileList">
+    <!-- File list (rendered by JS) -->
+  </div>
+</div>

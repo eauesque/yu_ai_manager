@@ -1,0 +1,407 @@
+/*
+ * Atelier Tool Variant — Components
+ *
+ * Loaded AFTER atelier-tool-tokens.css (specificity rests on body modifier).
+ * Selectors scoped to body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool only.
+ */
+
+/* ----- Dense panel (retrofits existing .tool-section / .tool-panel) ----- */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tool-section,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tool-panel,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-tool-panel {
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-4);
+  margin-bottom: var(--space-section);
+  box-shadow: none;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tool-section > h2,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tool-panel > h2 {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--text);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tool-section > p,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .tool-panel > p {
+  margin: 0 0 var(--space-3) 0;
+  color: var(--text-muted);
+}
+
+/* ----- Buttons ----- */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .btn,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-primary,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-ghost,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-danger {
+  height: var(--control-h-md);
+  padding: 0 var(--space-3);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .btn,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-primary {
+  background: var(--accent-tool);
+  color: white;
+  border-color: var(--accent-tool);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .btn:hover,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-primary:hover {
+  filter: brightness(1.08);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .btn-sm {
+  height: 28px;
+  font-size: var(--fs-small);
+  padding: 0 var(--space-2);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-ghost {
+  background: transparent;
+  color: var(--text);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-ghost:hover {
+  background: var(--surface-raised);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-danger {
+  background: var(--danger);
+  color: var(--danger-fg);
+  border-color: var(--danger);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-danger:hover {
+  background: var(--danger-strong);
+  border-color: var(--danger-strong);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .btn:focus-visible,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-primary:focus-visible,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-ghost:focus-visible,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-btn-danger:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 1px;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool span[title="OK"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool span[title^="Trust Level:"] {
+  background: color-mix(in srgb, var(--accent-tool) 12%, var(--surface)) !important;
+  color: var(--text) !important;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool [id^="ext-cat-"] span[style*="color:var(--muted"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool [id^="ext-cat-"] div[style*="color:var(--muted"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool [id^="ext-cat-"] span[style*="color:var(--text-secondary"] {
+  color: var(--text) !important;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool [id^="ext-cat-"] > div > div > div > span[style],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool [id^="ext-cat-"] > div > div > div[style] {
+  color: var(--text) !important;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool [data-i18n="ext.security_warning"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #extensionHooks span[style],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #extensionHooks div[style] {
+  color: var(--text) !important;
+}
+
+/* ----- Table ----- */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--fs-body);
+  font-family: var(--font-body);
+  background: var(--surface);
+  color: var(--text);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table thead th {
+  background: var(--surface-raised);
+  color: var(--text);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-align: left;
+  padding: var(--space-2) var(--table-cell-padding-x);
+  border-bottom: 1px solid var(--table-border);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table tbody td {
+  height: var(--table-row-height);
+  padding: 0 var(--table-cell-padding-x);
+  border-bottom: 1px solid var(--table-border);
+  vertical-align: middle;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table--striped tbody tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table--bordered td,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table--bordered th {
+  border: 1px solid var(--table-border);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table--on-raised {
+  background: var(--surface-raised);
+}
+
+/* sortable chevron — visual only; click handler stays in existing JS */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table th[aria-sort]::after {
+  content: " ";
+  display: inline-block;
+  width: 0;
+  height: 0;
+  margin-left: var(--space-1);
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 4px solid var(--text-muted);
+  vertical-align: middle;
+  opacity: 0.4;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table th[aria-sort="ascending"]::after {
+  border-bottom-color: var(--accent-tool);
+  opacity: 1;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-table th[aria-sort="descending"]::after {
+  border-bottom: none;
+  border-top: 4px solid var(--accent-tool);
+  opacity: 1;
+}
+
+/* ----- Log view ----- */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-log {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  background: var(--canvas);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-2);
+  max-height: 60vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-log--compact {
+  max-height: 30vh;
+}
+
+/* ----- Form row (inline label + input + button cluster) -----
+ * Used by webhooks add row, archive_cleanup path picker, etc.
+ */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row > input[type="text"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row > input[type="url"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row > input[type="search"] {
+  flex: 1;
+  min-width: 200px;
+  height: var(--control-h-md);
+  padding: 0 var(--space-3);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row > label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+/* ----- Form row labeled variant -----
+ * Labels wrap inputs/selects vertically (label text on top, control below).
+ * Used for multi-input rows like LLM provider settings (URL + Key + Model).
+ */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row.atelier-form-row--labeled {
+  align-items: flex-end;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row--labeled > label {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1;
+  min-width: 150px;
+  gap: var(--space-1);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row--labeled label input[type="text"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row--labeled label input[type="url"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row--labeled label input[type="password"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row--labeled label select {
+  width: 100%;
+  height: var(--control-h-md);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  box-sizing: border-box;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-form-row--labeled > label > form {
+  display: block;
+}
+
+/* ----- Fieldset (collapsible section wrapper) -----
+ * Styles <details> + <summary> for grouped form sections.
+ * Used by archive_cleanup LLM Settings, etc.
+ */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  margin-top: var(--space-3);
+  padding: 0;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset > summary {
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  font-weight: 600;
+  user-select: none;
+  list-style: none;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset > summary::-webkit-details-marker {
+  display: none;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset > summary::before {
+  content: "▸";
+  display: inline-block;
+  margin-right: var(--space-2);
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset > .atelier-fieldset-body {
+  padding: var(--space-2) var(--space-3) var(--space-3);
+  border-top: 1px solid var(--border);
+  font-size: var(--fs-small);
+}
+
+/* Engine select row inside fieldset */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset .atelier-fieldset-engine {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset .atelier-fieldset-engine > label {
+  font-weight: 600;
+  color: var(--text);
+  font-size: var(--fs-small);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool .atelier-fieldset .atelier-fieldset-engine > select {
+  height: var(--control-h-md);
+  padding: 0 var(--space-2);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+}
+
+/* ----- AI / LLM provider config form (#aiLegacyConfig) -----
+ *
+ * Tools page exposes 5 mutually-exclusive provider sections inside
+ * #aiLegacyConfig. They are built with deeply-inlined styles
+ * (background:rgba(0,0,0,0.2); border:1px solid rgba(255,255,255,0.2); ...)
+ * which clash with atelier warm-chrome. Switching to <details> would alter
+ * behaviour (engine selector vs user toggle), so we keep the div structure
+ * and override the inline styles via !important.
+ */
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig > div[id^="ai"][id$="Section"] {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent-tool);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  margin: var(--space-3) 0;
+  box-shadow: var(--shadow-sm);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig input[type="text"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig input[type="password"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig select,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiEngine {
+  background: var(--surface-raised) !important;
+  border: 1px solid var(--border) !important;
+  color: var(--text) !important;
+  font-family: var(--font-body);
+  font-size: var(--fs-body);
+  border-radius: var(--radius-sm) !important;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig input[type="text"]:focus-visible,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig input[type="password"]:focus-visible,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig select:focus-visible,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiEngine:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 1px;
+  border-color: var(--accent-tool) !important;
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig [id$="Status"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig [id$="ConnStatus"],
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig [id$="KeyStatus"] {
+  color: var(--text-muted) !important;
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+}
+
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #aiLegacyConfig label {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--text);
+}

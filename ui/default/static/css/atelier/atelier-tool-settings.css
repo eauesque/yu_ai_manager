@@ -1,0 +1,63 @@
+/* Settings page — sidebar button overrides & save-bar styles             */
+/* Reuses tools-layout / tools-sidebar-item / tools-sidebar-item--active  */
+/* from atelier-tool-tools.css. Only settings-specific deltas live here.  */
+
+/* tools-sidebar-item is designed for <a>; settings uses <button>. Reset.
+ *
+ * The reset must clear the UA's button styling WITHOUT clearing the
+ * component's own. `padding: 0` did both: it dropped the 6px/12px that
+ * atelier-tool-tools.css gives every sidebar item, collapsing each button to
+ * its 19.5px line box -- under WCAG 2.2 AA's 24px minimum target size, which
+ * axe flagged on cat-server / cat-scan / cat-tagging. Restating the
+ * component's padding here brings these to the same 41.5px the Tools page
+ * already had.
+ *
+ * `border: none` likewise drops the 2px transparent left border the active
+ * state colours in, so it is restated too -- otherwise the active item shifts
+ * horizontally by 2px when selected. */
+.settings-layout .tools-sidebar-item {
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  display: block;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  padding: 6px 12px;
+  margin: 0;
+}
+
+/* Category section heading */
+.settings-cat-heading {
+  font-size: var(--at-font-size-lg, 1.125rem);
+  font-weight: var(--at-font-weight-semibold, 600);
+  margin: 0 0 var(--at-space-6, 1.5rem);
+  color: var(--at-text-primary);
+}
+
+/* Per-category save bar */
+.settings-save-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--at-space-3, 0.75rem);
+  padding: var(--at-space-4, 1rem) 0;
+  border-top: 1px solid var(--at-border-muted);
+  margin-top: var(--at-space-6, 1.5rem);
+}
+
+/* Feedback text next to save button */
+.save-status {
+  font-size: var(--at-font-size-sm, 0.875rem);
+  color: var(--at-text-secondary);
+}
+
+/* Unsaved changes indicator */
+.save-hint {
+  font-size: var(--at-font-size-sm, 0.875rem);
+  color: var(--at-color-warning);
+}
+
+.save-hint[hidden] {
+  display: none;
+}

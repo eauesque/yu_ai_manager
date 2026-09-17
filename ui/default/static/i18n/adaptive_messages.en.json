@@ -1,0 +1,109 @@
+{
+  "loadingTipsByTime": {
+    "common": [
+      "Tip: Press `/` to focus the search box anytime.",
+      "Tip: Press `Ctrl+Shift+A` to open the add-condition menu.",
+      "Tip: Press `Ctrl+/` to open the regex cheat sheet.",
+      "Tip: Use `🎲 Random` to jump to one result quickly.",
+      "Tip: If conditions get too many, use `🗑️` to clear them all.",
+      "Tip: You can exclude tags with `-tag` (example: `-nsfw`).",
+      "Tip: Try `OR` conditions to widen results before narrowing.",
+      "Tip: Add a `checkpoint` condition for reproducible exploration."
+    ],
+    "late_night": [
+      "Late night mode: removing one condition can reveal hidden hits.",
+      "At night, random browsing often surfaces unexpected gems."
+    ],
+    "early_morning": [
+      "Early morning tip: start broad on date range, then narrow down."
+    ],
+    "morning": [
+      "Morning tip: model + date range is an effective combo."
+    ],
+    "noon": [
+      "Noon tip: adding `in_prompt` can improve precision."
+    ],
+    "afternoon": [
+      "Afternoon tip: adjust columns to compare images more easily."
+    ],
+    "evening": [
+      "Evening tip: regex helps when memory is fuzzy."
+    ],
+    "night": [
+      "Night tip: reverse-search by checkpoint can be useful."
+    ],
+    "weekday": [
+      "Weekday tip: model filters are great for quick focused searches.",
+      "Weekday tip: keeping result count around 50-100 feels snappier."
+    ],
+    "weekend": [
+      "Weekend tip: search broad first, then narrow with extra filters.",
+      "Weekend tip: `🎲 Random` is great for rediscovering older work."
+    ],
+    "spring": ["Spring tip: after a new scan, re-run search for extra hits."],
+    "summer": ["Summer tip: if rendering is heavy, reduce count from 100 to 50."],
+    "autumn": ["Autumn tip: widen with OR, then refine for better flow."],
+    "winter": ["Winter tip: for zero hits, try underscore/space tag variants."],
+    "new_year": [
+      "New Year tip: review last year's work with a broad date filter."
+    ],
+    "golden_week": [
+      "Golden Week tip: save conditions for longer search sessions."
+    ],
+    "summer_holiday": [
+      "Summer holiday tip: random mode can rediscover buried favorites."
+    ],
+    "year_end": [
+      "Year-end tip: review by model to spot yearly trends."
+    ]
+  },
+  "emptySearchCheersByTime": {
+    "common": [
+      "You're close. Removing one condition often helps.",
+      "Almost there. Expanding the date range can improve hit rate.",
+      "Try tag variants (underscore vs space).",
+      "If regex is on, try `.*keyword.*` for a broader match.",
+      "A small condition tweak can unlock matches.",
+      "Zero results is fine. Change one search axis and try again.",
+      "Try removing exclusion tags first and re-check."
+    ],
+    "late_night": [
+      "Great late-night run. Slightly relaxing conditions may reveal hits.",
+      "Still searching strong. Try `🎲 Random` to switch direction."
+    ],
+    "early_morning": [
+      "Strong early start. Try widening the date range first."
+    ],
+    "morning": [
+      "Good morning momentum. Add a model filter for the next try."
+    ],
+    "noon": [
+      "Lunch break search is close. Try one tag at a time first."
+    ],
+    "afternoon": [
+      "Nice afternoon retry. Temporarily remove exclusion tags and test again."
+    ],
+    "evening": [
+      "Evening session: an `in_prompt` filter may catch more results."
+    ],
+    "night": [
+      "Final push today. A 1-month range can bring results back."
+    ],
+    "weekday": [
+      "You're progressing well. Relax just one condition and retry.",
+      "Busy-day trick: simpler queries often work better."
+    ],
+    "weekend": [
+      "Weekend digging looks good. Try OR search to broaden candidates.",
+      "With extra time, restarting from random can work well."
+    ],
+    "spring": ["Spring mode: loosen filters a bit and keep it light."],
+    "summer": ["Hot-day mode: start simple with 1-2 tags."],
+    "autumn": ["Autumn mode: broaden with OR, then tighten."],
+    "winter": ["Winter mode: shorten keywords and retry carefully."],
+    "new_year": ["New year cleanup: search across last year to recover items."],
+    "golden_week": ["GW mode: choose model first, then refine conditions."],
+    "summer_holiday": ["Summer holiday mode: increase result count to survey broadly."],
+    "year_end": ["Year-end push: reduce exclusions to catch missed items."]
+  }
+}

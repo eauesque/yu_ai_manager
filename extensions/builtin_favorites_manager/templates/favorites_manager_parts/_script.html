@@ -1,0 +1,453 @@
+<script nonce="{{ csp_nonce }}">
+/**
+ * Favorites Manager — Core: state, collections, grid, export, init.
+ * Selection logic is in _script_select.html.
+ */
+(function() {
+  'use strict';
+
+  // Stubs for index-page functions referenced by detail modal
+  window.refreshCollectionSidebar = window.refreshCollectionSidebar || function() { loadCollections(); };
+  window.search = window.search || function() {};
+  window.updateKeyboardGuideVisibility = window.updateKeyboardGuideVisibility || function() {};
+
+  var _currentCollectionId = null; // null = all favorites
+  var _collections = [];
+  var _selectMode = false;
+
+  // -------------------------------------------------------------------
+  // API helpers (apiFetch / escapeHtml via window.appApi namespace)
+  // -------------------------------------------------------------------
+
+  function apiFetch(url, opts) {
+    return window.appApi.apiFetch(url, opts);
+  }
+  function escapeHtml(s) {
+    return window.appApi.escapeHtml(s);
+  }
+
+  function apiJson(url, opts) {
+    return apiFetch(url, opts).then(function(r) { return r.json(); });
+  }
+
+  // -------------------------------------------------------------------
+  // Collections sidebar
+  // -------------------------------------------------------------------
+
+  function loadCollections() {
+    apiJson('/api/collections').then(function(data) {
+      _collections = data.collections || [];
+      renderCollectionList();
+    });
+  }
+
+  function renderCollectionList() {
+    var list = document.getElementById('fmCollList');
+    if (!list) return;
+
+    var html = '';
+    // "All Favorites" item
+    var allActive = _currentCollectionId === null ? ' active' : '';
+    html += '<div class="fm-coll-item' + allActive + '" data-cid="all" data-action="fmSelectCollection">';
+    html += '<span class="fm-coll-name">\u2b50 \u3059\u3079\u3066</span>';
+    html += '</div>';
+
+    _collections.forEach(function(c) {
+      var active = _currentCollectionId === c.id ? ' active' : '';
+      html += '<div class="fm-coll-item' + active + '" data-cid="' + c.id + '" data-action="fmSelectCollection" data-action-arg="' + c.id + '">';
+      html += '<span class="fm-coll-name">' + escapeHtml(c.name) + '</span>';
+      html += '<span class="fm-coll-count">' + c.count + '</span>';
+      html += '<span class="fm-coll-actions">';
+      if (c.id !== 1) {
+        html += '<button class="fm-coll-btn" data-action="fmRenameCollection" data-action-arg="' + c.id + '" title="\u540d\u524d\u5909\u66f4">\u270f</button>';
+        html += '<button class="fm-coll-btn" data-action="fmDeleteCollection" data-action-arg="' + c.id + '" title="\u524a\u9664">\ud83d\uddd1</button>';
+      }
+      html += '</span>';
+      html += '</div>';
+    });
+
+    list.innerHTML = html;
+
+    // Drop target registration for drag-and-drop
+    list.querySelectorAll('.fm-coll-item[data-cid]').forEach(function(item) {
+      var cid = item.dataset.cid;
+      if (cid === 'all') return; // "All Favorites" is not a drop target
+
+      item.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+      });
+      item.addEventListener('dragenter', function(e) {
+        e.preventDefault();
+        item.classList.add('fm-drop-target');
+      });
+      item.addEventListener('dragleave', function(e) {
+        if (item.contains(e.relatedTarget)) return;
+        item.classList.remove('fm-drop-target');
+      });
+      item.addEventListener('drop', function(e) {
+        e.preventDefault();
+        item.classList.remove('fm-drop-target');
+        var targetCollId = parseInt(cid, 10);
+        if (isNaN(targetCollId)) return;
+        var raw = e.dataTransfer.getData('application/json');
+        if (!raw) return;
+        var data = JSON.parse(raw);
+        var ids = data.fileIds || [];
+        if (!ids.length) return;
+        fmDropToCollection(ids, targetCollId);
+      });
+    });
+  }
+
+  window.fmSelectCollection = function(cid) {
+    // data-action-arg always passes a string; "all" item passes no arg.
+    // Normalize to int (or null) so downstream comparisons and JSON payloads
+    // (e.g. /api/lan-share/create which requires int) work correctly.
+    if (cid === undefined || cid === null || cid === 'all') {
+      _currentCollectionId = null;
+    } else {
+      var n = parseInt(cid, 10);
+      _currentCollectionId = isNaN(n) ? null : n;
+    }
+    renderCollectionList();
+    loadImages();
+    updateToolbarTitle();
+  };
+
+  function updateToolbarTitle() {
+    var title = document.getElementById('fmToolbarTitle');
+    if (!title) return;
+    if (_currentCollectionId === null) {
+      title.textContent = window.tr ? window.tr('favorites.all_favorites', 'すべてのお気に入り') : '\u3059\u3079\u3066\u306e\u304a\u6c17\u306b\u5165\u308a';
+    } else {
+      var coll = _collections.find(function(c) { return c.id === _currentCollectionId; });
+      title.textContent = coll ? coll.name : (window.tr ? window.tr('favorites.collection', 'コレクション') : '\u30b3\u30ec\u30af\u30b7\u30e7\u30f3');
+    }
+  }
+
+  // Create collection
+  document.addEventListener('DOMContentLoaded', function() {
+    var addBtn = document.getElementById('fmAddCollBtn');
+    var nameInput = document.getElementById('fmNewCollName');
+    if (addBtn) {
+      addBtn.addEventListener('click', function() {
+        var name = (nameInput.value || '').trim();
+        if (!name) return;
+        apiJson('/api/collections', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({name: name})
+        }).then(function() {
+          nameInput.value = '';
+          loadCollections();
+        });
+      });
+    }
+    if (nameInput) {
+      nameInput.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          addBtn.click();
+        }
+      });
+    }
+  });
+
+  // Rename collection
+  window.fmRenameCollection = function(cid) {
+    var item = document.querySelector('.fm-coll-item[data-cid="' + cid + '"]');
+    if (!item) return;
+    var nameSpan = item.querySelector('.fm-coll-name');
+    var oldName = nameSpan.textContent;
+
+    var input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'fm-rename-input';
+    input.value = oldName;
+    nameSpan.textContent = '';
+    nameSpan.appendChild(input);
+    input.focus();
+    input.select();
+
+    function save() {
+      var newName = (input.value || '').trim();
+      if (!newName || newName === oldName) {
+        nameSpan.textContent = oldName;
+        return;
+      }
+      apiJson('/api/collections/' + cid, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({name: newName})
+      }).then(function() {
+        loadCollections();
+      });
+    }
+
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') { e.preventDefault(); input.blur(); }
+      if (e.key === 'Escape') { nameSpan.textContent = oldName; }
+      e.stopPropagation();
+    });
+  };
+
+  // Delete collection
+  window.fmDeleteCollection = function(cid) {
+    // data-action-arg passes string; coerce for strict id comparisons.
+    cid = parseInt(cid, 10);
+    var coll = _collections.find(function(c) { return c.id === cid; });
+    var name = coll ? coll.name : '\u3053\u306e\u30b3\u30ec\u30af\u30b7\u30e7\u30f3';
+    if (!confirm(window.tr ? window.tr('favorites.confirm_delete_collection', '"' + name + '" を削除しますか？コレクション内のお気に入りも解除されます。') : '"' + name + '" \u3092\u524a\u9664\u3057\u307e\u3059\u304b\uff1f\u30b3\u30ec\u30af\u30b7\u30e7\u30f3\u5185\u306e\u304a\u6c17\u306b\u5165\u308a\u3082\u89e3\u9664\u3055\u308c\u307e\u3059\u3002')) return;
+
+    apiJson('/api/collections/' + cid, { method: 'DELETE' }).then(function() {
+      if (_currentCollectionId === cid) {
+        _currentCollectionId = null;
+      }
+      loadCollections();
+      loadImages();
+    });
+  };
+
+  // -------------------------------------------------------------------
+  // Image grid
+  // -------------------------------------------------------------------
+
+  function loadImages() {
+    var url = '/ext/favorites/api/images';
+    if (_currentCollectionId !== null) {
+      url += '?collection_id=' + _currentCollectionId;
+    }
+
+    apiJson(url).then(function(data) {
+      var images = data.images || [];
+      renderGrid(images);
+
+      var countEl = document.getElementById('fmImageCount');
+      if (countEl) {
+        countEl.textContent = images.length + ' ' + (window.tr ? window.tr('favorites.count_unit', '枚') : '\u679a');
+      }
+    });
+  }
+
+  function renderGrid(images) {
+    var grid = document.getElementById('fmGrid');
+    if (!grid) return;
+
+    if (!images.length) {
+      grid.innerHTML = '<div class="fm-empty">' + (window.tr ? window.tr('favorites.no_favorites_in_collection', 'このコレクションにはお気に入りがありません') : '\u3053\u306e\u30b3\u30ec\u30af\u30b7\u30e7\u30f3\u306b\u306f\u304a\u6c17\u306b\u5165\u308a\u304c\u3042\u308a\u307e\u305b\u3093') + '</div>';
+      return;
+    }
+
+    var html = '';
+    images.forEach(function(img) {
+      html += '<div class="fm-card" data-id="' + img.id + '" draggable="true">';
+      html += '<input type="checkbox" class="fm-select-cb" name="fav-select" data-file-id="' + img.id + '" data-action="fmSelectChanged" data-action-event="change" aria-label="Select image ' + img.id + '" />';
+      html += '<img src="/api/thumbnail/' + img.id + '" loading="lazy" alt="">';
+      html += '<button class="fm-remove-btn" data-action="fmRemoveFromCollection" data-action-arg="' + img.id + '" title="Remove">\u2715</button>';
+      html += '</div>';
+    });
+
+    grid.innerHTML = html;
+  }
+
+  window.fmShowDetail = function(fileId) {
+    var cards = document.querySelectorAll('.fm-card[data-id]');
+    var ids = [];
+    cards.forEach(function(c) {
+      var id = parseInt(c.dataset.id, 10);
+      if (!isNaN(id)) ids.push(id);
+    });
+    // Prefer the detail modal API exposed by the favorites bundle
+    // (apps/favorites-app.ts pulls in detail-modal/index, which installs
+    // window.detailModalApi.showDetail). Fall back to legacy window.showDetail
+    // and finally to opening the index page with ?detail=<id>.
+    var api = window.detailModalApi;
+    var fn = (api && typeof api.showDetail === 'function')
+      ? api.showDetail
+      : (typeof window.showDetail === 'function' ? window.showDetail : null);
+    if (fn) {
+      fn(fileId, { source: 'favorites', scope: 'result_set', scopeIds: ids });
+    } else {
+      window.location.href = '/?detail=' + fileId;
+    }
+  };
+
+  window.fmRemoveFromCollection = function(rawFileId) {
+    var fileId = parseInt(rawFileId, 10);
+    if (!confirm(window.tr ? window.tr('favorites.confirm_remove', 'この画像をコレクションから削除しますか？') : '\u3053\u306e\u753b\u50cf\u3092\u30b3\u30ec\u30af\u30b7\u30e7\u30f3\u304b\u3089\u524a\u9664\u3057\u307e\u3059\u304b\uff1f')) return;
+    var cid = _currentCollectionId || 1;
+    apiJson('/ext/favorites/api/batch-remove', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({file_ids: [fileId], collection_id: cid})
+    }).then(function() {
+      loadCollections();
+      loadImages();
+    });
+  };
+
+  // -------------------------------------------------------------------
+  // Export: ZIP
+  // -------------------------------------------------------------------
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var zipBtn = document.getElementById('fmExportZipBtn');
+    if (zipBtn) {
+      zipBtn.addEventListener('click', function() {
+        var url = '/ext/favorites/api/export/zip';
+        if (_currentCollectionId !== null) {
+          url += '?collection_id=' + _currentCollectionId;
+        }
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = '';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        showToast(window.tr ? window.tr('favorites.zip_export_started', 'ZIP エクスポートを開始しました...') : 'ZIP \u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u3092\u958b\u59cb\u3057\u307e\u3057\u305f...');
+      });
+    }
+  });
+
+  // -------------------------------------------------------------------
+  // Export: Folder (symlink)
+  // -------------------------------------------------------------------
+
+  document.addEventListener('DOMContentLoaded', function() {
+    var folderBtn = document.getElementById('fmExportFolderBtn');
+    if (folderBtn) {
+      folderBtn.addEventListener('click', function() {
+        var el = document.getElementById('fmFolderModal');
+        el.style.display = 'flex';
+        if (window.FocusTrap) FocusTrap.activate(el, fmCloseFolderModal);
+        else { var input = document.getElementById('fmFolderPath'); if (input) input.focus(); }
+      });
+    }
+  });
+
+  window.fmCloseFolderModal = function() {
+    var el = document.getElementById('fmFolderModal');
+    el.style.display = 'none';
+    if (window.FocusTrap) FocusTrap.deactivate(el);
+  };
+
+  window.fmDoFolderExport = function() {
+    var path = (document.getElementById('fmFolderPath').value || '').trim();
+    if (!path) { alert(window.tr ? window.tr('favorites.enter_output_path', '出力先パスを入力してください。') : '\u51fa\u529b\u5148\u30d1\u30b9\u3092\u5165\u529b\u3057\u3066\u304f\u3060\u3055\u3044\u3002'); return; }
+
+    var body = { dest_path: path };
+    if (_currentCollectionId !== null) {
+      body.collection_id = _currentCollectionId;
+    }
+
+    apiJson('/ext/favorites/api/export/folder', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body)
+    }).then(function(data) {
+      fmCloseFolderModal();
+      if (data.ok) {
+        var _msg = window.tr
+          ? window.tr('favorites.symlink_created', data.created + ' 件のシンボリックリンクを作成')
+          : data.created + ' \u4ef6\u306e\u30b7\u30f3\u30dc\u30ea\u30c3\u30af\u30ea\u30f3\u30af\u3092\u4f5c\u6210';
+        if (data.skipped) _msg += (window.tr ? window.tr('favorites.skipped_suffix', '、' + data.skipped + ' 件スキップ') : '\u3001' + data.skipped + ' \u4ef6\u30b9\u30ad\u30c3\u30d7');
+        if (data.errors) _msg += (window.tr ? window.tr('favorites.errors_suffix', '、' + data.errors + ' 件エラー') : '\u3001' + data.errors + ' \u4ef6\u30a8\u30e9\u30fc');
+        showToast(_msg);
+      } else {
+        alert((window.tr ? window.tr('favorites.export_failed', 'エクスポート失敗') : '\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u5931\u6557') + ': ' + (data.error || (window.tr ? window.tr('favorites.unknown_error', '不明なエラー') : '\u4e0d\u660e\u306a\u30a8\u30e9\u30fc')));
+      }
+    }).catch(function(e) {
+      alert((window.tr ? window.tr('favorites.export_failed', 'エクスポート失敗') : '\u30a8\u30af\u30b9\u30dd\u30fc\u30c8\u5931\u6557') + ': ' + e.message);
+    });
+  };
+
+  // -------------------------------------------------------------------
+  // Drag-and-drop: move cards to collection
+  // -------------------------------------------------------------------
+
+  window.fmDropToCollection = function(ids, targetCollId) {
+    var srcCid = _currentCollectionId;
+    if (srcCid === targetCollId) return;
+
+    apiJson('/ext/favorites/api/batch-add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({file_ids: ids, collection_id: targetCollId})
+    }).then(function() {
+      if (srcCid !== null) {
+        return apiJson('/ext/favorites/api/batch-remove', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({file_ids: ids, collection_id: srcCid})
+        });
+      }
+    }).then(function() {
+      showToast(window.tr ? window.tr('favorites.images_moved', ids.length + ' 件の画像を移動しました') : ids.length + ' \u4ef6\u306e\u753b\u50cf\u3092\u79fb\u52d5\u3057\u307e\u3057\u305f');
+      if (typeof fmDeselectAll === 'function') fmDeselectAll();
+      loadCollections();
+      loadImages();
+    });
+  };
+
+  // -------------------------------------------------------------------
+  // Shared namespace for _script_select.html
+  // -------------------------------------------------------------------
+
+  window._fm = {
+    apiJson: apiJson,
+    loadCollections: loadCollections,
+    loadImages: loadImages,
+    getCollectionId: function() { return _currentCollectionId; },
+    isSelectMode: function() { return _selectMode; },
+    toggleSelectMode: function() {
+      _selectMode = !_selectMode;
+      document.body.classList.toggle('fm-select-mode', _selectMode);
+      return _selectMode;
+    }
+  };
+
+  // -------------------------------------------------------------------
+  // Init
+  // -------------------------------------------------------------------
+
+  document.addEventListener('DOMContentLoaded', function() {
+    loadCollections();
+    loadImages();
+
+    // Drag-and-drop from cards
+    var grid = document.getElementById('fmGrid');
+    if (grid) {
+      grid.addEventListener('dragstart', function(e) {
+        var card = e.target.closest('.fm-card[data-id]');
+        if (!card) { e.preventDefault(); return; }
+        var fileId = parseInt(card.dataset.id, 10);
+        var ids;
+        if (_selectMode && window._fm && typeof window._fm.getSelectedIds === 'function') {
+          var selected = window._fm.getSelectedIds();
+          ids = selected.length > 0 && selected.indexOf(fileId) >= 0 ? selected : [fileId];
+        } else {
+          ids = [fileId];
+        }
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('application/json', JSON.stringify({fileIds: ids}));
+        card.classList.add('fm-dragging');
+        if (ids.length > 1) {
+          var badge = document.createElement('div');
+          badge.textContent = ids.length + ' ' + (window.tr ? window.tr('favorites.images', 'images') : 'images');
+          badge.style.cssText = 'padding:6px 12px;background:#2563eb;color:#fff;border-radius:6px;font-size:13px;position:fixed;top:-100px;';
+          document.body.appendChild(badge);
+          e.dataTransfer.setDragImage(badge, 0, 0);
+          setTimeout(function() { document.body.removeChild(badge); }, 0);
+        }
+      });
+
+      grid.addEventListener('dragend', function(e) {
+        var card = e.target.closest('.fm-card');
+        if (card) card.classList.remove('fm-dragging');
+      });
+    }
+  });
+})();
+</script>

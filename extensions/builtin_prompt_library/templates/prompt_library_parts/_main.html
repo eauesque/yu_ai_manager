@@ -1,0 +1,41 @@
+<div class="pl-container">
+  <!-- Toolbar -->
+  <div class="pl-toolbar">
+    <h1 class="pl-toolbar-title" data-i18n="prompt_library.title">Prompt Library</h1>
+    <input type="text" class="pl-search" id="plSearch" placeholder="Search prompts..." data-i18n-placeholder="prompt_library.search_placeholder" autocomplete="off" aria-label="Search prompts" data-i18n-aria-label="prompt_library.search_aria">
+    <select class="pl-sort-select" id="plSort" aria-label="Sort order" data-i18n-aria-label="prompt_library.sort_order_aria">
+      <option value="updated_at-desc" data-i18n="prompt_library.sort_updated_new">Updated (new)</option>
+      <option value="updated_at-asc" data-i18n="prompt_library.sort_updated_old">Updated (old)</option>
+      <option value="created_at-desc" data-i18n="prompt_library.sort_created_new">Created (new)</option>
+      <option value="created_at-asc" data-i18n="prompt_library.sort_created_old">Created (old)</option>
+      <option value="title-asc" data-i18n="prompt_library.sort_title_az">Title (A-Z)</option>
+      <option value="title-desc" data-i18n="prompt_library.sort_title_za">Title (Z-A)</option>
+    </select>
+    <button class="pl-btn" id="plSelectBtn" data-i18n="prompt_library.select">Select</button>
+    <button class="pl-btn primary" id="plNewBtn" data-i18n="prompt_library.new">+ New</button>
+  </div>
+
+  <!-- Selection bar -->
+  <div class="pl-select-bar" id="plSelectBar">
+    <span class="pl-select-count" id="plSelectCount" data-i18n="prompt_library.selected_count">0 selected</span>
+    <button class="pl-btn small" id="plSelAllBtn" data-i18n="prompt_library.select_all">Select All</button>
+    <button class="pl-btn small" id="plDeselBtn" data-i18n="prompt_library.deselect">Deselect</button>
+    <button class="pl-btn small danger" id="plBulkDelBtn" data-i18n="prompt_library.delete">Delete</button>
+    <button class="pl-btn small" id="plBulkMoveBtn" data-i18n="prompt_library.move_to_folder">Move to Folder</button>
+    <button class="pl-btn small" id="plBulkTagBtn" data-i18n="prompt_library.add_tags">Add Tags</button>
+  </div>
+
+  <!-- Card list -->
+  <div class="pl-list" id="plList">
+    <div class="pl-empty" id="plEmpty" data-i18n="prompt_library.empty_message">
+      No prompts saved yet. Click <b>+ New</b> to save your first prompt.
+    </div>
+  </div>
+
+  <!-- Pagination -->
+  <div class="pl-pagination" id="plPagination" style="display:none;">
+    <button class="pl-btn small" id="plPrev" disabled data-i18n="prompt_library.prev">&lt; Prev</button>
+    <span id="plPageInfo">1 / 1</span>
+    <button class="pl-btn small" id="plNext" disabled data-i18n="prompt_library.next">Next &gt;</button>
+  </div>
+</div>

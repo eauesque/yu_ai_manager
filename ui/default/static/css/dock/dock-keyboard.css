@@ -1,0 +1,61 @@
+/* Regex cheat dock: keyboard hints card */
+.cheat-kb-card { min-width: 240px; }
+
+.cheat-kb-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.cheat-kb-toggle {
+  appearance: none;
+  border: 1px solid var(--cheat-border);
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--cheat-text);
+  border-radius: 10px;
+  padding: 6px 10px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+body.dark .cheat-kb-toggle { background: rgba(0, 0, 0, 0.18); }
+
+.cheat-kb-summary {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.9;
+  line-height: 1.35;
+}
+
+.cheat-kb-card.is-collapsed .cheat-kb-table { display: none; }
+.cheat-kb-card.is-collapsed .cheat-kb-summary { display: block; }
+.cheat-kb-card:not(.is-collapsed) .cheat-kb-summary { display: none; }
+
+.cheat-kb-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.cheat-kb-table td {
+  padding: 4px 0;
+  vertical-align: top;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.cheat-kb-table tr:first-child td { border-top: none; }
+.cheat-kb-table .k { white-space: nowrap; opacity: 0.92; padding-right: 10px; }
+.cheat-kb-table .d { opacity: 0.92; }
+
+.cheat-kb-table code {
+  background: var(--cheat-chip-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 2px 6px;
+  margin-left: 6px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 12px;
+}

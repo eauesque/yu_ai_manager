@@ -1,0 +1,101 @@
+<script nonce="{{ csp_nonce }}">
+/* ── MD Viewer: shared utility functions (pure, no closure state) ── */
+
+function escapeHtml(s) {
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+
+function escapeAttr(s) {
+  return s.replace(/&/g, '&amp;').replace(/"/g, '&quot;')
+          .replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function shortenPath(p) {
+  if (p.length <= 60) return p;
+  var parts = p.replace(/\\/g, '/').split('/');
+  if (parts.length <= 3) return p;
+  return parts[0] + '/.../' + parts.slice(-2).join('/');
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// ── Markdown sanitization ────────────────────────────────
+// Sanitize marked.js output to prevent XSS
+function sanitizeHtml(html) {
+  var ALLOWED_TAGS = /^(p|br|strong|b|em|i|u|a|code|pre|blockquote|ul|ol|li|h[1-6]|table|thead|tbody|tr|th|td|hr|div|span|del|s|sub|sup|img|mark|dl|dt|dd)$/i;
+  var ALLOWED_ATTRS = /^(href|title|class|id|alt|src|width|height|colspan|rowspan|align)$/i;
+  var tmp = document.createElement('div');
+  tmp.innerHTML = html;
+  _sanitizeNode(tmp, ALLOWED_TAGS, ALLOWED_ATTRS);
+  return tmp.innerHTML;
+}
+
+function isSafeHrefUrl(url) {
+  if (!url) return false;
+  var trimmed = url.trim();
+  if (!trimmed) return false;
+  if (trimmed.charAt(0) === '#') return true;
+  if (/^(https?:)?\/\//i.test(trimmed)) return true;
+  if (/^[A-Za-z][A-Za-z0-9+.-]*:/i.test(trimmed)) return false;
+  return true;
+}
+
+function isSafeImageUrl(url) {
+  if (!url) return false;
+  var trimmed = url.trim();
+  if (!trimmed) return false;
+  if (/^(https?:)?\/\//i.test(trimmed)) return false;
+  if (/^[A-Za-z][A-Za-z0-9+.-]*:/i.test(trimmed)) return false;
+  return true;
+}
+
+function _sanitizeNode(node, allowedTags, allowedAttrs) {
+  var children = Array.prototype.slice.call(node.childNodes);
+  for (var i = 0; i < children.length; i++) {
+    var child = children[i];
+    if (child.nodeType === 1) {
+      var tag = child.tagName;
+      if (!allowedTags.test(tag)) {
+        var text = document.createTextNode(child.textContent || '');
+        node.replaceChild(text, child);
+        continue;
+      }
+      // Allow only anchors, relative URLs, and http(s) links.
+      if (child.hasAttribute('href')) {
+        var href = child.getAttribute('href') || '';
+        if (!isSafeHrefUrl(href)) {
+          child.removeAttribute('href');
+        }
+      }
+      // Keep images local to avoid external beaconing from markdown.
+      if (child.hasAttribute('src')) {
+        var src = child.getAttribute('src') || '';
+        if (!isSafeImageUrl(src)) {
+          child.removeAttribute('src');
+        }
+      }
+      // Remove disallowed attributes
+      var attrs = Array.prototype.slice.call(child.attributes);
+      for (var j = 0; j < attrs.length; j++) {
+        if (!allowedAttrs.test(attrs[j].name)) {
+          child.removeAttribute(attrs[j].name);
+        }
+      }
+      // Remove event handler attributes
+      var allAttrs = Array.prototype.slice.call(child.attributes);
+      for (var k = 0; k < allAttrs.length; k++) {
+        if (allAttrs[k].name.indexOf('on') === 0) {
+          child.removeAttribute(allAttrs[k].name);
+        }
+      }
+      _sanitizeNode(child, allowedTags, allowedAttrs);
+    }
+  }
+}
+</script>

@@ -1,0 +1,493 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Prompt Simulator JS — Sed & Autocomplete ── */
+
+/* ── Sed ── */
+function simToggleSed() {
+  var bar = document.getElementById('simSedBar');
+  if (bar.style.display === 'none') {
+    bar.style.display = '';
+    var si = document.getElementById('simSedInput');
+    si.focus(); si.select();
+  } else {
+    simHideSed();
+  }
+}
+function simHideSed() { document.getElementById('simSedBar').style.display = 'none'; }
+function simShowSedRef() { var el = document.getElementById('simSedRefOverlay'); el.classList.add('active'); if (window.FocusTrap) FocusTrap.activate(el, simHideSedRef); }
+function simHideSedRef() { var el = document.getElementById('simSedRefOverlay'); el.classList.remove('active'); if (window.FocusTrap) FocusTrap.deactivate(el); }
+
+/* Sed parser (shared logic with Wildcard Manager) */
+function _simSedParseDelimited(expr, pos, delim) {
+  var cur = '', i = pos;
+  while (i < expr.length) {
+    if (expr[i] === '\\' && i + 1 < expr.length && expr[i + 1] === delim) {
+      cur += delim; i += 2;
+    } else if (expr[i] === delim) {
+      return { value: cur, end: i + 1 };
+    } else {
+      cur += expr[i]; i++;
+    }
+  }
+  return null;
+}
+
+function _simSedParseAddr(expr, pos) {
+  if (pos >= expr.length || expr[pos] !== '/') return null;
+  var r = _simSedParseDelimited(expr, pos + 1, '/');
+  if (!r) return null;
+  try { return { re: new RegExp(r.value), end: r.end }; }
+  catch (_e) { return null; }
+}
+
+function _simParseSedSub(expr) {
+  if (expr.length < 4 || expr[0] !== 's') return null;
+  var delim = expr[1];
+  var r1 = _simSedParseDelimited(expr, 2, delim);
+  if (!r1) return null;
+  var r2 = _simSedParseDelimited(expr, r1.end, delim);
+  if (!r2) return null;
+  var flags = expr.substring(r2.end);
+  if (!/^[gi]*$/.test(flags)) return null;
+  return { cmd: 's', addr: null, pattern: r1.value, replacement: r2.value, flags: flags };
+}
+
+function _simParseSedExpr(expr) {
+  if (expr[0] === '/') {
+    var addr = _simSedParseAddr(expr, 0);
+    if (!addr) return null;
+    var rest = expr.substring(addr.end);
+    if (rest === '!d') return { cmd: 'd', addr: addr.re, negate: true };
+    if (rest === 'd') return { cmd: 'd', addr: addr.re, negate: false };
+    var mA = rest.match(/^a\\([\s\S]*)$/);
+    if (mA) return { cmd: 'a', addr: addr.re, text: mA[1] };
+    var mI = rest.match(/^i\\([\s\S]*)$/);
+    if (mI) return { cmd: 'i', addr: addr.re, text: mI[1] };
+    if (rest.length >= 4 && rest[0] === 's') {
+      var sub = _simParseSedSub(rest);
+      if (sub) { sub.addr = addr.re; return sub; }
+    }
+    return null;
+  }
+  if (expr.length >= 4 && expr[0] === 'y') {
+    var yDelim = expr[1];
+    var r1 = _simSedParseDelimited(expr, 2, yDelim);
+    if (!r1) return null;
+    var r2 = _simSedParseDelimited(expr, r1.end, yDelim);
+    if (!r2) return null;
+    if (expr.substring(r2.end).trim() !== '') return null;
+    return { cmd: 'y', source: r1.value, dest: r2.value };
+  }
+  if (expr.length >= 4 && expr[0] === 's') {
+    return _simParseSedSub(expr);
+  }
+  return null;
+}
+
+function _simSetInput(text) {
+  if (_simEditor) { _simEditor.setValue(text); }
+  else {
+    var el = document.getElementById('simInput');
+    if (el) el.value = text;
+  }
+}
+
+function _simSedToast(msg) {
+  showOutput('sed', msg);
+}
+
+function simExecSed() {
+  var expr = document.getElementById('simSedInput').value.trim();
+  var parsed = _simParseSedExpr(expr);
+  if (!parsed) { _simSedToast(_st('sed_error').replace('{0}', 'invalid syntax')); return; }
+  var text = getInput();
+  var lines = text.split('\n');
+
+  switch (parsed.cmd) {
+    case 's': {
+      try { var re = new RegExp(parsed.pattern, parsed.flags); }
+      catch (err) { _simSedToast(_st('sed_error').replace('{0}', err.message)); return; }
+      var changed = 0;
+      var newLines = lines.map(function(line) {
+        if (parsed.addr && !parsed.addr.test(line)) return line;
+        var newLine = line.replace(re, parsed.replacement);
+        if (newLine !== line) changed++;
+        return newLine;
+      });
+      if (changed === 0) { _simSedToast(_st('sed_no_match')); }
+      else { _simSetInput(newLines.join('\n')); _simSedToast(_st('sed_done').replace('{0}', changed)); simSimulate({keepOutput: true}); }
+      break;
+    }
+    case 'd': {
+      var kept = [], removed = 0;
+      lines.forEach(function(line) {
+        var match = parsed.addr.test(line);
+        if (match ^ parsed.negate) { removed++; }
+        else { kept.push(line); }
+      });
+      if (removed === 0) { _simSedToast(_st('sed_no_match')); }
+      else {
+        _simSetInput(kept.join('\n'));
+        if (parsed.negate) { _simSedToast(_st('sed_kept').replace('{0}', kept.length)); }
+        else { _simSedToast(_st('sed_deleted').replace('{0}', removed)); }
+        simSimulate({keepOutput: true});
+      }
+      break;
+    }
+    case 'y': {
+      if (parsed.source.length !== parsed.dest.length) {
+        _simSedToast(_st('sed_error').replace('{0}', 'y: source/dest length mismatch'));
+        return;
+      }
+      var map = {};
+      for (var ci = 0; ci < parsed.source.length; ci++) { map[parsed.source[ci]] = parsed.dest[ci]; }
+      var changed = 0;
+      var newLines = lines.map(function(line) {
+        var newLine = line.split('').map(function(ch) { return map[ch] !== undefined ? map[ch] : ch; }).join('');
+        if (newLine !== line) changed++;
+        return newLine;
+      });
+      if (changed === 0) { _simSedToast(_st('sed_no_match')); }
+      else { _simSetInput(newLines.join('\n')); _simSedToast(_st('sed_translit').replace('{0}', changed)); simSimulate({keepOutput: true}); }
+      break;
+    }
+    case 'a':
+    case 'i': {
+      var inserted = 0;
+      var newLines = [];
+      lines.forEach(function(line) {
+        if (parsed.addr.test(line)) {
+          if (parsed.cmd === 'i') { newLines.push(parsed.text); inserted++; }
+          newLines.push(line);
+          if (parsed.cmd === 'a') { newLines.push(parsed.text); inserted++; }
+        } else {
+          newLines.push(line);
+        }
+      });
+      if (inserted === 0) { _simSedToast(_st('sed_no_match')); }
+      else { _simSetInput(newLines.join('\n')); _simSedToast(_st('sed_inserted').replace('{0}', inserted)); simSimulate({keepOutput: true}); }
+      break;
+    }
+    default:
+      _simSedToast(_st('sed_error').replace('{0}', 'unknown command'));
+  }
+}
+
+/* ── Caret coordinate helper (mirror div technique) ── */
+var _acMirrorDiv = null;
+var _acMirrorProps = [
+  'direction','boxSizing','width','overflowX','overflowY',
+  'borderTopWidth','borderRightWidth','borderBottomWidth','borderLeftWidth','borderStyle',
+  'paddingTop','paddingRight','paddingBottom','paddingLeft',
+  'fontStyle','fontVariant','fontWeight','fontStretch','fontSize',
+  'fontSizeAdjust','lineHeight','fontFamily',
+  'textAlign','textTransform','textIndent','textDecoration',
+  'letterSpacing','wordSpacing','tabSize','MozTabSize',
+  'whiteSpace','wordWrap','wordBreak'
+];
+function _acGetCaretCoords(el, pos) {
+  if (!_acMirrorDiv) {
+    _acMirrorDiv = document.createElement('div');
+    _acMirrorDiv.id = '_simAcCaretMirror';
+    _acMirrorDiv.setAttribute('aria-hidden', 'true');
+    _acMirrorDiv.setAttribute('data-1p-ignore', '');
+    _acMirrorDiv.setAttribute('data-lpignore', 'true');
+    document.body.appendChild(_acMirrorDiv);
+  }
+  var s = _acMirrorDiv.style;
+  var cs = getComputedStyle(el);
+  s.whiteSpace = 'pre-wrap'; s.wordWrap = 'break-word';
+  s.position = 'fixed'; s.visibility = 'hidden'; s.overflow = 'hidden';
+  s.top = '-9999px'; s.left = '-9999px'; s.height = 'auto';
+  for (var i = 0; i < _acMirrorProps.length; i++) {
+    var p = _acMirrorProps[i];
+    s[p] = cs.getPropertyValue(p.replace(/[A-Z]/g, function(c){ return '-'+c.toLowerCase(); }));
+  }
+  if (el.nodeName === 'INPUT') { s.whiteSpace = 'nowrap'; s.height = 'auto'; }
+  var txt = el.value.substring(0, pos);
+  _acMirrorDiv.textContent = txt;
+  if (el.nodeName === 'TEXTAREA' && txt.endsWith('\n')) _acMirrorDiv.textContent += ' ';
+  var marker = document.createElement('span');
+  marker.textContent = '\u200b';
+  _acMirrorDiv.appendChild(marker);
+  var coords = {
+    top: marker.offsetTop - el.scrollTop,
+    left: marker.offsetLeft - el.scrollLeft,
+    height: parseInt(cs.lineHeight) || Math.round(parseInt(cs.fontSize) * 1.2)
+  };
+  _acMirrorDiv.textContent = '';
+  return coords;
+}
+
+/* ── Autocomplete for editor ── */
+(function() {
+  var _acDrop = null;       // dropdown element
+  var _acItems = [];        // current candidates [{label, sub, type}]
+  var _acIdx = -1;          // highlighted index
+  var _acMode = '';         // 'wc' | 'tag' | ''
+  var _acDebounce = null;
+  var _acDanbooruOn = false;
+  var _acTokenStart = 0;    // start position of current token in textarea
+  var _acWcPrefixPos = 0;   // position of __ trigger
+
+  /* Danbooru toggle */
+  try { _acDanbooruOn = localStorage.getItem('sim_danbooru_ac') === '1'; } catch(_e) {}
+  window.simToggleDanbooruAc = function() {
+    _acDanbooruOn = !_acDanbooruOn;
+    try { localStorage.setItem('sim_danbooru_ac', _acDanbooruOn ? '1' : '0'); } catch(_e) {}
+    var btn = document.getElementById('simAcTagToggle');
+    btn.classList.toggle('on', _acDanbooruOn);
+    btn.title = _st(_acDanbooruOn ? 'ac_danbooru_on' : 'ac_danbooru_off');
+  };
+  /* Init toggle state */
+  (function() {
+    var btn = document.getElementById('simAcTagToggle');
+    if (btn) {
+      btn.classList.toggle('on', _acDanbooruOn);
+      btn.title = _st(_acDanbooruOn ? 'ac_danbooru_on' : 'ac_danbooru_off');
+    }
+  })();
+
+  /* Get the textarea element */
+  function _acTa() {
+    if (_simEditor) return _simEditor.getTextarea();
+    return document.getElementById('simInput');
+  }
+
+  /* Create/get dropdown */
+  function _acEnsureDrop() {
+    if (_acDrop) return _acDrop;
+    _acDrop = document.createElement('div');
+    _acDrop.className = 'sim-ac-dropdown';
+    _acDrop.style.display = 'none';
+    // Insert after editor container
+    var container = document.getElementById('simEditorContainer');
+    if (container && container.parentNode) {
+      container.parentNode.appendChild(_acDrop);
+    } else {
+      document.body.appendChild(_acDrop);
+    }
+    _acDrop.addEventListener('mousedown', function(e) { e.preventDefault(); });
+    return _acDrop;
+  }
+
+  /* Show dropdown with items */
+  function _acShow(items, mode) {
+    if (!items.length) { _acHide(); return; }
+    _acItems = items;
+    _acMode = mode;
+    _acIdx = 0;
+    var drop = _acEnsureDrop();
+    var html = '';
+    for (var i = 0; i < items.length; i++) {
+      var it = items[i];
+      var cls = 'sim-ac-item' + (it.type === 'wc' ? ' sim-ac-wc' : '') + (i === 0 ? ' active' : '');
+      html += '<div class="' + cls + '" data-idx="' + i + '">';
+      html += '<span class="sim-ac-icon">' + (it.type === 'wc' ? '\ud83c\udfb4' : '') + '</span>';
+      html += '<span class="sim-ac-name">' + escHtml(it.label) + '</span>';
+      if (it.sub) html += '<span class="sim-ac-sub">' + escHtml(it.sub) + '</span>';
+      html += '</div>';
+    }
+    drop.innerHTML = html;
+    drop.style.display = '';
+    /* Position at caret within textarea */
+    var ta = _acTa();
+    if (ta) {
+      var rect = ta.getBoundingClientRect();
+      var parRect = drop.parentNode.getBoundingClientRect();
+      var caret = _acGetCaretCoords(ta, ta.selectionStart);
+      var caretAbsTop = rect.top + caret.top;
+      var caretAbsLeft = rect.left + caret.left;
+      var dropTop = caretAbsTop + caret.height + 2 - parRect.top;
+      var dropH = Math.min(drop.scrollHeight || 220, 220);
+      if (caretAbsTop + caret.height + 2 + dropH > window.innerHeight) {
+        dropTop = caretAbsTop - dropH - 2 - parRect.top;
+      }
+      drop.style.left = Math.max(0, caretAbsLeft - parRect.left) + 'px';
+      drop.style.top = dropTop + 'px';
+      drop.style.width = '';
+    }
+    /* Mouse click on items */
+    var itemEls = drop.querySelectorAll('.sim-ac-item');
+    itemEls.forEach(function(el) {
+      el.addEventListener('click', function() {
+        _acIdx = parseInt(el.getAttribute('data-idx'), 10);
+        _acConfirm();
+      });
+    });
+  }
+
+  function _acHide() {
+    if (_acDrop) _acDrop.style.display = 'none';
+    _acItems = [];
+    _acIdx = -1;
+    _acMode = '';
+  }
+
+  function _acVisible() {
+    return _acDrop && _acDrop.style.display !== 'none' && _acItems.length > 0;
+  }
+
+  /* Update highlight */
+  function _acUpdateHighlight() {
+    if (!_acDrop) return;
+    var items = _acDrop.querySelectorAll('.sim-ac-item');
+    items.forEach(function(el, i) {
+      el.classList.toggle('active', i === _acIdx);
+    });
+    if (items[_acIdx]) items[_acIdx].scrollIntoView({ block: 'nearest' });
+  }
+
+  /* Confirm selection */
+  function _acConfirm() {
+    if (_acIdx < 0 || _acIdx >= _acItems.length) return;
+    var item = _acItems[_acIdx];
+    var ta = _acTa();
+    if (!ta) { _acHide(); return; }
+
+    var val = ta.value;
+    if (item.type === 'wc') {
+      /* Replace from __ prefix to cursor with __name__ */
+      var insert = '__' + item.value + '__';
+      ta.value = val.substring(0, _acWcPrefixPos) + insert + val.substring(ta.selectionStart);
+      var newPos = _acWcPrefixPos + insert.length;
+      ta.selectionStart = ta.selectionEnd = newPos;
+    } else {
+      /* Replace current token */
+      var before = val.substring(0, _acTokenStart);
+      var after = val.substring(ta.selectionStart);
+      var insert = item.value;
+      /* Add trailing comma+space if next char isn't comma */
+      if (after && after[0] !== ',' && after[0] !== '\n') insert += ', ';
+      ta.value = before + insert + after;
+      var newPos = _acTokenStart + insert.length;
+      ta.selectionStart = ta.selectionEnd = newPos;
+    }
+    ta.focus();
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    _acHide();
+  }
+
+  /* Analyze cursor position to determine mode */
+  function _acAnalyze() {
+    var ta = _acTa();
+    if (!ta) return null;
+    var val = ta.value;
+    var pos = ta.selectionStart;
+    /* Look backwards for __ */
+    var left = val.substring(0, pos);
+    var wcMatch = left.match(/__([a-zA-Z0-9_/\-]*)$/);
+    if (wcMatch) {
+      _acWcPrefixPos = pos - wcMatch[0].length;
+      return { mode: 'wc', query: wcMatch[1] };
+    }
+    /* Tag mode: find last comma or newline */
+    var lastSep = Math.max(left.lastIndexOf(','), left.lastIndexOf('\n'));
+    var token = left.substring(lastSep + 1).trim();
+    _acTokenStart = lastSep + 1;
+    /* Adjust _acTokenStart to skip leading whitespace */
+    while (_acTokenStart < pos && (val[_acTokenStart] === ' ' || val[_acTokenStart] === '\t')) _acTokenStart++;
+    if (token.length >= 2) return { mode: 'tag', query: token };
+    return null;
+  }
+
+  /* Search wildcards locally */
+  function _acSearchWc(query) {
+    var q = query.toLowerCase();
+    var names = Object.keys(_simWildcards);
+    var results = [];
+    for (var i = 0; i < names.length && results.length < 15; i++) {
+      if (names[i].toLowerCase().indexOf(q) === 0 || (q === '' && results.length < 15)) {
+        results.push({
+          label: '__' + names[i] + '__',
+          sub: _simWildcards[names[i]].length + ' entries',
+          type: 'wc',
+          value: names[i],
+        });
+      }
+    }
+    return results;
+  }
+
+  /* Fetch Danbooru tags */
+  function _acFetchDanbooru(query) {
+    fetch('/ext/prompt-sim/danbooru-ac?q=' + encodeURIComponent(query) + '&limit=10')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        var tags = (data.tags || []).map(function(t) {
+          return {
+            label: t.name,
+            sub: t.count ? '(' + t.count.toLocaleString() + ')' : '',
+            type: 'tag',
+            value: t.name,
+          };
+        });
+        if (tags.length) _acShow(tags, 'tag');
+        else _acHide();
+      })
+      .catch(function() { _acHide(); });
+  }
+
+  /* Triggered on input */
+  function _acOnInput() {
+    clearTimeout(_acDebounce);
+    var info = _acAnalyze();
+    if (!info) { _acHide(); return; }
+    if (info.mode === 'wc') {
+      var results = _acSearchWc(info.query);
+      _acShow(results, 'wc');
+      return;
+    }
+    if (info.mode === 'tag' && _acDanbooruOn) {
+      _acDebounce = setTimeout(function() { _acFetchDanbooru(info.query); }, 200);
+    } else {
+      _acHide();
+    }
+  }
+
+  /* Keyboard handler */
+  function _acOnKeydown(e) {
+    if (!_acVisible()) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      _acIdx = (_acIdx + 1) % _acItems.length;
+      _acUpdateHighlight();
+      return;
+    }
+    if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      _acIdx = (_acIdx - 1 + _acItems.length) % _acItems.length;
+      _acUpdateHighlight();
+      return;
+    }
+    if (e.key === 'Enter' && e.shiftKey) {
+      e.preventDefault();
+      _acConfirm();
+      return;
+    }
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      _acHide();
+      return;
+    }
+  }
+
+  /* Bind events */
+  var ta = _acTa();
+  if (ta) {
+    ta.addEventListener('input', _acOnInput);
+    ta.addEventListener('keydown', _acOnKeydown);
+    ta.addEventListener('blur', function() {
+      setTimeout(_acHide, 150);
+    });
+  }
+
+  /* Close on mousedown outside — hides dropdown before the subsequent
+     click event, so buttons underneath become clickable (Issue #4). */
+  document.addEventListener('mousedown', function(e) {
+    if (_acDrop && _acDrop.style.display !== 'none' && !_acDrop.contains(e.target)) {
+      var ta = _acTa();
+      if (!ta || e.target !== ta) _acHide();
+    }
+  });
+})();
+</script>

@@ -1,0 +1,152 @@
+<div class="ghub-wrap">
+  <!-- Header -->
+  <div class="ghub-header">
+    <h1><span aria-hidden="true">&#x1F4CC;</span> <span data-ghub-i18n="title">GitHub Integration</span></h1>
+    <select id="ghubAccountSelect" data-ghub-i18n-aria="select_account">
+      <option value="" data-ghub-i18n="select_account">-- Select Account --</option>
+    </select>
+    <button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubRefresh"
+            data-ghub-i18n-title="refresh" data-ghub-i18n-aria="refresh">&#x21BB; <span data-ghub-i18n="refresh">Refresh</span></button>
+  </div>
+
+  <!-- Tabs (scrollable on mobile — fade hint via CSS) -->
+  <div class="ghub-tabs" role="tablist">
+    <button class="ghub-tab active" role="tab" id="ghubTabDashboard" data-tab="dashboard"
+            aria-selected="true" aria-controls="ghubPanelDashboard"
+            data-action="ghubSwitchTab" data-action-arg="dashboard">
+      <span data-ghub-i18n="tab_dashboard">Dashboard</span> <span class="ghub-badge" id="ghubNotifBadge" style="display:none">0</span>
+    </button>
+    <button class="ghub-tab" role="tab" id="ghubTabIssues" data-tab="issues"
+            aria-selected="false" aria-controls="ghubPanelIssues"
+            data-action="ghubSwitchTab" data-action-arg="issues" data-ghub-i18n="tab_issues">Issues</button>
+    <button class="ghub-tab" role="tab" id="ghubTabPulls" data-tab="pulls"
+            aria-selected="false" aria-controls="ghubPanelPulls"
+            data-action="ghubSwitchTab" data-action-arg="pulls" data-ghub-i18n="tab_pulls">Pull Requests</button>
+    <button class="ghub-tab" role="tab" id="ghubTabDiscussions" data-tab="discussions"
+            aria-selected="false" aria-controls="ghubPanelDiscussions"
+            data-action="ghubSwitchTab" data-action-arg="discussions" data-ghub-i18n="tab_discussions">Discussions</button>
+    <button class="ghub-tab" role="tab" id="ghubTabReleases" data-tab="releases"
+            aria-selected="false" aria-controls="ghubPanelReleases"
+            data-action="ghubSwitchTab" data-action-arg="releases" data-ghub-i18n="tab_releases">Releases</button>
+    <button class="ghub-tab" role="tab" id="ghubTabSettings" data-tab="settings"
+            aria-selected="false" aria-controls="ghubPanelSettings"
+            data-action="ghubSwitchTab" data-action-arg="settings" data-ghub-i18n="tab_settings">Settings</button>
+  </div>
+
+  <!-- Dashboard Panel -->
+  <div class="ghub-panel active" id="ghubPanelDashboard" role="tabpanel" tabindex="-1"
+       aria-labelledby="ghubTabDashboard" data-tab="dashboard">
+    <div class="ghub-stats-grid" id="ghubStatsGrid">
+      <div class="ghub-stat-card">
+        <div class="ghub-stat-value" id="ghubStatNotifs">-</div>
+        <div class="ghub-stat-label" data-ghub-i18n="stat_notifs">Notifications</div>
+      </div>
+      <div class="ghub-stat-card">
+        <div class="ghub-stat-value" id="ghubStatIssues">-</div>
+        <div class="ghub-stat-label" data-ghub-i18n="stat_issues">Open Issues</div>
+      </div>
+      <div class="ghub-stat-card">
+        <div class="ghub-stat-value" id="ghubStatPRs">-</div>
+        <div class="ghub-stat-label" data-ghub-i18n="stat_prs">Open PRs</div>
+      </div>
+      <div class="ghub-stat-card">
+        <div class="ghub-stat-value" id="ghubStatStars">-</div>
+        <div class="ghub-stat-label" data-ghub-i18n="stat_stars">Stars</div>
+      </div>
+    </div>
+    <div class="ghub-section-header" data-ghub-i18n="notif_header">Notifications</div>
+    <div id="ghubNotifList"><div class="ghub-empty" data-ghub-i18n="select_account_notif">Select an account to view notifications</div></div>
+
+    <div class="ghub-section-header" data-ghub-i18n="repo_header">Repositories</div>
+    <div id="ghubRepoList"><div class="ghub-empty" data-ghub-i18n="select_account_repo">Select an account to view repositories</div></div>
+  </div>
+
+  <!-- Issues Panel -->
+  <div class="ghub-panel" id="ghubPanelIssues" role="tabpanel" tabindex="-1"
+       aria-labelledby="ghubTabIssues" data-tab="issues">
+    <div class="ghub-toolbar">
+      <select id="ghubIssueRepo" aria-label="Repository"><option value="" data-ghub-i18n="all_repos">All repos</option></select>
+      <select id="ghubIssueState" aria-label="State">
+        <option value="open" data-ghub-i18n="state_open">Open</option>
+        <option value="closed" data-ghub-i18n="state_closed">Closed</option>
+        <option value="all" data-ghub-i18n="state_all">All</option>
+      </select>
+      <button class="ghub-btn ghub-btn-primary ghub-btn-small" data-action="ghubLoadIssues" data-ghub-i18n="load">Load</button>
+      <button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubTriageIssues" data-ghub-i18n="triage_btn">Triage</button>
+      <button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubShowNewIssueForm" data-ghub-i18n="new_issue">+ New Issue</button>
+    </div>
+    <div id="ghubNewIssueForm" style="display:none">
+      <div class="ghub-card">
+        <div class="ghub-form-group">
+          <label for="ghubNewIssueRepo" data-ghub-i18n="new_issue_repo">Repository</label>
+          <select id="ghubNewIssueRepo"></select>
+        </div>
+        <div class="ghub-form-group">
+          <label for="ghubNewIssueTitle" data-ghub-i18n="new_issue_title">Title</label>
+          <input type="text" id="ghubNewIssueTitle" data-ghub-i18n-ph="new_issue_title_ph" placeholder="Issue title">
+        </div>
+        <div class="ghub-form-group">
+          <label for="ghubNewIssueBody" data-ghub-i18n="new_issue_body">Description</label>
+          <textarea id="ghubNewIssueBody" data-ghub-i18n-ph="new_issue_body_ph" placeholder="Describe the issue..."></textarea>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="ghub-btn ghub-btn-primary" data-action="ghubSubmitNewIssue" data-ghub-i18n="create_issue">Create Issue</button>
+          <button class="ghub-btn ghub-btn-secondary" data-action="ghubHideNewIssueForm" data-ghub-i18n="cancel">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div id="ghubIssueList"><div class="ghub-empty" data-ghub-i18n="select_first">Select an account and click Load</div></div>
+  </div>
+
+  <!-- Pull Requests Panel -->
+  <div class="ghub-panel" id="ghubPanelPulls" role="tabpanel" tabindex="-1"
+       aria-labelledby="ghubTabPulls" data-tab="pulls">
+    <div class="ghub-toolbar">
+      <select id="ghubPRRepo" aria-label="Repository"><option value="" data-ghub-i18n="all_repos">All repos</option></select>
+      <select id="ghubPRState" aria-label="State">
+        <option value="open" data-ghub-i18n="state_open">Open</option>
+        <option value="closed" data-ghub-i18n="state_closed">Closed</option>
+        <option value="all" data-ghub-i18n="state_all">All</option>
+      </select>
+      <button class="ghub-btn ghub-btn-primary ghub-btn-small" data-action="ghubLoadPulls" data-ghub-i18n="load">Load</button>
+    </div>
+    <div id="ghubPRList"><div class="ghub-empty" data-ghub-i18n="select_first">Select an account and click Load</div></div>
+  </div>
+
+  <!-- Discussions Panel -->
+  <div class="ghub-panel" id="ghubPanelDiscussions" role="tabpanel" tabindex="-1"
+       aria-labelledby="ghubTabDiscussions" data-tab="discussions">
+    <div class="ghub-toolbar">
+      <select id="ghubDiscRepo" aria-label="Repository"><option value="" data-ghub-i18n="all_repos">All repos</option></select>
+      <button class="ghub-btn ghub-btn-primary ghub-btn-small" data-action="ghubLoadDiscussions" data-ghub-i18n="load">Load</button>
+    </div>
+    <div id="ghubDiscList"><div class="ghub-empty" data-ghub-i18n="select_first">Select an account and click Load</div></div>
+  </div>
+
+  <!-- Releases Panel -->
+  <div class="ghub-panel" id="ghubPanelReleases" role="tabpanel" tabindex="-1"
+       aria-labelledby="ghubTabReleases" data-tab="releases">
+    <div class="ghub-toolbar">
+      <select id="ghubRelRepo" aria-label="Repository"><option value="" data-ghub-i18n="all_repos">All repos</option></select>
+      <button class="ghub-btn ghub-btn-primary ghub-btn-small" data-action="ghubLoadReleases" data-ghub-i18n="load">Load</button>
+    </div>
+    <div id="ghubRelList"><div class="ghub-empty" data-ghub-i18n="select_first">Select an account and click Load</div></div>
+  </div>
+
+  <!-- Settings Panel -->
+  <div class="ghub-panel" id="ghubPanelSettings" role="tabpanel" tabindex="-1"
+       aria-labelledby="ghubTabSettings" data-tab="settings">
+    <div id="ghubSettingsContent"></div>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div id="toast-container"></div>
+
+<!-- Detail overlay -->
+<div class="ghub-detail-overlay" id="ghubDetailOverlay" data-action="ghubCloseDetail">
+  <div class="ghub-detail-panel" id="ghubDetailPanel">
+    <button class="ghub-detail-close" data-action="ghubCloseDetail" data-ghub-i18n-aria="close">&times;</button>
+    <div id="ghubDetailContent"></div>
+  </div>
+</div>

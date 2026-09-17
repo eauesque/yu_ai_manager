@@ -1,0 +1,30 @@
+/* Status cards */
+.status-card {
+  background: rgba(128, 128, 128, 0.08);
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(128, 128, 128, 0.15);
+}
+
+.status-label {
+  font-size: 11px;
+  color: var(--muted-bright, var(--muted, #aab2c0));
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 2px;
+}
+
+.status-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text, #eee);
+}
+
+.status-sub {
+  font-size: 11px;
+  color: var(--muted-bright, var(--muted, #aab2c0));
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

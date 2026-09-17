@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="simulator.page_title">Prompt Simulator</title>
+  {% include "simulator_parts/_style.html" %}
+  <link rel="stylesheet" href="/ext/syntax/style.css">
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+  {% include "simulator_parts/_body.html" %}
+  </main>
+  <script nonce="{{ csp_nonce }}" src="/ext/syntax/engine.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/syntax/widget.js"></script>
+  <link rel="stylesheet" href="/static/css/prompt-linter.css">
+  <script nonce="{{ csp_nonce }}" src="/static/dist/linter.js"></script>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/power-vim-edit.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/static/tauri_shell/cross_tab.js"></script>
+  {% include "simulator_parts/_script_i18n.html" %}
+  {% include "simulator_parts/_script.html" %}
+  {% include "simulator_parts/_script_wildcards.html" %}
+  {% include "simulator_parts/_script_autocomplete.html" %}
+</body>
+</html>

@@ -1,0 +1,264 @@
+<script nonce="{{ csp_nonce }}">
+  // -- Inpainting (Canvas mask editor) ------------------------------------
+
+  // Sibling <script> tags don't share scope with _script.html's IIFE,
+  // so re-declare the $ shorthand here.
+  function $(id) { return document.getElementById(id); }
+
+  var _nabInpaintSrc = null;   // base64 source image (no prefix)
+  var _nabInpaintCanvas = null;
+  var _nabInpaintCtx = null;
+  var _nabInpaintTool = "brush";
+  var _nabInpaintBrushSize = 30;
+  var _nabInpaintDrawing = false;
+  var _nabInpaintLastX = null;
+  var _nabInpaintLastY = null;
+
+  function _nabInpaintUpdateStatus() {
+    $("nabInpaintStatus").textContent = _nabInpaintSrc ? "(1 image)" : "";
+  }
+
+  window.nabClickInpaintFile = function() {
+    var input = $("nabInpaintFile");
+    if (input) input.click();
+  };
+
+  // -- File loading -------------------------------------------------------
+
+  window.nabSetInpaintFile = function(file) {
+    // data-action-this="1" hands the <input> element itself, not a File.
+    if (file && file.tagName === "INPUT") file = file.files && file.files[0];
+    if (!file || !file.type.startsWith("image/")) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      _nabInpaintSrc = dataUrl.replace(/^data:image\/[^;]+;base64,/, "");
+
+      var img = $("nabInpaintImg");
+      img.onload = function() {
+        _nabInitCanvas(img);
+        $("nabInpaintPlaceholder").style.display = "none";
+        $("nabInpaintPreview").style.display = "";
+        _nabInpaintUpdateStatus();
+        nabUpdateGenLabel();
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
+
+  function _nabInitCanvas(img) {
+    var canvas = $("nabInpaintCanvas");
+    // Use natural dimensions for canvas pixel buffer
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    _nabInpaintCanvas = canvas;
+    _nabInpaintCtx = canvas.getContext("2d");
+    _nabInpaintCtx.clearRect(0, 0, canvas.width, canvas.height);
+    _bindCanvasEvents(canvas);
+  }
+
+  // -- Clear / Fill -------------------------------------------------------
+
+  window.nabClearInpaint = function() {
+    _nabInpaintSrc = null;
+    _nabInpaintCanvas = null;
+    _nabInpaintCtx = null;
+    $("nabInpaintImg").src = "";
+    $("nabInpaintPlaceholder").style.display = "";
+    $("nabInpaintPreview").style.display = "none";
+    $("nabInpaintFile").value = "";
+    _nabInpaintUpdateStatus();
+    nabUpdateGenLabel();
+  };
+
+  window.nabClearMask = function() {
+    if (!_nabInpaintCtx || !_nabInpaintCanvas) return;
+    _nabInpaintCtx.clearRect(0, 0, _nabInpaintCanvas.width, _nabInpaintCanvas.height);
+  };
+
+  window.nabFillMask = function() {
+    if (!_nabInpaintCtx || !_nabInpaintCanvas) return;
+    _nabInpaintCtx.globalCompositeOperation = "source-over";
+    _nabInpaintCtx.fillStyle = "rgba(255,0,0,0.5)";
+    _nabInpaintCtx.fillRect(0, 0, _nabInpaintCanvas.width, _nabInpaintCanvas.height);
+  };
+
+  // -- Tool selection -----------------------------------------------------
+
+  window.nabSetInpaintTool = function(tool) {
+    _nabInpaintTool = tool;
+    var brushBtn = $("nabInpaintBrushBtn");
+    var eraserBtn = $("nabInpaintEraserBtn");
+    if (tool === "brush") {
+      brushBtn.classList.add("active");
+      eraserBtn.classList.remove("active");
+    } else {
+      brushBtn.classList.remove("active");
+      eraserBtn.classList.add("active");
+    }
+  };
+
+  // -- Canvas drawing -----------------------------------------------------
+
+  function _getCanvasPos(canvas, e) {
+    var rect = canvas.getBoundingClientRect();
+    var scaleX = canvas.width / rect.width;
+    var scaleY = canvas.height / rect.height;
+    var clientX, clientY;
+    if (e.touches && e.touches.length > 0) {
+      clientX = e.touches[0].clientX;
+      clientY = e.touches[0].clientY;
+    } else {
+      clientX = e.clientX;
+      clientY = e.clientY;
+    }
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY,
+    };
+  }
+
+  function _nabDrawStroke(x, y) {
+    var ctx = _nabInpaintCtx;
+    if (!ctx) return;
+    var size = parseInt($("nabInpaintBrushSize").value, 10) || 30;
+    // Scale brush size to canvas coordinates
+    var rect = _nabInpaintCanvas.getBoundingClientRect();
+    var scale = _nabInpaintCanvas.width / rect.width;
+    var scaledSize = size * scale;
+
+    if (_nabInpaintTool === "eraser") {
+      ctx.globalCompositeOperation = "destination-out";
+    } else {
+      ctx.globalCompositeOperation = "source-over";
+    }
+
+    ctx.fillStyle = "rgba(255,0,0,0.5)";
+    ctx.strokeStyle = "rgba(255,0,0,0.5)";
+    ctx.lineWidth = scaledSize;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+
+    // Draw line from last position
+    if (_nabInpaintLastX !== null && _nabInpaintLastY !== null) {
+      ctx.beginPath();
+      ctx.moveTo(_nabInpaintLastX, _nabInpaintLastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+    }
+
+    // Draw circle at current position
+    ctx.beginPath();
+    ctx.arc(x, y, scaledSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+
+    _nabInpaintLastX = x;
+    _nabInpaintLastY = y;
+  }
+
+  function _onDrawStart(e) {
+    if (!_nabInpaintCtx) return;
+    e.preventDefault();
+    _nabInpaintDrawing = true;
+    var pos = _getCanvasPos(_nabInpaintCanvas, e);
+    _nabInpaintLastX = pos.x;
+    _nabInpaintLastY = pos.y;
+    _nabDrawStroke(pos.x, pos.y);
+  }
+
+  function _onDrawMove(e) {
+    if (!_nabInpaintDrawing || !_nabInpaintCtx) return;
+    e.preventDefault();
+    var pos = _getCanvasPos(_nabInpaintCanvas, e);
+    _nabDrawStroke(pos.x, pos.y);
+  }
+
+  function _onDrawEnd(e) {
+    if (!_nabInpaintDrawing) return;
+    e.preventDefault();
+    _nabInpaintDrawing = false;
+    _nabInpaintLastX = null;
+    _nabInpaintLastY = null;
+  }
+
+  function _bindCanvasEvents(canvas) {
+    // Mouse events
+    canvas.addEventListener("mousedown", _onDrawStart);
+    canvas.addEventListener("mousemove", _onDrawMove);
+    canvas.addEventListener("mouseup", _onDrawEnd);
+    canvas.addEventListener("mouseleave", _onDrawEnd);
+    // Touch events
+    canvas.addEventListener("touchstart", _onDrawStart, { passive: false });
+    canvas.addEventListener("touchmove", _onDrawMove, { passive: false });
+    canvas.addEventListener("touchend", _onDrawEnd);
+    canvas.addEventListener("touchcancel", _onDrawEnd);
+  }
+
+  // -- Mask export (red → white/black) ------------------------------------
+
+  function _nabExportMask() {
+    if (!_nabInpaintCanvas || !_nabInpaintCtx) return null;
+    var w = _nabInpaintCanvas.width;
+    var h = _nabInpaintCanvas.height;
+    var srcData = _nabInpaintCtx.getImageData(0, 0, w, h);
+    var pixels = srcData.data;
+
+    // Create temp canvas for black/white mask
+    var tmp = document.createElement("canvas");
+    tmp.width = w;
+    tmp.height = h;
+    var tmpCtx = tmp.getContext("2d");
+    var outData = tmpCtx.createImageData(w, h);
+    var out = outData.data;
+
+    for (var i = 0; i < pixels.length; i += 4) {
+      var alpha = pixels[i + 3];
+      var val = alpha > 0 ? 255 : 0;  // any alpha → white (regenerate)
+      out[i] = val;
+      out[i + 1] = val;
+      out[i + 2] = val;
+      out[i + 3] = 255;
+    }
+
+    tmpCtx.putImageData(outData, 0, 0);
+    return tmp.toDataURL("image/png").replace(/^data:image\/[^;]+;base64,/, "");
+  }
+
+  // -- Collect for generation ---------------------------------------------
+
+  window.nabCollectInpaint = function() {
+    if (!_nabInpaintSrc || !_nabInpaintCanvas) return null;
+    var mask = _nabExportMask();
+    if (!mask) return null;
+    return {
+      image: _nabInpaintSrc,
+      mask: mask,
+      strength: parseFloat($("nabInpaintStrength").value) || 0.7,
+      noise: parseFloat($("nabInpaintNoise").value) || 0.0,
+    };
+  };
+
+  // -- Drag & drop --------------------------------------------------------
+
+  (function() {
+    var drop = $("nabInpaintDrop");
+    if (!drop) return;
+
+    drop.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      drop.classList.add("dragover");
+    });
+    drop.addEventListener("dragleave", function() {
+      drop.classList.remove("dragover");
+    });
+    drop.addEventListener("drop", function(e) {
+      e.preventDefault();
+      drop.classList.remove("dragover");
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files.length > 0) {
+        nabSetInpaintFile(files[0]);
+      }
+    });
+  })();
+</script>

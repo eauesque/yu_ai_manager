@@ -1,0 +1,65 @@
+[Unit]
+Description=yu AI Manager server
+After=network.target
+# A database older than this build exits 78 (EX_CONFIG) and restarting cannot
+# fix it, so RestartPreventExitStatus stops immediately. Every other failure
+# gets five tries in five minutes: a transient one (a migration holding the
+# write lock) recovers, a permanent one stops instead of looping forever.
+# StartLimit* belong in [Unit]; RestartPreventExitStatus belongs in [Service].
+# Put the pair in [Service] and systemd ignores them -- the default 10s window
+# stays, RestartSec=5 never reaches burst 5, and the loop is back.
+StartLimitIntervalSec=300
+StartLimitBurst=5
+# Wants=, never Requires=: if the migration unit fails or is skipped (no Python
+# tree on this machine), the server must still start and refuse with 78 on its
+# own. Requires= would replace that diagnostic with a dependency failure.
+Wants=yu-db-migrate.service
+After=yu-db-migrate.service
+
+[Service]
+# No dash, unlike deploy/yu-db-migrate.service: the migration unit is
+# meant to skip when it cannot run, but the server cannot serve without
+# the key, so a missing file failing the unit is the correct outcome.
+EnvironmentFile=%h/.config/yu/server.env
+# Both halves matter: `test "" != "REPLACE..."` is true, so the placeholder
+# check alone lets an empty or unset key through -- and the server then exits 1
+# ("no key was supplied") instead of the 78 this unit's Restart rules are built
+# around, burning StartLimitBurst and needing a manual reset-failed.
+ExecStartPre=/bin/sh -c 'test -n "$YU_DB_KEY" && test "$YU_DB_KEY" != "REPLACE_WITH_A_GENERATED_SECRET"'
+# No --db-key on argv: there it is readable by every user on the machine
+# through `ps`. Measured, because the first version of this comment also
+# claimed `systemctl show` exposes it and that is false -- `systemctl show`
+# prints only the EnvironmentFile *path*, and `systemctl show-environment`
+# does not carry unit environment at all. What the environment route does
+# expose is /proc/<pid>/environ, readable by the owner alone, i.e. the same
+# class as this file's own mode. So the argv removal is the whole of the fix,
+# and it is a real one: `ps` is world-readable, the other two are not.
+#
+# The binary already declares `env = "YU_DB_KEY"` on that argument
+# (crates/yu-server/src/main.rs), so EnvironmentFile above supplies it without
+# it ever reaching the command line. --db stays explicit: the path is not a
+# secret.
+#
+# Note the unbraced $YU_DB_KEY in ExecStartPre above: systemd expands ${FOO}
+# inside a word but passes $FOO through as a literal for the shell to expand
+# (measured -- the recorded argv holds `$YU_DB_KEY`, not its value). Writing
+# it braced would put the key back into argv, which is why the gate rejects
+# that form too.
+ExecStart=%h/.local/bin/yu-server --db ${YU_DB}
+Restart=on-failure
+RestartSec=5
+# 65 as well as 78, and for the same reason. 65 (EX_DATAERR) means the
+# database was written by a NEWER yu-server: no migration runs backwards, so
+# restarting cannot help any more than it can for 78. Without it `Restart=on-
+# failure` retried every 5s, burned StartLimitBurst, and left the unit in
+# `failed` needing `systemctl reset-failed` -- a worse state than the stop the
+# comment at the top of this file describes as the intent.
+#
+# Note what this does NOT do: 78 has an automatic repair path
+# (yu-db-migrate.service). 65 has none -- the remedy is a newer binary, which
+# nothing here can fetch. Stopping is correct; being told is a separate
+# problem.
+RestartPreventExitStatus=65 78
+
+[Install]
+WantedBy=default.target

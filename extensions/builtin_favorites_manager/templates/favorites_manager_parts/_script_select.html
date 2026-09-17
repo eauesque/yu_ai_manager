@@ -1,0 +1,264 @@
+<script nonce="{{ csp_nonce }}">
+/**
+ * Favorites Manager — Batch select + Explorer-style selection
+ * Depends on _script.html (window._fm namespace).
+ */
+(function() {
+  'use strict';
+
+  var _fm = window._fm;
+
+  // -------------------------------------------------------------------
+  // Batch select mode
+  // -------------------------------------------------------------------
+
+  window.fmSelectToggle = function() {
+    var active = _fm.toggleSelectMode();
+    var bar = document.getElementById('fmSelectBar');
+    var btn = document.getElementById('fmSelectModeBtn');
+    if (bar) bar.style.display = active ? 'flex' : 'none';
+    if (btn) {
+      btn.style.background = active ? 'var(--accent, #667eea)' : '';
+      btn.style.color = active ? '#fff' : '';
+    }
+    if (!active) fmDeselectAll();
+  };
+
+  window.fmSelectAll = function() {
+    document.querySelectorAll('.fm-select-cb').forEach(function(cb) { cb.checked = true; });
+    fmUpdateSelectCount();
+  };
+
+  window.fmDeselectAll = function() {
+    document.querySelectorAll('.fm-select-cb').forEach(function(cb) { cb.checked = false; });
+    fmUpdateSelectCount();
+  };
+
+  window.fmSelectChanged = function() { fmUpdateSelectCount(); };
+
+  function fmGetSelectedIds() {
+    var ids = [];
+    document.querySelectorAll('.fm-select-cb:checked').forEach(function(cb) {
+      ids.push(parseInt(cb.dataset.fileId, 10));
+    });
+    return ids;
+  }
+
+  function fmUpdateSelectCount() {
+    var el = document.getElementById('fmSelectCount');
+    if (el) el.textContent = fmGetSelectedIds().length + ' ' + (window.tr ? window.tr('favorites.selected_suffix', '件選択中') : '\u4ef6\u9078\u629e\u4e2d');
+  }
+
+  // -------------------------------------------------------------------
+  // Move dropdown
+  // -------------------------------------------------------------------
+
+  window.fmShowMoveDropdown = function(anchorBtn) {
+    var dd = document.getElementById('fmMoveDropdown');
+    if (dd.style.display !== 'none') { dd.style.display = 'none'; return; }
+    dd.innerHTML = '<div style="padding:6px 10px;font-size:11px;opacity:0.6;">' + (window.tr ? window.tr('favorites.loading', '読み込み中...') : '\u8aad\u307f\u8fbc\u307f\u4e2d...') + '</div>';
+    dd.style.display = 'block';
+
+    _fm.apiJson('/api/collections').then(function(data) {
+      var colls = (data.collections || []).filter(function(c) {
+        return c.id !== _fm.getCollectionId();
+      });
+      var html = '';
+      colls.forEach(function(c) {
+        html += '<button type="button" class="fm-dd-item" data-action="fmDoMove" data-action-arg="' + c.id + '">'
+          + escapeHtml(c.name) + ' <span style="opacity:0.5;">(' + c.count + ')</span></button>';
+      });
+      dd.innerHTML = html || '<div style="padding:8px 10px;font-size:12px;opacity:0.6;">' + (window.tr ? window.tr('favorites.no_other_collections', '他のコレクションがありません') : '\u4ed6\u306e\u30b3\u30ec\u30af\u30b7\u30e7\u30f3\u304c\u3042\u308a\u307e\u305b\u3093') + '</div>';
+    });
+
+    setTimeout(function() {
+      document.addEventListener('click', function handler(e) {
+        if (!dd.contains(e.target) && e.target !== anchorBtn) {
+          dd.style.display = 'none';
+          document.removeEventListener('click', handler);
+        }
+      });
+    }, 10);
+  };
+
+  window.fmDoMove = function(targetCollId) {
+    var ids = fmGetSelectedIds();
+    if (!ids.length) return;
+    document.getElementById('fmMoveDropdown').style.display = 'none';
+    // data-action-arg passes string; backend expects int collection_id.
+    targetCollId = parseInt(targetCollId, 10);
+    var cid = _fm.getCollectionId() || 1;
+
+    _fm.apiJson('/ext/favorites/api/batch-add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({file_ids: ids, collection_id: targetCollId})
+    }).then(function() {
+      if (_fm.getCollectionId() !== null) {
+        return _fm.apiJson('/ext/favorites/api/batch-remove', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({file_ids: ids, collection_id: cid})
+        });
+      }
+    }).then(function() {
+      showToast(window.tr ? window.tr('favorites.images_moved', ids.length + ' 件の画像を移動しました') : ids.length + ' \u4ef6\u306e\u753b\u50cf\u3092\u79fb\u52d5\u3057\u307e\u3057\u305f');
+      fmDeselectAll();
+      _fm.loadCollections();
+      _fm.loadImages();
+    });
+  };
+
+  // -------------------------------------------------------------------
+  // Batch remove
+  // -------------------------------------------------------------------
+
+  window.fmBatchRemove = function() {
+    var ids = fmGetSelectedIds();
+    if (!ids.length) return;
+    if (!confirm(window.tr ? window.tr('favorites.confirm_batch_remove', ids.length + ' 件の画像をこのコレクションから削除しますか？') : ids.length + ' \u4ef6\u306e\u753b\u50cf\u3092\u3053\u306e\u30b3\u30ec\u30af\u30b7\u30e7\u30f3\u304b\u3089\u524a\u9664\u3057\u307e\u3059\u304b\uff1f')) return;
+    var cid = _fm.getCollectionId() || 1;
+    _fm.apiJson('/ext/favorites/api/batch-remove', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({file_ids: ids, collection_id: cid})
+    }).then(function() {
+      showToast(window.tr ? window.tr('favorites.images_removed', ids.length + ' 件の画像を削除しました') : ids.length + ' \u4ef6\u306e\u753b\u50cf\u3092\u524a\u9664\u3057\u307e\u3057\u305f');
+      fmDeselectAll();
+      _fm.loadCollections();
+      _fm.loadImages();
+    });
+  };
+
+  // -------------------------------------------------------------------
+  // Explorer-style selection (Ctrl+Click, Shift+Click, rectangle drag)
+  // -------------------------------------------------------------------
+
+  var _lastClickedIndex = -1;
+
+  function fmEnsureSelectMode() {
+    if (_fm.isSelectMode()) return;
+    _fm.toggleSelectMode(); // now true
+    var bar = document.getElementById('fmSelectBar');
+    var btn = document.getElementById('fmSelectModeBtn');
+    if (bar) bar.style.display = 'flex';
+    if (btn) { btn.style.background = 'var(--accent, #667eea)'; btn.style.color = '#fff'; }
+  }
+
+  function fmGetAllCheckboxes() {
+    return Array.prototype.slice.call(document.querySelectorAll('.fm-select-cb'));
+  }
+
+  function fmCardIndexOf(card) {
+    var cards = Array.prototype.slice.call(document.querySelectorAll('.fm-card[data-id]'));
+    return cards.indexOf(card);
+  }
+
+  // Delegated click on grid: Ctrl+Click toggle, Shift+Click range, plain click showDetail
+  document.addEventListener('DOMContentLoaded', function() {
+    var grid = document.getElementById('fmGrid');
+    if (!grid) return;
+
+    grid.addEventListener('click', function(e) {
+      var card = e.target.closest('.fm-card[data-id]');
+      if (!card) return;
+      if (e.target.classList.contains('fm-select-cb') || e.target.classList.contains('fm-remove-btn')) return;
+
+      var fileId = parseInt(card.dataset.id, 10);
+      var idx = fmCardIndexOf(card);
+
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        fmEnsureSelectMode();
+        var cb = card.querySelector('.fm-select-cb');
+        if (cb) cb.checked = !cb.checked;
+        _lastClickedIndex = idx;
+        fmUpdateSelectCount();
+      } else if (e.shiftKey && _lastClickedIndex >= 0) {
+        e.preventDefault();
+        fmEnsureSelectMode();
+        var cbs = fmGetAllCheckboxes();
+        var from = Math.min(_lastClickedIndex, idx);
+        var to = Math.max(_lastClickedIndex, idx);
+        for (var i = from; i <= to; i++) {
+          if (cbs[i]) cbs[i].checked = true;
+        }
+        fmUpdateSelectCount();
+      } else if (!_fm.isSelectMode()) {
+        fmShowDetail(fileId);
+      } else {
+        var cb2 = card.querySelector('.fm-select-cb');
+        if (cb2) cb2.checked = !cb2.checked;
+        _lastClickedIndex = idx;
+        fmUpdateSelectCount();
+      }
+    });
+  });
+
+  // Expose for drag-and-drop in _script.html
+  window._fm.getSelectedIds = fmGetSelectedIds;
+
+  // Rectangle (rubber-band) selection on grid
+  document.addEventListener('DOMContentLoaded', function() {
+    var grid = document.getElementById('fmGrid');
+    if (!grid) return;
+
+    var _dragging = false;
+    var _startX = 0, _startY = 0;
+    var _band = null;
+
+    grid.addEventListener('mousedown', function(e) {
+      if (e.target !== grid && e.target.closest('.fm-card')) return;
+      if (e.button !== 0) return;
+      _dragging = true;
+      _startX = e.clientX;
+      _startY = e.clientY;
+      _band = document.createElement('div');
+      _band.className = 'fm-rubberband';
+      _band.style.left = _startX + 'px';
+      _band.style.top = _startY + 'px';
+      _band.style.width = '0';
+      _band.style.height = '0';
+      document.body.appendChild(_band);
+      e.preventDefault();
+    });
+
+    document.addEventListener('mousemove', function(e) {
+      if (!_dragging || !_band) return;
+      var x = Math.min(e.clientX, _startX);
+      var y = Math.min(e.clientY, _startY);
+      var w = Math.abs(e.clientX - _startX);
+      var h = Math.abs(e.clientY - _startY);
+      _band.style.left = x + 'px';
+      _band.style.top = y + 'px';
+      _band.style.width = w + 'px';
+      _band.style.height = h + 'px';
+    });
+
+    document.addEventListener('mouseup', function(e) {
+      if (!_dragging || !_band) return;
+      _dragging = false;
+      var bandRect = _band.getBoundingClientRect();
+      document.body.removeChild(_band);
+      _band = null;
+
+      if (bandRect.width < 5 && bandRect.height < 5) return;
+
+      fmEnsureSelectMode();
+      var cards = document.querySelectorAll('.fm-card[data-id]');
+      if (!e.ctrlKey && !e.metaKey) {
+        fmGetAllCheckboxes().forEach(function(cb) { cb.checked = false; });
+      }
+      cards.forEach(function(card) {
+        var r = card.getBoundingClientRect();
+        if (r.right > bandRect.left && r.left < bandRect.right &&
+            r.bottom > bandRect.top && r.top < bandRect.bottom) {
+          var cb = card.querySelector('.fm-select-cb');
+          if (cb) cb.checked = true;
+        }
+      });
+      fmUpdateSelectCount();
+    });
+  });
+})();
+</script>

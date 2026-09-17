@@ -1,0 +1,32 @@
+<!-- Groups Manager -->
+<details class="tool-item" id="tool-groups-manager">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.groups_manager">📁 Group Manager</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+  <p data-i18n="tools.groups_manager_desc">View folder groups and zip archives. Groups cluster files by parent folder or archive.</p>
+  <div id="groupsInfo"></div>
+  <div class="atelier-form-row">
+    <button type="button" class="tool-btn atelier-btn-ghost" data-action="toolsPageApi.loadGroups" data-i18n="tools.groups_load">Load Groups</button>
+    <button type="button" class="tool-btn atelier-btn-ghost" data-action="toolsPageApi.warmGroupsIndex" data-i18n="tools.groups_warm">Warm Cache</button>
+  </div>
+  <div id="groupsResult">
+    <div>
+      <div>
+        <div id="groupsFolderCount">-</div>
+        <div data-i18n="tools.groups_folder_groups">Folder Groups</div>
+      </div>
+      <div>
+        <div id="groupsZipCount">-</div>
+        <div data-i18n="tools.groups_zip_groups">ZIP Groups</div>
+      </div>
+    </div>
+    <div id="groupsListContainer">
+      <div id="groupsList"></div>
+    </div>
+  </div>
+  <div id="groupsError"></div>
+  </div>
+</details>

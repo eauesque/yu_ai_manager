@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="{{ html_lang | default('en') }}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ title_prefix | default('Error') }} {{ status_code }} - YU AI Manager</title>
+<style>
+  body{margin:0;padding:40px 20px;background:#111;color:#ccc;font-family:system-ui,-apple-system,sans-serif;display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+  .error-card{max-width:520px;width:100%;background:#1a1a2e;border:1px solid rgba(255,80,80,0.25);border-radius:12px;padding:32px;text-align:center;}
+  h1{color:#ff6b6b;font-size:48px;margin:0 0 8px;}
+  .msg{color:#aaa;font-size:14px;margin-bottom:24px;}
+  .qr-box{display:inline-block;background:#fff;padding:8px;border-radius:8px;margin:16px 0;}
+  .qr-label{font-size:11px;color:#666;margin-top:8px;}
+  .detail{font-size:11px;color:#555;margin-top:16px;word-break:break-all;text-align:left;background:rgba(0,0,0,0.3);padding:12px;border-radius:6px;max-height:120px;overflow:auto;}
+  .bundle-tools{margin-top:16px;display:flex;gap:10px;justify-content:center;flex-wrap:wrap;}
+  .bundle-status{font-size:11px;color:#888;margin-top:8px;min-height:16px;}
+  a{color:#667eea;text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .actions{margin-top:20px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
+  .actions a,.actions button{padding:8px 16px;border-radius:6px;font-size:13px;border:1px solid rgba(128,128,128,0.3);background:rgba(255,255,255,0.05);color:#ccc;cursor:pointer;text-decoration:none;}
+  .actions a:hover,.actions button:hover{background:rgba(255,255,255,0.1);}
+</style>
+</head>
+<body data-1p-ignore data-lpignore="true">
+<div class="error-card">
+  <h1>{{ status_code }}</h1>
+  <div class="msg">{{ message | e }}</div>
+  <div class="qr-box" id="errorQr"></div>
+  <div class="qr-label">QR: {{ qr_label | e }}</div>
+  {% if detail %}
+  <div class="detail"><strong>{{ detail_label | default('Detail') | e }}:</strong> {{ detail | e }}</div>
+  {% endif %}
+  {% if bundle_json %}
+  <div class="bundle-tools">
+    <button type="button" id="copyBundleBtn">{{ copy_bundle_label }}</button>
+    <button type="button" id="downloadBundleBtn">{{ download_bundle_label }} (.json.gz)</button>
+  </div>
+  <div class="bundle-status" id="bundleStatus"></div>
+  {% endif %}
+  <div class="actions">
+    <a href="/">{{ back_home }}</a>
+    <button data-action="historyBack">{{ back_prev }}</button>
+  </div>
+</div>
+<script nonce="{{ csp_nonce }}">
+window.historyBack = function() { history.back(); };
+var _qrData = {{ qr_data | tojson }};
+var _bundleJson = {{ bundle_json | tojson }};
+var _bundleDownloadB64 = {{ bundle_download_b64 | tojson }};
+var _bundleDownloadName = {{ bundle_download_name | tojson }};
+
+function _setBundleStatus(message) {
+  var el = document.getElementById('bundleStatus');
+  if (!el) return;
+  el.textContent = message || '';
+}
+
+function _renderErrorQr() {
+  var el = document.getElementById('errorQr');
+  if (!el) return;
+  var text = typeof _qrData === 'string' ? _qrData : JSON.stringify(_qrData);
+  /* Try QRCode library (Canvas/SVG) */
+  if (typeof QRCode !== 'undefined') {
+    try {
+      new QRCode(el, {
+        text: text,
+        width: 180,
+        height: 180,
+        colorDark: '#000000',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.L,
+      });
+      if (el.querySelector('canvas') || el.querySelector('svg') || el.querySelector('img')) return;
+    } catch(e) {
+      console.warn('QR Canvas/SVG failed:', e.message || e);
+      el.innerHTML = '';
+    }
+  }
+  /* Fallback: render as copyable text block */
+  el.style.background = 'rgba(30,30,50,0.8)';
+  el.style.padding = '12px';
+  el.style.borderRadius = '8px';
+  el.style.maxWidth = '320px';
+  el.style.textAlign = 'left';
+  el.innerHTML = '<div style="font-size:10px;color:var(--muted,#aab2c0);margin-bottom:4px;">Error Info (copy to share):</div>'
+    + '<code style="font-size:10px;color:#aaa;word-break:break-all;user-select:all;cursor:text;">'
+    + text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;') + '</code>';
+}
+
+/* Load vendor lib, then render */
+(function() {
+  var s = document.createElement('script');
+  s.src = '/static/vendor/qrcode.min.js';
+  s.onload = _renderErrorQr;
+  s.onerror = function() {
+    /* Vendor file not found -- render text fallback directly */
+    _renderErrorQr();
+  };
+  document.head.appendChild(s);
+})();
+
+function _base64ToBytes(input) {
+  var binary = atob(input);
+  var bytes = new Uint8Array(binary.length);
+  for (var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+  return bytes;
+}
+
+(function() {
+  var copyBtn = document.getElementById('copyBundleBtn');
+  if (copyBtn) {
+    copyBtn.addEventListener('click', async function() {
+      var text = _bundleJson || '';
+      // navigator.clipboard needs a secure context; fall back for plain HTTP LAN.
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        try {
+          await navigator.clipboard.writeText(text);
+          _setBundleStatus('Bundle JSON copied.');
+          return;
+        } catch (_e) { /* fall through */ }
+      }
+      try {
+        var ta = document.createElement('textarea');
+        ta.value = text;
+        ta.style.cssText = 'position:fixed;left:-9999px;top:0;opacity:0;';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        var ok = document.execCommand('copy');
+        document.body.removeChild(ta);
+        _setBundleStatus(ok ? 'Bundle JSON copied.' : 'Bundle JSON copy failed.');
+      } catch (e) {
+        _setBundleStatus('Bundle JSON copy failed.');
+      }
+    });
+  }
+  var downloadBtn = document.getElementById('downloadBundleBtn');
+  if (downloadBtn) {
+    downloadBtn.addEventListener('click', function() {
+      try {
+        var blob = new Blob([_base64ToBytes(_bundleDownloadB64 || '')], { type: 'application/gzip' });
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement('a');
+        a.href = url;
+        a.download = _bundleDownloadName || 'error-bundle.json.gz';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        setTimeout(function() { URL.revokeObjectURL(url); }, 1000);
+        _setBundleStatus('Bundle download started.');
+      } catch (e) {
+        _setBundleStatus('Bundle download failed.');
+      }
+    });
+  }
+})();
+</script>
+</body>
+</html>

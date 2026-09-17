@@ -1,0 +1,202 @@
+  // -- ControlNet image upload -----------------------------------
+
+  var _cfbControlnetImageName = "";
+
+  function _initControlnetUpload() {
+    var inp = $("cfbControlnetImage");
+    if (!inp) return;
+    inp.addEventListener("change", function() {
+      if (!inp.files || !inp.files[0]) return;
+      var fd = new FormData();
+      fd.append("image", inp.files[0]);
+      fetch(BASE + "/api/upload-controlnet-image", {
+        method: "POST", headers: _xhrHeaders(), body: fd,
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        if (d.ok) {
+          _cfbControlnetImageName = d.name || "";
+          var nm = $("cfbControlnetImageName");
+          if (nm) nm.textContent = _cfbControlnetImageName;
+        } else {
+          window.showToast(
+            window.tr('comfyui_bridge.upload_failed', 'Upload failed') + ": " + (d.error || "unknown"),
+            true);
+        }
+      }).catch(function(e) {
+        window.showToast(
+          window.tr('comfyui_bridge.upload_failed', 'Upload failed') + ": " + e.message,
+          true);
+      });
+    });
+  }
+
+  // -- Drag & drop workflow import -------------------------------
+
+  var _cfbImportedParams = null;
+
+  function _initDragDrop() {
+    var container = document.querySelector(".cfb-container");
+    if (!container) return;
+    var overlay = $("cfbDropOverlay");
+    var depth = 0;
+    function hasFiles(e) {
+      return e.dataTransfer && e.dataTransfer.types &&
+        Array.prototype.indexOf.call(e.dataTransfer.types, "Files") >= 0;
+    }
+    container.addEventListener("dragenter", function(e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      depth++;
+      if (overlay) overlay.style.display = "";
+    });
+    container.addEventListener("dragover", function(e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+    });
+    container.addEventListener("dragleave", function(e) {
+      if (!hasFiles(e)) return;
+      depth--;
+      if (depth <= 0) {
+        depth = 0;
+        if (overlay) overlay.style.display = "none";
+      }
+    });
+    container.addEventListener("drop", function(e) {
+      if (!hasFiles(e)) return;
+      e.preventDefault();
+      depth = 0;
+      if (overlay) overlay.style.display = "none";
+      var files = e.dataTransfer.files;
+      if (!files || !files.length) return;
+      var file = files[0];
+      var name = (file.name || "").toLowerCase();
+      if (name.endsWith(".json")) {
+        _cfbImportJsonFile(file);
+      } else if (/\.(png|webp|jpe?g)$/.test(name)) {
+        _cfbImportImageFile(file);
+      } else {
+        window.showToast(
+          window.tr('comfyui_bridge.unsupported_file', 'Unsupported file type'),
+          true);
+      }
+    });
+  }
+
+  function _cfbImportJsonFile(file) {
+    var reader = new FileReader();
+    reader.onload = function() {
+      var workflow;
+      try {
+        workflow = JSON.parse(reader.result);
+      } catch (e) {
+        window.showToast(
+          window.tr('comfyui_bridge.invalid_json', 'Invalid JSON') + ": " + e.message,
+          true);
+        return;
+      }
+      // Ask server to extract Simple mode params from the API-format workflow.
+      postJSON("/api/parse-workflow-params", workflow).then(function(d) {
+        _cfbSetImportedWorkflow(workflow, "api", d.simple_params || null);
+      }).catch(function() {
+        // If extraction fails, still load workflow (JSON mode only)
+        _cfbSetImportedWorkflow(workflow, "api", null);
+      });
+    };
+    reader.readAsText(file);
+  }
+
+  function _cfbImportImageFile(file) {
+    var fd = new FormData();
+    fd.append("image", file);
+    fetch(BASE + "/api/extract-workflow", {method: "POST", headers: _xhrHeaders(), body: fd})
+      .then(function(r) { return r.json(); }).then(function(d) {
+        if (!d.ok) {
+          window.showToast(
+            window.tr('comfyui_bridge.extract_failed', 'Extract failed') + ": " + (d.error || "unknown"),
+            true);
+          return;
+        }
+        _cfbSetImportedWorkflow(d.workflow, d.format, d.simple_params || null);
+      }).catch(function(e) {
+        window.showToast(
+          window.tr('comfyui_bridge.extract_failed', 'Extract failed') + ": " + e.message,
+          true);
+      });
+  }
+
+  function _cfbSetImportedWorkflow(workflow, format, simpleParams) {
+    var jsonArea = $("cfbWorkflowJson");
+    if (jsonArea) jsonArea.value = JSON.stringify(workflow, null, 2);
+    _cfbImportedParams = simpleParams;
+    var bar = $("cfbImportBar");
+    var text = $("cfbImportBarText");
+    var applyBtn = $("cfbImportApplyBtn");
+    if (bar) bar.style.display = "";
+    if (text) {
+      if (format === "api" && simpleParams) {
+        text.textContent = window.tr(
+          'comfyui_bridge.workflow_imported_api',
+          'Workflow imported - Simple mode parameters available');
+      } else if (format === "editor") {
+        text.textContent = window.tr(
+          'comfyui_bridge.workflow_imported_editor',
+          'Editor-format workflow imported to JSON tab (Simple not supported)');
+      } else {
+        text.textContent = window.tr(
+          'comfyui_bridge.workflow_imported',
+          'Workflow imported to JSON tab');
+      }
+    }
+    if (applyBtn) {
+      applyBtn.style.display = (format === "api" && simpleParams) ? "" : "none";
+    }
+  }
+
+  window.cfbApplyImportToSimple = function() {
+    var p = _cfbImportedParams;
+    if (!p) return;
+    if (p.prompt != null) {
+      if (typeof _cfbSetPrompt === "function") _cfbSetPrompt(p.prompt);
+      else $("cfbPrompt").value = p.prompt;
+    }
+    if (p.negative_prompt != null) {
+      if (typeof _cfbSetNegative === "function") _cfbSetNegative(p.negative_prompt);
+      else $("cfbNegative").value = p.negative_prompt;
+    }
+    // Use truthiness check (not just != null) so empty strings don't overwrite
+    // a previously selected value or block auto-detection.
+    if (p.ckpt_name) _setSelectValue("cfbModel", p.ckpt_name);
+    if (p.diffusion_model) _setSelectValue("cfbDiffusionModel", p.diffusion_model);
+    if (p.text_encoder_1) _setSelectValue("cfbTextEncoder1", p.text_encoder_1);
+    if (p.text_encoder_2) _setSelectValue("cfbTextEncoder2", p.text_encoder_2);
+    // Do NOT restore clip_type from stored params — it may be stale (e.g. "wan" before
+    // the qwen_image fix, or "stable_diffusion" from an older bridge version).
+    // Clear it so cfbUpdateSeparateLoadUI() can auto-detect from the text encoder filenames.
+    // If auto-detect produces no match (unknown encoder), the field stays empty and the
+    // user can set it manually — same UX as a fresh session.
+    var _clipTypeSel = $("cfbClipType");
+    if (_clipTypeSel) _clipTypeSel.value = "";
+    if (p.weight_dtype) _setSelectValue("cfbWeightDtype", p.weight_dtype);
+    if (p.vae_name) _setSelectValue("cfbVae", p.vae_name);
+    if (p.steps != null) $("cfbSteps").value = p.steps;
+    if (p.sampler_name != null) _setSelectValue("cfbSampler", p.sampler_name);
+    if (p.scheduler != null) _setSelectValue("cfbScheduler", p.scheduler);
+    if (p.cfg != null) $("cfbCfg").value = p.cfg;
+    if (p.width != null) $("cfbWidth").value = p.width;
+    if (p.height != null) $("cfbHeight").value = p.height;
+    if (p.seed != null) $("cfbSeed").value = p.seed;
+    if (p.a1111_mode != null && $("cfbA1111Mode")) $("cfbA1111Mode").checked = !!p.a1111_mode;
+    cfbUpdateSeparateLoadUI(); // calls _cfbAutoDetectClipType() when separate-load mode
+    // Apply-to-Simple values are authoritative - clear dirty so a later
+    // Checkpoint change can re-apply its preset.
+    if (typeof _cfbResetDirty === "function") _cfbResetDirty();
+    cfbSwitchTab("simple");
+    cfbDismissImportBar();
+    window.showToast(
+      window.tr('comfyui_bridge.applied_to_simple', 'Applied to Simple mode'));
+  };
+
+  window.cfbDismissImportBar = function() {
+    var bar = $("cfbImportBar");
+    if (bar) bar.style.display = "none";
+    _cfbImportedParams = null;
+  };

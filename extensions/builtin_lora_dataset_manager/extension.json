@@ -1,0 +1,81 @@
+{
+  "name": "builtin-lora-dataset-manager",
+  "version": "0.1.0",
+  "description": "LoRA Dataset Manager -- kohya_ss / sd-scripts dataset generation",
+  "type": "ui_widget",
+  "category": "bridge",
+  "entry": "lora_dataset_manager.py",
+  "hooks": ["on_db_migrate"],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/lora-dataset",
+  "nav": {
+    "label": "LoRA Dataset",
+    "icon": "\ud83c\udfa8"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 450
+  },
+  "config_schema": {
+    "kohya_path": {
+      "type": "str",
+      "default": "",
+      "label": "kohya_ss path (parent of train_network.py)"
+    },
+    "output_base_dir": {
+      "type": "str",
+      "default": "",
+      "label": "Dataset output base directory"
+    },
+    "checkpoint_dir": {
+      "type": "str",
+      "default": "",
+      "label": "Base model (checkpoint) directory"
+    },
+    "default_base_model": {
+      "type": "enum",
+      "default": "sdxl",
+      "options": ["sd15", "sdxl"],
+      "label": "Default base model type"
+    },
+    "kohya_python_path": {
+      "type": "str",
+      "default": "",
+      "label": "kohya_ss Python path (override, leave empty for auto-detect)"
+    },
+    "train_network_dim": {
+      "type": "int",
+      "default": 32,
+      "range": [1, 256],
+      "label": "Network Dim (LoRA rank)"
+    },
+    "train_network_alpha": {
+      "type": "int",
+      "default": 16,
+      "range": [1, 256],
+      "label": "Network Alpha"
+    },
+    "train_learning_rate": {
+      "type": "str",
+      "default": "1e-4",
+      "label": "Learning rate"
+    },
+    "train_max_epochs": {
+      "type": "int",
+      "default": 10,
+      "range": [1, 1000],
+      "label": "Max train epochs"
+    },
+    "train_save_every_n_epochs": {
+      "type": "int",
+      "default": 2,
+      "range": [1, 100],
+      "label": "Save every N epochs"
+    },
+    "train_extra_args": {
+      "type": "str",
+      "default": "",
+      "label": "Extra training arguments (space-separated, e.g. --optimizer_type=AdamW8bit)"
+    }
+  }
+}

@@ -1,0 +1,250 @@
+<div class="ldm-layout">
+  <!-- Sidebar: Project list -->
+  <aside class="ldm-sidebar">
+    <h3 data-i18n="lora.projects">Projects</h3>
+    <div id="ldmProjectList"></div>
+    <button class="ldm-new-btn" id="ldmNewBtn">
+      + <span data-i18n="lora.new_project">New Project</span>
+    </button>
+  </aside>
+
+  <!-- Main area -->
+  <div class="ldm-main" id="ldmMain">
+    <div class="ldm-empty" id="ldmEmpty">
+      <span data-i18n="lora.select_or_create">Select or create a project to begin</span>
+    </div>
+
+    <!-- Project detail (hidden until selected) -->
+    <div id="ldmDetail" style="display:none;">
+      <!-- Project header -->
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+        <h2 id="ldmProjectName" style="margin:0;font-size:18px;"></h2>
+        <span id="ldmProjectModel" style="font-size:11px;padding:2px 8px;border-radius:8px;background:rgba(102,126,234,0.15);color:var(--muted);"></span>
+        <button class="btn btn-small" style="margin-left:auto;font-size:11px;padding:4px 10px;" id="ldmDeleteBtn">
+          <span data-i18n="lora.delete">Delete</span>
+        </button>
+      </div>
+
+      <!-- Tabs -->
+      <div class="ldm-tabs" role="tablist" id="ldmTabBar">
+        <button class="ldm-tab active" role="tab" data-tab="ldmTabFiles" aria-selected="true" data-i18n="lora.tab_files">Images</button>
+        <button class="ldm-tab" role="tab" data-tab="ldmTabTags" aria-selected="false" data-i18n="lora.tab_tags">Tags</button>
+        <button class="ldm-tab" role="tab" data-tab="ldmTabExport" aria-selected="false" data-i18n="lora.tab_export">Export</button>
+        <button class="ldm-tab" role="tab" data-tab="ldmTabTrain" aria-selected="false" data-i18n="lora.tab_train">Train</button>
+        <button class="ldm-tab" role="tab" data-tab="ldmTabSettings" aria-selected="false" data-i18n="lora.tab_settings">Settings</button>
+      </div>
+
+      <!-- Tab: Images -->
+      <div class="ldm-tab-panel active" id="ldmTabFiles" role="tabpanel">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <input type="text" id="ldmSearchQuery" placeholder="Search query..." style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-input);color:var(--fg);font-size:13px;">
+          <button class="btn btn-secondary" style="padding:8px 14px;font-size:12px;" id="ldmSearchBtn">
+            <span data-i18n="lora.search">Search</span>
+          </button>
+        </div>
+        <div style="display:flex;gap:8px;margin-bottom:12px;">
+          <button class="btn btn-primary" style="padding:6px 12px;font-size:12px;" id="ldmAddSelectedBtn" data-i18n="lora.add_selected">Add Selected</button>
+          <span id="ldmFileCount" style="font-size:12px;color:var(--muted);align-self:center;"></span>
+        </div>
+        <div id="ldmSearchResults" style="font-size:12px;color:var(--muted);margin-bottom:12px;"></div>
+        <h4 style="font-size:13px;color:var(--muted);margin:12px 0 6px;" data-i18n="lora.selected_files">Selected Files</h4>
+        <div class="ldm-file-grid" id="ldmFileGrid"></div>
+      </div>
+
+      <!-- Tab: Tags -->
+      <div class="ldm-tab-panel" id="ldmTabTags" role="tabpanel">
+        <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px;">
+          <label for="ldmPresetSelect" style="font-size:12px;color:var(--muted);" data-i18n="lora.preset">Preset:</label>
+          <select id="ldmPresetSelect" style="padding:6px 10px;border:1px solid var(--border);border-radius:6px;background:var(--bg-input);color:var(--fg);font-size:12px;">
+            <option value="" data-i18n="lora.custom">Custom</option>
+          </select>
+          <button class="btn btn-secondary" style="padding:5px 10px;font-size:11px;" id="ldmSavePresetBtn" data-i18n="lora.save_preset">Save Preset</button>
+        </div>
+        <p style="font-size:12px;color:var(--muted);margin:0 0 8px;" data-i18n="lora.tag_click_hint">Click tags to toggle exclusion</p>
+        <div class="ldm-tag-list" id="ldmTagList"></div>
+        <h4 style="font-size:13px;color:var(--muted);margin:16px 0 6px;" data-i18n="lora.caption_preview">Caption Preview</h4>
+        <div class="ldm-caption-preview" id="ldmCaptionPreview" data-i18n="lora.no_preview">No preview available</div>
+      </div>
+
+      <!-- Tab: Export -->
+      <div class="ldm-tab-panel" id="ldmTabExport" role="tabpanel">
+        <div class="ldm-form-group">
+          <label for="ldmBaseModel" data-i18n="lora.base_model">Base Model</label>
+          <select id="ldmBaseModel">
+            <option value="sdxl">SDXL</option>
+            <option value="sd15">SD 1.5</option>
+          </select>
+        </div>
+        <div class="ldm-form-group">
+          <label for="ldmModelScope" data-i18n="lora.model_scope_label">Model scope</label>
+          <select id="ldmModelScope">
+            <option value="active" data-i18n="lora.model_scope_active">Active model only</option>
+            <option value="all" data-i18n="lora.model_scope_all">All models</option>
+          </select>
+          <p style="font-size:11px;color:var(--muted);margin:4px 0 0;" data-i18n="lora.model_scope_help">Captions are built from tags of the selected scope.</p>
+        </div>
+        <div class="ldm-form-group">
+          <label for="ldmRepeat" data-i18n="lora.repeat_count">Repeat Count</label>
+          <input type="number" id="ldmRepeat" min="1" max="999" value="10">
+        </div>
+        <div class="ldm-form-group">
+          <label for="ldmOutputDir" data-i18n="lora.output_dir">Output Directory</label>
+          <input type="text" id="ldmOutputDir" placeholder="/path/to/output">
+        </div>
+        <div style="margin-top:16px;">
+          <button class="btn btn-primary" style="padding:8px 20px;font-size:13px;" id="ldmExportBtn" data-i18n="lora.export">Export Dataset</button>
+        </div>
+        <div id="ldmExportStatus" style="margin-top:12px;font-size:12px;"></div>
+      </div>
+
+      <!-- Tab: Train -->
+      <div class="ldm-tab-panel" id="ldmTabTrain" role="tabpanel">
+        <div id="ldmTrainNotConfigured" style="display:none;">
+          <p style="color:var(--muted);font-size:13px;" data-i18n="lora.kohya_not_set">kohya_ss path is not configured. Set it in Extension settings.</p>
+        </div>
+        <div id="ldmTrainForm">
+          <!-- Status banner (shown when training is running) -->
+          <div id="ldmTrainStatus" style="display:none;padding:10px 14px;border-radius:6px;margin-bottom:12px;font-size:13px;background:rgba(102,126,234,0.12);border:1px solid rgba(102,126,234,0.3);">
+            <span id="ldmTrainStatusText"></span>
+          </div>
+
+          <div class="ldm-form-group">
+            <label for="ldmCheckpoint" data-i18n="lora.checkpoint">Checkpoint</label>
+            <select id="ldmCheckpoint">
+              <option value="" data-i18n="lora.select_checkpoint">Select checkpoint...</option>
+            </select>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+            <button class="btn btn-secondary" style="padding:8px 16px;font-size:12px;" id="ldmDryRunBtn" data-i18n="lora.preview_command">Preview Command</button>
+            <button class="btn btn-primary" style="padding:8px 16px;font-size:12px;" id="ldmStartTrainBtn" data-i18n="lora.start_training">Start Training</button>
+            <button class="btn btn-secondary" style="padding:8px 16px;font-size:12px;display:none;" id="ldmResumeTrainBtn" data-i18n="lora.resume_training">Resume Training</button>
+            <button class="btn btn-secondary" style="padding:8px 16px;font-size:12px;display:none;" id="ldmRefreshLogBtn" data-i18n="lora.refresh_log">Refresh Log</button>
+          </div>
+          <div id="ldmCommandPreview" style="display:none;margin-top:12px;">
+            <div class="ldm-caption-preview" id="ldmCommandText"></div>
+          </div>
+          <div id="ldmTrainLog" style="display:none;margin-top:12px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+              <span style="font-size:11px;color:var(--muted);" id="ldmLogInfo"></span>
+            </div>
+            <div class="ldm-log-output" id="ldmLogOutput"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab: Settings -->
+      <div class="ldm-tab-panel" id="ldmTabSettings" role="tabpanel">
+        <div class="ldm-settings-form">
+          <h3 data-i18n="lora.global_settings">Global Settings</h3>
+
+          <div class="ldm-field-group">
+            <label for="ldmCfgKohyaPath" data-i18n="lora.kohya_dir">kohya_ss directory</label>
+            <div class="ldm-input-row">
+              <input type="text" id="ldmCfgKohyaPath" class="ldm-input"
+                     placeholder="e.g. C:\kohya_ss">
+              <span class="ldm-field-hint" data-i18n="lora.kohya_dir_hint">Parent directory of train_network.py</span>
+            </div>
+          </div>
+
+          <div class="ldm-field-group">
+            <label for="ldmCfgOutputDir" data-i18n="lora.output_base_dir">Dataset output base directory</label>
+            <div class="ldm-input-row">
+              <input type="text" id="ldmCfgOutputDir" class="ldm-input"
+                     placeholder="e.g. C:\lora_datasets">
+              <span class="ldm-field-hint" data-i18n="lora.output_base_dir_hint">Export destination base directory</span>
+            </div>
+          </div>
+
+          <div class="ldm-field-group">
+            <label for="ldmCfgCheckpointDir" data-i18n="lora.checkpoint_dir">Checkpoint directory</label>
+            <div class="ldm-input-row">
+              <input type="text" id="ldmCfgCheckpointDir" class="ldm-input"
+                     placeholder="e.g. C:\models\Stable-diffusion">
+              <span class="ldm-field-hint" data-i18n="lora.checkpoint_dir_hint">Base model (.safetensors / .ckpt) folder</span>
+            </div>
+          </div>
+
+          <div class="ldm-field-group">
+            <label for="ldmCfgKohyaPython" data-i18n="lora.kohya_python">kohya_ss Python path (optional)</label>
+            <div class="ldm-input-row">
+              <input type="text" id="ldmCfgKohyaPython" class="ldm-input"
+                     placeholder="e.g. O:\webui\kohya_ss\venv\Scripts\python.exe">
+              <span class="ldm-field-hint" data-i18n="lora.kohya_python_hint">Leave empty for auto-detect from kohya_ss venv/</span>
+            </div>
+          </div>
+
+          <div class="ldm-field-group">
+            <label for="ldmCfgDefaultModel" data-i18n="lora.default_base_model">Default base model</label>
+            <select id="ldmCfgDefaultModel" class="ldm-select">
+              <option value="sdxl">SDXL</option>
+              <option value="sd15">SD 1.5</option>
+            </select>
+          </div>
+
+          <h3 style="margin:24px 0 12px;" data-i18n="lora.train_params">Training Parameters</h3>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="ldm-field-group">
+              <label for="ldmCfgNetDim" data-i18n="lora.network_dim">Network Dim (rank)</label>
+              <input type="number" id="ldmCfgNetDim" class="ldm-input" min="1" max="256" value="32">
+            </div>
+            <div class="ldm-field-group">
+              <label for="ldmCfgNetAlpha" data-i18n="lora.network_alpha">Network Alpha</label>
+              <input type="number" id="ldmCfgNetAlpha" class="ldm-input" min="1" max="256" value="16">
+            </div>
+            <div class="ldm-field-group">
+              <label for="ldmCfgLR" data-i18n="lora.learning_rate">Learning Rate</label>
+              <input type="text" id="ldmCfgLR" class="ldm-input" value="1e-4" placeholder="1e-4">
+            </div>
+            <div class="ldm-field-group">
+              <label for="ldmCfgMaxEpochs" data-i18n="lora.max_epochs">Max Epochs</label>
+              <input type="number" id="ldmCfgMaxEpochs" class="ldm-input" min="1" max="1000" value="10">
+            </div>
+            <div class="ldm-field-group">
+              <label for="ldmCfgSaveEvery" data-i18n="lora.save_every">Save Every N Epochs</label>
+              <input type="number" id="ldmCfgSaveEvery" class="ldm-input" min="1" max="100" value="2">
+            </div>
+          </div>
+
+          <div class="ldm-field-group">
+            <label for="ldmCfgExtraArgs" data-i18n="lora.extra_args">Extra Arguments</label>
+            <div class="ldm-input-row">
+              <input type="text" id="ldmCfgExtraArgs" class="ldm-input"
+                     placeholder="e.g. --optimizer_type=AdamW8bit --lr_scheduler=cosine">
+              <span class="ldm-field-hint" data-i18n="lora.extra_args_hint">Space-separated additional kohya_ss arguments</span>
+            </div>
+          </div>
+
+          <div class="ldm-settings-actions">
+            <button class="btn btn-primary" style="padding:8px 20px;font-size:13px;" id="ldmSaveSettingsBtn" data-i18n="lora.save">Save</button>
+            <span id="ldmSettingsSaveStatus" class="ldm-save-status"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- New Project Dialog -->
+<dialog id="ldmNewDialog" style="border-radius:8px;border:1px solid var(--border);background:var(--bg-card);color:var(--fg);padding:20px;max-width:400px;width:90%;">
+  <h3 style="margin:0 0 16px;" data-i18n="lora.new_project">New Project</h3>
+  <div class="ldm-form-group">
+    <label for="ldmNewName" data-i18n="lora.project_name">Project Name</label>
+    <input type="text" id="ldmNewName" placeholder="my_character_lora">
+  </div>
+  <div class="ldm-form-group">
+    <label for="ldmNewConcept" data-i18n="lora.concept_name">Concept (folder name)</label>
+    <input type="text" id="ldmNewConcept" placeholder="1girl white_hair">
+  </div>
+  <div class="ldm-form-group">
+    <label for="ldmNewBaseModel" data-i18n="lora.base_model">Base Model</label>
+    <select id="ldmNewBaseModel">
+      <option value="sdxl">SDXL</option>
+      <option value="sd15">SD 1.5</option>
+    </select>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px;">
+    <button class="btn btn-secondary" id="ldmNewCancelBtn" data-i18n="lora.cancel">Cancel</button>
+    <button class="btn btn-primary" id="ldmNewCreateBtn" data-i18n="lora.create">Create</button>
+  </div>
+</dialog>

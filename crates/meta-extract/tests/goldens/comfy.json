@@ -1,0 +1,9 @@
+{
+  "parser": "comfy",
+  "fixture": "fixtures/inspect_parity/comfyui_conform.png",
+  "python_format_raw": "comfy",
+  "positive": "masterpiece, best quality, 1girl",
+  "negative": "lowres, bad anatomy",
+  "raw_meta": "{\"1\":{\"class_type\":\"KSampler\",\"inputs\":{\"cfg\":7.0,\"negative\":[\"3\",0],\"positive\":[\"2\",0],\"sampler_name\":\"euler\",\"seed\":42,\"steps\":20}},\"2\":{\"class_type\":\"CLIPTextEncode\",\"inputs\":{\"text\":\"masterpiece, best quality, 1girl\"}},\"3\":{\"class_type\":\"CLIPTextEncode\",\"inputs\":{\"text\":\"lowres, bad anatomy\"}}}",
+  "format_rust": "comfy"
+}

@@ -1,0 +1,461 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Wildcard Manager JS — Core (i18n, state, tree, editor) ── */
+
+/* ── i18n ── */
+var _wmLang = (function() {
+  try { return (localStorage.getItem('lang') || '').trim().toLowerCase(); } catch(_e) { return ''; }
+})() || ((navigator.language || '').toLowerCase().startsWith('ja') ? 'ja' : 'en');
+
+var _wmI18n = {
+  en: {
+    title: 'Wildcard Manager',
+    btn_upload: '📂 Upload',
+    btn_dirs: '📁 Dirs',
+    btn_load_dirs: '⬇ Load from Dirs',
+    btn_back: '← Simulator',
+    filter_placeholder: 'Filter wildcards...',
+    wildcards_label: 'wildcards',
+    btn_clear_all: 'Clear All',
+    select_hint: 'Select a wildcard to edit',
+    btn_delete: 'Delete',
+    btn_save: 'Save',
+    btn_add_entry: '+ Add Entry',
+    dir_title: 'Wildcard Directories',
+    btn_dir_add: 'Add',
+    btn_dir_browse: '📂 Browse',
+    btn_dir_remove: 'Remove',
+    btn_close: 'Close',
+    browse_failed: 'Could not open folder picker. Enter path manually.',
+    dir_exists: 'OK',
+    dir_not_found: 'Not Found',
+    toast_saved: 'Saved',
+    toast_saved_to: 'Saved to {0}',
+    save_failed: 'Save failed',
+    save_no_dirs: 'No wildcard directory configured. Open Dirs to add one.',
+    delete_failed: 'Delete failed',
+    delete_not_found: 'File not found on disk: {0}',
+    rename_failed: 'Rename failed',
+    rename_not_found: 'File not found on disk: {0}',
+    confirm_rename_dirty: 'You have unsaved changes that will be discarded by rename. Continue?',
+    toast_deleted: 'Deleted: {0}',
+    toast_cleared: 'All wildcards cleared',
+    toast_loaded: 'Loaded {0} wildcards from directories',
+    toast_uploaded: '{0} loaded ({1} entries)',
+    toast_no_dirs: 'No directories configured. Open Dirs to add.',
+    entries: '{0} entries',
+    confirm_delete: 'Delete "{0}"?',
+    confirm_discard: 'You have unsaved changes. Discard and switch?',
+    confirm_clear: 'Clear all wildcards?',
+    btn_replace: '🔍 Replace',
+    btn_sort: '↕ Sort',
+    btn_sed: 'sed',
+    find_placeholder: 'Find...',
+    replace_placeholder: 'Replace...',
+    btn_replace_next: 'Replace',
+    btn_replace_all: 'Replace All',
+    replace_count: '{0} matches',
+    replace_done: 'Replaced {0} occurrences',
+    sort_done: 'Sorted {0} entries',
+    sort_reverse_done: 'Reverse-sorted {0} entries',
+    sort_tip: 'Shift: case-sensitive / Ctrl: reverse',
+    sed_placeholder: 's/old/new/g  /pat/d  y/ab/AB/',
+    sed_done: 'sed: {0} lines changed',
+    sed_error: 'sed error: {0}',
+    sed_no_match: 'sed: no matches',
+    sed_deleted: 'sed: {0} lines deleted',
+    sed_kept: 'sed: kept {0} lines',
+    sed_translit: 'sed: {0} lines transliterated',
+    sed_inserted: 'sed: {0} lines inserted',
+    btn_goto: 'Ln',
+    goto_label: 'Go to Line:',
+    line_col: 'Ln {0}, Col {1}',
+    btn_upload_label: 'Upload',
+    btn_dirs_label: 'Dirs',
+    btn_load_dirs_label: 'Load',
+    btn_back_label: 'Sim',
+    rename_prompt: 'Enter new name:',
+    rename_exists: 'A wildcard named "{0}" already exists.',
+    toast_renamed: 'Renamed: {0} → {1}',
+    btn_new: '+ New',
+    new_prompt: 'Enter wildcard name:',
+    new_exists: 'A wildcard named "{0}" already exists.',
+    toast_created: 'Created: {0}',
+    no_wildcards: 'No wildcards loaded',
+    no_matches: 'No matches',
+    no_dirs_configured: 'No directories configured',
+    sed_invalid_syntax: 'invalid syntax',
+    sed_y_mismatch: 'y: source/dest length mismatch',
+    sed_unknown_cmd: 'unknown command',
+    rename_tip: 'Click to rename',
+    btn_close_bar: 'Close',
+    fetch_error: 'Network error',
+    sed_ref_title: 'sed Reference',
+    sed_ref_syntax: 'Syntax',
+    sed_ref_desc: 'Description',
+    sed_ref_example: 'Example',
+    sed_ref_s: 'Replace — all lines',
+    sed_ref_addr_s: 'Replace — matching lines only',
+    sed_ref_d: 'Delete matching lines',
+    sed_ref_nd: 'Keep only matching lines (grep)',
+    sed_ref_y: 'Transliterate chars (like tr)',
+    sed_ref_a: 'Insert text after matching lines',
+    sed_ref_i: 'Insert text before matching lines',
+    sed_ref_flags_title: 'Flags (s command)',
+    sed_ref_flag_g: 'Replace all occurrences in each line',
+    sed_ref_flag_i: 'Case-insensitive matching',
+    sed_ref_regex_title: 'Regex (JavaScript RegExp)',
+    sed_ref_re_dot: 'Any character',
+    sed_ref_re_anchor: 'Start / end of line',
+    sed_ref_re_quant: 'Quantifiers (0+, 1+, 0-1)',
+    sed_ref_re_class: 'Digit, word char, whitespace',
+    sed_ref_re_set: 'Character set / negated set',
+    sed_ref_re_alt: 'Alternation & grouping',
+    sed_ref_re_boundary: 'Word boundary',
+    sed_ref_re_look: 'Lookahead / negative lookahead',
+    sed_ref_re_backref: 'Back-reference in replacement',
+    sed_ref_delim_title: 'Delimiter',
+    sed_ref_delim_body: 'The character after s or y is the delimiter. Use \\/ to include a literal delimiter.',
+  },
+  ja: {
+    title: 'ワイルドカードマネージャ',
+    btn_upload: '📂 アップロード',
+    btn_dirs: '📁 Dir設定',
+    btn_load_dirs: '⬇ Dirから読込',
+    btn_back: '← シミュレータ',
+    filter_placeholder: 'ワイルドカード検索...',
+    wildcards_label: '件',
+    btn_clear_all: '全削除',
+    select_hint: 'ワイルドカードを選択して編集',
+    btn_delete: '削除',
+    btn_save: '保存',
+    btn_add_entry: '+ エントリ追加',
+    dir_title: 'ワイルドカードディレクトリ',
+    btn_dir_add: '追加',
+    btn_dir_browse: '📂 参照',
+    btn_dir_remove: '削除',
+    btn_close: '閉じる',
+    browse_failed: 'フォルダ選択を開けませんでした。パスを直接入力してください。',
+    dir_exists: 'OK',
+    dir_not_found: '見つかりません',
+    toast_saved: '保存しました',
+    toast_saved_to: '保存しました: {0}',
+    save_failed: '保存に失敗しました',
+    save_no_dirs: 'ワイルドカードディレクトリが未設定です。Dir設定から追加してください。',
+    delete_failed: '削除に失敗しました',
+    delete_not_found: 'ディスク上にファイルが見つかりません: {0}',
+    rename_failed: 'リネームに失敗しました',
+    rename_not_found: 'ディスク上にファイルが見つかりません: {0}',
+    confirm_rename_dirty: '未保存の変更があります。リネームすると破棄されます。続行しますか？',
+    toast_deleted: '削除: {0}',
+    toast_cleared: '全ワイルドカードを削除しました',
+    toast_loaded: 'ディレクトリから{0}個のワイルドカードを読込',
+    toast_uploaded: '{0} を読込 ({1}件)',
+    toast_no_dirs: 'ディレクトリ未設定。Dir設定から追加してください。',
+    entries: '{0}件',
+    confirm_delete: '「{0}」を削除しますか？',
+    confirm_discard: '未保存の変更があります。破棄して切り替えますか？',
+    confirm_clear: '全ワイルドカードを削除しますか？',
+    btn_replace: '🔍 置換',
+    btn_sort: '↕ ソート',
+    btn_sed: 'sed',
+    find_placeholder: '検索...',
+    replace_placeholder: '置換...',
+    btn_replace_next: '置換',
+    btn_replace_all: '一括置換',
+    replace_count: '{0}件一致',
+    replace_done: '{0}件を置換しました',
+    sort_done: '{0}件をソートしました',
+    sort_reverse_done: '{0}件を逆順ソートしました',
+    sort_tip: 'Shift: 大文字小文字区別 / Ctrl: 逆順',
+    sed_placeholder: 's/old/new/g  /pat/d  y/ab/AB/',
+    sed_done: 'sed: {0}行を変更',
+    sed_error: 'sed エラー: {0}',
+    sed_no_match: 'sed: 一致なし',
+    sed_deleted: 'sed: {0}行を削除',
+    sed_kept: 'sed: {0}行を抽出',
+    sed_translit: 'sed: {0}行を変換',
+    sed_inserted: 'sed: {0}行を挿入',
+    btn_goto: 'Ln',
+    goto_label: '行移動:',
+    line_col: '{0}行 {1}列',
+    btn_upload_label: 'アップロード',
+    btn_dirs_label: 'Dir設定',
+    btn_load_dirs_label: '読込',
+    btn_back_label: 'Sim',
+    rename_prompt: '新しい名前を入力:',
+    rename_exists: '「{0}」は既に存在します。',
+    toast_renamed: 'リネーム: {0} → {1}',
+    btn_new: '+ 新規',
+    new_prompt: 'ワイルドカード名を入力:',
+    new_exists: '「{0}」は既に存在します。',
+    toast_created: '作成: {0}',
+    no_wildcards: 'ワイルドカード未読込',
+    no_matches: '一致なし',
+    no_dirs_configured: 'ディレクトリ未設定',
+    sed_invalid_syntax: '構文エラー',
+    sed_y_mismatch: 'y: 変換元/先の長さが不一致',
+    sed_unknown_cmd: '不明なコマンド',
+    rename_tip: 'クリックでリネーム',
+    btn_close_bar: '閉じる',
+    fetch_error: '通信エラー',
+    sed_ref_title: 'sed リファレンス',
+    sed_ref_syntax: '構文',
+    sed_ref_desc: '説明',
+    sed_ref_example: '例',
+    sed_ref_s: '置換 — 全行対象',
+    sed_ref_addr_s: '置換 — マッチ行のみ',
+    sed_ref_d: 'マッチ行を削除',
+    sed_ref_nd: 'マッチ行だけ残す（grep的）',
+    sed_ref_y: '文字単位変換（tr相当）',
+    sed_ref_a: 'マッチ行の後にテキスト挿入',
+    sed_ref_i: 'マッチ行の前にテキスト挿入',
+    sed_ref_flags_title: 'フラグ（sコマンド用）',
+    sed_ref_flag_g: '各行の全出現を置換',
+    sed_ref_flag_i: '大文字小文字を区別しない',
+    sed_ref_regex_title: '正規表現（JavaScript RegExp）',
+    sed_ref_re_dot: '任意の1文字',
+    sed_ref_re_anchor: '行頭 / 行末',
+    sed_ref_re_quant: '量指定子（0回以上, 1回以上, 0-1回）',
+    sed_ref_re_class: '数字, 単語文字, 空白',
+    sed_ref_re_set: '文字セット / 否定セット',
+    sed_ref_re_alt: '選択 & グループ化',
+    sed_ref_re_boundary: '単語境界',
+    sed_ref_re_look: '先読み / 否定先読み',
+    sed_ref_re_backref: '置換文字列での後方参照',
+    sed_ref_delim_title: '区切り文字',
+    sed_ref_delim_body: 's や y の直後の文字が区切り文字になります。区切り文字自体を含めるには \\/ を使います。',
+  }
+};
+
+function _wmt(key, fallback) {
+  var dict = _wmI18n[_wmLang] || _wmI18n.en;
+  return dict[key] || (_wmI18n.en[key]) || fallback || key;
+}
+
+/* Apply i18n to DOM */
+(function() {
+  document.querySelectorAll('[data-wm-i18n]').forEach(function(el) {
+    var text = _wmt(el.getAttribute('data-wm-i18n'));
+    if (text) el.textContent = text;
+  });
+  document.querySelectorAll('[data-wm-i18n-attr]').forEach(function(el) {
+    var parts = el.getAttribute('data-wm-i18n-attr').split(':');
+    if (parts.length === 2) {
+      var text = _wmt(parts[1]);
+      if (text) el.setAttribute(parts[0], text);
+    }
+  });
+  document.documentElement.setAttribute('lang', _wmLang);
+})();
+
+/* ── State ── */
+var _wmWildcards = {};
+var _wmSources = {};    /* {name: "txt"|"yaml"} — origin format per entry */
+var _wmSelectedWc = null;
+var _wmDirOpen = {};
+var _wmDirs = [];
+var _wmEditor = null;
+var _wmDirty = false;   /* true when editor has unsaved changes */
+
+function _wmIsYaml(name) { return _wmSources[name] === 'yaml'; }
+
+/* Update dirty indicator (asterisk) in editor header */
+function _wmUpdateDirtyIndicator() {
+  var el = document.getElementById('wmEditorName');
+  if (!el || !_wmSelectedWc) return;
+  var base = '__' + _wmSelectedWc + '__';
+  el.textContent = _wmDirty ? base + ' *' : base;
+}
+
+/* ── Utility ── */
+function _wmEscHtml(s) {
+  var d = document.createElement('div');
+  d.appendChild(document.createTextNode(s));
+  return d.innerHTML;
+}
+function _wmEscAttr(s) {
+  return s.replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* ── Editor init (PromptSyntaxWidget + Vim/Emacs) ── */
+(function initWmEditor() {
+  var container = document.getElementById('wmEditorContainer');
+  if (!container) return;
+  if (typeof PromptSyntaxWidget !== 'undefined') {
+    _wmEditor = PromptSyntaxWidget.createEditor(container, {
+      value: '',
+      placeholder: '',
+      rows: 20,
+      showSyntaxBar: false,
+      showErrors: false,
+    });
+  } else {
+    var ta = document.createElement('textarea');
+    ta.id = 'wmEditorTextarea';
+    ta.setAttribute('aria-label', 'Wildcard editor');
+    ta.style.cssText = 'width:100%;min-height:400px;padding:10px;border-radius:8px;border:1px solid rgba(128,128,128,0.2);background:rgba(30,30,50,0.8);color:var(--text,#e0e0e0);font-family:monospace;font-size:13px;resize:vertical;line-height:1.5;';
+    container.appendChild(ta);
+  }
+  /* Vim / Emacs keybindings — resolve keyboardPowerVimEdit lazily (module loads after inline) */
+  (function() {
+    var ta = _wmEditor ? _wmEditor.getTextarea() : document.getElementById('wmEditorTextarea');
+    if (!ta) return;
+    ta.addEventListener('keydown', function(e) {
+      var edit = window.keyboardPowerVimEdit;
+      if (!edit) return;
+      if (e.altKey && !e.ctrlKey && !e.shiftKey) edit.handleVimNavigation(e, ta);
+      if (e.ctrlKey && !e.altKey) edit.handleCtrlShortcuts(e, ta);
+    });
+  })();
+
+  /* ── Line number gutter ── */
+  (function initGutter() {
+    var editorWrap = _wmEditor
+      ? container.querySelector('.ps-editor-wrap') || container.querySelector('.ps-editor-container')
+      : container.querySelector('textarea');
+    if (!editorWrap) return;
+
+    var lined = document.createElement('div');
+    lined.className = 'wm-editor-lined';
+    var gutter = document.createElement('div');
+    gutter.className = 'wm-line-gutter';
+    gutter.id = 'wmLineGutter';
+
+    /* Wrap existing content in lined container */
+    var parent = editorWrap.parentNode;
+    parent.insertBefore(lined, editorWrap);
+    lined.appendChild(gutter);
+    lined.appendChild(editorWrap);
+
+    var ta = _wmEditor ? _wmEditor.getTextarea() : editorWrap;
+    window._wmGutter = gutter;
+
+    /* (C) Wrap-aware gutter: measure each line's visual height via a hidden
+     *     mirror div, then create one <div> per line number with matching
+     *     height so numbers stay aligned even when long lines wrap.        */
+    var _wmGutterCache = { count: 0, width: 0, len: 0 };
+    var _wmGutterRetried = false;
+
+    var _WM_GUTTER_FAST_THRESHOLD = 300; /* lines — above this use fast path */
+
+    window._wmUpdateGutter = function() {
+      var taWidth = ta.clientWidth;
+      if (taWidth === 0) {
+        /* Editor not visible yet — defer once to next frame */
+        if (!_wmGutterRetried) {
+          _wmGutterRetried = true;
+          requestAnimationFrame(window._wmUpdateGutter);
+        }
+        return;
+      }
+      _wmGutterRetried = false;
+
+      var text = ta.value || '';
+      var lines = text.split('\n');
+      var count = lines.length;
+      var textLen = text.length;
+      if (count === _wmGutterCache.count
+          && taWidth === _wmGutterCache.width
+          && textLen === _wmGutterCache.len) return;
+      _wmGutterCache.count = count;
+      _wmGutterCache.width = taWidth;
+      _wmGutterCache.len = textLen;
+
+      /* Fast path for large files: skip per-line mirror measurement,
+         use CSS line-height for uniform height. Much faster for 300+ lines. */
+      if (count > _WM_GUTTER_FAST_THRESHOLD) {
+        var gFrag = document.createDocumentFragment();
+        for (var i = 0; i < count; i++) {
+          var nd = document.createElement('div');
+          nd.textContent = i + 1;
+          gFrag.appendChild(nd);
+        }
+        gutter.innerHTML = '';
+        gutter.appendChild(gFrag);
+        return;
+      }
+
+      /* Create hidden mirror div once */
+      if (!window._wmGutterMirror) {
+        var m = document.createElement('div');
+        m.style.cssText = 'position:absolute;top:-9999px;left:-9999px;visibility:hidden;'
+          + 'white-space:pre-wrap;word-wrap:break-word;overflow-wrap:break-word;box-sizing:border-box;';
+        document.body.appendChild(m);
+        window._wmGutterMirror = m;
+      }
+
+      /* Sync mirror styles with textarea */
+      var mirror = window._wmGutterMirror;
+      var cs = getComputedStyle(ta);
+      mirror.style.fontFamily = cs.fontFamily;
+      mirror.style.fontSize = cs.fontSize;
+      mirror.style.lineHeight = cs.lineHeight;
+      mirror.style.width = taWidth + 'px';
+      mirror.style.paddingLeft = cs.paddingLeft;
+      mirror.style.paddingRight = cs.paddingRight;
+
+      /* Insert one <div> per line into mirror for height measurement */
+      mirror.innerHTML = '';
+      var mFrag = document.createDocumentFragment();
+      for (var i = 0; i < count; i++) {
+        var ld = document.createElement('div');
+        ld.textContent = lines[i] || '\u00a0';
+        mFrag.appendChild(ld);
+      }
+      mirror.appendChild(mFrag);
+
+      /* Read measured heights, build gutter divs */
+      var gFrag = document.createDocumentFragment();
+      var mc = mirror.children;
+      for (var i = 0; i < count; i++) {
+        var nd = document.createElement('div');
+        nd.textContent = i + 1;
+        nd.style.height = mc[i].offsetHeight + 'px';
+        gFrag.appendChild(nd);
+      }
+      gutter.innerHTML = '';
+      gutter.appendChild(gFrag);
+      mirror.innerHTML = '';
+    };
+
+    /* (E) Optimised with lastIndexOf chain — avoids substring + split allocations */
+    window._wmUpdateLineInfo = function() {
+      var el = document.getElementById('wmLineInfo');
+      if (!el) return;
+      var pos = ta.selectionStart || 0;
+      var val = ta.value;
+      var lastNl = val.lastIndexOf('\n', pos - 1);
+      var col = pos - lastNl; /* 1-based; works correctly when lastNl == -1 */
+      var line = 1, idx = lastNl;
+      while (idx !== -1) { idx = val.lastIndexOf('\n', idx - 1); line++; }
+      el.textContent = _wmt('line_col').replace('{0}', line).replace('{1}', col);
+    };
+
+    /* (D) Debounce timers — longer delay for large files */
+    var _wmGutterTimer = null, _wmLineInfoTimer = null;
+    function _wmScheduleGutter() {
+      clearTimeout(_wmGutterTimer);
+      var delay = (ta.value.length > 20000) ? 250 : 50;
+      _wmGutterTimer = setTimeout(_wmUpdateGutter, delay);
+    }
+    function _wmScheduleLineInfo() {
+      clearTimeout(_wmLineInfoTimer);
+      var delay = (ta.value.length > 20000) ? 250 : 50;
+      _wmLineInfoTimer = setTimeout(_wmUpdateLineInfo, delay);
+    }
+
+    ta.addEventListener('input', function() { _wmDirty = true; _wmUpdateDirtyIndicator(); _wmScheduleGutter(); _wmScheduleLineInfo(); });
+    ta.addEventListener('scroll', function() { gutter.scrollTop = ta.scrollTop; });
+    ta.addEventListener('click', _wmUpdateLineInfo);
+    ta.addEventListener('keyup', _wmScheduleLineInfo);
+
+    /* Re-measure gutter when textarea width changes (window resize etc.) */
+    if (typeof ResizeObserver !== 'undefined') {
+      new ResizeObserver(_wmScheduleGutter).observe(ta);
+    }
+
+    _wmUpdateGutter();
+    _wmUpdateLineInfo();
+  })();
+})();
+</script>

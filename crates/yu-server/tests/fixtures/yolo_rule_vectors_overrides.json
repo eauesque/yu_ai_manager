@@ -1,0 +1,15 @@
+{
+  "_comment": [
+    "Intentional differences from tests/fixtures/yolo_rule_vectors.json.",
+    "The fixture itself is frozen: never edit it. Record a deliberate change",
+    "here instead, one entry per expected value, and rules.rs applies it before",
+    "comparing. A disagreement with no entry here is an unintended regression.",
+    "Each entry needs: vector_id, expected, reason, design_doc.",
+    "reason and design_doc must be non-empty and design_doc must name a file",
+    "that exists -- an override nobody can trace is the silent rewrite this",
+    "mechanism exists to prevent. vector_id must name a value the fixture",
+    "actually has, so a stale entry fails instead of sitting there.",
+    "Procedure: docs/superpowers/specs/2026-08-14-hailo-yolo-stream-python-retirement-design.md (決定 3)"
+  ],
+  "overrides": []
+}

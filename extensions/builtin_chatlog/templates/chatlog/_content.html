@@ -1,0 +1,44 @@
+<div class="ctl-content">
+  <h1 class="ctl-page-title" data-i18n="chatlog.page_title"><span aria-hidden="true">💬</span> Chat Logs</h1>
+  <div class="ctl-content-header" id="ctlHeader" style="display:none">
+    <span class="ctl-content-title" id="ctlTitle"></span>
+    <div class="ctl-content-meta" id="ctlMeta"></div>
+    <div class="ctl-header-actions">
+      <button class="ctl-btn ctl-btn-ai" id="ctlAiBtn" title="AI分析 (要約・トピック・決定事項)" data-i18n-title="chatlog.ai_analysis_title" data-i18n="chatlog.ai_analysis">🤖 AI分析</button>
+      <button class="ctl-btn-delete" id="ctlDeleteBtn" title="会話を削除" data-i18n-title="chatlog.delete_conversation_title" aria-label="会話を削除" data-i18n-aria-label="chatlog.delete_conversation_aria">🗑</button>
+    </div>
+  </div>
+
+  <!-- AI Analysis Panel -->
+  <div class="ctl-ai-panel" id="ctlAiPanel" style="display:none">
+    <div class="ctl-ai-panel-header">
+      <span class="ctl-ai-panel-title" data-i18n="chatlog.ai_analysis_result">🤖 AI分析結果</span>
+      <button class="ctl-ai-panel-close" id="ctlAiPanelClose" title="閉じる" data-i18n-title="chatlog.close">&times;</button>
+    </div>
+    <div id="ctlAiLoading" class="ctl-ai-loading" style="display:none" data-i18n="chatlog.analyzing">分析中...</div>
+    <div id="ctlAiContent">
+      <div class="ctl-ai-section" id="ctlAiSummary" style="display:none">
+        <div class="ctl-ai-section-label" data-i18n="chatlog.ai_summary">📝 要約</div>
+        <div class="ctl-ai-section-body" id="ctlAiSummaryBody"></div>
+      </div>
+      <div class="ctl-ai-section" id="ctlAiTopics" style="display:none">
+        <div class="ctl-ai-section-label" data-i18n="chatlog.ai_topics">🏷️ トピック</div>
+        <div class="ctl-ai-section-body" id="ctlAiTopicsBody"></div>
+      </div>
+      <div class="ctl-ai-section" id="ctlAiDecisions" style="display:none">
+        <div class="ctl-ai-section-label" data-i18n="chatlog.ai_decisions">✅ 決定事項</div>
+        <div class="ctl-ai-section-body" id="ctlAiDecisionsBody"></div>
+      </div>
+      <div class="ctl-ai-section" id="ctlAiEntities" style="display:none">
+        <div class="ctl-ai-section-label" data-i18n="chatlog.ai_entities">🔗 エンティティ</div>
+        <div class="ctl-ai-section-body" id="ctlAiEntitiesBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="ctl-messages" id="ctlMessages">
+    <div class="ctl-placeholder" data-i18n="chatlog.select_conversation_placeholder">
+      左の一覧から会話を選択してください
+    </div>
+  </div>
+</div>

@@ -1,0 +1,373 @@
+.result-card {
+  position: relative;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease;
+  /* Entry animation: stagger only the first 20 cards, show the rest immediately
+     (limits GPU compositor layer count) */
+  animation: vt-card-enter 0.25s ease backwards;
+  animation-delay: calc(min(var(--i, 0), 20) * 25ms);
+  /* Repaint isolation: confine hover/transform effects to individual cards */
+  contain: layout style paint;
+}
+
+@keyframes vt-card-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* Reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .result-card { animation: none; transition: none; }
+}
+
+/* Dock-style hover zoom (CSS fallback when JS not active) */
+.result-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+  z-index: 2;
+}
+
+/* When JS fish-eye dock zoom is active, disable CSS :hover scale
+   (JS manages transform directly for smooth Gaussian falloff) */
+body.dock-zoom-js .result-card:hover {
+  transform: none;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  z-index: auto;
+}
+body.dock-zoom-js .result-card {
+  transition: transform 0.12s ease-out, box-shadow 0.2s ease;
+}
+
+/* Fallback: subtle lift when dock zoom is disabled */
+body.no-dock-zoom .result-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  z-index: auto;
+}
+
+.result-image {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  object-fit: contain;
+  background: var(--skeleton-bg, #e8e8e8);
+  cursor: pointer;
+  display: block;
+}
+
+/* Skeleton shimmer: displayed before img finishes loading */
+.result-image:not([data-loaded]) {
+  background:
+    linear-gradient(
+      90deg,
+      var(--skeleton-bg, #e8e8e8) 0%,
+      var(--skeleton-shine, #f5f5f5) 40%,
+      var(--skeleton-bg, #e8e8e8) 80%
+    );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes skeleton-shimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .result-image:not([data-loaded]) { animation: none; }
+}
+
+/* Stop shimmer after loading completes */
+.result-image[data-loaded] {
+  animation: none;
+  background: var(--skeleton-bg, #e8e8e8);
+}
+
+body.dark .result-image {
+  --skeleton-bg: #1a1a1a;
+  --skeleton-shine: #2a2a2a;
+}
+
+/* Also apply to stack thumbnails inside container cards */
+.stack-thumb:not([data-loaded]) {
+  background:
+    linear-gradient(
+      90deg,
+      var(--skeleton-bg, #e8e8e8) 0%,
+      var(--skeleton-shine, #f5f5f5) 40%,
+      var(--skeleton-bg, #e8e8e8) 80%
+    );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+}
+
+body.dark .stack-thumb:not([data-loaded]) {
+  --skeleton-bg: #1a1a1a;
+  --skeleton-shine: #2a2a2a;
+}
+
+.result-info { padding: 15px; }
+
+.result-meta {
+  font-size: 12px;
+  color: var(--muted, #aab2c0);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Meta source badges */
+.meta-badge {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 5px;
+  border-radius: 3px;
+  line-height: 1.4;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.meta-nai  { background: rgba(139, 92, 246, 0.18); color: #6d28d9; }
+.meta-sd   { background: rgba(59, 130, 246, 0.18); color: #1e40af; }
+.meta-comfy { background: rgba(234, 179, 8, 0.18); color: #92400e; }
+.meta-other { background: rgba(128, 128, 128, 0.15); color: var(--muted, #aab2c0); }
+body.dark .meta-nai  { color: #a78bfa; }
+body.dark .meta-sd   { color: #60a5fa; }
+body.dark .meta-comfy { color: #facc15; }
+
+.result-prompt {
+  font-size: 13px;
+  line-height: 1.5;
+  margin-bottom: 10px;
+  min-height: 24px;
+}
+
+.result-prompt.collapsed {
+  max-height: 60px;
+  overflow: hidden;
+  position: relative;
+}
+
+.result-prompt.collapsed::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 20px;
+  background: linear-gradient(transparent, white);
+}
+
+body.dark .result-prompt.collapsed::after {
+  background: linear-gradient(transparent, var(--card));
+}
+
+.result-prompt.prompt-toggle{
+  cursor: pointer;
+  position: relative;
+  padding-right: 26px;
+  user-select: none;
+}
+
+.result-prompt.prompt-toggle:hover{
+  background: rgba(59,130,246,0.06);
+  border-radius: 6px;
+}
+
+.result-prompt .prompt-chev{
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* ── Favorites selection mode ── */
+
+.fav-select-cb-wrap {
+  display: none;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  z-index: 3;
+  cursor: pointer;
+}
+
+body.fav-select-mode .fav-select-cb-wrap {
+  display: block;
+}
+
+.fav-select-cb {
+  display: none;
+}
+
+.fav-select-check {
+  display: inline-block;
+  width: 22px;
+  height: 22px;
+  border: 2px solid rgba(255,255,255,0.7);
+  border-radius: 4px;
+  background: rgba(0,0,0,0.4);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.fav-select-cb:checked + .fav-select-check {
+  background: var(--accent, #667eea);
+  border-color: var(--accent, #667eea);
+}
+
+.fav-select-cb:checked + .fav-select-check::after {
+  content: '\2713';
+  display: block;
+  color: #fff;
+  font-size: 14px;
+  text-align: center;
+  line-height: 22px;
+}
+
+/* Selection action bar */
+.fav-select-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.fav-select-action {
+  padding: 4px 12px;
+  border: 1px solid rgba(128,128,128,0.3);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text, #e7eaf0);
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+  transition: background 0.15s;
+}
+
+.fav-select-action:hover {
+  background: var(--btn-hover);
+}
+
+.fav-select-action.primary {
+  background: var(--accent, #667eea);
+  color: #fff;
+  border-color: var(--accent, #667eea);
+}
+
+.fav-select-action.primary:hover {
+  opacity: 0.9;
+}
+
+.fav-select-action.danger {
+  color: #ff6b6b;
+  border-color: rgba(255,107,107,0.3);
+}
+
+.fav-select-action.danger:hover {
+  background: rgba(255,107,107,0.1);
+}
+
+/* Collection dropdown */
+.fav-coll-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 100;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  min-width: 180px;
+  max-height: 240px;
+  overflow-y: auto;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  padding: 4px 0;
+}
+
+.fav-coll-dd-item {
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  border: none;
+  background: none;
+  color: var(--text, #e7eaf0);
+  text-align: left;
+  cursor: pointer;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.fav-coll-dd-item:hover {
+  background: var(--btn-hover);
+}
+
+/* --- Card favorite button (hover) --- */
+.card-fav-btn {
+  display: none;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  z-index: 3;
+  border: none;
+  background: rgba(0,0,0,0.5);
+  color: #ffd700;
+  font-size: 18px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  cursor: pointer;
+  line-height: 30px;
+  text-align: center;
+  padding: 0;
+  transition: background 0.15s, transform 0.15s;
+}
+
+.result-card:hover .card-fav-btn,
+.card-fav-btn.active {
+  display: block;
+}
+
+.card-fav-btn:hover {
+  background: rgba(0,0,0,0.7);
+  transform: scale(1.15);
+}
+
+body.fav-select-mode .card-fav-btn {
+  display: none !important;
+}
+
+/* ── PDF badge ── */
+.card-pdf-badge {
+  position: absolute;
+  bottom: 50%;
+  left: 6px;
+  z-index: 2;
+  background: rgba(180, 60, 40, 0.85);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 2px 6px;
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+/* ── Rubber-band (rectangle drag) selection ── */
+.fav-rubberband {
+  position: fixed;
+  border: 1px solid var(--accent, #667eea);
+  background: rgba(102, 126, 234, 0.15);
+  pointer-events: none;
+  z-index: 50;
+}

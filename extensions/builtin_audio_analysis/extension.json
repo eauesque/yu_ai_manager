@@ -1,0 +1,34 @@
+{
+  "name": "builtin-audio-analysis",
+  "version": "1.0.0",
+  "description": "Audio transcription and analysis (Whisper local / OpenAI Whisper API)",
+  "type": "general",
+  "category": "ai",
+  "entry": "audio_analysis_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/",
+  "config": {
+    "enabled": true,
+    "priority": 160
+  },
+  "config_schema": {
+    "engine": {
+      "type": "select",
+      "label": "Transcription Engine",
+      "options": ["whisper_local", "whisper_api"],
+      "default": "whisper_local"
+    },
+    "whisper_model": {
+      "type": "select",
+      "label": "Whisper Model (local)",
+      "options": ["tiny", "base", "small", "medium", "large-v3"],
+      "default": "base"
+    },
+    "whisper_language": {
+      "type": "text",
+      "label": "Language (blank=auto)",
+      "default": ""
+    }
+  }
+}

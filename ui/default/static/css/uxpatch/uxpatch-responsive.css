@@ -1,0 +1,124 @@
+/* Responsive hardening (low-res / mobile) */
+@media (max-width: 720px) {
+  .container {
+    padding: 12px;
+  }
+
+  header {
+    padding: 14px;
+  }
+
+  .search-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 10px;
+  }
+
+  .search-row .form-group {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+
+  #resultsCount {
+    display: block;
+    padding: 6px 0 !important;
+    white-space: normal !important;
+  }
+
+  #conditionMenu {
+    padding: 10px;
+  }
+
+  #activeConditions {
+    max-width: 100%;
+  }
+
+  .modal-content {
+    max-width: 96vw !important;
+    width: 96vw !important;
+    max-height: 88vh !important;
+  }
+
+  /* Touch-friendly: increase input/button sizes */
+  input[type="text"],
+  input[type="date"],
+  select {
+    padding: 10px 12px;
+    font-size: 16px; /* prevents iOS zoom on focus */
+    min-height: 44px;
+  }
+
+  button {
+    min-height: 44px;
+  }
+
+  /* Fixed widths → flexible */
+  .form-group {
+    min-width: 0 !important;
+  }
+
+  .results-header {
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+
+  .result-info {
+    padding: 10px;
+  }
+
+  .results-grid {
+    gap: 12px;
+  }
+
+  .search-path-tip {
+    flex-direction: column;
+  }
+
+  .condition-field {
+    flex-wrap: wrap;
+  }
+
+  /* Stack the grid controller ABOVE the collections FAB (.cs-mobile-fab,
+     left:16px/bottom:16px, 48px, z-index 900) which appears at <=720px.
+     Same bottom-left corner would otherwise hide the controller. */
+  .fgc {
+    left: 16px;
+    bottom: 72px; /* clears the 48px FAB (top edge at 64px) + 8px gap */
+  }
+
+  /* Keep the stack intact while a toast pushes the controller upward */
+  body:has(#toast-container .toast.show) .fgc {
+    bottom: 122px;
+  }
+
+  h1 {
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .results-grid {
+    gap: 8px;
+  }
+
+  .result-info {
+    padding: 8px;
+  }
+
+  .results-group-controls .rg-btn {
+    padding: 4px 8px;
+    font-size: 12px;
+  }
+
+  #exportCsvBtn {
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+
+}
+
+@media (max-width: 420px) {
+  .container {
+    padding: 8px;
+  }
+}

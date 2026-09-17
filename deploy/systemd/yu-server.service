@@ -1,0 +1,43 @@
+[Unit]
+Description=yu-server (image manager)
+After=network.target
+# See deploy/yu-server.service for why these live in [Unit] and
+# RestartPreventExitStatus lives in [Service]: StartLimit* are systemd.unit(5)
+# directives, and in [Service] they are silently ignored.
+StartLimitIntervalSec=300
+StartLimitBurst=5
+# The same wiring deploy/yu-server.service carries, and it has to be here too:
+# `make deploy` (Makefile) substitutes __WORKDIR__ in *this* file and writes it
+# to ~/.config/systemd/user/yu-server.service -- the same destination name
+# scripts/migrate_launch_args.py installs the other file to. Whichever runs
+# last wins, so without this line one `make deploy` silently removed the
+# migration ordering added in v4.731.0 and the deployment went back to
+# stopping at 78 forever.
+#
+# Wants=, never Requires=, for the reason spelled out in
+# deploy/yu-server.service. Naming a unit that is not installed is harmless
+# (measured: the unit starts and runs normally), so this is safe on a machine
+# that never installed the oneshot.
+Wants=yu-db-migrate.service
+After=yu-db-migrate.service
+
+[Service]
+ExecStart=%h/.local/bin/yu-server --lan
+WorkingDirectory=__WORKDIR__
+Restart=on-failure
+RestartSec=5
+# 65 as well as 78, and for the same reason. 65 (EX_DATAERR) means the
+# database was written by a NEWER yu-server: no migration runs backwards, so
+# restarting cannot help any more than it can for 78. Without it `Restart=on-
+# failure` retried every 5s, burned StartLimitBurst, and left the unit in
+# `failed` needing `systemctl reset-failed` -- a worse state than the stop the
+# comment at the top of this file describes as the intent.
+#
+# Note what this does NOT do: 78 has an automatic repair path
+# (yu-db-migrate.service). 65 has none -- the remedy is a newer binary, which
+# nothing here can fetch. Stopping is correct; being told is a separate
+# problem.
+RestartPreventExitStatus=65 78
+
+[Install]
+WantedBy=default.target

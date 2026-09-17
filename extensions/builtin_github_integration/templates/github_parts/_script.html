@@ -1,0 +1,460 @@
+<script nonce="{{ csp_nonce }}">
+/* GitHub Integration — main script (dashboard, tabs, shared utilities) */
+
+var ghubAccounts = [];
+var ghubCurrentLabel = '';
+
+/* ── Shared utilities ─────────────────────────────────────── */
+
+async function ghubFetch(url, opts) {
+  var res = await fetch(url, opts || {});
+  var json = await res.json();
+  if (!res.ok) throw new Error(json.error || json.message || ('HTTP ' + res.status));
+  return json.data || json;
+}
+
+function ghubEl(id) { return document.getElementById(id); }
+
+function ghubTimeAgo(iso) {
+  if (!iso) return '';
+  var d = new Date(iso);
+  var diff = (Date.now() - d.getTime()) / 1000;
+  if (diff < 60) return _t('just_now');
+  if (diff < 3600) return Math.floor(diff / 60) + _t('time_m');
+  if (diff < 86400) return Math.floor(diff / 3600) + _t('time_h');
+  if (diff < 2592000) return Math.floor(diff / 86400) + _t('time_d');
+  return d.toLocaleDateString();
+}
+
+function ghubEsc(s) {
+  var d = document.createElement('div');
+  d.textContent = s || '';
+  return d.innerHTML;
+}
+
+function ghubLabelsHtml(labels) {
+  return (labels || []).map(function(l) {
+    return '<span class="ghub-label">' + ghubEsc(l) + '</span>';
+  }).join(' ');
+}
+
+function ghubStateClass(state, merged, draft) {
+  if (merged) return 'ghub-state-merged';
+  if (draft) return 'ghub-state-draft';
+  if (state === 'open') return 'ghub-state-open';
+  if (state === 'closed') return 'ghub-state-closed';
+  return '';
+}
+
+function ghubStateIcon(state, merged, draft) {
+  if (merged) return '&#x1F7E3;';
+  if (draft) return '&#x26AA;';
+  if (state === 'open') return '&#x1F7E2;';
+  return '&#x1F534;';
+}
+
+function ghubShowToast(msg) {
+  // Delegate to nav.js shared toast (proper reflow + transition)
+  if (window.showToast) { window.showToast(msg); return; }
+  // Fallback if nav.js not yet loaded
+  var c = document.getElementById('toast-container');
+  if (!c) return;
+  var t = document.createElement('div');
+  t.className = 'toast';
+  t.textContent = msg;
+  c.appendChild(t);
+  void t.offsetWidth;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.replace('show', 'hide'); }, 2500);
+  setTimeout(function() { t.remove(); }, 2800);
+}
+
+/* ── Tab switching ────────────────────────────────────────── */
+
+function ghubSwitchTab(name) {
+  document.querySelectorAll('.ghub-tab').forEach(function(t) {
+    var active = t.getAttribute('data-tab') === name;
+    t.classList.toggle('active', active);
+    t.setAttribute('aria-selected', active ? 'true' : 'false');
+  });
+  document.querySelectorAll('.ghub-panel').forEach(function(p) {
+    p.classList.toggle('active', p.getAttribute('data-tab') === name);
+  });
+}
+
+/* ── Account management ───────────────────────────────────── */
+
+async function ghubLoadAccounts() {
+  try {
+    var data = await ghubFetch('/api/github/accounts');
+    ghubAccounts = Array.isArray(data) ? data : (data.data || []);
+    var sel = ghubEl('ghubAccountSelect');
+    sel.innerHTML = '<option value="">' + _t('select_account') + '</option>';
+    ghubAccounts.forEach(function(a) {
+      var opt = document.createElement('option');
+      opt.value = a.label;
+      opt.textContent = a.label + (a.enabled ? '' : ' ' + _t('disabled'));
+      sel.appendChild(opt);
+    });
+    if (ghubAccounts.length === 1) {
+      sel.value = ghubAccounts[0].label;
+      ghubSelectAccount(ghubAccounts[0].label);
+    }
+  } catch (e) {
+    console.error('Failed to load accounts:', e);
+  }
+}
+
+function ghubSelectAccount(label) {
+  ghubCurrentLabel = label;
+  if (!label) return;
+  // Populate repo dropdowns
+  var acc = ghubAccounts.find(function(a) { return a.label === label; });
+  var repos = acc ? acc.repos : [];
+  ['ghubIssueRepo', 'ghubPRRepo', 'ghubDiscRepo', 'ghubRelRepo', 'ghubNewIssueRepo'].forEach(function(id) {
+    var s = ghubEl(id);
+    if (!s) return;
+    var hasAll = id !== 'ghubNewIssueRepo';
+    s.innerHTML = hasAll ? '<option value="">' + _t('all_repos') + '</option>' : '';
+    repos.forEach(function(r) {
+      var o = document.createElement('option');
+      o.value = r; o.textContent = r;
+      s.appendChild(o);
+    });
+  });
+  ghubLoadDashboard();
+  ghubAutoLoadActiveTab();
+}
+
+ghubEl('ghubAccountSelect').addEventListener('change', function() {
+  ghubSelectAccount(this.value);
+});
+
+/* Auto-load active tab data when account changes */
+function ghubAutoLoadActiveTab() {
+  if (!ghubCurrentLabel) return;
+  var active = document.querySelector('.ghub-tab.active');
+  var tab = active ? active.getAttribute('data-tab') : 'dashboard';
+  if (tab === 'dashboard') return; /* already loaded by ghubSelectAccount */
+  ghubRefresh();
+}
+
+/* ── Tab scroll fade hint ─────────────────────────────────── */
+(function() {
+  var tabs = document.querySelector('.ghub-tabs');
+  if (!tabs) return;
+  function updateFade() {
+    var sl = tabs.scrollLeft, sw = tabs.scrollWidth, cw = tabs.clientWidth;
+    if (sw <= cw) { tabs.classList.remove('ghub-scrolled-end', 'ghub-scrolled-mid'); return; }
+    var atStart = sl < 4, atEnd = sl + cw >= sw - 4;
+    tabs.classList.toggle('ghub-scrolled-end', atEnd && !atStart);
+    tabs.classList.toggle('ghub-scrolled-mid', !atStart && !atEnd);
+  }
+  tabs.addEventListener('scroll', updateFade, { passive: true });
+  window.addEventListener('resize', updateFade);
+  updateFade();
+})();
+
+/* ── Dashboard ────────────────────────────────────────────── */
+
+async function ghubLoadDashboard() {
+  if (!ghubCurrentLabel) return;
+  ghubLoadNotifications();
+  ghubLoadRepoStats();
+  ghubLoadDashboardCounts();
+}
+
+async function ghubLoadDashboardCounts() {
+  try {
+    var issues = await ghubFetch('/api/github/issues/' + encodeURIComponent(ghubCurrentLabel) + '?state=open');
+    ghubEl('ghubStatIssues').textContent = (issues.data || issues).issues ? (issues.data || issues).issues.length : 0;
+  } catch (_) { ghubEl('ghubStatIssues').textContent = '?'; }
+
+  try {
+    var pulls = await ghubFetch('/api/github/pulls/' + encodeURIComponent(ghubCurrentLabel) + '?state=open');
+    ghubEl('ghubStatPRs').textContent = (pulls.data || pulls).pulls ? (pulls.data || pulls).pulls.length : 0;
+  } catch (_) { ghubEl('ghubStatPRs').textContent = '?'; }
+}
+
+async function ghubLoadNotifications() {
+  var list = ghubEl('ghubNotifList');
+  list.innerHTML = '<div class="ghub-loading">' + _t('loading_notifications') + '</div>';
+  try {
+    var data = await ghubFetch('/api/github/notifications/' + encodeURIComponent(ghubCurrentLabel));
+    var notifs = (data.data || data).notifications || [];
+    ghubEl('ghubStatNotifs').textContent = notifs.filter(function(n) { return n.unread; }).length;
+
+    var badge = ghubEl('ghubNotifBadge');
+    var unread = notifs.filter(function(n) { return n.unread; }).length;
+    if (unread > 0) {
+      badge.textContent = unread;
+      badge.style.display = 'inline-block';
+    } else {
+      badge.style.display = 'none';
+    }
+
+    if (!notifs.length) {
+      list.innerHTML = '<div class="ghub-empty">' + _t('no_notifications') + '</div>';
+      return;
+    }
+
+    var html = '';
+    if (unread > 0) {
+      html += '<div style="margin-bottom:10px"><button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubMarkAllRead">' + _t('mark_all_read') + '</button></div>';
+    }
+    notifs.forEach(function(n) {
+      var typeIcon = n.subject_type === 'PullRequest' ? '&#x1F500;' :
+                     n.subject_type === 'Issue' ? '&#x1F4CB;' :
+                     n.subject_type === 'Discussion' ? '&#x1F4AC;' :
+                     n.subject_type === 'Release' ? '&#x1F3F7;' : '&#x1F514;';
+      html += '<div class="ghub-card ghub-notif">';
+      html += '<div class="ghub-notif-dot ' + (n.unread ? '' : 'read') + '"></div>';
+      html += '<div class="ghub-notif-content">';
+      html += '<div class="ghub-card-title">' + typeIcon + ' ' + ghubEsc(n.subject_title) + '</div>';
+      html += '<div class="ghub-card-meta">';
+      html += '<span class="ghub-notif-type">' + ghubEsc(n.subject_type) + '</span>';
+      html += '<span>' + ghubEsc(n.repo_full_name) + '</span>';
+      html += '<span>' + ghubEsc(n.reason) + '</span>';
+      html += '<span>' + ghubTimeAgo(n.updated_at) + '</span>';
+      if (n.unread) {
+        html += '<button class="ghub-btn ghub-btn-secondary ghub-btn-small" data-action="ghubMarkRead" data-action-arg="' + ghubEsc(n.id) + '">' + _t('mark_read') + '</button>';
+      }
+      html += '</div></div></div>';
+    });
+    list.innerHTML = html;
+  } catch (e) {
+    list.innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+
+async function ghubMarkRead(threadId) {
+  try {
+    await ghubFetch('/api/github/notifications/' + encodeURIComponent(ghubCurrentLabel) + '/' + threadId, { method: 'PATCH' });
+    ghubLoadNotifications();
+  } catch (e) { ghubShowToast('Error: ' + e.message); }
+}
+
+async function ghubMarkAllRead() {
+  try {
+    await ghubFetch('/api/github/notifications/' + encodeURIComponent(ghubCurrentLabel) + '/mark-all-read', { method: 'POST' });
+    ghubShowToast(_t('all_marked_read'));
+    ghubLoadNotifications();
+  } catch (e) { ghubShowToast('Error: ' + e.message); }
+}
+
+async function ghubLoadRepoStats() {
+  var list = ghubEl('ghubRepoList');
+  list.innerHTML = '<div class="ghub-loading">' + _t('loading_repos') + '</div>';
+  try {
+    var data = await ghubFetch('/api/github/repo-stats-all/' + encodeURIComponent(ghubCurrentLabel));
+    var repos = (data.data || data).repos || [];
+    var totalStars = 0;
+    repos.forEach(function(r) { totalStars += r.stars || 0; });
+    ghubEl('ghubStatStars').textContent = totalStars;
+
+    if (!repos.length) {
+      list.innerHTML = '<div class="ghub-empty">' + _t('no_repos') + '</div>';
+      return;
+    }
+    var html = '<div class="ghub-stats-grid">';
+    repos.forEach(function(r) {
+      html += '<div class="ghub-stat-card" style="text-align:left">';
+      html += '<div style="font-weight:600;margin-bottom:6px">';
+      html += '<a href="' + ghubEsc(r.html_url) + '" target="_blank" rel="noopener" style="color:var(--accent)">' + ghubEsc(r.full_name) + '</a>';
+      html += '</div>';
+      html += '<div class="ghub-card-meta">';
+      html += '<span>&#x2B50; ' + r.stars + '</span>';
+      html += '<span>&#x1F374; ' + r.forks + '</span>';
+      html += '<span>&#x1F4CB; ' + r.open_issues + '</span>';
+      if (r.language) html += '<span>' + ghubEsc(r.language) + '</span>';
+      html += '</div>';
+      if (r.description) html += '<div style="font-size:0.82rem;color:var(--text-muted);margin-top:6px">' + ghubEsc(r.description) + '</div>';
+      html += '</div>';
+    });
+    html += '</div>';
+    list.innerHTML = html;
+  } catch (e) {
+    list.innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+
+/* ── Discussions ──────────────────────────────────────────── */
+
+async function ghubLoadDiscussions() {
+  if (!ghubCurrentLabel) { ghubShowToast(_t('select_first')); return; }
+  var list = ghubEl('ghubDiscList');
+  list.innerHTML = '<div class="ghub-loading">' + _t('loading_discussions') + '</div>';
+  var repo = ghubEl('ghubDiscRepo').value;
+  var url = '/api/github/discussions/' + encodeURIComponent(ghubCurrentLabel);
+  if (repo) url += '?repo=' + encodeURIComponent(repo);
+  try {
+    var data = await ghubFetch(url);
+    var discs = (data.data || data).discussions || [];
+    if (!discs.length) { list.innerHTML = '<div class="ghub-empty">' + _t('no_discussions') + '</div>'; return; }
+
+    var html = '';
+    discs.forEach(function(d) {
+      html += '<div class="ghub-card">';
+      html += '<div class="ghub-card-title">';
+      html += (d.category_emoji || '&#x1F4AC;') + ' ';
+      html += '<a href="' + ghubEsc(d.url) + '" target="_blank" rel="noopener">' + ghubEsc(d.title) + '</a>';
+      if (d.answered) html += ' <span class="ghub-label ghub-priority-low">' + _t('answered') + '</span>';
+      html += '</div>';
+      html += '<div class="ghub-card-meta">';
+      html += '<span>' + ghubEsc(d.repo || '') + '</span>';
+      if (d.category) html += '<span class="ghub-label">' + ghubEsc(d.category) + '</span>';
+      html += '<span>' + _t('by') + ghubEsc(d.author) + '</span>';
+      html += '<span>&#x1F4AC; ' + d.comments_count + '</span>';
+      html += '<span>' + ghubTimeAgo(d.created_at) + '</span>';
+      html += ' ' + ghubLabelsHtml(d.labels);
+      html += '</div>';
+      if (d.body) {
+        html += '<div class="ghub-card-body">' + ghubEsc(d.body.substring(0, 300)) + '</div>';
+      }
+      html += '</div>';
+    });
+    list.innerHTML = html;
+  } catch (e) {
+    list.innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+
+/* ── Releases ─────────────────────────────────────────────── */
+
+async function ghubLoadReleases() {
+  if (!ghubCurrentLabel) { ghubShowToast(_t('select_first')); return; }
+  var list = ghubEl('ghubRelList');
+  list.innerHTML = '<div class="ghub-loading">' + _t('loading_releases') + '</div>';
+  var repo = ghubEl('ghubRelRepo').value;
+  var url = '/api/github/releases/' + encodeURIComponent(ghubCurrentLabel);
+  if (repo) url += '?repo=' + encodeURIComponent(repo);
+  try {
+    var data = await ghubFetch(url);
+    var rels = (data.data || data).releases || [];
+    if (!rels.length) { list.innerHTML = '<div class="ghub-empty">' + _t('no_releases') + '</div>'; return; }
+
+    var html = '';
+    rels.forEach(function(r) {
+      html += '<div class="ghub-card">';
+      html += '<div class="ghub-card-title">';
+      html += '<span class="ghub-release-tag">' + ghubEsc(r.tag_name) + '</span> ';
+      html += '<a href="' + ghubEsc(r.html_url) + '" target="_blank" rel="noopener">' + ghubEsc(r.name || r.tag_name) + '</a>';
+      if (r.prerelease) html += ' <span class="ghub-label">' + _t('prerelease') + '</span>';
+      if (r.draft) html += ' <span class="ghub-label">' + _t('draft') + '</span>';
+      html += '</div>';
+      html += '<div class="ghub-card-meta">';
+      html += '<span>' + ghubEsc(r.repo || '') + '</span>';
+      html += '<span>' + _t('by') + ghubEsc(r.author) + '</span>';
+      html += '<span>' + ghubTimeAgo(r.published_at) + '</span>';
+      html += '</div>';
+      if (r.body) {
+        html += '<div class="ghub-card-body">' + ghubEsc(r.body.substring(0, 500)) + '</div>';
+      }
+      html += '</div>';
+    });
+    list.innerHTML = html;
+  } catch (e) {
+    list.innerHTML = '<div class="ghub-empty">' + _t('failed') + ghubEsc(e.message) + '</div>';
+  }
+}
+
+/* ── Detail overlay ───────────────────────────────────────── */
+
+function ghubShowDetail(html) {
+  ghubEl('ghubDetailContent').innerHTML = html;
+  var overlay = ghubEl('ghubDetailOverlay');
+  overlay.classList.add('active');
+  /* Move focus into the panel for a11y */
+  var closeBtn = overlay.querySelector('.ghub-detail-close');
+  if (closeBtn) setTimeout(function() { closeBtn.focus(); }, 50);
+}
+
+function ghubCloseDetail(ev) {
+  if (ev && ev.target && ev.target !== ghubEl('ghubDetailOverlay')) return;
+  ghubEl('ghubDetailOverlay').classList.remove('active');
+  /* Return focus to the element that opened the overlay */
+  var active = document.querySelector('.ghub-tab.active');
+  if (active) active.focus();
+}
+
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape') ghubCloseDetail();
+});
+
+/* ── Refresh ──────────────────────────────────────────────── */
+
+function ghubRefresh() {
+  if (!ghubCurrentLabel) { ghubShowToast(_t('select_first')); return; }
+  var active = document.querySelector('.ghub-tab.active');
+  var tab = active ? active.getAttribute('data-tab') : 'dashboard';
+  if (tab === 'dashboard') ghubLoadDashboard();
+  else if (tab === 'issues') ghubLoadIssues();
+  else if (tab === 'pulls') ghubLoadPulls();
+  else if (tab === 'discussions') ghubLoadDiscussions();
+  else if (tab === 'releases') ghubLoadReleases();
+  else if (tab === 'settings') ghubLoadSettings();
+}
+
+/* ── Tab keyboard navigation (ARIA tabs pattern) ─────────── */
+(function() {
+  var tablist = document.querySelector('.ghub-tabs');
+  if (!tablist) return;
+  /* Ensure all tab buttons have tabindex for Safari focus compatibility */
+  var allTabs = tablist.querySelectorAll('.ghub-tab');
+  allTabs.forEach(function(t, i) {
+    t.setAttribute('tabindex', i === 0 ? '0' : '-1');
+  });
+  tablist.addEventListener('keydown', function(e) {
+    var tabs = Array.from(tablist.querySelectorAll('.ghub-tab'));
+    var idx = tabs.indexOf(document.activeElement);
+    if (idx < 0) return;
+    var next = -1;
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      next = (idx + 1) % tabs.length;
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      next = (idx - 1 + tabs.length) % tabs.length;
+    } else if (e.key === 'Home') {
+      next = 0;
+    } else if (e.key === 'End') {
+      next = tabs.length - 1;
+    }
+    if (next >= 0) {
+      e.preventDefault();
+      /* Update roving tabindex */
+      tabs.forEach(function(t) { t.setAttribute('tabindex', '-1'); });
+      tabs[next].setAttribute('tabindex', '0');
+      tabs[next].focus();
+      tabs[next].click();
+    }
+  });
+})();
+
+/* ── Focus trap for detail overlay ───────────────────────── */
+(function() {
+  var overlay = document.getElementById('ghubDetailOverlay');
+  if (!overlay) return;
+  overlay.addEventListener('keydown', function(e) {
+    if (e.key !== 'Tab') return;
+    var focusable = overlay.querySelectorAll(
+      'a[href], button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (!focusable.length) return;
+    var first = focusable[0];
+    var last = focusable[focusable.length - 1];
+    if (e.shiftKey) {
+      if (document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      }
+    } else {
+      if (document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    }
+  });
+})();
+
+/* ── Init ─────────────────────────────────────────────────── */
+ghubLoadAccounts();
+</script>

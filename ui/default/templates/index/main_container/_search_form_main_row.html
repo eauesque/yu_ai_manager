@@ -1,0 +1,40 @@
+    <div class="search-panel">
+      <form id="searchForm">
+        <!-- Main search bar + toggle integration -->
+        <div class="search-row" style="align-items:center;gap:8px;">
+          <div class="form-group" style="flex:3;margin-bottom:0;">
+            <div class="input-with-clear">
+              <input type="text" id="tagQuery" placeholder="e.g. 1girl, blonde_hair, -nsfw" aria-label="Tag search" data-i18n-aria-label="search.main_input_label" data-i18n-placeholder="search.main_input_placeholder" />
+              <button type="button" class="clear-btn" data-action="runtimeInitApi.clearInput" data-action-arg="tagQuery" data-i18n-title="search.clear_title" title="クリア">×</button>
+            </div>
+          </div>
+
+          <!-- Live search toggle -->
+          <label class="regex-pill live-search-pill" id="liveSearchPill" data-i18n-title="search.live.title" title="リアルタイム検索">
+            <input type="checkbox" name="live-search" data-action="searchResultsApi.toggleLiveSearch" data-action-event="change" aria-label="Live search" />
+            <span class="regex-pill-label">⚡<span class="pill-text" data-i18n="search.live.label">Live</span></span>
+          </label>
+
+          <!-- Regex toggle -->
+          <label class="regex-pill" id="regexPill" data-i18n-title="search.regex_title" title="正規表現を有効にする">
+            <input type="checkbox" id="regexToggle" data-action="searchResultsApi.onRegexToggleChange" data-action-event="change" aria-label="Regex search" />
+            <span class="regex-pill-label">.*<span class="pill-text" data-i18n="search.regex_label">Regex</span></span>
+          </label>
+
+          <!-- Semantic search toggle -->
+          <label class="regex-pill" id="semanticPill" data-i18n-title="semantic_search.toggle_title" title="Semantic Search (CLIP)" style="display:none;">
+            <input type="checkbox" id="semanticToggle" data-action="searchResultsApi.onSemanticToggleChange" data-action-event="change" aria-label="Semantic search" />
+            <span class="regex-pill-label">&#x1f9e0;<span class="pill-text" data-i18n="semantic_search.toggle_label">AI</span></span>
+          </label>
+
+          <!-- ? Help -->
+          <button type="button" data-action="dockApi.toggleRegexCheatDock" data-i18n-title="search.help_title" data-i18n-aria-label="search.help_aria" title="正規表現ヘルプ / ショートカット (Ctrl+/)" style="background:none;border:1px solid rgba(128,128,128,0.3);border-radius:50%;width:36px;height:36px;cursor:pointer;font-size:13px;color:var(--muted,#aab2c0);padding:0;line-height:36px;flex-shrink:0;" aria-label="ヘルプ">?</button>
+
+          <!-- Search button -->
+          <button type="submit" id="searchBtn" style="white-space:nowrap;flex-shrink:0;" data-i18n-aria-label="search.submit_aria" aria-label="検索">🔎 <span data-i18n="search.submit_label">検索</span></button>
+        </div>
+
+        <div id="shortcutHintInline" class="shortcut-hint-inline">
+          <span class="shortcut-hint-text">⌨ <span data-i18n="search.shortcut_hint_short">Esc | / | ? | Ctrl+/</span></span>
+          <button type="button" data-action="keyboardApi.showKeyboardHelp" class="shortcut-hint-btn" data-i18n-title="search.shortcut_btn" title="ショートカット一覧">📖 <span data-i18n="search.shortcut_btn">ショートカット一覧</span></button>
+        </div>

@@ -1,0 +1,100 @@
+/* ── Modal Filmstrip / Thumbnail Ticker ── */
+
+.modal-filmstrip {
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  z-index: 4;
+  background: rgba(0,0,0,0.55);
+  border-top: 1px solid rgba(255,255,255,0.1);
+  padding: 6px 0;
+  display: flex;
+  align-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+.modal.immersive .modal-filmstrip {
+  z-index: 14;
+}
+.modal-filmstrip.filmstrip-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.modal-filmstrip-scroll {
+  flex: 1;
+  overflow-x: auto;
+  overflow-y: hidden;
+  white-space: nowrap;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.25) transparent;
+  -webkit-overflow-scrolling: touch;
+}
+.modal-filmstrip-scroll::-webkit-scrollbar { height: 4px; }
+.modal-filmstrip-scroll::-webkit-scrollbar-track { background: transparent; }
+.modal-filmstrip-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.25); border-radius: 2px; }
+
+.modal-filmstrip-thumb {
+  display: inline-block;
+  width: 56px; height: 56px;
+  border-radius: 4px;
+  border: 2px solid transparent;
+  margin-right: 4px;
+  padding: 0;
+  cursor: pointer;
+  overflow: hidden;
+  vertical-align: middle;
+  background: rgba(255,255,255,0.05);
+  transition: border-color 0.15s;
+}
+.modal-filmstrip-thumb:last-child { margin-right: 0; }
+
+.modal-filmstrip-thumb img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  display: block;
+  pointer-events: none;
+}
+
+.modal-filmstrip-thumb.active {
+  border-color: #7cc4ff;
+  box-shadow: 0 0 0 1px rgba(124,196,255,0.4);
+}
+
+.modal-filmstrip-thumb:hover:not(.active) {
+  border-color: rgba(255,255,255,0.4);
+}
+
+.modal-filmstrip-nav {
+  flex-shrink: 0;
+  width: 28px; height: 56px; z-index: 5;
+  display: flex; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.85); color: #ccc; border: none;
+  cursor: pointer; font-size: 16px; padding: 0;
+}
+.modal-filmstrip-nav:hover { background: rgba(0,0,0,0.95); color: #fff; }
+.modal-filmstrip-nav:disabled { opacity: 0.3; cursor: default; }
+.modal-filmstrip-nav--prev { border-radius: 0 4px 4px 0; }
+.modal-filmstrip-nav--next { border-radius: 4px 0 0 4px; }
+
+.modal-filmstrip-pos {
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  color: #d9e6ff;
+  opacity: 0.9;
+  padding-right: 8px;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+/* Narrow viewport: shrink filmstrip buttons + images together (Fix M) */
+@media (max-width: 480px) {
+  .modal-filmstrip-thumb {
+    width: 44px;
+    height: 44px;
+  }
+  .modal-filmstrip-nav {
+    height: 44px;
+  }
+}

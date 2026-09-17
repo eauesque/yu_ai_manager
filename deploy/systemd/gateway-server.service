@@ -1,0 +1,12 @@
+[Unit]
+Description=yu gateway-server
+After=network.target
+
+[Service]
+ExecStart=%h/.local/bin/gateway-server
+WorkingDirectory=__WORKDIR__
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

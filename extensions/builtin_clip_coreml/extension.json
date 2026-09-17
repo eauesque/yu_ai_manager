@@ -1,0 +1,15 @@
+{
+  "name": "builtin-clip-coreml",
+  "version": "1.0.0",
+  "description": "CLIP Core ML encoder backend for semantic search (Apple Neural Engine)",
+  "type": "general",
+  "category": "ai",
+  "entry": "clip_coreml_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "clip_coreml_core",
+  "config": {
+    "enabled": true,
+    "priority": 140
+  }
+}

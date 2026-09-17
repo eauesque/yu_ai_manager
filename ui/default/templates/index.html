@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="page.search_title">YU AI Manager - Search</title>
+  <link rel="stylesheet" href="static/css/main.css?v=20260507c">
+  <link rel="stylesheet" href="static/css/character-prompts.css?v=20260213">
+  <link rel="stylesheet" href="static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260225">
+  <link rel="stylesheet" href="static/css/dark-mode/tags/dark-mode-tags-enhanced.css?v=20260225">
+  <link rel="stylesheet" href="static/css/ratings.css?v=20260226">
+  <link rel="stylesheet" href="static/css/context-menu.css?v=20260226">
+  <link rel="stylesheet" href="static/css/sns-share.css?v=20260304">
+  <link rel="stylesheet" href="static/css/search/search-controls-mode.css?v=20260311">
+  <link rel="stylesheet" href="static/css/atelier/atelier-tokens.css?v=20260504b">
+  <link rel="stylesheet" href="static/css/atelier/atelier-components.css?v=20260504b">
+  <link rel="stylesheet" href="static/css/atelier/atelier-index.css?v=20260504b">
+  <link rel="stylesheet" href="static/css/atelier/atelier-modal.css?v=20260504b">
+  <script nonce="{{ csp_nonce }}" src="static/vendor/qrcode.min.js"></script>
+</head>
+
+<body data-1p-ignore data-lpignore="true">
+  {% include "_nav.html" %}
+
+  {% include "index/_main_container.html" %}
+  {% include "index/_search_modal.html" %}
+  {% include "index/floating_grid_ctrl/_panel.html" %}
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/index-app.js?v={{ dist_v }}"></script>
+  {% include "index/_regex_cheat_panel.html" %}
+  {% include "index/_regex_intro_modal.html" %}
+  {# scan progress bar is now handled globally by nav/job-progress.ts #}
+  {% include "index/_thumb_progress.html" %}
+  {% include "index/_drop_zone.html" %}
+</body>
+</html>

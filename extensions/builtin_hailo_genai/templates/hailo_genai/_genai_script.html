@@ -1,0 +1,414 @@
+<script nonce="{{ csp_nonce }}">
+(function() {
+  var BASE = '/ext/hailo-genai/api'; // also declared in _genai_script_media.html — keep in sync
+  var _modelAvail = {};
+
+  // Custom language code toggle for video lang selector
+  var _hgVideoLangSel = document.getElementById('hgVideoLang');
+  if (_hgVideoLangSel) {
+    _hgVideoLangSel.addEventListener('change', function() {
+      var customInput = this.parentElement.querySelector('.s2t-custom-lang');
+      if (customInput) {
+        customInput.style.display = this.value === 'custom' ? 'inline-block' : 'none';
+      }
+    });
+  }
+
+  /* ── Tab switching ─────────────────────────────────── */
+  document.querySelectorAll('.hg-mode-btn').forEach(function(btn) {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.hg-mode-btn').forEach(function(b) { b.classList.remove('hg-mode-active'); });
+      btn.classList.add('hg-mode-active');
+      var mode = btn.getAttribute('data-hg-mode');
+      document.querySelectorAll('.hg-panel').forEach(function(p) { p.style.display = 'none'; });
+      var panel = document.getElementById('hgPanel' + mode.charAt(0).toUpperCase() + mode.slice(1));
+      if (panel) panel.style.display = '';
+      if (mode === 'models') loadStatus();
+    });
+  });
+
+  /* ── Slider bindings ───────────────────────────────── */
+  function bindSlider(sid, vid) {
+    var s = document.getElementById(sid), v = document.getElementById(vid);
+    if (s && v) s.addEventListener('input', function() { v.textContent = this.value; });
+  }
+  bindSlider('hgLlmTemp', 'hgLlmTempVal');
+  bindSlider('hgLlmMaxTok', 'hgLlmMaxTokVal');
+
+  /* ── VLM image preview ─────────────────────────────── */
+  var vlmImg = document.getElementById('hgVlmImage');
+  if (vlmImg) vlmImg.addEventListener('change', function() {
+    var preview = document.getElementById('hgVlmPreview');
+    var img = document.getElementById('hgVlmPreviewImg');
+    if (this.files && this.files[0]) {
+      var reader = new FileReader();
+      reader.onload = function(e) { img.src = e.target.result; preview.style.display = ''; };
+      reader.readAsDataURL(this.files[0]);
+    } else { preview.style.display = 'none'; }
+  });
+
+  /* ── Model select change → availability check ────── */
+  var llmSel0 = document.getElementById('hgLlmModel');
+  if (llmSel0) llmSel0.addEventListener('change', function() {
+    checkModelAvail('hgLlmModel', 'hgLlmDlPrompt', 'hgLlmSendBtn');
+  });
+  var s2tSel0 = document.getElementById('hgS2tModel');
+  if (s2tSel0) s2tSel0.addEventListener('change', function() {
+    checkModelAvail('hgS2tModel', 'hgS2tDlPrompt', 'hgS2tBtn');
+  });
+
+  /* ── Enter key to send ─────────────────────────────── */
+  var llmInput = document.getElementById('hgLlmPrompt');
+  if (llmInput) llmInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); hgLlmSend(); }
+  });
+
+  /* ── Status ────────────────────────────────────────── */
+  function loadStatus() {
+    fetch(BASE + '/runtime').then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status !== 'ok') return;
+
+      // Context bar
+      if (d.context) {
+        var bar = document.getElementById('hgContextBar');
+        var fill = document.getElementById('hgContextFill');
+        var pct = document.getElementById('hgContextPct');
+        if (!bar || !fill || !pct) return;
+        var usage = d.context.usage || 0, cap = d.context.capacity || 1;
+        var p = Math.round(usage / cap * 100);
+        fill.style.width = p + '%';
+        pct.textContent = p + '% (' + usage + '/' + cap + ')';
+        bar.style.display = '';
+      } else {
+        var contextBar = document.getElementById('hgContextBar');
+        if (contextBar) contextBar.style.display = 'none';
+      }
+
+      populateModelDropdowns(d.models);
+      if (document.getElementById('hgPanelModels').style.display !== 'none') {
+        renderModelList(d.models);
+      }
+    }).catch(function() {
+      console.debug('hailo-genai runtime status load failed');
+    });
+  }
+
+  function escapeHtml(s) {
+    var d = document.createElement('div');
+    d.textContent = s;
+    return d.innerHTML;
+  }
+
+  function populateModelDropdowns(models) {
+    var llmSel = document.getElementById('hgLlmModel');
+    var s2tSel = document.getElementById('hgS2tModel');
+    var curLlm = llmSel.value, curS2t = s2tSel.value;
+
+    Object.keys(models).forEach(function(name) { _modelAvail[name] = models[name].available; });
+
+    llmSel.innerHTML = '';
+    s2tSel.innerHTML = '';
+    Object.keys(models).forEach(function(name) {
+      var m = models[name];
+      var opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = m.description + (m.available ? '' : ' [' + window.tr('hailo_genai.not_downloaded', '未ダウンロード') + ']');
+      if (m.type === 'llm') llmSel.appendChild(opt);
+      else if (m.type === 's2t') s2tSel.appendChild(opt.cloneNode(true));
+    });
+    if (curLlm) llmSel.value = curLlm;
+    if (curS2t) s2tSel.value = curS2t;
+
+    checkModelAvail('hgLlmModel', 'hgLlmDlPrompt', 'hgLlmSendBtn');
+    checkModelAvail('hgS2tModel', 'hgS2tDlPrompt', 'hgS2tBtn');
+    checkVlmAvail();
+  }
+
+  function checkModelAvail(selId, promptId, sendBtnId) {
+    var sel = document.getElementById(selId);
+    var prompt = document.getElementById(promptId);
+    var sendBtn = document.getElementById(sendBtnId);
+    if (!sel || !prompt || !sendBtn) return;
+    var avail = _modelAvail[sel.value];
+    if (avail === false) {
+      prompt.style.display = '';
+      sendBtn.disabled = true;
+      sendBtn.title = window.tr('hailo_genai.download_model_first', '先にモデルをダウンロードしてください');
+    } else {
+      prompt.style.display = 'none';
+      sendBtn.disabled = false;
+      sendBtn.title = '';
+    }
+  }
+
+  function checkVlmAvail() {
+    var prompt = document.getElementById('hgVlmDlPrompt');
+    var sendBtn = document.getElementById('hgVlmSendBtn');
+    if (!prompt || !sendBtn) return;
+    var avail = _modelAvail['qwen2-vl-2b-instruct'];
+    if (avail === false) {
+      prompt.style.display = '';
+      sendBtn.disabled = true;
+      sendBtn.title = window.tr('hailo_genai.download_model_first', '先にモデルをダウンロードしてください');
+    } else {
+      prompt.style.display = 'none';
+      sendBtn.disabled = false;
+      sendBtn.title = '';
+    }
+  }
+
+  function renderModelList(models) {
+    var container = document.getElementById('hgModelList');
+    container.innerHTML = '';
+    var keys = Object.keys(models);
+    if (!keys.length) {
+      container.textContent = window.tr('hailo_genai.no_models_found', 'モデルが見つかりません。');
+      return;
+    }
+    keys.forEach(function(name) {
+      var m = models[name];
+      var row = document.createElement('div');
+      row.className = 'hg-model-row';
+
+      var info = document.createElement('div');
+      info.className = 'hg-model-info';
+      var nameEl = document.createElement('span');
+      nameEl.className = 'hg-model-name';
+      nameEl.textContent = name;
+      var typeEl = document.createElement('span');
+      typeEl.className = 'hg-model-type';
+      typeEl.textContent = ' [' + m.type + ']';
+      var descEl = document.createElement('div');
+      descEl.className = 'hg-model-desc';
+      descEl.textContent = m.description + (m.file_size_mb ? ' (' + m.file_size_mb + ' MB)' : '');
+      info.appendChild(nameEl);
+      info.appendChild(typeEl);
+      info.appendChild(descEl);
+
+      var badge = document.createElement('div');
+      if (m.available) {
+        var ok = document.createElement('span');
+        ok.className = 'hg-model-badge-ok';
+        ok.textContent = window.tr('hailo_genai.downloaded', 'ダウンロード済');
+        badge.appendChild(ok);
+      } else {
+        var btn = document.createElement('button');
+        btn.className = 'btn btn-secondary';
+        btn.style.fontSize = '11px';
+        btn.style.padding = '2px 8px';
+        btn.textContent = window.tr('hailo_genai.download', 'ダウンロード');
+        btn.addEventListener('click', function() { hgDownloadModel(name); });
+        badge.appendChild(btn);
+      }
+
+      row.appendChild(info);
+      row.appendChild(badge);
+      container.appendChild(row);
+    });
+  }
+
+  /* ── LLM chat (multi-turn with bubble UI) ──────────── */
+  var _chatHistory = [];
+  var _currentAiBubble = null;
+
+  function addChatBubble(role, text) {
+    var chat = document.getElementById('hgLlmChat');
+    var bubble = document.createElement('div');
+    bubble.className = 'hg-bubble ' + (role === 'user' ? 'hg-bubble-user' : 'hg-bubble-ai');
+    var label = document.createElement('div');
+    label.className = 'hg-bubble-label';
+    label.textContent = role === 'user' ? 'You' : 'AI';
+    bubble.appendChild(label);
+    var content = document.createElement('div');
+    content.textContent = text || '';
+    bubble.appendChild(content);
+    chat.appendChild(bubble);
+    chat.scrollTop = chat.scrollHeight;
+    return content;
+  }
+
+  window.hgLlmSend = function() {
+    var input = document.getElementById('hgLlmPrompt');
+    var prompt = input.value.trim();
+    if (!prompt) return;
+
+    var sendBtn = document.getElementById('hgLlmSendBtn');
+    input.value = '';
+    sendBtn.disabled = true;
+
+    _chatHistory.push({role: 'user', content: [{type: 'text', text: prompt}]});
+    addChatBubble('user', prompt);
+
+    _currentAiBubble = addChatBubble('ai', '');
+
+    var model = document.getElementById('hgLlmModel').value;
+    var temp = parseFloat(document.getElementById('hgLlmTemp').value) || 0.7;
+    var maxTok = parseInt(document.getElementById('hgLlmMaxTok').value) || 512;
+
+    var msgsToSend = _chatHistory.slice();
+    if (_chatHistory.length <= 1) {
+      msgsToSend = [{role: 'system', content: [{type: 'text', text: 'You are a helpful assistant.'}]}].concat(msgsToSend);
+    }
+
+    fetch(BASE + '/llm/generate', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({messages: msgsToSend, model: model, temperature: temp, max_generated_tokens: maxTok})
+    }).then(function(resp) {
+      var reader = resp.body.getReader();
+      var decoder = new TextDecoder();
+      var buf = '';
+      var fullText = [];
+
+      function read() {
+        reader.read().then(function(result) {
+          if (result.done) {
+            var assistantText = fullText.join('');
+            _chatHistory.push({role: 'assistant', content: [{type: 'text', text: assistantText}]});
+            sendBtn.disabled = false;
+            var chat = document.getElementById('hgLlmChat');
+            chat.scrollTop = chat.scrollHeight;
+            loadStatus();
+            return;
+          }
+          buf += decoder.decode(result.value, {stream: true});
+          var lines = buf.split('\n');
+          buf = lines.pop();
+          lines.forEach(function(line) {
+            if (!line.startsWith('data: ')) return;
+            try {
+              var d = JSON.parse(line.slice(6));
+              if (d.token && _currentAiBubble) {
+                fullText.push(d.token);
+                _currentAiBubble.textContent += d.token;
+                var chat = document.getElementById('hgLlmChat');
+                chat.scrollTop = chat.scrollHeight;
+              }
+              if (d.error && _currentAiBubble) {
+                _currentAiBubble.textContent += '\n[Error: ' + d.error + ']';
+              }
+            } catch(e) {}
+          });
+          read();
+        }).catch(function(err) {
+          // Stream interrupted mid-flight (server closed connection — typically
+          // because of a Hailo load failure or pipe break). The
+          // outer .catch only covers the initial fetch promise, so without this
+          // the rejection bubbles up as a `TypeError: network error` unhandled
+          // rejection and surfaces in client-error-bundle telemetry.
+          if (_currentAiBubble) {
+            _currentAiBubble.textContent += '\n[Stream interrupted: ' + err.message + ']';
+          }
+          sendBtn.disabled = false;
+        });
+      }
+      read();
+    }).catch(function(err) {
+      if (_currentAiBubble) _currentAiBubble.textContent = '[Error: ' + err.message + ']';
+      sendBtn.disabled = false;
+    });
+  };
+
+  window.hgLlmClear = function() {
+    _chatHistory = [];
+    _currentAiBubble = null;
+    fetch(BASE + '/llm/clear-context', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).then(function() {
+      document.getElementById('hgLlmChat').innerHTML = '';
+      loadStatus();
+    });
+  };
+
+  /* ── Inline download (from LLM/VLM/S2T panels) ───── */
+  window.hgInlineDownload = function(selId, promptId, fixedModel) {
+    var name = fixedModel || document.getElementById(selId).value;
+    var prompt = document.getElementById(promptId);
+    if (!name || !prompt) return;
+    prompt.classList.add('hg-downloading');
+    prompt.querySelector('span').textContent = name + ' ' + window.tr('hailo_genai.downloading', 'をダウンロード中...');
+    prompt.querySelector('button').disabled = true;
+
+    fetch(BASE + '/model/download', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({model: name})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      prompt.classList.remove('hg-downloading');
+      if (d.status === 'ok') {
+        loadStatus(); _refreshHealth();
+        showResult(window.tr('hailo_genai.download_complete', 'ダウンロード完了') + ': ' + name);
+      } else {
+        prompt.querySelector('span').textContent = window.tr('hailo_genai.download_failed', 'ダウンロード失敗') + ': ' + (d.message || '');
+        prompt.querySelector('button').disabled = false;
+        prompt.querySelector('button').textContent = window.tr('hailo_genai.retry', '再試行');
+      }
+    }).catch(function(err) {
+      prompt.classList.remove('hg-downloading');
+      prompt.querySelector('span').textContent = window.tr('hailo_genai.error', 'エラー') + ': ' + err.message;
+      prompt.querySelector('button').disabled = false;
+      prompt.querySelector('button').textContent = window.tr('hailo_genai.retry', '再試行');
+    });
+  };
+
+  /* ── Model management ──────────────────────────────── */
+  window.hgDownloadModel = function(name) {
+    var el = document.getElementById('hgModelList');
+    el.textContent = name + ' ' + window.tr('hailo_genai.downloading', 'をダウンロード中...');
+    fetch(BASE + '/model/download', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'},
+      body: JSON.stringify({model: name})
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      if (d.status === 'ok') { loadStatus(); _refreshHealth(); }
+      else { el.textContent = window.tr('hailo_genai.download_failed', 'ダウンロード失敗') + ': ' + (d.message || ''); }
+    }).catch(function(err) { el.textContent = window.tr('hailo_genai.error', 'エラー') + ': ' + err.message; });
+  };
+
+  window.hgUnloadModel = function() {
+    fetch(BASE + '/model/unload', {
+      method: 'POST',
+      headers: {'X-Requested-With': 'XMLHttpRequest'}
+    }).then(function(r) { return r.json(); }).then(function(d) {
+      showResult(d.status === 'ok' ? window.tr('hailo_genai.model_unloaded', 'モデルをアンロードしました') + ': ' + d.unloaded : (d.message || window.tr('hailo_genai.no_loaded_model', 'ロード済みモデルはありません')));
+      loadStatus(); _refreshHealth();
+    });
+  };
+
+  function _refreshHealth() {
+    if (window.extensionHealthApi && typeof window.extensionHealthApi.renderInto === 'function') {
+      window.extensionHealthApi.renderInto('hgHealth', 'builtin-hailo-genai', 'details');
+    }
+  }
+
+  function showResult(msg) {
+    var el = document.getElementById('hgResult');
+    el.textContent = msg;
+    el.style.display = '';
+    setTimeout(function() { el.style.display = 'none'; }, 4000);
+  }
+
+  var _initialized = false;
+
+  function activateSection() {
+    if (_initialized) return;
+    _initialized = true;
+    loadStatus();
+  }
+
+  document.addEventListener('tools:activate-section', function(ev) {
+    var detail = ev.detail || {};
+    if (detail.id === 'hgGenaiSection') activateSection();
+  });
+
+  var section = document.getElementById('hgGenaiSection');
+  // Standalone /ext/* pages and direct Tools-page includes have no enclosing
+  // details.tool-item to dispatch 'tools:activate-section', so activate them immediately.
+  var isStandalone = window.location.pathname.indexOf('/ext/') === 0;
+  var isDirectToolsInclude = section && !section.closest('details.tool-item');
+  if (isStandalone || isDirectToolsInclude || (section && section.classList.contains('expanded'))) {
+    activateSection();
+  }
+})();
+</script>

@@ -1,0 +1,15 @@
+{
+  "name": "builtin-clip-search",
+  "version": "1.0.0",
+  "description": "CLIP semantic image search (encoder abstraction, indexer, vector store)",
+  "type": "general",
+  "category": "ai",
+  "entry": "clip_search_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "clip_core",
+  "config": {
+    "enabled": true,
+    "priority": 150
+  }
+}

@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="fleet.title">Fleet 管理</title>
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tokens.css?v=4.250.0">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-components.css?v=4.250.0">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tool-tokens.css?v=4.250.0">
+  <link rel="stylesheet" href="/static/css/atelier/atelier-tool-components.css?v=4.250.0">
+  <link rel="stylesheet" href="/ext/lan_cowork/fleet/static/atelier-fleet.css?v=4.250.0">
+  <link rel="stylesheet" href="/ext/lan_cowork/fleet/static/fleet.css">
+</head>
+<body class="atelier-tool">
+  <!-- NAV_PLACEHOLDER -->
+  <div id="fleet-root">
+    <div class="fleet-back-row">
+      <a href="/lan-cowork" class="fleet-back-link" data-i18n="fleet.button.back_to_cowork">← LAN Cowork に戻る</a>
+    </div>
+    <header class="fleet-header">
+      <h1 data-i18n="fleet.title">Fleet 管理</h1>
+      <button id="fleet-refresh-btn" class="btn btn-secondary" data-i18n="fleet.button.refresh">更新</button>
+    </header>
+
+    <div id="fleet-multi-chief-banner" class="fleet-banner fleet-banner--warning" style="display:none">
+      <span data-i18n="fleet.warning.multi_chief">複数チーフが検出されました。古いチーフノードを再起動してください。</span>
+    </div>
+
+    <nav class="fleet-tabs" role="tablist">
+      <button role="tab" class="fleet-tab fleet-tab--active" data-tab="overview" data-i18n="fleet.tab.overview">概要</button>
+      <button role="tab" class="fleet-tab" data-tab="logs" data-i18n="fleet.tab.logs">ログ</button>
+      <button role="tab" class="fleet-tab" data-tab="update" data-i18n="fleet.tab.update">アップデート</button>
+      <button role="tab" class="fleet-tab" data-tab="settings" data-i18n="fleet.tab.settings">設定</button>
+    </nav>
+
+    <section id="fleet-tab-overview" class="fleet-tab-panel">
+      <div id="fleet-nodes-grid" class="fleet-nodes-grid"></div>
+    </section>
+
+    <section id="fleet-tab-logs" class="fleet-tab-panel" style="display:none">
+      <div class="fleet-logs-layout">
+        <aside class="fleet-logs-peers">
+          <h3 data-i18n="fleet.logs.peer_select">ピア選択</h3>
+          <div id="fleet-logs-peer-list"></div>
+        </aside>
+        <div class="fleet-logs-viewer">
+          <div class="fleet-logs-toolbar">
+            <select id="fleet-logs-level" aria-label="Log level">
+              <option value="">ALL</option>
+              <option value="DEBUG">DEBUG</option>
+              <option value="INFO">INFO</option>
+              <option value="WARNING">WARNING</option>
+              <option value="ERROR">ERROR</option>
+            </select>
+            <input type="text" id="fleet-logs-search" placeholder="検索..." aria-label="Search logs">
+            <label class="fleet-logs-autoscroll">
+              <input type="checkbox" id="fleet-logs-autoscroll" checked>
+              <span data-i18n="fleet.logs.autoscroll">自動スクロール</span>
+            </label>
+            <button id="fleet-logs-pause-btn" class="btn btn-sm" data-i18n="fleet.logs.pause">一時停止</button>
+            <button id="fleet-logs-clear-btn" class="btn btn-sm" data-i18n="fleet.logs.clear">クリア</button>
+            <button id="fleet-logs-copy-btn" class="btn btn-sm" data-i18n="fleet.logs.copy">コピー</button>
+            <button id="fleet-logs-download-btn" class="btn btn-sm" data-i18n="fleet.logs.download">ダウンロード</button>
+            <span id="fleet-logs-status" class="fleet-logs-status" aria-live="polite"></span>
+          </div>
+          <div id="fleet-logs-output" class="fleet-logs-output"></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="fleet-tab-update" class="fleet-tab-panel" style="display:none">
+      <div class="fleet-update-toolbar">
+        <label>
+          <span data-i18n="fleet.update.source">Source:</span>
+          <select id="fleet-update-source">
+            <option value="origin">origin</option>
+          </select>
+        </label>
+        <label>
+          <span data-i18n="fleet.update.branch">Branch:</span>
+          <select id="fleet-update-branch">
+            <option value="main">main</option>
+          </select>
+        </label>
+        <button id="fleet-update-dispatch-btn" class="btn btn-primary" data-i18n="fleet.update.button.dispatch">選択ノードを一括更新</button>
+        <button id="fleet-restart-dispatch-btn" class="btn btn-sm" data-i18n="fleet.update.button.restart_only_dispatch">選択ノードを再起動のみ</button>
+      </div>
+      <div id="fleet-update-progress" class="fleet-update-progress" style="display:none">
+        <p id="fleet-update-dispatch-status"></p>
+      </div>
+      <!-- Consent request status panel (shown when a peer needs consent) -->
+      <div id="fleet-consent-panel" style="display:none; margin-top:16px; padding:12px; background:var(--surface2,#f5f5f5); border-radius:6px; border:1px solid var(--border,#ddd);">
+        <p id="fleet-consent-panel-msg" style="margin:0 0 10px;"></p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button type="button" id="fleet-consent-send-btn" class="btn btn-sm btn-primary"
+                  data-i18n="fleet.consent.chief.send_request">同意リクエストを送る</button>
+          <button type="button" id="fleet-consent-cancel-btn" class="btn btn-sm" style="display:none;"
+                  data-i18n="fleet.consent.chief.cancel">キャンセル</button>
+          <button type="button" id="fleet-consent-retry-btn" class="btn btn-sm btn-primary" style="display:none;"
+                  data-i18n="fleet.consent.chief.re_request">再リクエスト</button>
+        </div>
+        <p id="fleet-consent-waiting-msg" style="display:none; margin:8px 0 0; font-size:0.85rem; color:var(--muted,#666);"></p>
+      </div>
+      <table class="fleet-update-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="fleet-update-select-all" aria-label="Select all"></th>
+            <th data-i18n="fleet.update.col.node">ノード</th>
+            <th data-i18n="fleet.update.col.version">バージョン</th>
+            <th data-i18n="fleet.update.col.commit">commit</th>
+            <th data-i18n="fleet.update.col.branch">ブランチ</th>
+            <th data-i18n="fleet.update.col.action">操作</th>
+            <th data-i18n="fleet.update.col.progress">進捗</th>
+          </tr>
+        </thead>
+        <tbody id="fleet-update-tbody"></tbody>
+      </table>
+    </section>
+    <section id="fleet-tab-settings" class="fleet-tab-panel" style="display:none">
+      <section class="fleet-settings-block">
+        <h2 data-i18n="fleet.settings.local.title">このノードへの許可設定</h2>
+        <p class="fleet-settings-desc" data-i18n="fleet.settings.local.desc">
+          このノードが他のピアからの「ログ配信」「リモート更新」を許可するかを設定します。マスタースイッチをONにして、各ピアの許可をチェックして保存してください。
+        </p>
+        <label class="fleet-settings-toggle">
+          <input type="checkbox" id="fleet-settings-allow-remote-update">
+          <span data-i18n="fleet.settings.local.allow_remote_update">リモートからのアップデートを有効にする（マスタースイッチ）</span>
+        </label>
+        <table class="fleet-settings-table">
+          <thead>
+            <tr>
+              <th data-i18n="fleet.settings.col.peer">ピア</th>
+              <th data-i18n="fleet.settings.col.log_stream">ログ配信</th>
+              <th data-i18n="fleet.settings.col.update">アップデート</th>
+            </tr>
+          </thead>
+          <tbody id="fleet-settings-local-tbody"></tbody>
+        </table>
+        <div class="fleet-settings-actions">
+          <button id="fleet-settings-local-save" class="btn btn-primary" data-i18n="fleet.settings.local.save">保存</button>
+          <span id="fleet-settings-local-status" class="fleet-settings-status"></span>
+        </div>
+      </section>
+
+      <section class="fleet-settings-block" id="fleet-settings-remote-block">
+        <h2 data-i18n="fleet.settings.remote.title">リモート許可付与（チーフ専用）</h2>
+        <p class="fleet-settings-desc" data-i18n="fleet.settings.remote.desc">
+          ペアリング済みのトークンを使って、対象ピアの allowlist にチーフの peer_id を追加します。
+          ピア側にログインせずに権限設定できますが、実行にはペアリングトークンが必要です。
+        </p>
+        <table class="fleet-settings-table">
+          <thead>
+            <tr>
+              <th data-i18n="fleet.settings.col.peer">ピア</th>
+              <th data-i18n="fleet.settings.col.status">状態</th>
+              <th data-i18n="fleet.settings.col.action">操作</th>
+            </tr>
+          </thead>
+          <tbody id="fleet-settings-remote-tbody"></tbody>
+        </table>
+      </section>
+    </section>
+  </div>
+  <script nonce="{{ csp_nonce }}" src="/ext/lan_cowork/fleet/static/fleet-api.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/lan_cowork/fleet/static/fleet-render.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/lan_cowork/fleet/static/fleet-polling.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/lan_cowork/fleet/static/fleet-actions.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/lan_cowork/fleet/static/fleet-tabs-settings.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/lan_cowork/fleet/static/fleet-tabs.js"></script>
+  <script nonce="{{ csp_nonce }}" src="/ext/lan_cowork/fleet/static/fleet.js"></script>
+</body>
+</html>

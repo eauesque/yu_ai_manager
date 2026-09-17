@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title>{% block title %}YU AI Manager{% endblock %}</title>
+  <!-- Default UI core CSS (modal, dark-mode, grid, etc.) -->
+  <link rel="stylesheet" href="/static/css/main.css">
+  <link rel="stylesheet" href="/static/css/dark-mode/fix/dark-mode-fix-v2.css">
+  <link rel="stylesheet" href="/static/css/dark-mode/tags/dark-mode-tags-enhanced.css">
+  <!-- Sample UI custom CSS (loaded after to allow overrides) -->
+  <link rel="stylesheet" href="/static/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body class="dark">
+  {% include "_sample_nav.html" %}
+  <main class="container" id="main-content">
+    {% block content %}{% endblock %}
+  </main>
+  <div id="toast" class="toast" role="alert" aria-live="polite"></div>
+  <!-- Default UI core JS: CSRF interceptor, SSE shared engine, theme, modal system -->
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/nav.js"></script>
+  <!-- Sample UI custom JS -->
+  <script nonce="{{ csp_nonce }}" src="/static/app.js"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

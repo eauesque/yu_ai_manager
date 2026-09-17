@@ -1,0 +1,167 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+  (function () {
+    function $(id) { return document.getElementById(id); }
+
+    var _sdwbSweepIds = [
+      "sdwbSweepEnabled", "sdwbSweepParam",
+      "sdwbSweepMin", "sdwbSweepMax", "sdwbSweepMode", "sdwbSweepCount", "sdwbSweepStep",
+      "sdwbSweepMacrosSharedCount", "sdwbSweepMacrosPadShort",
+      "sdwbSweepYEnabled", "sdwbSweepYParam",
+      "sdwbSweepYMin", "sdwbSweepYMax", "sdwbSweepYMode", "sdwbSweepYCount", "sdwbSweepYStep",
+      "sdwbSweepYMacrosSharedCount", "sdwbSweepYMacrosPadShort",
+      "sdwbSweepZEnabled", "sdwbSweepZParam",
+      "sdwbSweepZMin", "sdwbSweepZMax", "sdwbSweepZMode", "sdwbSweepZCount", "sdwbSweepZStep",
+      "sdwbSweepZMacrosSharedCount", "sdwbSweepZMacrosPadShort",
+      "sdwbSweepDeferSave",
+    ];
+
+    var _sdwbLastParamsConfig = {
+      storageKey: "sdwb_last_params",
+      getParams: function() {
+        var p = {
+          prompt: (typeof _sdwbGetPrompt === "function" ? _sdwbGetPrompt() : $("sdwbPrompt").value),
+          negative: (typeof _sdwbGetNegative === "function" ? _sdwbGetNegative() : $("sdwbNegative").value),
+          steps: $("sdwbSteps").value,
+          sampler: $("sdwbSampler").value,
+          cfg: $("sdwbCfg").value,
+          width: $("sdwbWidth").value,
+          height: $("sdwbHeight").value,
+          seed: $("sdwbSeed").value,
+          image_format: $("sdwbImageFormat").value,
+          batch_count: $("sdwbBatchCount") ? $("sdwbBatchCount").value : "1",
+          batch_size: $("sdwbBatchSize") ? $("sdwbBatchSize").value : "1",
+        };
+        // Hires Fix
+        if ($("sdwbHiresEnable")) {
+          p.hires_enable = $("sdwbHiresEnable").checked;
+          p.hires_upscaler = $("sdwbHiresUpscaler").value;
+          p.hires_scale = $("sdwbHiresScale").value;
+          p.hires_steps = $("sdwbHiresSteps").value;
+          p.hires_denoising = $("sdwbHiresDenoising").value;
+          p.hires_resize_x = $("sdwbHiresResizeX").value;
+          p.hires_resize_y = $("sdwbHiresResizeY").value;
+        }
+        // Refiner
+        if ($("sdwbRefinerEnable")) {
+          p.refiner_enable = $("sdwbRefinerEnable").checked;
+          p.refiner_checkpoint = $("sdwbRefinerCheckpoint").value;
+          p.refiner_switch_at = $("sdwbRefinerSwitchAt").value;
+        }
+        // Sweep scalar fields
+        _sdwbSweepIds.forEach(function(id) {
+          var el = $(id);
+          if (!el) return;
+          if (el.type === "checkbox") p["sw_" + id] = el.checked ? "1" : "0";
+          else p["sw_" + id] = el.value;
+        });
+        // Macros slot state (canonical model in _sdwbMacroSlots, see _script_sweep.html)
+        try {
+          if (window._sdwbMacroSlots) {
+            ["x", "y", "z"].forEach(function(ax) {
+              if (window._sdwbMacroSlots[ax]) {
+                p["sw_macros_" + ax] = JSON.stringify(window._sdwbMacroSlots[ax]);
+              }
+            });
+          }
+        } catch (_e) {}
+        return p;
+      },
+      setParams: function(p) {
+        if (p.prompt != null) {
+          if (typeof _sdwbSetPrompt === "function") _sdwbSetPrompt(p.prompt);
+          else $("sdwbPrompt").value = p.prompt;
+        }
+        if (p.negative != null) {
+          if (typeof _sdwbSetNegative === "function") _sdwbSetNegative(p.negative);
+          else $("sdwbNegative").value = p.negative;
+        }
+        if (p.steps != null) $("sdwbSteps").value = p.steps;
+        if (p.sampler != null) $("sdwbSampler").value = p.sampler;
+        if (p.cfg != null) $("sdwbCfg").value = p.cfg;
+        if (p.width != null) $("sdwbWidth").value = p.width;
+        if (p.height != null) $("sdwbHeight").value = p.height;
+        if (p.seed != null) $("sdwbSeed").value = p.seed;
+        if (p.image_format != null) $("sdwbImageFormat").value = p.image_format;
+        if (p.batch_count != null && $("sdwbBatchCount")) $("sdwbBatchCount").value = p.batch_count;
+        if (p.batch_size != null && $("sdwbBatchSize")) $("sdwbBatchSize").value = p.batch_size;
+        if (typeof window._sdwbUpdateBatchTotal === "function") window._sdwbUpdateBatchTotal();
+        // Hires Fix
+        if (p.hires_enable != null && $("sdwbHiresEnable")) {
+          $("sdwbHiresEnable").checked = !!p.hires_enable;
+          if (typeof window.sdwbUpdateHiresState === "function") window.sdwbUpdateHiresState();
+        }
+        if (p.hires_upscaler != null && $("sdwbHiresUpscaler")) $("sdwbHiresUpscaler").value = p.hires_upscaler;
+        if (p.hires_scale != null && $("sdwbHiresScale")) $("sdwbHiresScale").value = p.hires_scale;
+        if (p.hires_steps != null && $("sdwbHiresSteps")) $("sdwbHiresSteps").value = p.hires_steps;
+        if (p.hires_denoising != null && $("sdwbHiresDenoising")) {
+          $("sdwbHiresDenoising").value = p.hires_denoising;
+          $("sdwbHiresDenoisingVal").textContent = p.hires_denoising;
+        }
+        if (p.hires_resize_x != null && $("sdwbHiresResizeX")) $("sdwbHiresResizeX").value = p.hires_resize_x;
+        if (p.hires_resize_y != null && $("sdwbHiresResizeY")) $("sdwbHiresResizeY").value = p.hires_resize_y;
+        // Refiner
+        if (p.refiner_enable != null && $("sdwbRefinerEnable")) {
+          $("sdwbRefinerEnable").checked = !!p.refiner_enable;
+          if (typeof window.sdwbUpdateRefinerState === "function") window.sdwbUpdateRefinerState();
+        }
+        if (p.refiner_checkpoint != null && $("sdwbRefinerCheckpoint")) $("sdwbRefinerCheckpoint").value = p.refiner_checkpoint;
+        if (p.refiner_switch_at != null && $("sdwbRefinerSwitchAt")) {
+          $("sdwbRefinerSwitchAt").value = p.refiner_switch_at;
+          $("sdwbRefinerSwitchAtVal").textContent = p.refiner_switch_at;
+        }
+        // Sweep scalar fields
+        _sdwbSweepIds.forEach(function(id) {
+          var key = "sw_" + id;
+          if (p[key] == null) return;
+          var el = $(id);
+          if (!el) return;
+          if (el.type === "checkbox") el.checked = p[key] === "1" || p[key] === true;
+          else el.value = p[key];
+        });
+        // Restore macros slot state, then re-render and sync visibility
+        try {
+          if (window._sdwbMacroSlots) {
+            ["x", "y", "z"].forEach(function(ax) {
+              var raw = p["sw_macros_" + ax];
+              if (raw == null) return;
+              var arr = JSON.parse(raw);
+              if (Array.isArray(arr) && arr.length > 0) {
+                window._sdwbMacroSlots[ax] = arr;
+                if (typeof window._sdwbRenderMacros === "function") {
+                  window._sdwbRenderMacros(ax);
+                }
+              }
+            });
+            if (typeof window._ssweepApplyMacrosVisibility === "function") {
+              window._ssweepApplyMacrosVisibility();
+            }
+          }
+        } catch (_e) {
+          console.warn("[sdwb/lastparams] sweep macros restore failed:", _e);
+        }
+        if (p.sw_sdwbSweepEnabled === "1") {
+          var sec = $("sdwbSweepSection");
+          if (sec) sec.open = true;
+        }
+        if (typeof window._sdwbSweepUpdateEstimate === "function") {
+          try { window._sdwbSweepUpdateEstimate(); } catch (_e) {}
+        }
+      },
+    };
+    window._sdwbLastParamsConfig = _sdwbLastParamsConfig;
+
+    window.sdwbSaveLastParams = function() {
+      if (window.BridgeLastParams) window.BridgeLastParams.save(_sdwbLastParamsConfig);
+    };
+
+    window.sdwbRestoreLast = function() {
+      if (!window.BridgeLastParams) return;
+      if (window.BridgeLastParams.restore(_sdwbLastParamsConfig)) {
+        // Visual feedback (brief flash on the button)
+        var btn = $("sdwbRestoreBtn");
+        if (btn) { btn.textContent = "🔄 OK!"; setTimeout(function() { btn.textContent = window.tr('sd_bridge.restore_last', '🔄 前回'); }, 800); }
+      }
+    };
+  })();
+</script>

@@ -1,0 +1,12 @@
+<script nonce="{{ csp_nonce }}">
+  // -- Save folder helpers ------------------------------------------
+
+  // Sibling <script> tags don't share scope with _script.html's IIFE,
+  // so re-declare the $ shorthand here.
+  function $(id) { return document.getElementById(id); }
+
+  window.nabBrowseSaveFolder = function() {
+    var el = $("nabCfgSaveFolder");
+    window.pickFolder(el.value.trim(), function(path) { el.value = path; });
+  };
+</script>

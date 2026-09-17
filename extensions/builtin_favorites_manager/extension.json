@@ -1,0 +1,20 @@
+{
+  "name": "builtin-favorites-manager",
+  "version": "1.0.0",
+  "description": "Favorites & Collections Manager",
+  "type": "ui_widget",
+  "category": "library",
+  "entry": "favorites_manager.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/favorites",
+  "nav": {
+    "label": "Favorites",
+    "icon": "\u2b50"
+  },
+  "core_shim": "favorites_core",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

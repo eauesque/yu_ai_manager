@@ -1,0 +1,9 @@
+{
+  "parser": "nai_v3",
+  "fixture": "fixtures/inspect_parity/novelai_v3_conform.png",
+  "python_format_raw": "novelai",
+  "positive": "best quality, 1boy, warrior",
+  "negative": "lowres, bad anatomy, worst quality",
+  "raw_meta": "{\"Comment\":\"{\\\"prompt\\\":\\\"best quality, 1boy, warrior\\\",\\\"uc\\\":\\\"lowres, bad anatomy, worst quality\\\",\\\"steps\\\":28,\\\"scale\\\":7.0,\\\"seed\\\":9999999,\\\"sampler\\\":\\\"k_euler_ancestral\\\",\\\"noise_schedule\\\":\\\"native\\\",\\\"strength\\\":0.5,\\\"cfg_rescale\\\":0.0}\",\"Description\":\"\"}",
+  "format_rust": "nai_v3"
+}

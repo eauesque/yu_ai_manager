@@ -1,0 +1,282 @@
+/*
+ * Atelier System (γ) — Favorites Manager retrofit
+ *
+ * Applies atelier tokens to the favorites_manager extension UI.
+ * Scoped under body.theme-atelier-{light,dark} so classic / dark themes
+ * keep their existing .fm-* presentation untouched.
+ *
+ * The favorites grid is image-display: drop the surrounding chrome onto
+ * --canvas (neutral grey) and let cards sit on --canvas-raised, mirroring
+ * the index page treatment in atelier-index.css.
+ */
+
+/* ----- Page chrome ----- */
+
+body.theme-atelier-light .fm-container,
+body.theme-atelier-dark .fm-container {
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light .fm-page-title,
+body.theme-atelier-dark .fm-page-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h2), "wght" 400;
+  font-size: 32px;
+  letter-spacing: -0.01em;
+  margin: 12px 0 0 24px;
+  color: var(--text);
+}
+
+/* ----- Sidebar ----- */
+
+body.theme-atelier-light .fm-sidebar,
+body.theme-atelier-dark .fm-sidebar {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+}
+
+body.theme-atelier-light .fm-sidebar-header,
+body.theme-atelier-dark .fm-sidebar-header {
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-ui);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text);
+}
+
+body.theme-atelier-light .fm-coll-item:hover,
+body.theme-atelier-dark .fm-coll-item:hover {
+  background: var(--surface-raised);
+}
+
+body.theme-atelier-light .fm-coll-item.active,
+body.theme-atelier-dark .fm-coll-item.active {
+  background: var(--accent-tool);
+  color: #fff;
+}
+
+body.theme-atelier-light .fm-coll-item .fm-coll-count,
+body.theme-atelier-dark .fm-coll-item .fm-coll-count {
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  opacity: 0.85;
+}
+
+body.theme-atelier-light .fm-coll-item.active .fm-coll-count,
+body.theme-atelier-dark .fm-coll-item.active .fm-coll-count {
+  color: #fff;
+  opacity: 0.85;
+}
+
+body.theme-atelier-light .fm-coll-btn:hover,
+body.theme-atelier-dark .fm-coll-btn:hover {
+  background: color-mix(in srgb, var(--accent-tool) 14%, transparent);
+}
+
+body.theme-atelier-light .fm-sidebar-footer,
+body.theme-atelier-dark .fm-sidebar-footer {
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+
+body.theme-atelier-light .fm-sidebar-footer input,
+body.theme-atelier-dark .fm-sidebar-footer input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light .fm-sidebar-footer input:focus-visible,
+body.theme-atelier-dark .fm-sidebar-footer input:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 1px;
+  border-color: var(--accent-tool);
+}
+
+body.theme-atelier-light .fm-sidebar-footer button,
+body.theme-atelier-dark .fm-sidebar-footer button {
+  background: var(--accent-tool);
+  border-color: var(--accent-tool);
+  color: #fff;
+  font-family: var(--font-ui);
+}
+
+/* ----- Toolbar ----- */
+
+body.theme-atelier-light .fm-toolbar,
+body.theme-atelier-dark .fm-toolbar {
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+}
+
+body.theme-atelier-light .fm-toolbar-title,
+body.theme-atelier-dark .fm-toolbar-title {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 500;
+  font-size: 18px;
+  color: var(--text);
+}
+
+body.theme-atelier-light .fm-toolbar-btn,
+body.theme-atelier-dark .fm-toolbar-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+  border-radius: 6px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+body.theme-atelier-light .fm-toolbar-btn:hover,
+body.theme-atelier-dark .fm-toolbar-btn:hover {
+  background: var(--surface-raised);
+  border-color: color-mix(in srgb, var(--accent-tool) 40%, var(--border));
+}
+
+body.theme-atelier-light .fm-toolbar-btn.primary,
+body.theme-atelier-dark .fm-toolbar-btn.primary {
+  background: var(--accent-tool);
+  border-color: var(--accent-tool);
+  color: #fff;
+}
+
+body.theme-atelier-light .fm-toolbar-btn.primary:hover,
+body.theme-atelier-dark .fm-toolbar-btn.primary:hover {
+  background: color-mix(in srgb, var(--accent-tool) 88%, #000);
+  border-color: color-mix(in srgb, var(--accent-tool) 88%, #000);
+  opacity: 1;
+}
+
+body.theme-atelier-light .fm-toolbar-btn.danger,
+body.theme-atelier-dark .fm-toolbar-btn.danger {
+  background: var(--surface);
+}
+
+/* ----- Selection bar ----- */
+
+body.theme-atelier-light .fm-select-bar,
+body.theme-atelier-dark .fm-select-bar {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  font-family: var(--font-ui);
+  color: var(--text-muted);
+}
+
+/* ----- Grid + cards ----- *
+ * Mirror atelier-index.css .result-card treatment: drop the grid onto
+ * neutral --canvas, give cards --canvas-raised + --shadow-sm so images
+ * carry the visual weight rather than the chrome.
+ */
+
+body.theme-atelier-light .fm-grid,
+body.theme-atelier-dark .fm-grid {
+  background: var(--canvas);
+}
+
+body.theme-atelier-light .fm-card,
+body.theme-atelier-dark .fm-card {
+  background: var(--canvas-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow-sm);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+body.theme-atelier-light .fm-card:hover,
+body.theme-atelier-dark .fm-card:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-1px);
+}
+
+body.theme-atelier-light .fm-empty,
+body.theme-atelier-dark .fm-empty {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-variation-settings: "opsz" var(--opsz-body), "wght" 400;
+  font-size: 14px;
+}
+
+/* Selection outline uses the action accent. */
+body.theme-atelier-light.fm-select-mode .fm-card:has(.fm-select-cb:checked),
+body.theme-atelier-dark.fm-select-mode .fm-card:has(.fm-select-cb:checked) {
+  outline-color: var(--accent-tool);
+}
+
+body.theme-atelier-light .fm-select-cb,
+body.theme-atelier-dark .fm-select-cb {
+  accent-color: var(--accent-tool);
+}
+
+/* ----- Modal ----- */
+
+body.theme-atelier-light .fm-modal,
+body.theme-atelier-dark .fm-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  border-radius: 10px;
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light .fm-modal h3,
+body.theme-atelier-dark .fm-modal h3 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-h3), "wght" 500;
+  font-size: 20px;
+  color: var(--text);
+}
+
+body.theme-atelier-light .fm-modal label,
+body.theme-atelier-dark .fm-modal label {
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light .fm-modal input[type="text"],
+body.theme-atelier-dark .fm-modal input[type="text"],
+body.theme-atelier-light .fm-rename-input,
+body.theme-atelier-dark .fm-rename-input {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: var(--font-ui);
+}
+
+body.theme-atelier-light .fm-modal input[type="text"]:focus-visible,
+body.theme-atelier-dark .fm-modal input[type="text"]:focus-visible,
+body.theme-atelier-light .fm-rename-input:focus-visible,
+body.theme-atelier-dark .fm-rename-input:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 1px;
+  border-color: var(--accent-tool);
+}
+
+/* ----- Move dropdown ----- */
+
+body.theme-atelier-light .fm-coll-dropdown,
+body.theme-atelier-dark .fm-coll-dropdown {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  border-radius: 8px;
+}
+
+body.theme-atelier-light .fm-dd-item:hover,
+body.theme-atelier-dark .fm-dd-item:hover {
+  background: var(--surface-raised);
+}
+
+/* ----- Drag / drop target ----- */
+
+body.theme-atelier-light .fm-coll-item.fm-drop-target,
+body.theme-atelier-dark .fm-coll-item.fm-drop-target {
+  background: color-mix(in srgb, var(--accent-tool) 22%, transparent);
+  outline: 2px dashed var(--accent-tool);
+  outline-offset: -2px;
+}
+
+body.theme-atelier-light .fm-rubberband,
+body.theme-atelier-dark .fm-rubberband {
+  border-color: var(--accent-tool);
+  background: color-mix(in srgb, var(--accent-tool) 12%, transparent);
+}

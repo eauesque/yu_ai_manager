@@ -1,0 +1,27 @@
+{
+  "name": "builtin-comfyui",
+  "version": "1.1.0",
+  "description": "ComfyUI workflow JSON metadata extraction (builtin) - parses CLIPTextEncode + KSampler and produces structured inspect output",
+  "type": "importer",
+  "category": "metadata",
+  "entry": "comfyui_parser.py",
+  "hooks": [
+    "on_scan_file",
+    "on_build_sections"
+  ],
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/comfyui",
+  "config": {
+    "enabled": true,
+    "priority": 110
+  },
+  "config_schema": {
+    "extract_workflow": {
+      "type": "bool",
+      "default": true,
+      "label": "Also extract workflow information",
+      "cli_flag": "--extract-workflow",
+      "description": "Store the ComfyUI workflow JSON in raw_meta_json"
+    }
+  }
+}

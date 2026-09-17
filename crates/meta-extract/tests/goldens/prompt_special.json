@@ -1,0 +1,144 @@
+[
+  {
+    "prompt": "a <lora:styleA:0.8> b <lora:blk:1:1:lbw=0,0,1> c",
+    "loras": [
+      {
+        "name": "styleA",
+        "weight": 0.8
+      },
+      {
+        "name": "blk",
+        "weight": 1.0,
+        "extra": "1:lbw=0,0,1"
+      }
+    ],
+    "embeddings": []
+  },
+  {
+    "prompt": "<lora:name:abc>",
+    "loras": [
+      {
+        "name": "name",
+        "weight": 1.0,
+        "extra": "abc"
+      }
+    ],
+    "embeddings": []
+  },
+  {
+    "prompt": "<lora:n:-0.5>",
+    "loras": [
+      {
+        "name": "n",
+        "weight": -0.5
+      }
+    ],
+    "embeddings": []
+  },
+  {
+    "prompt": "<lora: spaced :0.3>",
+    "loras": [
+      {
+        "name": "spaced",
+        "weight": 0.3
+      }
+    ],
+    "embeddings": []
+  },
+  {
+    "prompt": "<embedding:e1:0.5> <hypernet:h1> (embedding:e2:2) embedding:e3",
+    "loras": [],
+    "embeddings": [
+      {
+        "name": "e1",
+        "weight": 0.5,
+        "type": "embedding"
+      },
+      {
+        "name": "h1",
+        "weight": 1.0,
+        "type": "hypernet"
+      },
+      {
+        "name": "e2",
+        "weight": 2.0,
+        "type": "embedding"
+      },
+      {
+        "name": "e3",
+        "weight": 1.0,
+        "type": "embedding"
+      }
+    ]
+  },
+  {
+    "prompt": "<embedding:solo>",
+    "loras": [],
+    "embeddings": [
+      {
+        "name": "solo",
+        "weight": 1.0,
+        "type": "embedding"
+      }
+    ]
+  },
+  {
+    "prompt": "(embedding:paren)",
+    "loras": [],
+    "embeddings": [
+      {
+        "name": "paren",
+        "weight": 1.0,
+        "type": "embedding"
+      }
+    ]
+  },
+  {
+    "prompt": "embedding:bare_one, embedding:bare.two",
+    "loras": [],
+    "embeddings": [
+      {
+        "name": "bare_one",
+        "weight": 1.0,
+        "type": "embedding"
+      },
+      {
+        "name": "bare.two",
+        "weight": 1.0,
+        "type": "embedding"
+      }
+    ]
+  },
+  {
+    "prompt": "<EMBEDDING:UpperCase> <LORA:Up:1.0>",
+    "loras": [
+      {
+        "name": "Up",
+        "weight": 1.0
+      }
+    ],
+    "embeddings": [
+      {
+        "name": "UpperCase",
+        "weight": 1.0,
+        "type": "embedding"
+      }
+    ]
+  },
+  {
+    "prompt": "<embedding:x:notanumber>",
+    "loras": [],
+    "embeddings": [
+      {
+        "name": "x",
+        "weight": 1.0,
+        "type": "embedding"
+      }
+    ]
+  },
+  {
+    "prompt": "1girl, solo",
+    "loras": [],
+    "embeddings": []
+  }
+]

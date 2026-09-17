@@ -1,0 +1,115 @@
+/* Progress bar stack container — hidden container, bars are position:fixed */
+#progress-bar-stack {
+  display: contents;
+}
+
+/* Scan progress bar layout */
+.scan-progress-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: rgba(0, 0, 0, 0.96);
+  border-top: 2px solid #3b82f6;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 790;
+  box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.3);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 0.3s ease, transform 0.3s ease, bottom 0.3s ease;
+}
+
+.scan-progress-bar.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.scan-progress-content {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.scan-progress-icon {
+  font-size: 24px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
+}
+
+.scan-progress-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.scan-progress-text {
+  color: #e0e0e0;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.scan-progress-details {
+  color: #999;
+  font-size: 12px;
+}
+
+.scan-progress-track {
+  flex: 1;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.scan-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #60a5fa);
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.scan-progress-percent {
+  color: #60a5fa;
+  font-size: 18px;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: right;
+}
+
+.scan-progress-close {
+  background: rgba(255, 255, 255, 0.1);
+  border: none;
+  color: #e0e0e0;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  pointer-events: auto;
+}
+
+.scan-progress-close:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.scan-queue-badge {
+  background: #f59e0b;
+  color: #000;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 10px;
+  white-space: nowrap;
+}

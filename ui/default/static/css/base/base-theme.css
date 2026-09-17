@@ -1,0 +1,244 @@
+:root{
+  --bg: #eaecf0;  /* WCAG SC 1.4.11: 1.19:1 vs --card (#fff) — visible card edge without depending on shadow */
+  --card: #ffffff;
+  --text: #222;
+  --muted: #5a5a5a;  /* WCAG AA: 5.67:1 on #eaecf0 */
+  --muted-accessible: #555;  /* higher contrast muted for WCAG AA labels */
+  --border: #e6e6e6;
+  --shadow: 0 4px 14px rgba(0,0,0,0.08);
+  --btn-bg: #ffffff;
+  --btn-text: #222;
+  --btn-hover: #f6f9ff;
+  --tooltip-bg: rgba(0,0,0,0.85);
+  --tooltip-text: #fff;
+  --accent: #2563eb;  /* WCAG AA: 5.17:1 on white (former #3b82f6 was 3.68:1) */
+  --accent-on-bg: #1d4ed8;  /* WCAG AA: 5.33:1 on --bg (#eaecf0); use for text on body bg */
+  --icon-brand: #0077bb;  /* Cerulean — YU AI Manager brand, 4.8:1 on white */
+
+  /* ── derived variables (used by extensions) ─── */
+  --fg: var(--text);
+  --fg-muted: var(--muted);
+  --bg-card: var(--card);
+  --bg-input: var(--card);
+  --bg-hover: #dde0e6;  /* darker than --bg (#eaecf0) for visible hover state */
+  --accent-bg: rgba(37,99,235,0.10);
+  --mark-bg: rgba(250,204,21,0.45);
+  --mark-fg: var(--text);
+  --success: #2e7d32;
+  --error: #d32f2f;
+
+  /* ── accessible status/badge text colors (dark in light mode, bright in dark mode) ─── */
+  --status-ok: #166534;        /* green text: 6.15:1 on white */
+  --status-warn: #7c4700;      /* amber text: 6.29:1 on white */
+  --positive-change-fg: #047857;  /* teal-green: 4.95:1 on white */
+  --negative-change-fg: #b91c1c;  /* dark red: 6.14:1 on white */
+  --rating-star-fg: #92400e;   /* dark amber: 5.90:1 on tinted bg */
+  --trust-verified-fg: #1e40af;   /* dark blue: 7.2:1 on white */
+  --trust-untrusted-fg: #b91c1c;  /* dark red: 6.14:1 on white */
+
+  /* ── font stacks (global) ──
+     Use via `font-family: var(--font-mono)` or the `.mono` utility class.
+     Inline `font-family: monospace` falls back to browser default
+     (Courier New on Windows) and looks alien next to the UI font; always
+     prefer this token so new code doesn't regress. */
+  --font-mono: "JetBrains Mono", "SFMono-Regular", "Cascadia Code", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+body.dark{
+  --bg: #0f1115;
+  --card: #1f2330;  /* WCAG SC 1.4.11: 1.19:1 vs --bg — visible card edge without depending on shadow */
+  --text: #e7eaf0;
+  --muted: #aab2c0;
+  --muted-accessible: #b0b8c8;  /* higher contrast muted for WCAG AA labels */
+  --border: #2b3240;
+  --table-head: #161b27;  /* WCAG AA: ~15:1 vs --text #e7eaf0 */
+  --shadow: 0 10px 26px rgba(0,0,0,0.45);
+  --btn-bg: #1b2030;
+  --btn-text: #e7eaf0;
+  --btn-hover: #222a3d;
+  --tooltip-bg: rgba(0,0,0,0.92);
+  --tooltip-text: #fff;
+  --accent: #60a5fa;
+  --accent-on-bg: #60a5fa;  /* same as --accent in dark mode */
+  --icon-brand: #5599dd;  /* Cerulean Light — YU AI Manager brand, 4.2:1 on dark */
+
+  /* ── derived variables (used by extensions) ─── */
+  --fg: var(--text);
+  --fg-muted: var(--muted);
+  --bg-card: var(--card);
+  --bg-input: var(--card);
+  --bg-hover: rgba(255,255,255,0.05);
+  --accent-bg: rgba(96,165,250,0.15);
+  --mark-bg: rgba(250,204,21,0.3);
+  --mark-fg: var(--text);
+  --success: #66bb6a;
+  --error: #ef5350;
+
+  /* ── accessible status/badge text colors ─── */
+  --status-ok: #4ade80;
+  --status-warn: #f39c12;
+  --positive-change-fg: #34d399;
+  --negative-change-fg: #f87171;
+  --rating-star-fg: #f59e0b;
+  --trust-verified-fg: #6bb8e8;
+  --trust-untrusted-fg: #f28b8b;
+
+  /* dark-mode tag tokens */
+  --tag-bg: #4a4a4a;
+  --tag-text: #f0f0f0;
+  --tag-border: #666;
+  --tag-hover-bg: #5a5a5a;
+  --tag-hover-border: #888;
+  --tag-text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+  --tag-focus-ring: #60a5fa;
+  --prompt-text-bg: #2d2d2d;
+  --prompt-text-border: #444;
+
+  /* tag category variants */
+  --tag-ns-bg: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+  --tag-ns-border: #718096;
+  --tag-ns-text: #e2e8f0;
+  --tag-wh-bg: linear-gradient(135deg, #742a2a 0%, #9b2c2c 100%);
+  --tag-wh-text: #fed7d7;
+  --tag-wh-border: #fc8181;
+  --tag-wl-bg: linear-gradient(135deg, #2c5282 0%, #2a4365 100%);
+  --tag-wl-text: #bee3f8;
+  --tag-wl-border: #63b3ed;
+  --tag-we-bg: linear-gradient(135deg, #744210 0%, #975a16 100%);
+  --tag-we-text: #fefcbf;
+  --tag-we-border: #f6e05e;
+
+  /* negative prompt tokens */
+  --neg-prompt-bg: #2d2424;
+  --neg-prompt-border: #fc8181;
+  --neg-tag-bg: #5a3a3a;
+  --neg-tag-text: #fbb6b6;
+  --neg-tag-border: #e57373;
+  --neg-heading: #fc8181;
+
+  /* accordion tokens */
+  --accordion-bg: #252525;
+  --accordion-border: #3a3a3a;
+  --accordion-header-bg: #2a2a2a;
+  --accordion-header-text: #e0e0e0;
+  --accordion-header-hover: #333;
+  --param-value-text: #f0f0f0;
+  --param-key-text: #a0a0a0;
+
+  /* dark-mode-fix-v2 tokens */
+  --char-section-bg: #2a2a2a;
+  --char-section-border: #444;
+  --caption-bg: #1e1e1e;
+  --caption-border: #60a5fa;
+  --caption-text: #e0e0e0;
+  --char-card-bg: #1e1e1e;
+  --char-card-border: #444;
+  --char-card-hover-border: #60a5fa;
+  --char-card-hover-shadow: 0 2px 12px rgba(96, 165, 250, 0.2);
+  --char-number-bg: #333;
+  --char-number-text: #60a5fa;
+  --char-position-bg: #333;
+  --char-position-text: #999;
+  --char-prompt-text: #e0e0e0;
+  --neg-caption-bg: rgba(255, 59, 48, 0.15);
+  --neg-caption-border: #ff3b30;
+  --neg-caption-text: #e0e0e0;
+}
+
+/* Konami code: retro neon theme */
+body.theme-retro{
+  --bg: #0a0014;
+  --card: #120024;
+  --text: #e0d0ff;
+  --muted: #a080d0;
+  --border: #2a1050;
+  --table-head: #0f0020;  /* WCAG AA: ~15:1 vs --text #e0d0ff */
+  --shadow: 0 0 20px rgba(160,80,255,0.3);
+  --btn-bg: #1a0038;
+  --btn-text: #e0d0ff;
+  --btn-hover: #2a1050;
+  --tooltip-bg: rgba(10,0,20,0.95);
+  --tooltip-text: #e0d0ff;
+  --accent: #bf5af2;
+  color-scheme: dark;
+}
+body.theme-retro #fixedNav{
+  background: linear-gradient(90deg, #0a0014 0%, #1a0040 50%, #0a0014 100%) !important;
+  border-bottom-color: rgba(191,90,242,0.4) !important;
+  box-shadow: 0 2px 12px rgba(191,90,242,0.3) !important;
+}
+body.theme-retro a{ color: #bf5af2; }
+body.theme-retro .nav-link.active{ color: #ff6ef2 !important; }
+@keyframes retro-glow{
+  0%,100%{ text-shadow: 0 0 6px rgba(191,90,242,0.6); }
+  50%{ text-shadow: 0 0 16px rgba(255,110,242,0.8), 0 0 30px rgba(191,90,242,0.4); }
+}
+body.theme-retro h1, body.theme-retro h2, body.theme-retro h3{
+  animation: retro-glow 3s ease-in-out infinite;
+}
+
+/* Custom theme glow effect (applied via theme editor) */
+@keyframes custom-glow{
+  0%,100%{ text-shadow: 0 0 6px color-mix(in srgb, var(--accent) 60%, transparent); }
+  50%{ text-shadow: 0 0 16px color-mix(in srgb, var(--accent) 80%, transparent), 0 0 30px color-mix(in srgb, var(--accent) 40%, transparent); }
+}
+body.theme-glow h1, body.theme-glow h2, body.theme-glow h3{
+  animation: custom-glow 3s ease-in-out infinite;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+  /* Prevent FOUC: i18n/init.ts adds .i18n-ready once translations are applied */
+  opacity: 0;
+  transition: opacity 0.08s;
+}
+body.i18n-ready {
+  opacity: 1;
+}
+
+/* Custom background image layer */
+body.has-bg-image::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: var(--bg-image) center/cover no-repeat fixed;
+  opacity: var(--bg-image-opacity, 0.1);
+  pointer-events: none;
+}
+
+/* Native form controls can ignore custom colors on some platforms. */
+body{ color-scheme: light; }
+body.dark{ color-scheme: dark; }
+
+/* Ensure form controls inherit theme colors. */
+input[type="text"], input[type="date"], select, textarea{
+  background: var(--card);
+  color: var(--text);
+}
+
+body.dark input[type="text"], body.dark input[type="date"], body.dark select, body.dark textarea{
+  background: var(--card);
+  color: var(--text);
+}
+
+body.dark option{
+  background: var(--card);
+  color: var(--text);
+}
+
+body:not(.dark) select{
+  background: var(--card, #fff);
+  color: var(--text, #1a1a1a);
+  border: 1px solid var(--border, #ccc);
+}
+
+body:not(.dark) option{
+  background: #fff;
+  color: #1a1a1a;
+}

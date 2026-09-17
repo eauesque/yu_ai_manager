@@ -1,0 +1,749 @@
+<script nonce="{{ csp_nonce }}">
+  "use strict";
+
+  // Part 2 of the sweep runner — split from _script_sweep.html to keep each
+  // file under 800 lines (CLAUDE.md). Top-level vars/functions land on
+  // window so part 1 (defined first) is reachable from here.
+
+  function _sdwbSubstitutePromptMacros(prompt, slotValuesByAxis) {
+    if (!prompt || !slotValuesByAxis) return prompt;
+    return prompt.replace(/\$([xyz])?(\d+)/g, function(m, ax, n) {
+      var axis = ax || "x";
+      var bag = slotValuesByAxis[axis];
+      if (!bag) return m;
+      var v = bag[parseInt(n, 10)];
+      return (v != null) ? String(v) : m;
+    });
+  }
+
+  function _ssweepApplyMacrosVisibility() {
+    ["x", "y", "z"].forEach(function(axis) {
+      var ids = _sdwbAxisIds(axis);
+      var sel = _ssweepGet(ids.paramSel);
+      var isMacros = !!(sel && sel.value === "_macros");
+      var editor = _ssweepGet(ids.editor);
+      if (editor) editor.style.display = isMacros ? "" : "none";
+      ids.rangeIds.forEach(function(id) {
+        var el = _ssweepGet(id);
+        if (!el) return;
+        var label = document.querySelector('label[for="' + id + '"]');
+        var disp = isMacros ? "none" : "";
+        el.style.display = disp;
+        if (label) label.style.display = disp;
+      });
+      if (isMacros) _sdwbRenderMacros(axis);
+    });
+    _ssweepApplyMode();
+  }
+
+  // ---------- Live total-image estimate ----------------------------
+  function _sdwbSweepCountForAxis(axis) {
+    var ids = _sdwbAxisIds(axis);
+    var sel = _ssweepGet(ids.paramSel);
+    var pv = sel ? sel.value : "";
+    if (pv === "_macros") {
+      var built = _sdwbMacroBuildSeries(axis, true);
+      return built ? built.count : 0;
+    }
+    var minEl = _ssweepGet(ids.rangeIds[0]);
+    var maxEl = _ssweepGet(ids.rangeIds[1]);
+    var modeEl = _ssweepGet(ids.rangeIds[2]);
+    var cntEl = _ssweepGet(ids.rangeIds[3]);
+    var stepEl = _ssweepGet(ids.rangeIds[4]);
+    if (!minEl || !maxEl || !modeEl || !cntEl || !stepEl) return 0;
+    var mn = parseFloat(minEl.value);
+    var mx = parseFloat(maxEl.value);
+    var md = modeEl.value || "count";
+    var ct = parseInt(cntEl.value, 10) || 0;
+    var sp = parseFloat(stepEl.value) || 0;
+    return _ssweepBuildSeries(mn, mx, md, ct, sp).length;
+  }
+
+  function _sdwbSweepEstimateTotal() {
+    var cap = (typeof _ssweepEffectiveMax === "function") ? _ssweepEffectiveMax() : 50;
+    var xCount = _sdwbSweepCountForAxis("x");
+    if (xCount < 1) return { total: 0, cap: cap, ok: false };
+    var total = xCount;
+    var yEn = _ssweepGet("sdwbSweepYEnabled");
+    if (yEn && yEn.checked) {
+      var yCount = _sdwbSweepCountForAxis("y");
+      if (yCount < 1) return { total: 0, cap: cap, ok: false };
+      total *= yCount;
+      var zEn = _ssweepGet("sdwbSweepZEnabled");
+      if (zEn && zEn.checked) {
+        var zCount = _sdwbSweepCountForAxis("z");
+        if (zCount < 1) return { total: 0, cap: cap, ok: false };
+        total *= zCount;
+      }
+    }
+    return { total: total, cap: cap, ok: total <= cap };
+  }
+
+  function _sdwbSweepUpdateEstimate() {
+    var el = _ssweepGet("sdwbSweepTotalEstimate");
+    if (!el) return;
+    var est = _sdwbSweepEstimateTotal();
+    if (est.total < 1) {
+      el.textContent = "—";
+      el.style.color = "";
+      el.title = "";
+      return;
+    }
+    var labelImgs = window.tr ? window.tr('sd_bridge.sweep_total_estimate_unit', '枚') : 'images';
+    var capLabel = window.tr ? window.tr('sd_bridge.sweep_total_estimate_cap', '上限') : 'cap';
+    var text = est.total + " " + labelImgs + " (" + capLabel + " " + est.cap + ")";
+    if (!est.ok) {
+      var warn = window.tr ? window.tr('sd_bridge.sweep_total_over_cap', '⚠ 上限超過 — Run Sweep でブロックされます')
+                            : '⚠ exceeds cap — Run Sweep will block';
+      el.textContent = text + " " + warn;
+      el.style.color = "#f44336";
+      el.title = warn;
+    } else {
+      el.textContent = text;
+      el.style.color = "#4caf50";
+      el.title = "";
+    }
+  }
+
+  function _ssweepApplyYEnabled() {
+    var en = _ssweepGet("sdwbSweepYEnabled");
+    var enabled = !!(en && en.checked);
+    ["sdwbSweepYParam", "sdwbSweepYMin", "sdwbSweepYMax", "sdwbSweepYMode",
+     "sdwbSweepYCount", "sdwbSweepYStep"].forEach(function(id) {
+      var el = _ssweepGet(id);
+      if (el) el.disabled = !enabled;
+    });
+  }
+
+  function _ssweepApplyZEnabled() {
+    var yEn = _ssweepGet("sdwbSweepYEnabled");
+    var zEn = _ssweepGet("sdwbSweepZEnabled");
+    var yChecked = !!(yEn && yEn.checked);
+    var zChecked = !!(zEn && zEn.checked);
+    if (zEn) zEn.disabled = !yChecked;
+    if (!yChecked && zEn && zEn.checked) zEn.checked = false;
+    var enabled = yChecked && zChecked;
+    ["sdwbSweepZParam", "sdwbSweepZMin", "sdwbSweepZMax", "sdwbSweepZMode",
+     "sdwbSweepZCount", "sdwbSweepZStep"].forEach(function(id) {
+      var el = _ssweepGet(id);
+      if (el) el.disabled = !enabled;
+    });
+  }
+
+  function _ssweepInitModeToggle() {
+    var modeSel = _ssweepGet("sdwbSweepMode");
+    if (modeSel) modeSel.addEventListener("change", _ssweepApplyMode);
+    var yModeSel = _ssweepGet("sdwbSweepYMode");
+    if (yModeSel) yModeSel.addEventListener("change", _ssweepApplyMode);
+    var zModeSel = _ssweepGet("sdwbSweepZMode");
+    if (zModeSel) zModeSel.addEventListener("change", _ssweepApplyMode);
+    var yEn = _ssweepGet("sdwbSweepYEnabled");
+    if (yEn) yEn.addEventListener("change", function() { _ssweepApplyYEnabled(); _ssweepApplyZEnabled(); });
+    var zEn = _ssweepGet("sdwbSweepZEnabled");
+    if (zEn) zEn.addEventListener("change", _ssweepApplyZEnabled);
+    ["x", "y", "z"].forEach(function(axis) {
+      var ids = _sdwbAxisIds(axis);
+      var paramSel = _ssweepGet(ids.paramSel);
+      if (paramSel) paramSel.addEventListener("change", _ssweepApplyMacrosVisibility);
+      var addBtn = _ssweepGet(ids.addBtn);
+      if (addBtn) addBtn.addEventListener("click", function() { _sdwbMacroAdd(axis); });
+      var padShort = _ssweepGet(ids.padShort);
+      if (padShort) padShort.addEventListener("change", function() { _sdwbRenderMacros(axis); });
+    });
+    _ssweepApplyMode();
+    _ssweepApplyYEnabled();
+    _ssweepApplyZEnabled();
+    _ssweepApplyMacrosVisibility();
+    var sweepSection = _ssweepGet("sdwbSweepSection");
+    if (sweepSection) {
+      sweepSection.addEventListener("input", _sdwbSweepUpdateEstimate);
+      sweepSection.addEventListener("change", _sdwbSweepUpdateEstimate);
+    }
+    _sdwbSweepUpdateEstimate();
+    if (window._sweepLoadAxes) {
+      try { window._sweepLoadAxes(); } catch (_e) {}
+    }
+    if (window._sweepOnAxesReady) {
+      window._sweepOnAxesReady(function() {
+        ["x", "y", "z"].forEach(function(axis) {
+          try { _sdwbRenderMacros(axis); } catch (_e) {}
+        });
+        _sdwbSweepUpdateEstimate();
+      });
+    }
+  }
+
+  function _ssweepInitRecovery() {
+    if (!window.SweepBuffer) return;
+    window.SweepBuffer.checkRecovery("sd-webui", "/ext/sd-webui/api/save-batch", {
+      recovered: window.tr ? window.tr('sd_bridge.sweep_recovered', 'SD WebUI Sweep の未保存 N 枚を自動保存しました') : 'SD WebUI: saved N recovered images',
+      warningTitle: window.tr ? window.tr('sd_bridge.sweep_recovery_title', '⚠ SD WebUI Sweep が中断されました') : '⚠ SD WebUI Sweep was interrupted',
+      warningBody: window.tr ? window.tr('sd_bridge.sweep_recovery_body', '前回の SD WebUI Sweep で N 枚が未保存です。サーバ自動保存に失敗しました。手動で対応してください。') : 'N images from previous SD WebUI Sweep were not saved. Auto-recovery failed.',
+      retryBtn: window.tr ? window.tr('sd_bridge.sweep_recovery_retry', 'サーバへ再保存') : 'Retry server save',
+      downloadBtn: window.tr ? window.tr('sd_bridge.sweep_recovery_download', '個別ダウンロード') : 'Download individually',
+      discardBtn: window.tr ? window.tr('sd_bridge.sweep_recovery_discard', '破棄') : 'Discard',
+    });
+  }
+
+  function _ssweepInitResume() {
+    if (!window.SweepResume) return;
+    window.SweepResume.maybeResume({
+      bridge: "sd-webui",
+      prefix: "sdwb",
+      sectionId: "sdwbSweepSection",
+      params: ["cfg_scale", "steps", "denoising_strength", "hr_scale"],
+    });
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", function() {
+      _ssweepInitModeToggle(); _ssweepInitRecovery(); _ssweepInitResume();
+    });
+  } else {
+    _ssweepInitModeToggle();
+    _ssweepInitRecovery();
+    _ssweepInitResume();
+  }
+
+  // Best-effort: update the visible denoise slider/number for parameter
+  // "denoising_strength". Whichever input exists for the current mode (Hires
+  // vs img2img) gets the new value.
+  function _ssweepSyncDenoiseDom(val) {
+    ["sdwbHiresDenoising", "sdwbDenoising"].forEach(function(id) {
+      var el = _ssweepGet(id);
+      if (!el) return;
+      el.value = val;
+      try { el.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+    });
+  }
+
+  function _ssweepShowCancelRow(show) {
+    var row = _ssweepGet("sdwbSweepCancelRow");
+    if (row) row.style.display = show ? "flex" : "none";
+  }
+
+  window.sdwbStopSweepGraceful = function() {
+    if (!_ssweepRunning) return;
+    _ssweepCancel = true;
+    _ssweepUpdateStatus(window.tr ? window.tr('bridge.status.stopping_graceful', 'Stopping after current generation…') : 'stopping…');
+  };
+  window.sdwbStopSweepImmediate = function() {
+    if (!_ssweepRunning) return;
+    _ssweepCancel = true;
+    if (_ssweepAbort) { try { _ssweepAbort.abort(); } catch(_) {} }
+    try {
+      window.bridgeFetch("sd-webui", "cancel", {});
+    } catch(_) {}
+    _ssweepUpdateStatus(window.tr ? window.tr('bridge.status.aborting', 'Aborting…') : 'aborting…');
+  };
+  window.sdwbCancelSweep = window.sdwbStopSweepGraceful;
+
+  window.sdwbRunSweep = async function() {
+    if (_ssweepRunning) return;
+    if (window._sdwbIsGenerating && window._sdwbIsGenerating()) return;
+
+    // Pre-load sweep axis wildcards (cheap on warm cache).
+    if (window._sweepLoadAxes) {
+      try { await window._sweepLoadAxes(); } catch (_e) { /* tolerate */ }
+    }
+
+    // ----- X axis -----
+    // X axis can be either a regular numeric param OR `_macros` (Prompt
+    // S/R macros). The _macros mode bypasses the numeric range fields
+    // and reads from the macro slots editor.
+    var xParamSel = _ssweepGet("sdwbSweepParam");
+    var xParamValue = xParamSel ? xParamSel.value : "";
+    var xIsMacros = (xParamValue === "_macros");
+    var xSpec = null;
+    var xValues = null;
+    var xMacroValues = null;
+    var xParamLabel = "";
+
+    if (xIsMacros) {
+      var built = _sdwbMacroBuildSeries("x");
+      if (!built) return;
+      xMacroValues = built.valuesPerIter;
+      xValues = [];
+      for (var _i = 0; _i < built.count; _i++) xValues.push(_i);
+      xParamLabel = (window.tr ? window.tr('sd_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (X)";
+    } else {
+      xSpec = _SSWEEP_PARAMS[xParamValue];
+      if (!xSpec) {
+        window.showToast("Sweep: unknown X parameter", true);
+        return;
+      }
+      var xMin = parseFloat(_ssweepGet("sdwbSweepMin").value);
+      var xMax = parseFloat(_ssweepGet("sdwbSweepMax").value);
+      var xMode = _ssweepGet("sdwbSweepMode").value || "count";
+      var xCount = parseInt(_ssweepGet("sdwbSweepCount").value, 10) || 6;
+      var xStep = parseFloat(_ssweepGet("sdwbSweepStep").value) || 0.5;
+      xValues = _ssweepBuildSeries(xMin, xMax, xMode, xCount, xStep);
+      if (xValues.length < 1) {
+        window.showToast(window.tr('sd_bridge.sweep_invalid_range', 'Sweep: invalid range or step'), true);
+        return;
+      }
+    }
+
+    // ----- Y axis (opt-in) -----
+    var yEn = _ssweepGet("sdwbSweepYEnabled");
+    var yEnabled = !!(yEn && yEn.checked);
+    var yParamSel = null, ySpec = null, yValues = null, yParamLabel = "";
+    var yIsMacros = false, yMacroValues = null, yParamValue = "";
+    if (yEnabled) {
+      yParamSel = _ssweepGet("sdwbSweepYParam");
+      yParamValue = yParamSel ? yParamSel.value : "";
+      yIsMacros = (yParamValue === "_macros");
+      if (yIsMacros) {
+        var ybuilt = _sdwbMacroBuildSeries("y");
+        if (!ybuilt) return;
+        yMacroValues = ybuilt.valuesPerIter;
+        yValues = [];
+        for (var _yi = 0; _yi < ybuilt.count; _yi++) yValues.push(_yi);
+        yParamLabel = (window.tr ? window.tr('sd_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (Y)";
+      } else {
+        ySpec = _SSWEEP_PARAMS[yParamValue];
+        if (!ySpec) {
+          window.showToast("Sweep: unknown Y parameter", true);
+          return;
+        }
+        var yMin = parseFloat(_ssweepGet("sdwbSweepYMin").value);
+        var yMax = parseFloat(_ssweepGet("sdwbSweepYMax").value);
+        var yMode = _ssweepGet("sdwbSweepYMode").value || "count";
+        var yCount = parseInt(_ssweepGet("sdwbSweepYCount").value, 10) || 3;
+        var yStep = parseFloat(_ssweepGet("sdwbSweepYStep").value) || 0.5;
+        yValues = _ssweepBuildSeries(yMin, yMax, yMode, yCount, yStep);
+        if (yValues.length < 1) {
+          window.showToast(window.tr('sd_bridge.sweep_invalid_range', 'Sweep: invalid range or step') + " (Y)", true);
+          return;
+        }
+        var yKey = "sd_bridge.sweep_param_" + yParamValue;
+        yParamLabel = (window.tr ? window.tr(yKey, ySpec.label) : ySpec.label);
+      }
+    }
+
+    // ----- Z axis (opt-in 3rd axis, requires Y) -----
+    var zEn = _ssweepGet("sdwbSweepZEnabled");
+    var zEnabled = !!(yEnabled && zEn && zEn.checked);
+    var zParamSel = null, zSpec = null, zValues = null, zParamLabel = "";
+    var zIsMacros = false, zMacroValues = null, zParamValue = "";
+    if (zEnabled) {
+      zParamSel = _ssweepGet("sdwbSweepZParam");
+      zParamValue = zParamSel ? zParamSel.value : "";
+      zIsMacros = (zParamValue === "_macros");
+      if (zIsMacros) {
+        var zbuilt = _sdwbMacroBuildSeries("z");
+        if (!zbuilt) return;
+        zMacroValues = zbuilt.valuesPerIter;
+        zValues = [];
+        for (var _zi = 0; _zi < zbuilt.count; _zi++) zValues.push(_zi);
+        zParamLabel = (window.tr ? window.tr('sd_bridge.sweep_param_macros', 'Prompt macros') : 'Prompt macros') + " (Z)";
+      } else {
+        zSpec = _SSWEEP_PARAMS[zParamValue];
+        if (!zSpec) {
+          window.showToast("Sweep: unknown Z parameter", true);
+          return;
+        }
+        var zMin = parseFloat(_ssweepGet("sdwbSweepZMin").value);
+        var zMax = parseFloat(_ssweepGet("sdwbSweepZMax").value);
+        var zMode = _ssweepGet("sdwbSweepZMode").value || "count";
+        var zCount = parseInt(_ssweepGet("sdwbSweepZCount").value, 10) || 3;
+        var zStep = parseFloat(_ssweepGet("sdwbSweepZStep").value) || 0.5;
+        zValues = _ssweepBuildSeries(zMin, zMax, zMode, zCount, zStep);
+        if (zValues.length < 1) {
+          window.showToast(window.tr('sd_bridge.sweep_invalid_range', 'Sweep: invalid range or step') + " (Z)", true);
+          return;
+        }
+        var zKey = "sd_bridge.sweep_param_" + zParamValue;
+        zParamLabel = (window.tr ? window.tr(zKey, zSpec.label) : zSpec.label);
+      }
+    }
+
+    var total = xValues.length;
+    if (yValues) total *= yValues.length;
+    if (zValues) total *= zValues.length;
+    var _cap = _ssweepEffectiveMax();
+    if (total > _cap) {
+      window.showToast(window.tr('sd_bridge.sweep_total_too_large', 'Sweep total exceeds the safety cap. Reduce X / Y / Z count.'), true);
+      return;
+    }
+
+    var seedEl = _ssweepGet("sdwbSeed");
+    var curSeed = parseInt(seedEl.value, 10);
+    if (!isFinite(curSeed) || curSeed < 0) {
+      curSeed = Math.floor(Math.random() * 2147483647);
+      seedEl.value = String(curSeed);
+    }
+
+    if (!xIsMacros) {
+      var xKey = "sd_bridge.sweep_param_" + xParamValue;
+      xParamLabel = (window.tr ? window.tr(xKey, xSpec.label) : xSpec.label);
+    }
+
+    var xDomEl = (!xIsMacros && xSpec && xSpec.dom) ? _ssweepGet(xSpec.dom) : null;
+    var xOrigDomVal = xDomEl ? xDomEl.value : null;
+    var yDomEl = (!yIsMacros && ySpec && ySpec.dom) ? _ssweepGet(ySpec.dom) : null;
+    var yOrigDomVal = yDomEl ? yDomEl.value : null;
+    var zDomEl = (!zIsMacros && zSpec && zSpec.dom) ? _ssweepGet(zSpec.dom) : null;
+    var zOrigDomVal = zDomEl ? zDomEl.value : null;
+    var originalHiresDenoise = _ssweepGet("sdwbHiresDenoising") ? _ssweepGet("sdwbHiresDenoising").value : null;
+    var originalI2iDenoise = _ssweepGet("sdwbDenoising") ? _ssweepGet("sdwbDenoising").value : null;
+
+    var deferSaveEl = _ssweepGet("sdwbSweepDeferSave");
+    var deferSave = !!(deferSaveEl && deferSaveEl.checked);
+    if (deferSave && window.SweepBuffer) {
+      window.SweepBuffer.start("sd-webui", {
+        param: xParamValue,
+        param_y: yEnabled ? yParamValue : null,
+        param_z: zEnabled ? zParamValue : null,
+      });
+    }
+
+    function _axisMeta(paramVal, isMacros, vals, macroVals) {
+      if (isMacros) {
+        return { param: "_macros", total: vals.length, series: macroVals.slice(), index: 0, value: macroVals[0] };
+      }
+      return { param: paramVal, total: vals.length, series: vals, index: 0, value: vals[0] };
+    }
+    var axes = [_axisMeta(xParamValue, xIsMacros, xValues, xMacroValues)];
+    if (yEnabled) axes.push(_axisMeta(yParamValue, yIsMacros, yValues, yMacroValues));
+    if (zEnabled) axes.push(_axisMeta(zParamValue, zIsMacros, zValues, zMacroValues));
+    var sweepRunMeta = {
+      id: (window.crypto && window.crypto.randomUUID) ? window.crypto.randomUUID()
+            : ("sw-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 10)),
+      bridge: "sd-webui",
+      base_seed: curSeed,
+      created_at: Math.floor(Date.now() / 1000),
+      axes: axes,
+    };
+
+    // Freeze the generate body once at sweep start so live UI edits to the
+    // prompt / negative prompt / sampler / etc. don't bleed into later
+    // iterations. Each runOne deep-clones this snapshot.
+    var _frozenBody = window._sdwbBuildBody();
+    if (!_frozenBody) {
+      // _sdwbBuildBody already toasted (e.g. prompt_required).
+      return;
+    }
+    // Capture the *unsubstituted* prompt/negative templates so the re-run
+    // flow can restore `$x1` / `$y1` / S-R tokens instead of the last
+    // iteration's substituted text.
+    if (typeof _frozenBody.prompt === "string") sweepRunMeta.prompt_template = _frozenBody.prompt;
+    if (typeof _frozenBody.negative_prompt === "string") sweepRunMeta.negative_template = _frozenBody.negative_prompt;
+    // SD WebUI: active checkpoint is selected via sdwbModelSelect; the
+    // server applies it through /api/models/switch. VAE has no UI here.
+    try {
+      var _ckptEl = document.getElementById("sdwbModelSelect");
+      if (_ckptEl && _ckptEl.value) sweepRunMeta.checkpoint = _ckptEl.value;
+    } catch (_e) { /* no-op */ }
+    if (typeof _frozenBody.sampler_name === "string") sweepRunMeta.sampler = _frozenBody.sampler_name;
+    if (typeof _frozenBody.width === "number") sweepRunMeta.width = _frozenBody.width;
+    if (typeof _frozenBody.height === "number") sweepRunMeta.height = _frozenBody.height;
+    if (typeof _frozenBody.steps === "number") sweepRunMeta.steps = _frozenBody.steps;
+    if (typeof _frozenBody.cfg_scale === "number") sweepRunMeta.cfg = _frozenBody.cfg_scale;
+
+    // ---- Sweep quick-jump integration ----
+    if (window.BridgeSweepQuickJump) {
+      window.BridgeSweepQuickJump.registerStart(sweepRunMeta);
+    }
+    var _bsqjOpenBtn = document.getElementById("sdwb-sweep-open");
+    var _bsqjHistBtn = document.getElementById("sdwb-sweep-history");
+    var _bsqjFirstFid = null;
+    if (_bsqjOpenBtn) {
+      _bsqjOpenBtn.disabled = true;
+      _bsqjOpenBtn.onclick = function () {
+        if (_bsqjFirstFid != null && window.BridgeSweepQuickJump) {
+          window.BridgeSweepQuickJump.openInNewTab(sweepRunMeta.id, _bsqjFirstFid);
+        }
+      };
+    }
+    if (_bsqjHistBtn && !_bsqjHistBtn._bsqjBound) {
+      _bsqjHistBtn._bsqjBound = true;
+      _bsqjHistBtn.addEventListener("click", function () {
+        if (window.BridgeSweepQuickJump) {
+          window.BridgeSweepQuickJump.renderHistoryPopover(_bsqjHistBtn);
+        }
+      });
+    }
+    // Save current UI parameters as "last params" so 🔄 前回 restores
+    // the sweep's prompt/seed/etc. after navigating away.
+    if (typeof window.sdwbSaveLastParams === "function") {
+      try { window.sdwbSaveLastParams(); } catch (_e) {}
+    }
+
+    _ssweepCancel = false;
+    _ssweepRunning = true;
+    _ssweepShowCancelRow(true);
+    function _macroEntryLabel(axisLetter, entry) {
+      var parts = [];
+      for (var k in entry) parts.push("$" + axisLetter + k + "=" + entry[k]);
+      return parts.join(", ");
+    }
+    var xLabels = [];
+    for (var _xj = 0; _xj < xValues.length; _xj++) {
+      if (xIsMacros) {
+        xLabels.push(_macroEntryLabel("x", xMacroValues[_xj]));
+      } else {
+        xLabels.push(xParamLabel + " = " + _ssweepFormatVal(xValues[_xj], xSpec.int));
+      }
+    }
+    var yLabels = null;
+    if (yEnabled) {
+      yLabels = [];
+      for (var _yj = 0; _yj < yValues.length; _yj++) {
+        if (yIsMacros) {
+          yLabels.push(_macroEntryLabel("y", yMacroValues[_yj]));
+        } else {
+          yLabels.push(yParamLabel + " = " + _ssweepFormatVal(yValues[_yj], ySpec.int));
+        }
+      }
+    }
+    var zLabels = null;
+    if (zEnabled) {
+      zLabels = [];
+      for (var _zj = 0; _zj < zValues.length; _zj++) {
+        if (zIsMacros) {
+          zLabels.push(_macroEntryLabel("z", zMacroValues[_zj]));
+        } else {
+          zLabels.push(zParamLabel + " = " + _ssweepFormatVal(zValues[_zj], zSpec.int));
+        }
+      }
+    }
+    _ssweepInitGrid(xLabels, yLabels, zLabels);
+
+    var doneCount = 0;
+    var xi = 0, yi = 0, zi = 0;
+
+    function _finalizeAndSave(reason) {
+      _ssweepRunning = false;
+      _ssweepShowCancelRow(false);
+      _ssweepAbort = null;
+      var baseStatus = (reason === "cancelled"
+        ? (window.tr ? window.tr('bridge.status.stopped', 'Stopped') : 'cancelled')
+        : (window.tr ? window.tr('sd_bridge.sweep_done', 'Sweep done') : 'done'))
+        + " (" + doneCount + "/" + total + ")";
+      _ssweepUpdateStatus(baseStatus);
+      if (window.BridgeSweepQuickJump) {
+        if (reason === "cancelled") {
+          window.BridgeSweepQuickJump.markCancelled(sweepRunMeta.id);
+        } else {
+          window.BridgeSweepQuickJump.markCompleted(sweepRunMeta.id);
+        }
+      }
+      if (reason !== "cancelled" && _bsqjFirstFid != null && window.BridgeSweepQuickJump) {
+        var _banner = document.createElement("div");
+        _banner.className = "bsqj-complete-banner";
+        var _link = document.createElement("a");
+        _link.href = "#";
+        _link.textContent = (window.tr && window.tr("bridge.sweep.openCompleted")) || "Sweep ページで確認 →";
+        _link.addEventListener("click", function (ev) {
+          ev.preventDefault();
+          window.BridgeSweepQuickJump.openInNewTab(sweepRunMeta.id, _bsqjFirstFid);
+        });
+        _banner.appendChild(_link);
+        document.body.appendChild(_banner);
+        setTimeout(function () { try { _banner.remove(); } catch (_) {} }, 8000);
+      }
+      if (xDomEl && xOrigDomVal != null) xDomEl.value = xOrigDomVal;
+      if (yDomEl && yOrigDomVal != null) yDomEl.value = yOrigDomVal;
+      if (zDomEl && zOrigDomVal != null) zDomEl.value = zOrigDomVal;
+      // denoising_strength has paired UI fields that need restoring whether
+      // it's the X, Y, or Z axis param.
+      if ((xParamValue === "denoising_strength") || (yEnabled && yParamValue === "denoising_strength") || (zEnabled && zParamValue === "denoising_strength")) {
+        if (originalHiresDenoise != null && _ssweepGet("sdwbHiresDenoising")) _ssweepGet("sdwbHiresDenoising").value = originalHiresDenoise;
+        if (originalI2iDenoise != null && _ssweepGet("sdwbDenoising")) _ssweepGet("sdwbDenoising").value = originalI2iDenoise;
+      }
+      if (typeof window._sdwbApplySeedAutoReset === "function") window._sdwbApplySeedAutoReset();
+      if (deferSave && window.SweepBuffer && window.SweepBuffer.size("sd-webui") > 0) {
+        var n = window.SweepBuffer.size("sd-webui");
+        _ssweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('sd_bridge.sweep_saving_batch', '保存中…') : 'saving…') + " (" + n + ")");
+        window.SweepBuffer.flushToServer("sd-webui", "/ext/sd-webui/api/save-batch")
+          .then(function(res) {
+            _ssweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('sd_bridge.sweep_saved', '保存しました') : 'saved') + " (" + res.saved.length + ")");
+            if (_bsqjFirstFid == null && Array.isArray(res.saved_items)) {
+              for (var _bj = 0; _bj < res.saved_items.length; _bj++) {
+                var _itB = res.saved_items[_bj];
+                if (_itB && typeof _itB.file_id === "number") {
+                  _bsqjFirstFid = _itB.file_id;
+                  if (window.BridgeSweepQuickJump) {
+                    window.BridgeSweepQuickJump.registerFirstSavedFileId(sweepRunMeta.id, _bsqjFirstFid);
+                  }
+                  if (_bsqjOpenBtn) _bsqjOpenBtn.disabled = false;
+                  break;
+                }
+              }
+            }
+          })
+          .catch(function(e) {
+            _ssweepUpdateStatus(baseStatus + " " + (window.tr ? window.tr('sd_bridge.sweep_save_failed', '保存失敗') : 'save failed') + ": " + e.message);
+            if (window.showToast) window.showToast((window.tr ? window.tr('sd_bridge.sweep_save_failed_toast', 'SD WebUI Sweep の一括保存に失敗。次回ロード時に再試行されます。') : 'SD WebUI batch save failed. Will retry on next load.'), true);
+            if (window.BridgeSweepQuickJump) window.BridgeSweepQuickJump.markFailed(sweepRunMeta.id);
+          });
+      }
+    }
+
+    function runOne() {
+      var done = zEnabled ? (zi >= zValues.length) : (xi >= xValues.length);
+      if (_ssweepCancel || done) {
+        _finalizeAndSave(_ssweepCancel ? "cancelled" : "done");
+        return;
+      }
+      var xValue = xValues[xi];
+      var xDisplay;
+      var xMacroEntry = null;
+      if (xIsMacros) {
+        xMacroEntry = xMacroValues[xi];
+        xDisplay = _macroEntryLabel("x", xMacroEntry);
+      } else {
+        xDisplay = _ssweepFormatVal(xValue, xSpec.int);
+      }
+      var yValue = yEnabled ? yValues[yi] : null;
+      var yDisplay = null, yMacroEntry = null;
+      if (yEnabled) {
+        if (yIsMacros) { yMacroEntry = yMacroValues[yi]; yDisplay = _macroEntryLabel("y", yMacroEntry); }
+        else { yDisplay = _ssweepFormatVal(yValue, ySpec.int); }
+      }
+      var zValue = zEnabled ? zValues[zi] : null;
+      var zDisplay = null, zMacroEntry = null;
+      if (zEnabled) {
+        if (zIsMacros) { zMacroEntry = zMacroValues[zi]; zDisplay = _macroEntryLabel("z", zMacroEntry); }
+        else { zDisplay = _ssweepFormatVal(zValue, zSpec.int); }
+      }
+      var statusLabel = "(" + (doneCount + 1) + "/" + total + ") " +
+        xParamLabel + " = " + xDisplay +
+        (yEnabled ? "  /  " + yParamLabel + " = " + yDisplay : "") +
+        (zEnabled ? "  /  " + zParamLabel + " = " + zDisplay : "");
+      _ssweepUpdateStatus(statusLabel);
+
+      if (xDomEl) {
+        xDomEl.value = xDisplay;
+        try { xDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+      }
+      if (!xIsMacros && xParamValue === "denoising_strength") _ssweepSyncDenoiseDom(xDisplay);
+      if (yDomEl) {
+        yDomEl.value = yDisplay;
+        try { yDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+      }
+      if (yEnabled && !yIsMacros && yParamValue === "denoising_strength") _ssweepSyncDenoiseDom(yDisplay);
+      if (zDomEl) {
+        zDomEl.value = zDisplay;
+        try { zDomEl.dispatchEvent(new Event("input", { bubbles: true })); } catch(_) {}
+      }
+      if (zEnabled && !zIsMacros && zParamValue === "denoising_strength") _ssweepSyncDenoiseDom(zDisplay);
+
+      // Deep-clone the frozen sweep-start snapshot so UI edits during the
+      // run don't affect subsequent iterations.
+      var body = JSON.parse(JSON.stringify(_frozenBody));
+      var slotValuesByAxis = {};
+      if (xIsMacros) slotValuesByAxis.x = xMacroEntry;
+      if (yIsMacros) slotValuesByAxis.y = yMacroEntry;
+      if (zIsMacros) slotValuesByAxis.z = zMacroEntry;
+      if (xIsMacros || yIsMacros || zIsMacros) {
+        if (typeof body.prompt === "string") body.prompt = _sdwbSubstitutePromptMacros(body.prompt, slotValuesByAxis);
+        if (typeof body.negative_prompt === "string") body.negative_prompt = _sdwbSubstitutePromptMacros(body.negative_prompt, slotValuesByAxis);
+      }
+      if (!xIsMacros) body[xSpec.body] = xSpec.int ? Math.round(xValue) : xValue;
+      if (yEnabled && !yIsMacros) body[ySpec.body] = ySpec.int ? Math.round(yValue) : yValue;
+      if (zEnabled && !zIsMacros) body[zSpec.body] = zSpec.int ? Math.round(zValue) : zValue;
+      body.seed = curSeed;
+      if (deferSave) body.skip_save = true;
+
+      var perIterMeta = JSON.parse(JSON.stringify(sweepRunMeta));
+      perIterMeta.axes[0].index = xi;
+      perIterMeta.axes[0].value = xIsMacros ? xMacroEntry : xValue;
+      if (yEnabled) {
+        perIterMeta.axes[1].index = yi;
+        perIterMeta.axes[1].value = yIsMacros ? yMacroEntry : yValue;
+      }
+      if (zEnabled) {
+        perIterMeta.axes[2].index = zi;
+        perIterMeta.axes[2].value = zIsMacros ? zMacroEntry : zValue;
+      }
+      body.sweep_meta = perIterMeta;
+
+      var capturedXi = xi, capturedYi = yi, capturedZi = zi;
+      var capturedDisplay = (xParamLabel + " = " + xDisplay) +
+        (yEnabled ? " / " + yParamLabel + "=" + yDisplay : "") +
+        (zEnabled ? " / " + zParamLabel + "=" + zDisplay : "");
+
+      var t0 = Date.now();
+      _ssweepAbort = (typeof AbortController !== "undefined") ? new AbortController() : null;
+      window.bridgeFetch("sd-webui", "generate", body, {
+        signal: _ssweepAbort ? _ssweepAbort.signal : undefined,
+      }).then(function(r) { return r.json(); }).then(function(d) {
+        var elapsed = Date.now() - t0;
+        if (_bsqjFirstFid == null && d && Array.isArray(d.saved_items)) {
+          for (var _bi = 0; _bi < d.saved_items.length; _bi++) {
+            var _it = d.saved_items[_bi];
+            if (_it && typeof _it.file_id === "number") {
+              _bsqjFirstFid = _it.file_id;
+              if (window.BridgeSweepQuickJump) {
+                window.BridgeSweepQuickJump.registerFirstSavedFileId(sweepRunMeta.id, _bsqjFirstFid);
+              }
+              if (_bsqjOpenBtn) _bsqjOpenBtn.disabled = false;
+              break;
+            }
+          }
+        }
+        if (!d.ok) {
+          window.showToast(capturedDisplay + " : " + (d.error || "generation failed"), true);
+          _ssweepMarkGridError(capturedZi, capturedXi, capturedYi, d.error || "failed");
+        } else {
+          var images = d.images || [];
+          var mimeMap = { png: "image/png", webp: "image/webp", jpg: "image/jpeg" };
+          var mime = mimeMap[d.image_format] || "image/png";
+          if (images.length > 0) {
+            _ssweepAppendBlock(capturedDisplay, "", mime, images[0], d.elapsed_ms || elapsed, d);
+            _ssweepFillGridCell(capturedZi, capturedXi, capturedYi, mime, images[0]);
+            if (deferSave && window.SweepBuffer) {
+              window.SweepBuffer.add("sd-webui", {
+                base64: images[0].base64,
+                seed: images[0].seed,
+                image_format: d.image_format || "png",
+                value: xValue,
+                label: capturedDisplay,
+                sweep_meta: perIterMeta,
+              });
+            }
+          }
+        }
+        doneCount++;
+        _advanceIndices();
+        runOne();
+      }).catch(function(e) {
+        if (!(e && (e.name === "AbortError" || /aborted/i.test(e.message || "")))) {
+          window.showToast(capturedDisplay + " : " + ((e && e.message) || String(e)), true);
+          _ssweepMarkGridError(capturedZi, capturedXi, capturedYi, (e && e.message) || "error");
+        } else {
+          _ssweepMarkGridError(capturedZi, capturedXi, capturedYi, "aborted");
+        }
+        doneCount++;
+        _advanceIndices();
+        runOne();
+      });
+    }
+
+    function _advanceIndices() {
+      if (yEnabled) {
+        yi++;
+        if (yi >= yValues.length) {
+          yi = 0;
+          xi++;
+          if (zEnabled && xi >= xValues.length) {
+            xi = 0;
+            zi++;
+          }
+        }
+      } else {
+        xi++;
+        // Defensive: UI gates Z behind Y today, but advance Z here too so a
+        // future "Z without Y" extension cannot silently stall the loop.
+        if (zEnabled && xi >= xValues.length) {
+          xi = 0;
+          zi++;
+        }
+      }
+    }
+
+    runOne();
+  };
+</script>

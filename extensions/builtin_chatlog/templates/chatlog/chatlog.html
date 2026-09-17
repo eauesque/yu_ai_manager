@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="chatlog.title">Chat Logs</title>
+  {% include "chatlog/_style.html" %}
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+    <div class="ctl-layout">
+      {% include "chatlog/_sidebar.html" %}
+      {% include "chatlog/_content.html" %}
+    </div>
+    <div class="ctl-backdrop" id="ctlBackdrop"></div>
+    <button class="ctl-drawer-toggle" id="ctlDrawerToggle" aria-label="サイドバーを開く" data-i18n-aria-label="chatlog.toggle_sidebar_aria">&#9776;</button>
+  </main>
+  {% include "chatlog/_import.html" %}
+  {% include "chatlog/_script_utils.html" %}
+  {% include "chatlog/_script.html" %}
+</body>
+</html>

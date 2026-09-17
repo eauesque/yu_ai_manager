@@ -1,0 +1,15 @@
+{
+  "name": "builtin-download",
+  "version": "1.0.0",
+  "description": "Batch ZIP download for selected images",
+  "type": "general",
+  "category": "library",
+  "entry": "download_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "blueprint_prefix": "/api/download",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

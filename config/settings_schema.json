@@ -1,0 +1,498 @@
+[
+  {
+    "category": "server",
+    "default": "127.0.0.1",
+    "description": "バインドホスト",
+    "key": "server.host",
+    "op_eligible": false,
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "server",
+    "default": 5000,
+    "description": "ポート番号",
+    "key": "server.port",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "server",
+    "default": false,
+    "description": "LAN アクセス有効",
+    "key": "server.lan",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "server",
+    "default": null,
+    "description": "PIN 認証コード",
+    "key": "server.pin",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "server",
+    "default": true,
+    "description": "ボスログイン UI",
+    "key": "server.pin_boss_login_ui",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "server",
+    "default": true,
+    "description": "クイックロック有効",
+    "key": "server.quick_lock_enabled",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "server",
+    "default": false,
+    "description": "再起動 API 有効",
+    "key": "server.allow_restart",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "server",
+    "default": false,
+    "description": "リモート再起動 API 有効",
+    "key": "server.allow_remote_restart",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "server",
+    "default": null,
+    "description": "リモート再起動トークン",
+    "key": "server.restart_token",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "server",
+    "default": "download",
+    "description": "高速モード: Rust サーバーの取得方法 — download（既定）配布バイナリを落とす。この端末ではビルドしない。 / build この端末でビルドする。ダウンロードはしない。 / auto 落として、駄目ならビルドする。【配布バイナリがある環境】どれを選んでも高速モードは働きます。build を選ぶ理由は、配布物を使いたくない・取得が塞がれている等の場合のみ。【ビルドを選ぶときの資源】cargo build は CPU とメモリを大きく使います。空きディスクが 8GB 以上必要です（ツールチェーンと中間生成物）。メモリが少ない環境ではスワップを使い尽くしシステムごと落ちる可能性があります（Raspberry Pi など）。コンパイル中も全機能を利用できます。【負荷の抑制】端末が忙しい間は自動で一時停止し、空いたら再開します。優先度も下げて走ります。【ツールチェーン】cargo が無い端末では、公式の rustup を取得してプロジェクト配下（.rust-toolchain/）に導入します。チェックサムはリポジトリに固定してあり、一致しなければ中止します。既存の Rust 環境は変更しません。不要になれば当該ディレクトリを消すだけです。Windows では MSVC 版ツールチェーンを使う都合上、Visual Studio のビルドツール（リンカ）が別途必要です。【失敗時】3 回続けて失敗した端末では以後試みません",
+    "key": "fast_mode_source",
+    "op_eligible": false,
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "extract",
+    "default": true,
+    "description": "A1111 メタデータ抽出",
+    "key": "extract_a1111",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "extract",
+    "default": true,
+    "description": "ComfyUI メタデータ抽出",
+    "key": "extract_comfyui",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "extract",
+    "default": true,
+    "description": "全文検索 (FTS5) 有効 — CLI 専用。サーバーは常に有効",
+    "key": "enable_fts",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "extract",
+    "default": true,
+    "description": "タグ小文字化",
+    "key": "lowercase_tags",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "extract",
+    "default": false,
+    "description": "pHash 計算",
+    "key": "compute_hash",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "ui",
+    "default": null,
+    "description": "タイムゾーン",
+    "key": "timezone",
+    "op_eligible": false,
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "ui",
+    "default": null,
+    "description": "UI テーマ (default/custom)",
+    "key": "ui",
+    "op_eligible": false,
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "ui",
+    "default": false,
+    "description": "プロンプト直接変換",
+    "key": "direct_prompt_convert",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "ui",
+    "default": true,
+    "description": "テンプレート保持",
+    "key": "preserve_templates",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "ui",
+    "default": false,
+    "description": "波括弧選択",
+    "key": "brace_choice",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "sns",
+    "default": "",
+    "description": "Bluesky ハンドル",
+    "key": "sns.bluesky.handle",
+    "op_eligible": false,
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "sns",
+    "default": "",
+    "description": "Bluesky アプリパスワード",
+    "key": "sns.bluesky.app_password",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "sns",
+    "default": "",
+    "description": "投稿テンプレート",
+    "key": "sns.post_template",
+    "op_eligible": false,
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "backup",
+    "default": true,
+    "description": "自動バックアップ有効",
+    "key": "backup.enabled",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "backup",
+    "default": "",
+    "description": "バックアップ先ディレクトリ",
+    "key": "backup.backup_dir",
+    "op_eligible": false,
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "backup",
+    "default": 5,
+    "description": "最大世代数",
+    "key": "backup.max_generations",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "backup",
+    "default": 24,
+    "description": "定期バックアップ間隔 (時間)",
+    "key": "backup.periodic_interval_hours",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "backup",
+    "default": true,
+    "description": "スキャン完了時にバックアップ",
+    "key": "backup.backup_on_scan_complete",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "backup",
+    "default": 5,
+    "description": "クールダウン (分)",
+    "key": "backup.cooldown_minutes",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "ai_analysis",
+    "default": "",
+    "description": "Anthropic (Claude) API key",
+    "key": "ai_analysis.api_key",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "ai_analysis",
+    "default": "",
+    "description": "OpenAI API key",
+    "key": "ai_analysis.openai_api_key",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "ai_analysis",
+    "default": "",
+    "description": "OpenAI Compatible API key",
+    "key": "ai_analysis.openai_compat_api_key",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "archive_cleanup_llm",
+    "default": "",
+    "description": "Archive Cleanup Anthropic API key",
+    "key": "archive_cleanup_llm.api_key",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "archive_cleanup_llm",
+    "default": "",
+    "description": "Archive Cleanup OpenAI API key",
+    "key": "archive_cleanup_llm.openai_api_key",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "archive_cleanup_llm",
+    "default": "",
+    "description": "Archive Cleanup OpenAI Compat API key",
+    "key": "archive_cleanup_llm.openai_compat_api_key",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "nai_bridge",
+    "default": "",
+    "description": "NovelAI API トークン",
+    "key": "extensions.builtin_nai_bridge.api_token",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "webhook",
+    "default": null,
+    "description": "Webhook 署名シークレット",
+    "key": "webhook_secret",
+    "op_eligible": true,
+    "secret": true,
+    "type": "str"
+  },
+  {
+    "category": "video",
+    "default": true,
+    "description": "動画解析有効",
+    "key": "video_analysis.enabled",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "video",
+    "default": 4,
+    "description": "キーフレーム数",
+    "key": "video_analysis.keyframe_count",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "video",
+    "default": "uniform",
+    "description": "キーフレーム戦略",
+    "key": "video_analysis.strategy",
+    "op_eligible": false,
+    "options": [
+      "uniform",
+      "scene"
+    ],
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "video",
+    "default": 0.4,
+    "description": "シーン閾値",
+    "key": "video_analysis.scene_threshold",
+    "op_eligible": false,
+    "secret": false,
+    "type": "float"
+  },
+  {
+    "category": "extract",
+    "default": 20,
+    "description": "アーカイブスロットル (ms)",
+    "key": "archive_throttle_ms",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "agent_safety",
+    "default": true,
+    "description": "Circuit Breaker 有効",
+    "key": "agent_safety.circuit_breaker.enabled",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "agent_safety",
+    "default": 60,
+    "description": "毎分最大アクション数",
+    "key": "agent_safety.circuit_breaker.max_actions_per_minute",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "agent_safety",
+    "default": 3,
+    "description": "同一呼び出し連続最大回数",
+    "key": "agent_safety.circuit_breaker.max_identical_consecutive",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "agent_safety",
+    "default": 15,
+    "description": "同一ツール毎分最大回数",
+    "key": "agent_safety.circuit_breaker.max_same_tool_per_minute",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "agent_safety",
+    "default": 10,
+    "description": "連続エラー最大回数",
+    "key": "agent_safety.circuit_breaker.max_consecutive_errors",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "agent_safety",
+    "default": 0.5,
+    "description": "エラーレート閾値 (0.0-1.0)",
+    "key": "agent_safety.circuit_breaker.error_rate_threshold",
+    "op_eligible": false,
+    "secret": false,
+    "type": "float"
+  },
+  {
+    "category": "agent_safety",
+    "default": 60,
+    "description": "Circuit Breaker クールダウン (秒)",
+    "key": "agent_safety.circuit_breaker.cooldown_seconds",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  },
+  {
+    "category": "agent_safety",
+    "default": "standard",
+    "description": "Budget プリセット",
+    "key": "agent_safety.budget.preset",
+    "op_eligible": false,
+    "options": [
+      "conservative",
+      "standard",
+      "power_user",
+      "unlimited"
+    ],
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "hailo_tagger",
+    "default": false,
+    "description": "Hailo Remote Tagger 有効",
+    "key": "hailo_tagger.enabled",
+    "op_eligible": false,
+    "secret": false,
+    "type": "bool"
+  },
+  {
+    "category": "hailo_tagger",
+    "default": "",
+    "description": "Hailo Tagger Pi エンドポイント URL",
+    "key": "hailo_tagger.endpoint_url",
+    "op_eligible": false,
+    "secret": false,
+    "type": "str"
+  },
+  {
+    "category": "hailo_tagger",
+    "default": 0.35,
+    "description": "タグ信頼度閾値",
+    "key": "hailo_tagger.threshold",
+    "op_eligible": false,
+    "secret": false,
+    "type": "float"
+  },
+  {
+    "category": "hailo_tagger",
+    "default": 30,
+    "description": "リクエストタイムアウト (秒)",
+    "key": "hailo_tagger.timeout",
+    "op_eligible": false,
+    "secret": false,
+    "type": "int"
+  }
+]

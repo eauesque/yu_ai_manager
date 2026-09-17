@@ -1,0 +1,1614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>yu_ai_manager — Local AI Inference Manager</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Sans+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<template id="__bundler_thumbnail" data-bg-color="#f3f1eb">
+  <svg viewBox="0 0 1200 800" xmlns="http://www.w3.org/2000/svg">
+    <rect width="1200" height="800" fill="#f3f1eb"/>
+    <rect x="80" y="80" width="1040" height="40" fill="#111111"/>
+    <rect x="80" y="260" width="620" height="120" fill="#111111"/>
+    <rect x="80" y="400" width="420" height="120" fill="#1a47ff"/>
+    <rect x="80" y="540" width="620" height="120" fill="#111111"/>
+    <rect x="80" y="700" width="1040" height="2" fill="#11111130"/>
+    <g transform="translate(800,340)">
+      <rect x="0" y="0" width="320" height="320" fill="none" stroke="#111111" stroke-width="3"/>
+      <rect x="0" y="0" width="320" height="40" fill="#111111"/>
+      <rect x="20" y="80" width="120" height="60" fill="#ebe8e0"/>
+      <rect x="160" y="80" width="140" height="60" fill="#ebe8e0"/>
+      <rect x="20" y="160" width="280" height="80" fill="#ebe8e0"/>
+      <circle cx="280" cy="280" r="8" fill="#1a47ff"/>
+    </g>
+  </svg>
+</template>
+<style>
+  :root {
+    /* Light / editorial base */
+    --bg: #f3f1eb;
+    --bg-2: #ebe8e0;
+    --ink: #111111;
+    --ink-2: #2a2a2a;
+    --mute: #6b6b66;
+    --mute-2: #9c9a92;
+    --rule: #1111111a;
+    --rule-strong: #11111130;
+    --accent: #1a47ff;         /* electric blue */
+    --accent-2: #0a2bb5;
+    --warn: #d4441a;
+
+    --mono: 'IBM Plex Mono', ui-monospace, monospace;
+    --sans: 'IBM Plex Sans', -apple-system, sans-serif;
+    --cond: 'IBM Plex Sans Condensed', 'IBM Plex Sans', sans-serif;
+
+    /* tweakable */
+    --scale: 1;     /* 0.9 tight / 1 std / 1.1 loose */
+    --motion: 1;    /* 0..1 anim intensity */
+  }
+
+  html[data-theme="dark"] {
+    --bg: #0d0d0e;
+    --bg-2: #141416;
+    --ink: #f1efe9;
+    --ink-2: #dcd9d1;
+    --mute: #8a8880;
+    --mute-2: #55534c;
+    --rule: #ffffff14;
+    --rule-strong: #ffffff2e;
+    --accent: #7aa6ff;
+    --accent-2: #b9ccff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html {
+    scroll-behavior: smooth;
+    font-size: calc(16px * var(--scale));
+    background: var(--bg);
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--sans);
+    font-weight: 400;
+    line-height: 1.55;
+    min-height: 100vh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "ss01","cv11";
+  }
+
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+  ul { list-style: none; }
+
+  /* ── Mouse-follow noise/glow layer ── */
+  .cursor-glow {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 2;
+    background:
+      radial-gradient(380px circle at var(--mx, 50%) var(--my, 50%),
+        color-mix(in oklab, var(--accent) 8%, transparent) 0%,
+        transparent 60%);
+    mix-blend-mode: multiply;
+    opacity: calc(0.9 * var(--motion));
+    transition: opacity .3s;
+  }
+  html[data-theme="dark"] .cursor-glow { mix-blend-mode: screen; }
+
+  /* Grain */
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 3;
+    opacity: .035;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+
+  /* ── Global grid lines (editorial) ── */
+  .gridlines {
+    position: fixed; inset: 0; pointer-events: none; z-index: 1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    max-width: 1440px; margin: 0 auto;
+    padding: 0 clamp(1rem, 3vw, 3rem);
+  }
+  .gridlines > span {
+    border-left: 1px dashed var(--rule);
+    height: 100%;
+  }
+  .gridlines > span:last-child { border-right: 1px dashed var(--rule); }
+  @media (max-width: 700px) { .gridlines { display: none; } }
+
+  /* ── Top system bar (live status) ── */
+  .sysbar {
+    position: sticky; top: 0; z-index: 40;
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .04em;
+    border-bottom: 1px solid var(--ink);
+  }
+  .sysbar-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 3vw, 3rem);
+    display: flex; align-items: center; gap: 2rem;
+    height: 28px;
+    overflow: hidden;
+  }
+  .sysbar-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #6dd66d;
+    box-shadow: 0 0 0 0 #6dd66d88;
+    animation: pulse 1.8s ease-out infinite;
+    flex: none;
+  }
+  @keyframes pulse {
+    0% { box-shadow: 0 0 0 0 #6dd66d88; }
+    70% { box-shadow: 0 0 0 8px #6dd66d00; }
+    100% { box-shadow: 0 0 0 0 #6dd66d00; }
+  }
+  .sysbar-metric { display: flex; gap: .5rem; align-items: center; opacity: .85; }
+  .sysbar-metric b { color: #fff; font-weight: 500; }
+  .sysbar-marquee {
+    margin-left: auto;
+    display: flex; gap: 2rem;
+    white-space: nowrap;
+    animation: marquee 40s linear infinite;
+    animation-duration: calc(40s / max(var(--motion), .2));
+  }
+  @keyframes marquee {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  .sysbar-marquee span { opacity: .55; }
+  .sysbar-marquee span b { color: #fff; font-weight: 500; opacity: 1; }
+
+  @media (max-width: 720px) {
+    .sysbar-metric:nth-of-type(n+3) { display: none; }
+    .sysbar-marquee { display: none; }
+  }
+
+  /* ── Header ── */
+  header.chrome {
+    position: sticky; top: 28px; z-index: 30;
+    background: color-mix(in oklab, var(--bg) 88%, transparent);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--rule);
+  }
+  .chrome-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 1rem clamp(1rem, 3vw, 3rem);
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: 1rem;
+  }
+  .brand {
+    display: flex; align-items: baseline; gap: .6rem;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .brand .mark {
+    display: inline-block;
+    width: 10px; height: 10px;
+    background: var(--ink);
+    transform: rotate(45deg);
+    margin-right: .25rem;
+  }
+  .brand em { font-style: normal; color: var(--mute); font-weight: 400; }
+
+  nav.primary {
+    display: flex; gap: 1.75rem;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--mute);
+  }
+  nav.primary a {
+    position: relative;
+    padding: 4px 0;
+    transition: color .2s;
+  }
+  nav.primary a:hover { color: var(--ink); }
+  nav.primary a::after {
+    content: '';
+    position: absolute;
+    left: 0; bottom: 0;
+    height: 1px; width: 100%;
+    background: currentColor;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform .25s ease;
+  }
+  nav.primary a:hover::after { transform: scaleX(1); }
+  @media (max-width: 720px) { nav.primary { display: none; } }
+
+  /* ── Layout grid ── */
+  .shell {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: 0 clamp(1rem, 3vw, 3rem);
+    position: relative;
+    z-index: 5;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+  }
+  @media (max-width: 900px) { .grid { grid-template-columns: repeat(6, 1fr); } }
+  @media (max-width: 600px) { .grid { grid-template-columns: repeat(4, 1fr); gap: 1rem; } }
+
+  /* Section meta labels */
+  .meta {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--mute);
+    display: flex; align-items: baseline; gap: 1rem;
+  }
+  .meta .num {
+    font-weight: 500;
+    color: var(--ink);
+    letter-spacing: 0;
+  }
+  .meta .rule {
+    flex: 1;
+    height: 1px;
+    background: var(--rule-strong);
+  }
+
+  /* ── HERO ── */
+  .hero {
+    padding: clamp(3rem, 8vw, 7rem) 0 clamp(3rem, 6vw, 5rem);
+  }
+  .hero-head { grid-column: 1 / span 12; }
+  .hero-kicker {
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .18em;
+    text-transform: uppercase;
+    color: var(--mute);
+    display: flex; gap: 1rem; align-items: center;
+    margin-bottom: 2rem;
+  }
+  .hero-kicker .tag {
+    background: var(--ink);
+    color: var(--bg);
+    padding: 4px 10px;
+    letter-spacing: .15em;
+  }
+
+  h1.display {
+    font-family: var(--cond);
+    font-weight: 700;
+    font-size: clamp(3.2rem, 10.5vw, 10rem);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    color: var(--ink);
+    margin-bottom: 2.5rem;
+  }
+  h1.display .wordline { display: block; overflow: hidden; }
+  h1.display .word {
+    display: inline-block;
+    transform: translateY(100%);
+    animation: rise .9s cubic-bezier(.2,.8,.2,1) forwards;
+  }
+  h1.display .wordline:nth-child(2) .word { animation-delay: .08s; }
+  h1.display .wordline:nth-child(3) .word { animation-delay: .16s; }
+  h1.display .accent { color: var(--accent); font-style: italic; font-weight: 600; }
+  h1.display .strike {
+    position: relative;
+    color: var(--mute);
+  }
+  h1.display .strike::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; top: 54%;
+    height: 3px;
+    background: var(--ink);
+    transform: scaleX(0);
+    transform-origin: left;
+    animation: strike 1s ease .9s forwards;
+  }
+  @keyframes rise { to { transform: translateY(0); } }
+  @keyframes strike { to { transform: scaleX(1); } }
+
+  .hero-meta {
+    grid-column: 1 / span 5;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--mute);
+    line-height: 1.8;
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 1rem;
+  }
+  .hero-meta dl {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .15rem 1.25rem;
+  }
+  .hero-meta dt { color: var(--mute); }
+  .hero-meta dd { color: var(--ink); }
+
+  .hero-desc {
+    grid-column: 7 / span 6;
+    font-size: clamp(1.05rem, 1.4vw, 1.3rem);
+    line-height: 1.5;
+    color: var(--ink-2);
+    border-top: 1px solid var(--rule-strong);
+    padding-top: 1rem;
+  }
+  .hero-desc .lead {
+    font-family: var(--cond);
+    font-size: clamp(1.5rem, 2vw, 1.9rem);
+    font-weight: 500;
+    line-height: 1.25;
+    color: var(--ink);
+    margin-bottom: 1rem;
+    letter-spacing: -0.005em;
+  }
+  .hero-cta {
+    grid-column: 7 / span 6;
+    margin-top: 1.5rem;
+    display: flex; gap: .75rem; flex-wrap: wrap;
+  }
+  @media (max-width: 900px) {
+    .hero-meta, .hero-desc, .hero-cta { grid-column: 1 / -1; }
+  }
+
+  .btn {
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    padding: .85rem 1.5rem;
+    display: inline-flex; align-items: center; gap: .6rem;
+    transition: transform .15s ease, background .2s ease, color .2s ease, border-color .2s ease;
+    border: 1px solid var(--ink);
+  }
+  .btn .arrow { transition: transform .2s ease; }
+  .btn:hover .arrow { transform: translateX(3px); }
+  .btn-primary { background: var(--ink); color: var(--bg); }
+  .btn-primary:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .btn-ghost { background: transparent; color: var(--ink); }
+  .btn-ghost:hover { background: var(--ink); color: var(--bg); }
+
+  /* ── DASHBOARD MOCK (hero visual) ── */
+  .dashboard {
+    grid-column: 1 / -1;
+    margin-top: 3rem;
+    border: 1px solid var(--ink);
+    background: var(--bg-2);
+    overflow: hidden;
+    position: relative;
+  }
+  .dash-chrome {
+    display: flex; align-items: center;
+    padding: .55rem .85rem;
+    border-bottom: 1px solid var(--ink);
+    background: var(--ink);
+    color: var(--bg);
+    font-family: var(--mono);
+    font-size: 11px;
+    gap: 1rem;
+  }
+  .dash-chrome .dots { display: flex; gap: .35rem; }
+  .dash-chrome .dots i {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: color-mix(in oklab, var(--bg) 30%, transparent);
+    display: inline-block;
+  }
+  .dash-chrome .path { opacity: .75; letter-spacing: .05em; }
+  .dash-chrome .dash-tabs { margin-left: auto; display: flex; gap: 1rem; opacity: .65; }
+  .dash-chrome .dash-tabs b { color: #fff; font-weight: 500; opacity: 1; }
+
+  .dash-body {
+    display: grid;
+    grid-template-columns: 200px 1fr 280px;
+    min-height: 420px;
+  }
+  @media (max-width: 900px) {
+    .dash-body { grid-template-columns: 1fr; }
+    .dash-side, .dash-aside { display: none; }
+  }
+
+  .dash-side {
+    border-right: 1px solid var(--rule-strong);
+    padding: 1rem;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--mute);
+  }
+  .dash-side h4 {
+    font-size: 10px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--mute-2);
+    margin: 1rem 0 .5rem;
+    font-weight: 500;
+  }
+  .dash-side h4:first-child { margin-top: 0; }
+  .dash-side ul li {
+    padding: .35rem 0;
+    display: flex; align-items: center; gap: .5rem;
+    cursor: default;
+    transition: color .2s;
+  }
+  .dash-side ul li:hover { color: var(--ink); }
+  .dash-side ul li.active { color: var(--ink); font-weight: 500; }
+  .dash-side ul li.active::before { content: '▸'; color: var(--accent); }
+  .dash-side ul li:not(.active)::before { content: '  '; white-space: pre; }
+
+  .dash-main {
+    padding: 1.25rem;
+    display: flex; flex-direction: column; gap: 1rem;
+  }
+  .dash-title {
+    display: flex; justify-content: space-between; align-items: baseline;
+    padding-bottom: .5rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .dash-title h3 {
+    font-family: var(--cond);
+    font-weight: 600;
+    font-size: 1.35rem;
+    letter-spacing: -0.01em;
+  }
+  .dash-title .sub {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--mute);
+  }
+
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--rule-strong);
+    border-top: 1px solid var(--rule-strong);
+    border-bottom: 1px solid var(--rule-strong);
+  }
+  .metric {
+    background: var(--bg-2);
+    padding: .85rem .9rem;
+    font-family: var(--mono);
+  }
+  .metric .label {
+    font-size: 9.5px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: .35rem;
+  }
+  .metric .value {
+    font-family: var(--cond);
+    font-weight: 700;
+    font-size: 1.55rem;
+    letter-spacing: -0.01em;
+    line-height: 1;
+  }
+  .metric .delta {
+    font-size: 10px;
+    color: var(--accent);
+    margin-top: .25rem;
+  }
+  @media (max-width: 640px) {
+    .metrics { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  .chart {
+    height: 140px;
+    background: var(--bg);
+    border: 1px solid var(--rule);
+    padding: .5rem;
+    position: relative;
+  }
+  .chart svg { width: 100%; height: 100%; display: block; }
+  .chart .cap {
+    position: absolute; top: 8px; left: 10px;
+    font-family: var(--mono); font-size: 10px;
+    color: var(--mute); letter-spacing: .1em; text-transform: uppercase;
+  }
+
+  .dash-aside {
+    border-left: 1px solid var(--rule-strong);
+    padding: 1rem;
+    background: var(--bg);
+    display: flex; flex-direction: column;
+  }
+  .dash-aside h4 {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: .75rem;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .dash-aside h4 .live {
+    display: inline-flex; align-items: center; gap: .35rem;
+    color: var(--ink);
+  }
+  .dash-aside h4 .live::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #16a34a;
+    animation: pulse-dot 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse-dot {
+    0%,100% { opacity: 1; transform: scale(1); }
+    50% { opacity: .35; transform: scale(.8); }
+  }
+  .logfeed {
+    font-family: var(--mono);
+    font-size: 10.5px;
+    line-height: 1.55;
+    color: var(--ink-2);
+    flex: 1;
+    overflow: hidden;
+    position: relative;
+  }
+  .logfeed::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 40px;
+    background: linear-gradient(to bottom, transparent, var(--bg));
+    pointer-events: none;
+  }
+  .logfeed .row { opacity: 0; animation: logIn .4s ease forwards; display: flex; gap: .5rem; padding: 1px 0; }
+  .logfeed .ts { color: var(--mute-2); flex: none; }
+  .logfeed .lvl { flex: none; font-weight: 500; }
+  .logfeed .lvl.info { color: var(--accent); }
+  .logfeed .lvl.ok { color: #0f8f4a; }
+  .logfeed .lvl.warn { color: var(--warn); }
+  .logfeed .msg { color: var(--ink-2); }
+  @keyframes logIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── Section: Capabilities ── */
+  section.slab {
+    padding: clamp(3rem, 7vw, 6rem) 0;
+    border-top: 1px solid var(--rule-strong);
+  }
+  .slab-head { grid-column: 1 / -1; display: flex; align-items: baseline; gap: 2rem; margin-bottom: 3rem; flex-wrap: wrap; }
+  .slab-head h2 {
+    font-family: var(--cond);
+    font-size: clamp(2.25rem, 5vw, 4rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    flex: 1 1 auto;
+  }
+  .slab-head .aside {
+    font-family: var(--mono); font-size: 11px; color: var(--mute);
+    max-width: 280px; line-height: 1.6;
+  }
+
+  .caps {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    border-top: 1px solid var(--rule-strong);
+  }
+  .cap {
+    grid-column: span 4;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    padding: 1.5rem 1.5rem 2rem;
+    position: relative;
+    transition: background .2s ease;
+    min-height: 220px;
+    display: flex; flex-direction: column;
+  }
+  .cap:nth-child(3n) { border-right: 0; }
+  .cap:hover { background: color-mix(in oklab, var(--ink) 3%, var(--bg)); }
+  .cap-num {
+    font-family: var(--mono); font-size: 10px;
+    letter-spacing: .2em; color: var(--mute); margin-bottom: 2rem;
+  }
+  .cap-title {
+    font-family: var(--cond);
+    font-weight: 600;
+    font-size: 1.55rem;
+    letter-spacing: -0.01em;
+    margin-bottom: .5rem;
+    line-height: 1.15;
+  }
+  .cap-title .acc { color: var(--accent); font-style: italic; }
+  .cap-desc {
+    font-size: .9rem;
+    color: var(--mute);
+    line-height: 1.5;
+  }
+  .cap .cap-more {
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--mute-2); margin-top: auto;
+    padding-top: 1rem;
+    letter-spacing: .05em;
+    display: flex; gap: .5rem; flex-wrap: wrap;
+  }
+  .cap .cap-more span {
+    border: 1px solid var(--rule-strong);
+    padding: 2px 6px;
+  }
+  @media (max-width: 900px) {
+    .cap { grid-column: span 6; }
+    .cap:nth-child(3n) { border-right: 1px solid var(--rule); }
+    .cap:nth-child(2n) { border-right: 0; }
+  }
+  @media (max-width: 600px) {
+    .cap { grid-column: span 12; border-right: 0; }
+  }
+
+  /* ── Backends ── */
+  .backends-wrap {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .backends-head { grid-column: 1 / span 4; }
+  .backends-head h3 {
+    font-family: var(--cond);
+    font-size: 2rem; font-weight: 600;
+    letter-spacing: -0.01em; line-height: 1.05;
+    margin-bottom: .75rem;
+  }
+  .backends-head p {
+    font-family: var(--mono); font-size: 11px;
+    color: var(--mute); line-height: 1.7;
+  }
+  .backends-list {
+    grid-column: 5 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border-top: 1px solid var(--rule-strong);
+    border-left: 1px solid var(--rule);
+  }
+  .backend {
+    padding: 1rem 1.1rem;
+    border-right: 1px solid var(--rule);
+    border-bottom: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 12px;
+    display: flex; flex-direction: column; gap: .35rem;
+    min-height: 110px;
+    transition: background .2s ease;
+    cursor: default;
+  }
+  .backend:hover { background: color-mix(in oklab, var(--accent) 6%, transparent); }
+  .backend .name { color: var(--ink); font-weight: 500; }
+  .backend .sub  { color: var(--mute); font-size: 10.5px; }
+  .backend .status {
+    margin-top: auto;
+    display: flex; align-items: center; gap: .4rem;
+    font-size: 10px;
+    letter-spacing: .1em;
+    color: var(--ink-2);
+  }
+  .backend .status::before {
+    content: ''; width: 6px; height: 6px; border-radius: 50%;
+    background: #16a34a;
+  }
+  .backend.warm .status::before { background: #e0a017; }
+  .backend.cold .status::before { background: var(--mute-2); }
+  @media (max-width: 900px) {
+    .backends-head, .backends-list { grid-column: 1 / -1; }
+    .backends-list { grid-template-columns: repeat(2, 1fr); }
+  }
+
+  /* ── Disclosure / editorial pull quote ── */
+  .disclose {
+    grid-column: 1 / -1;
+    padding: 3rem 0 1rem;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+    border-top: 1px solid var(--rule-strong);
+  }
+  .disclose-label { grid-column: 1 / span 2; }
+  .disclose-body {
+    grid-column: 3 / span 10;
+    font-family: var(--cond);
+    font-size: clamp(1.5rem, 2.8vw, 2.4rem);
+    font-weight: 500;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .disclose-body em { color: var(--mute); font-style: normal; }
+  .disclose-body .mark { background: var(--accent); color: #fff; padding: 0 .25rem; }
+  .disclose-foot {
+    grid-column: 3 / span 10;
+    margin-top: 1.25rem;
+    font-family: var(--mono);
+    font-size: 11.5px;
+    color: var(--mute);
+    line-height: 1.7;
+    max-width: 620px;
+  }
+  @media (max-width: 900px) {
+    .disclose-label { grid-column: 1 / -1; }
+    .disclose-body, .disclose-foot { grid-column: 1 / -1; }
+  }
+
+  /* ── Pricing / cost toggle ── */
+  .price-wrap {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+    align-items: start;
+  }
+  .price-head { grid-column: 1 / span 5; }
+  .price-head h3 {
+    font-family: var(--cond);
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    font-weight: 600;
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    margin-bottom: 1rem;
+  }
+  .price-head p {
+    color: var(--mute); font-size: .95rem; max-width: 320px;
+  }
+
+  .cost-toggle {
+    grid-column: 6 / span 7;
+    border: 1px solid var(--ink);
+    background: var(--bg);
+    overflow: hidden;
+  }
+  .cost-tabs {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    border-bottom: 1px solid var(--ink);
+  }
+  .cost-tab {
+    padding: 1rem 1.25rem;
+    text-align: left;
+    font-family: var(--mono);
+    font-size: 12px;
+    letter-spacing: .04em;
+    border-right: 1px solid var(--ink);
+    background: var(--bg);
+    transition: background .2s ease, color .2s ease;
+    display: flex; align-items: baseline; justify-content: space-between;
+    gap: 1rem;
+  }
+  .cost-tab:last-child { border-right: 0; }
+  .cost-tab small { color: var(--mute); font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; }
+  .cost-tab.active { background: var(--ink); color: var(--bg); }
+  .cost-tab.active small { color: color-mix(in oklab, var(--bg) 80%, transparent); }
+  .cost-tab:hover:not(.active) { background: color-mix(in oklab, var(--ink) 6%, var(--bg)); }
+
+  .cost-panel { padding: 1.75rem 1.5rem; display: none; }
+  .cost-panel.active { display: block; }
+  .cost-panel .num {
+    font-family: var(--cond);
+    font-size: clamp(3.5rem, 8vw, 6rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: .95;
+    color: var(--ink);
+    display: flex; align-items: baseline; gap: .5rem;
+  }
+  .cost-panel .num .unit {
+    font-size: .9rem; color: var(--mute);
+    font-family: var(--mono); font-weight: 500;
+    letter-spacing: .05em;
+  }
+  .cost-panel .breakdown {
+    margin-top: 1.5rem;
+    display: grid; grid-template-columns: 1fr auto; gap: .4rem 1rem;
+    font-family: var(--mono); font-size: 12px;
+    max-width: 520px;
+  }
+  .cost-panel .breakdown .k { color: var(--mute); border-bottom: 1px dotted var(--rule-strong); padding-bottom: .25rem; }
+  .cost-panel .breakdown .v { color: var(--ink); font-weight: 500; border-bottom: 1px dotted var(--rule-strong); padding-bottom: .25rem; text-align: right; }
+  .cost-panel .breakdown .total-k { color: var(--ink); font-weight: 600; padding-top: .5rem; border: 0; }
+  .cost-panel .breakdown .total-v { color: var(--accent); font-weight: 700; padding-top: .5rem; border: 0; text-align: right; font-size: 14px; }
+
+  .cost-panel .cta {
+    margin-top: 1.75rem;
+    display: flex; gap: .75rem; flex-wrap: wrap; align-items: center;
+  }
+  .cost-panel .caveat {
+    margin-top: 1rem;
+    font-family: var(--mono);
+    font-size: 10.5px;
+    color: var(--mute-2);
+    line-height: 1.6;
+  }
+  @media (max-width: 900px) {
+    .price-head, .cost-toggle { grid-column: 1 / -1; }
+  }
+
+  /* ── Requirements ── */
+  .req-wrap {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.25rem;
+  }
+  .req-col {
+    grid-column: span 6;
+    border-top: 2px solid var(--ink);
+    padding-top: 1rem;
+  }
+  .req-col h4 {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: var(--mute);
+    margin-bottom: 1rem;
+  }
+  .req-col h4.bad { color: var(--warn); }
+  .req-col ul li {
+    font-family: var(--mono);
+    font-size: 13px;
+    color: var(--ink);
+    padding: .7rem 0;
+    border-bottom: 1px solid var(--rule);
+    display: grid;
+    grid-template-columns: 24px 1fr;
+    align-items: baseline;
+    gap: .5rem;
+  }
+  .req-col ul li::before {
+    content: counter(r, decimal-leading-zero);
+    counter-increment: r;
+    color: var(--mute-2);
+    font-size: 10px;
+    letter-spacing: .1em;
+  }
+  .req-col ul { counter-reset: r; }
+
+  @media (max-width: 700px) { .req-col { grid-column: 1 / -1; } }
+
+  /* ── Footer ── */
+  footer {
+    margin-top: 4rem;
+    background: var(--ink);
+    color: var(--bg);
+    position: relative;
+    z-index: 5;
+  }
+  .footer-inner {
+    max-width: 1440px;
+    margin: 0 auto;
+    padding: clamp(2.5rem, 5vw, 4rem) clamp(1rem, 3vw, 3rem) 1.5rem;
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    gap: 1.5rem;
+  }
+  .footer-brand {
+    grid-column: 1 / span 6;
+    font-family: var(--cond);
+    font-size: clamp(2rem, 5vw, 4rem);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .footer-brand em { color: color-mix(in oklab, var(--bg) 45%, transparent); font-style: normal; }
+  .footer-col { grid-column: span 3; font-family: var(--mono); font-size: 12px; }
+  .footer-col h5 {
+    text-transform: uppercase;
+    letter-spacing: .15em;
+    color: color-mix(in oklab, var(--bg) 55%, transparent);
+    font-size: 10.5px;
+    margin-bottom: 1rem;
+    font-weight: 500;
+  }
+  .footer-col a {
+    color: color-mix(in oklab, var(--bg) 88%, transparent);
+    display: block;
+    padding: .2rem 0;
+    transition: color .2s, transform .2s;
+  }
+  .footer-col a:hover { color: #fff; transform: translateX(3px); }
+  .footer-bottom {
+    grid-column: 1 / -1;
+    margin-top: 3rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid color-mix(in oklab, var(--bg) 15%, transparent);
+    display: flex; justify-content: space-between; flex-wrap: wrap;
+    font-family: var(--mono); font-size: 11px;
+    color: color-mix(in oklab, var(--bg) 55%, transparent);
+  }
+  @media (max-width: 900px) {
+    .footer-brand, .footer-col { grid-column: 1 / -1; }
+  }
+
+  /* ── Tweaks panel ── */
+  .tweaks {
+    position: fixed; right: 1rem; bottom: 1rem; z-index: 80;
+    background: var(--bg);
+    border: 1px solid var(--ink);
+    padding: .9rem 1rem;
+    font-family: var(--mono); font-size: 11px;
+    display: none;
+    width: 250px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.08);
+  }
+  .tweaks.on { display: block; }
+  .tweaks h5 {
+    font-size: 10px; letter-spacing: .15em; text-transform: uppercase;
+    margin-bottom: .85rem; display: flex; justify-content: space-between;
+  }
+  .tweaks h5 .x { cursor: pointer; color: var(--mute); }
+  .tweaks .tweak { margin-bottom: .8rem; }
+  .tweaks label {
+    display: flex; justify-content: space-between;
+    font-size: 10px; letter-spacing: .05em; color: var(--mute);
+    margin-bottom: .35rem;
+  }
+  .tweaks label b { color: var(--ink); font-weight: 500; }
+  .tweaks .seg {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--rule-strong);
+  }
+  .tweaks .seg button {
+    padding: .4rem .25rem;
+    font-family: var(--mono); font-size: 10.5px;
+    color: var(--mute);
+    border-right: 1px solid var(--rule-strong);
+    transition: background .15s, color .15s;
+  }
+  .tweaks .seg button:last-child { border-right: 0; }
+  .tweaks .seg button.on { background: var(--ink); color: var(--bg); }
+  .tweaks .seg button:hover:not(.on) { background: color-mix(in oklab, var(--ink) 8%, var(--bg)); color: var(--ink); }
+  .tweaks input[type="range"] {
+    width: 100%; accent-color: var(--accent);
+  }
+  .tweaks .two {
+    display: grid; grid-template-columns: 1fr 1fr;
+    border: 1px solid var(--rule-strong);
+  }
+  .tweaks .two button {
+    padding: .5rem; border-right: 1px solid var(--rule-strong);
+    color: var(--mute); transition: background .15s, color .15s;
+  }
+  .tweaks .two button:last-child { border-right: 0; }
+  .tweaks .two button.on { background: var(--ink); color: var(--bg); }
+
+  /* ── Utility ── */
+  .reveal { opacity: 0; transform: translateY(20px); transition: opacity .6s ease, transform .6s cubic-bezier(.2,.8,.2,1); }
+  .reveal.in { opacity: 1; transform: translateY(0); }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal, h1.display .word, .sysbar-marquee, .sysbar-dot, .cursor-glow, .logfeed .row { animation: none !important; transition: none !important; transform: none !important; opacity: 1 !important; }
+  }
+
+  /* Subtle hover scrub for metric values */
+  .metric .value[data-target] { display: inline-block; }
+
+  /* Selection */
+  ::selection { background: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+
+<div class="cursor-glow" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="gridlines" aria-hidden="true">
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+  <span></span><span></span><span></span><span></span>
+</div>
+
+<!-- Live system bar -->
+<div class="sysbar" role="status" aria-label="system status">
+  <div class="sysbar-inner">
+    <span class="sysbar-dot" aria-hidden="true"></span>
+    <span class="sysbar-metric">STATUS <b>OPERATIONAL</b></span>
+    <span class="sysbar-metric">BUILD <b id="sys-build">v0.9.4</b></span>
+    <span class="sysbar-metric">LATENCY <b id="sys-lat">23 ms</b></span>
+    <div class="sysbar-marquee" aria-hidden="true">
+      <span>NODES DISCOVERED <b id="sys-nodes">04</b></span>
+      <span>TOKENS/S <b id="sys-tps">1 284</b></span>
+      <span>QUEUE <b id="sys-q">0</b></span>
+      <span>UPTIME <b id="sys-up">18d 04:21</b></span>
+      <span>TEMP <b id="sys-t">52°C</b></span>
+      <span>NODES DISCOVERED <b>04</b></span>
+      <span>TOKENS/S <b>1 284</b></span>
+      <span>QUEUE <b>0</b></span>
+      <span>UPTIME <b>18d 04:21</b></span>
+      <span>TEMP <b>52°C</b></span>
+    </div>
+  </div>
+</div>
+
+<header class="chrome">
+  <div class="chrome-inner">
+    <a href="index.html" class="brand">
+      <span class="mark"></span>yu_ai_manager <em>/ by eauesque</em>
+    </a>
+    <nav class="primary" aria-label="primary">
+      <a href="#capabilities">capabilities</a>
+      <a href="#backends">backends</a>
+      <a href="#pricing">pricing</a>
+      <a href="https://github.com/eauesque/yu_ai_manager">github ↗</a>
+      <a href="privacy.html">privacy</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <!-- HERO -->
+  <section class="hero shell">
+    <div class="grid">
+      <div class="hero-head">
+        <div class="hero-kicker">
+          <span class="tag">01 / INTRO</span>
+          <span>LOCAL AI INFERENCE MANAGEMENT</span>
+        </div>
+        <h1 class="display" aria-label="manage your AI hardware, not the cloud.">
+          <span class="wordline"><span class="word">manage your</span></span>
+          <span class="wordline"><span class="word"><span class="accent">AI hardware.</span></span></span>
+          <span class="wordline"><span class="word">not <span class="strike">the cloud.</span></span></span>
+        </h1>
+      </div>
+
+      <div class="hero-meta">
+        <dl>
+          <dt>Version</dt><dd>0.9.4 / 2026-04</dd>
+          <dt>License</dt><dd>MIT · source available</dd>
+          <dt>Binary</dt><dd>Windows 10/11 · macOS 12+</dd>
+          <dt>Telemetry</dt><dd>none</dd>
+          <dt>Registry</dt><dd>local-only (mDNS)</dd>
+        </dl>
+      </div>
+
+      <div class="hero-desc">
+        <p class="lead">A unified manager for local AI inference — image tagging, OCR, LLM routing, YOLO detection, and more.</p>
+        <p>Built for <b>Hailo‑10H</b>, <b>ONNX Runtime</b>, <b>AMD ROCm</b>, and <b>Apple CoreML</b> backends, with automatic fallback and LAN‑distributed inference via mDNS discovery.</p>
+        <div class="hero-cta">
+          <a href="#pricing" class="btn btn-primary">Get binary · $49.99 <span class="arrow">→</span></a>
+          <a href="https://github.com/eauesque/yu_ai_manager" class="btn btn-ghost">View source (MIT) <span class="arrow">↗</span></a>
+        </div>
+      </div>
+
+      <!-- DASHBOARD MOCK -->
+      <div class="dashboard reveal" id="dashboard">
+        <div class="dash-chrome">
+          <span class="dots"><i></i><i></i><i></i></span>
+          <span class="path">~/yu_ai_manager / library / inference</span>
+          <span class="dash-tabs"><span><b>overview</b></span><span>library</span><span>router</span><span>logs</span></span>
+        </div>
+        <div class="dash-body">
+          <aside class="dash-side" aria-hidden="true">
+            <h4>Workspaces</h4>
+            <ul>
+              <li class="active">Inference</li>
+              <li>Library · 48 112</li>
+              <li>LLM Router</li>
+              <li>OCR / Translate</li>
+              <li>YOLO Streams</li>
+              <li>LoRA Datasets</li>
+              <li>Extensions</li>
+            </ul>
+            <h4>Nodes</h4>
+            <ul>
+              <li>host.local · Hailo</li>
+              <li>mac-studio · CoreML</li>
+              <li>rocm-01 · ROCm</li>
+              <li>ollama · 3B/13B</li>
+            </ul>
+          </aside>
+
+          <div class="dash-main">
+            <div class="dash-title">
+              <h3>Inference overview</h3>
+              <span class="sub">last 60s · auto‑refresh</span>
+            </div>
+            <div class="metrics">
+              <div class="metric"><div class="label">Tokens / sec</div><div class="value" data-target="1284">0</div><div class="delta">+3.8 % · 60s</div></div>
+              <div class="metric"><div class="label">Images / min</div><div class="value" data-target="412">0</div><div class="delta">+1.1 %</div></div>
+              <div class="metric"><div class="label">Queue depth</div><div class="value" data-target="0">0</div><div class="delta" style="color:var(--mute)">nominal</div></div>
+              <div class="metric"><div class="label">Latency p95</div><div class="value" data-target="38">0</div><div class="delta">−4 ms</div></div>
+            </div>
+            <div class="chart" aria-hidden="true">
+              <span class="cap">Inference throughput · tokens/s</span>
+              <svg viewBox="0 0 600 140" preserveAspectRatio="none">
+                <defs>
+                  <linearGradient id="fill" x1="0" x2="0" y1="0" y2="1">
+                    <stop offset="0%" stop-color="var(--accent)" stop-opacity="0.28"/>
+                    <stop offset="100%" stop-color="var(--accent)" stop-opacity="0"/>
+                  </linearGradient>
+                </defs>
+                <g stroke="var(--rule-strong)" stroke-width="1">
+                  <line x1="0" y1="35" x2="600" y2="35"/>
+                  <line x1="0" y1="70" x2="600" y2="70"/>
+                  <line x1="0" y1="105" x2="600" y2="105"/>
+                </g>
+                <path id="chart-fill" d="" fill="url(#fill)"/>
+                <path id="chart-line" d="" fill="none" stroke="var(--accent)" stroke-width="1.5"/>
+                <g id="chart-dots"></g>
+              </svg>
+            </div>
+          </div>
+
+          <aside class="dash-aside">
+            <h4><span>Event log</span><span class="live">LIVE</span></h4>
+            <div class="logfeed" id="logfeed" aria-live="polite"></div>
+          </aside>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EDITORIAL DISCLOSURE -->
+  <section class="slab shell" id="honest">
+    <div class="grid">
+      <div class="meta" style="grid-column:1/-1; margin-bottom: 2rem;">
+        <span class="num">02</span><span>HONEST DISCLOSURE</span><span class="rule"></span><span>§ 01</span>
+      </div>
+      <div class="disclose reveal">
+        <div class="disclose-label">
+          <span class="meta"><span class="num">*</span></span>
+        </div>
+        <p class="disclose-body">
+          If you can set up a Python environment and <span class="mark">build binaries yourself</span>, you don't need to buy this. <em>The source code is on GitHub under MIT license — free, forever.</em>
+        </p>
+        <p class="disclose-foot">
+          What you're paying for is a ready‑to‑run binary, the build process, and installer packaging. That's it. No subscription. No telemetry. No vendor lock‑in. If you're unsure whether this software fits your setup, read the requirements below before purchasing.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- CAPABILITIES -->
+  <section class="slab shell" id="capabilities">
+    <div class="grid">
+      <div class="slab-head">
+        <div class="meta"><span class="num">03</span><span>CAPABILITIES</span></div>
+      </div>
+      <div class="slab-head">
+        <h2>Nine modules,<br/>one local runtime.</h2>
+        <p class="aside">Every capability runs on your hardware. No data leaves your machine unless you explicitly route it to a configured endpoint.</p>
+      </div>
+
+      <div class="caps">
+        <article class="cap reveal">
+          <div class="cap-num">01</div>
+          <h3 class="cap-title">Multi‑backend <span class="acc">inference</span></h3>
+          <p class="cap-desc">Hailo‑10H, ONNX Runtime, ROCm, CoreML. Automatic fallback and LAN‑distributed inference via mDNS discovery.</p>
+          <div class="cap-more"><span>Hailo</span><span>ONNX</span><span>ROCm</span><span>CoreML</span></div>
+        </article>
+        <article class="cap reveal">
+          <div class="cap-num">02</div>
+          <h3 class="cap-title">Image library <span class="acc">management</span></h3>
+          <p class="cap-desc">SQLite‑backed library with VirtualGrid UI. Tag management, collections, ratings, favorites, duplicate detection.</p>
+          <div class="cap-more"><span>SQLite</span><span>VirtualGrid</span><span>dedupe</span></div>
+        </article>
+        <article class="cap reveal">
+          <div class="cap-num">03</div>
+          <h3 class="cap-title">WD‑Tagger / <span class="acc">AI analysis</span></h3>
+          <p class="cap-desc">Batch image tagging with WD‑Tagger. Configurable thresholds, tag normalization, Danbooru autocomplete.</p>
+          <div class="cap-more"><span>batch</span><span>thresholds</span><span>autocomplete</span></div>
+        </article>
+        <article class="cap reveal">
+          <div class="cap-num">04</div>
+          <h3 class="cap-title">LLM <span class="acc">router</span></h3>
+          <p class="cap-desc">Multi‑backend LLM routing with SLO state reporting. Supports Ollama, OpenAI‑compatible APIs, and local models.</p>
+          <div class="cap-more"><span>Ollama</span><span>OpenAI‑API</span><span>SLO</span></div>
+        </article>
+        <article class="cap reveal">
+          <div class="cap-num">05</div>
+          <h3 class="cap-title">OCR + <span class="acc">translation</span></h3>
+          <p class="cap-desc">Multi‑engine OCR with bounding‑box detection. LLM‑powered translation, overlay rendering, and batch export.</p>
+          <div class="cap-more"><span>bbox</span><span>overlay</span><span>batch export</span></div>
+        </article>
+        <article class="cap reveal">
+          <div class="cap-num">06</div>
+          <h3 class="cap-title">YOLO object <span class="acc">detection</span></h3>
+          <p class="cap-desc">Hailo‑accelerated YOLO with stream sources (USB, RTSP, HTTP). Rule‑based detection triggers and action hooks.</p>
+          <div class="cap-more"><span>USB</span><span>RTSP</span><span>HTTP</span><span>triggers</span></div>
+        </article>
+        <article class="cap reveal">
+          <div class="cap-num">07</div>
+          <h3 class="cap-title">LoRA dataset <span class="acc">manager</span></h3>
+          <p class="cap-desc">Build and export LoRA training datasets. WD‑Tagger integration, caption preview, kohya_ss export.</p>
+          <div class="cap-more"><span>WD‑Tagger</span><span>kohya_ss</span><span>caption</span></div>
+        </article>
+        <article class="cap reveal">
+          <div class="cap-num">08</div>
+          <h3 class="cap-title">Extension <span class="acc">system</span></h3>
+          <p class="cap-desc">Multi‑stage sandboxed extensions. MCP server integration, inbound/outbound webhooks, Agent Safety Gateway.</p>
+          <div class="cap-more"><span>MCP</span><span>webhooks</span><span>sandboxed</span></div>
+        </article>
+        <article class="cap reveal">
+          <div class="cap-num">09</div>
+          <h3 class="cap-title">SD / NAI / ComfyUI <span class="acc">bridge</span></h3>
+          <p class="cap-desc">Direct integration with Stable Diffusion WebUI, NovelAI, and ComfyUI for generation and prompt management.</p>
+          <div class="cap-more"><span>SD‑WebUI</span><span>NAI</span><span>ComfyUI</span></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- BACKENDS -->
+  <section class="slab shell" id="backends">
+    <div class="grid">
+      <div class="slab-head">
+        <div class="meta"><span class="num">04</span><span>SUPPORTED BACKENDS</span></div>
+      </div>
+      <div class="backends-wrap">
+        <div class="backends-head reveal">
+          <h3>Every major<br/>local accelerator.</h3>
+          <p>Hot‑swap. Automatic fallback. Discover peers on the LAN with mDNS and distribute load without a central server.</p>
+        </div>
+        <div class="backends-list">
+          <div class="backend"><div class="name">Hailo‑10H</div><div class="sub">HailoRT 5.x · NPU</div><div class="status">ONLINE · 2 dev.</div></div>
+          <div class="backend"><div class="name">ONNX Runtime</div><div class="sub">CPU · DirectML</div><div class="status">ONLINE</div></div>
+          <div class="backend warm"><div class="name">AMD ROCm</div><div class="sub">gfx11 · HIP</div><div class="status">WARMING</div></div>
+          <div class="backend"><div class="name">Apple CoreML</div><div class="sub">ANE · M‑series</div><div class="status">ONLINE</div></div>
+          <div class="backend warm"><div class="name">NVIDIA CUDA</div><div class="sub">via Ollama</div><div class="status">WARMING</div></div>
+          <div class="backend cold"><div class="name">CPU fallback</div><div class="sub">always available</div><div class="status">IDLE</div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING / COST TOGGLE -->
+  <section class="slab shell" id="pricing">
+    <div class="grid">
+      <div class="slab-head">
+        <div class="meta"><span class="num">05</span><span>PRICING</span></div>
+      </div>
+      <div class="price-wrap">
+        <div class="price-head reveal">
+          <h3>Buy the binary —<br/>or build it yourself.</h3>
+          <p>Both paths are legitimate. Pick whichever respects your time more.</p>
+        </div>
+
+        <div class="cost-toggle reveal">
+          <div class="cost-tabs" role="tablist">
+            <button class="cost-tab active" data-tab="buy" role="tab" aria-selected="true">
+              <span>01 · Buy binary</span><small>recommended</small>
+            </button>
+            <button class="cost-tab" data-tab="build" role="tab" aria-selected="false">
+              <span>02 · Build yourself</span><small>MIT, free</small>
+            </button>
+          </div>
+
+          <div class="cost-panel active" id="panel-buy">
+            <div class="num"><span id="num-buy">$49.99</span> <span class="unit">· one‑time · no subscription</span></div>
+            <div class="breakdown">
+              <div class="k">Pre‑built binary (Win / macOS)</div><div class="v">included</div>
+              <div class="k">Installer package</div><div class="v">included</div>
+              <div class="k">All future binary updates</div><div class="v">included</div>
+              <div class="k">Source code on GitHub (MIT)</div><div class="v">free, always</div>
+              <div class="k">Estimated setup time</div><div class="v">≈ 2 min</div>
+              <div class="k total-k">Total</div><div class="v total-v">$49.99 once</div>
+            </div>
+            <div class="cta">
+              <a href="#" class="btn btn-primary">Get on Microsoft Store <span class="arrow">→</span></a>
+            </div>
+            <p class="caveat">No telemetry. No vendor lock‑in. Microsoft Store handles billing per their terms.</p>
+          </div>
+
+          <div class="cost-panel" id="panel-build">
+            <div class="num"><span id="num-build">$0.00</span> <span class="unit">· your time, your call</span></div>
+            <div class="breakdown">
+              <div class="k">git clone · source (MIT)</div><div class="v">free</div>
+              <div class="k">Python environment setup</div><div class="v">≈ 20 – 60 min</div>
+              <div class="k">Build + package binaries</div><div class="v">≈ 15 – 45 min</div>
+              <div class="k">Future rebuild on every update</div><div class="v">recurring</div>
+              <div class="k">Debugging install paths</div><div class="v">depends on you</div>
+              <div class="k total-k">Total</div><div class="v total-v">≈ 1 h · $0</div>
+            </div>
+            <div class="cta">
+              <a href="https://github.com/eauesque/yu_ai_manager" class="btn btn-ghost">git clone / build <span class="arrow">↗</span></a>
+            </div>
+            <p class="caveat">If you're comfortable here, skip the binary. That's the point of this project being open source.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REQUIREMENTS -->
+  <section class="slab shell" id="requirements">
+    <div class="grid">
+      <div class="slab-head">
+        <div class="meta"><span class="num">06</span><span>REQUIREMENTS &amp; LIMITATIONS</span></div>
+      </div>
+      <div class="req-wrap">
+        <div class="req-col reveal">
+          <h4>Minimum requirements</h4>
+          <ul>
+            <li>Windows 10 / 11 or macOS 12+</li>
+            <li>8 GB RAM</li>
+            <li>Compatible AI hardware (see backends)</li>
+            <li>Local model files not included</li>
+          </ul>
+        </div>
+        <div class="req-col reveal">
+          <h4 class="bad">Not for you if</h4>
+          <ul>
+            <li>You are comfortable with Python environments</li>
+            <li>You can build from source yourself</li>
+            <li>You don't have local AI hardware</li>
+            <li>You expect cloud‑based functionality</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">yu_ai_manager <em>— local‑first, always.</em></div>
+    <div class="footer-col">
+      <h5>Links</h5>
+      <a href="https://github.com/eauesque/yu_ai_manager">GitHub ↗</a>
+      <a href="privacy.html">Privacy policy</a>
+      <a href="bugreport.html">Bug report</a>
+    </div>
+    <div class="footer-col">
+      <h5>Build</h5>
+      <a href="#">Microsoft Store</a>
+      <a href="https://github.com/eauesque/yu_ai_manager">git clone</a>
+      <a href="https://github.com/eauesque/yu_ai_manager/releases">Releases</a>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 eauesque · MIT License</span>
+      <span>v0.9.4 / 2026‑04‑18 · no telemetry</span>
+    </div>
+  </div>
+</footer>
+
+<!-- Tweaks panel -->
+<div class="tweaks" id="tweaks" role="dialog" aria-label="tweaks">
+  <h5>Tweaks <span class="x" id="tweaks-close">×</span></h5>
+  <div class="tweak">
+    <label>Density <b id="t-density-val">standard</b></label>
+    <div class="seg" id="t-density">
+      <button data-v="0.9">tight</button>
+      <button class="on" data-v="1">std</button>
+      <button data-v="1.1">loose</button>
+    </div>
+  </div>
+  <div class="tweak">
+    <label>Motion <b id="t-motion-val">100%</b></label>
+    <input id="t-motion" type="range" min="0" max="1" step="0.05" value="1"/>
+  </div>
+  <div class="tweak">
+    <label>Theme <b id="t-theme-val">light</b></label>
+    <div class="two" id="t-theme">
+      <button class="on" data-v="light">light</button>
+      <button data-v="dark">dark</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   Tweakable defaults (editmode-persistable)
+   ═══════════════════════════════════════════════════════════════════ */
+const TWEAKS = /*EDITMODE-BEGIN*/{
+  "density": 1.1,
+  "motion": 1,
+  "theme": "light"
+}/*EDITMODE-END*/;
+
+/* ═══════════════════════════════════════════════════════════════════
+   Apply tweaks to DOM
+   ═══════════════════════════════════════════════════════════════════ */
+function applyTweaks(t) {
+  document.documentElement.style.setProperty('--scale', t.density);
+  document.documentElement.style.setProperty('--motion', t.motion);
+  document.documentElement.dataset.theme = t.theme;
+  // sync controls
+  document.querySelectorAll('#t-density button').forEach(b => b.classList.toggle('on', parseFloat(b.dataset.v) === t.density));
+  document.querySelectorAll('#t-theme button').forEach(b => b.classList.toggle('on', b.dataset.v === t.theme));
+  document.getElementById('t-motion').value = t.motion;
+  document.getElementById('t-motion-val').textContent = Math.round(t.motion * 100) + '%';
+  document.getElementById('t-density-val').textContent = t.density < 1 ? 'tight' : t.density > 1 ? 'loose' : 'standard';
+  document.getElementById('t-theme-val').textContent = t.theme;
+}
+applyTweaks(TWEAKS);
+
+function setTweak(k, v) {
+  TWEAKS[k] = v;
+  applyTweaks(TWEAKS);
+  try { window.parent.postMessage({ type: '__edit_mode_set_keys', edits: { [k]: v } }, '*'); } catch(_) {}
+}
+
+document.getElementById('t-density').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  setTweak('density', parseFloat(b.dataset.v));
+});
+document.getElementById('t-theme').addEventListener('click', (e) => {
+  const b = e.target.closest('button'); if (!b) return;
+  setTweak('theme', b.dataset.v);
+});
+document.getElementById('t-motion').addEventListener('input', (e) => {
+  setTweak('motion', parseFloat(e.target.value));
+});
+document.getElementById('tweaks-close').addEventListener('click', () => {
+  document.getElementById('tweaks').classList.remove('on');
+  try { window.parent.postMessage({ type: '__deactivate_edit_mode' }, '*'); } catch(_) {}
+});
+
+window.addEventListener('message', (e) => {
+  const t = e.data && e.data.type;
+  if (t === '__activate_edit_mode') document.getElementById('tweaks').classList.add('on');
+  if (t === '__deactivate_edit_mode') document.getElementById('tweaks').classList.remove('on');
+});
+try { window.parent.postMessage({ type: '__edit_mode_available' }, '*'); } catch(_) {}
+
+/* ═══════════════════════════════════════════════════════════════════
+   Cursor glow follow
+   ═══════════════════════════════════════════════════════════════════ */
+let mx = innerWidth/2, my = innerHeight/2, tx = mx, ty = my;
+addEventListener('pointermove', (e) => { tx = e.clientX; ty = e.clientY; });
+(function loop(){
+  mx += (tx - mx) * 0.12;
+  my += (ty - my) * 0.12;
+  document.documentElement.style.setProperty('--mx', mx + 'px');
+  document.documentElement.style.setProperty('--my', my + 'px');
+  requestAnimationFrame(loop);
+})();
+
+/* ═══════════════════════════════════════════════════════════════════
+   Reveal on scroll
+   ═══════════════════════════════════════════════════════════════════ */
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+/* ═══════════════════════════════════════════════════════════════════
+   Count-up metrics
+   ═══════════════════════════════════════════════════════════════════ */
+const formatN = (n, target) => {
+  if (target >= 1000) return Math.round(n).toLocaleString('en-US').replace(/,/g, ' ');
+  return Math.round(n);
+};
+const countUp = (el) => {
+  const target = parseFloat(el.dataset.target);
+  const dur = 1600;
+  const t0 = performance.now();
+  const tick = (t) => {
+    const p = Math.min(1, (t - t0) / dur);
+    const eased = 1 - Math.pow(1 - p, 3);
+    el.textContent = formatN(target * eased, target);
+    if (p < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+};
+const mio = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { countUp(e.target); mio.unobserve(e.target); } });
+}, { threshold: 0.5 });
+document.querySelectorAll('.metric .value[data-target]').forEach(el => mio.observe(el));
+
+/* ═══════════════════════════════════════════════════════════════════
+   Live log feed
+   ═══════════════════════════════════════════════════════════════════ */
+const logMessages = [
+  ['info','router.ollama ready · 3 models loaded'],
+  ['ok','hailo-10h initialised · 2 devices'],
+  ['info','mDNS peer advertised : host.local'],
+  ['info','discovered peer : mac-studio.local · CoreML'],
+  ['ok','batch wd-tagger : 128 images · 4.1s'],
+  ['info','yolo stream rtsp://cam-02 connected'],
+  ['warn','rocm warming up · falling back to ONNX'],
+  ['ok','ocr + translate batch · 42 pages'],
+  ['info','lora dataset built : 1 864 captions'],
+  ['ok','extension loaded : mcp.weather'],
+  ['info','slo : p95 latency 38ms · target 60ms'],
+  ['ok','queue drained · 0 pending'],
+  ['info','autosave checkpoint · v0.9.4'],
+];
+const feed = document.getElementById('logfeed');
+let logIdx = 0;
+function pad2(n){ return n.toString().padStart(2,'0'); }
+function tsNow(offset=0) {
+  const d = new Date(Date.now() - offset);
+  return `${pad2(d.getHours())}:${pad2(d.getMinutes())}:${pad2(d.getSeconds())}`;
+}
+function pushLog() {
+  if (!feed) return;
+  const [lvl, msg] = logMessages[logIdx % logMessages.length];
+  logIdx++;
+  const row = document.createElement('div');
+  row.className = 'row';
+  row.innerHTML = `<span class="ts">${tsNow()}</span><span class="lvl ${lvl}">${lvl.padEnd(4,' ')}</span><span class="msg">${msg}</span>`;
+  feed.appendChild(row);
+  // trim
+  while (feed.children.length > 14) feed.removeChild(feed.firstChild);
+}
+// seed with some
+for (let i = 0; i < 8; i++) pushLog();
+setInterval(() => {
+  if (document.hidden || parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--motion')) < 0.1) return;
+  pushLog();
+}, 1800);
+
+/* ═══════════════════════════════════════════════════════════════════
+   Sparkline chart (live)
+   ═══════════════════════════════════════════════════════════════════ */
+const chartLine = document.getElementById('chart-line');
+const chartFill = document.getElementById('chart-fill');
+const chartDots = document.getElementById('chart-dots');
+const CW = 600, CH = 140, N = 48;
+let series = Array.from({length: N}, (_, i) => 55 + Math.sin(i/4) * 18 + Math.random()*12);
+function renderChart() {
+  if (!chartLine) return;
+  const step = CW / (N - 1);
+  const max = Math.max(...series), min = Math.min(...series);
+  const pad = 12;
+  const pts = series.map((v, i) => {
+    const x = i * step;
+    const y = CH - pad - ((v - min) / Math.max(max - min, 1)) * (CH - pad*2);
+    return [x, y];
+  });
+  const d = pts.map((p, i) => (i === 0 ? `M${p[0]},${p[1]}` : `L${p[0]},${p[1]}`)).join(' ');
+  chartLine.setAttribute('d', d);
+  chartFill.setAttribute('d', d + ` L${CW},${CH} L0,${CH} Z`);
+  // last dot
+  const last = pts[pts.length - 1];
+  chartDots.innerHTML = `<circle cx="${last[0]}" cy="${last[1]}" r="3" fill="var(--accent)"/><circle cx="${last[0]}" cy="${last[1]}" r="7" fill="var(--accent)" opacity="0.25"/>`;
+}
+renderChart();
+setInterval(() => {
+  const motion = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--motion'));
+  if (motion < 0.1) return;
+  series.shift();
+  const last = series[series.length - 1];
+  const next = Math.max(30, Math.min(95, last + (Math.random() - 0.5) * 14));
+  series.push(next);
+  renderChart();
+  // sysbar tps animate
+  const tpsEl = document.getElementById('sys-tps');
+  if (tpsEl) tpsEl.textContent = Math.round(1200 + next * 3).toLocaleString('en-US').replace(/,/g,' ');
+  const latEl = document.getElementById('sys-lat');
+  if (latEl) latEl.textContent = Math.round(20 + (100 - next)/3) + ' ms';
+}, 1400);
+
+/* ═══════════════════════════════════════════════════════════════════
+   Pricing cost toggle
+   ═══════════════════════════════════════════════════════════════════ */
+document.querySelectorAll('.cost-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.cost-tab').forEach(t => {
+      t.classList.remove('active');
+      t.setAttribute('aria-selected','false');
+    });
+    tab.classList.add('active');
+    tab.setAttribute('aria-selected','true');
+    const id = tab.dataset.tab;
+    document.querySelectorAll('.cost-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('panel-' + id).classList.add('active');
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════════════
+   Small safeties
+   ═══════════════════════════════════════════════════════════════════ */
+if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+  // Respect user preference
+  document.documentElement.style.setProperty('--motion', '0.2');
+}
+</script>
+
+</body>
+</html>

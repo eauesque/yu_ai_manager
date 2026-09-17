@@ -1,0 +1,180 @@
+/*
+ * Atelier System (γ) — llm_router.html
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool.
+ */
+
+/* ----- Header h1 polish ----- */
+
+body.theme-atelier-light.atelier-tool .lr-header h1,
+body.theme-atelier-dark.atelier-tool .lr-header h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  margin: 4px 0 16px;
+}
+
+/* ----- Cards / sections ----- */
+
+body.theme-atelier-light.atelier-tool .lr-summary-card,
+body.theme-atelier-dark.atelier-tool .lr-summary-card,
+body.theme-atelier-light.atelier-tool .lr-section,
+body.theme-atelier-dark.atelier-tool .lr-section {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  margin-bottom: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .lr-section h2,
+body.theme-atelier-dark.atelier-tool .lr-section h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 18px;
+  margin: 0 0 var(--space-3);
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .lr-summary-cell,
+body.theme-atelier-dark.atelier-tool .lr-summary-cell {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .lr-summary-label,
+body.theme-atelier-dark.atelier-tool .lr-summary-label {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light.atelier-tool .lr-summary-value,
+body.theme-atelier-dark.atelier-tool .lr-summary-value {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 22px;
+  color: var(--text);
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* ----- Buttons ----- */
+
+body.theme-atelier-light.atelier-tool .lr-btn,
+body.theme-atelier-dark.atelier-tool .lr-btn {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+body.theme-atelier-light.atelier-tool .lr-btn:hover:not(:disabled),
+body.theme-atelier-dark.atelier-tool .lr-btn:hover:not(:disabled) {
+  background: var(--surface-raised);
+  border-color: color-mix(in srgb, var(--accent-tool) 40%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .lr-btn.primary,
+body.theme-atelier-dark.atelier-tool .lr-btn.primary {
+  background: var(--accent-tool);
+  border-color: var(--accent-tool);
+  color: #fff;
+}
+
+body.theme-atelier-light.atelier-tool .lr-btn.primary:hover:not(:disabled),
+body.theme-atelier-dark.atelier-tool .lr-btn.primary:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent-tool) 88%, #000);
+  border-color: color-mix(in srgb, var(--accent-tool) 88%, #000);
+}
+
+body.theme-atelier-light.atelier-tool .lr-btn.danger,
+body.theme-atelier-dark.atelier-tool .lr-btn.danger {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--danger-fg);
+}
+
+/* ----- Tables ----- */
+
+body.theme-atelier-light.atelier-tool .lr-table,
+body.theme-atelier-dark.atelier-tool .lr-table {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  border-collapse: collapse;
+  width: 100%;
+}
+
+body.theme-atelier-light.atelier-tool .lr-table th,
+body.theme-atelier-dark.atelier-tool .lr-table th {
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+body.theme-atelier-light.atelier-tool .lr-table td,
+body.theme-atelier-dark.atelier-tool .lr-table td {
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+/* ----- Badges ----- */
+
+body.theme-atelier-light.atelier-tool .lr-badge,
+body.theme-atelier-dark.atelier-tool .lr-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  border: 1px solid var(--border);
+  background: var(--surface-raised);
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .lr-badge.static,
+body.theme-atelier-dark.atelier-tool .lr-badge.static {
+  background: color-mix(in srgb, var(--accent-tool) 12%, var(--surface));
+  color: var(--accent-tool);
+  border-color: color-mix(in srgb, var(--accent-tool) 35%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .lr-badge.mdns,
+body.theme-atelier-dark.atelier-tool .lr-badge.mdns {
+  background: color-mix(in srgb, var(--accent-warm) 18%, var(--surface));
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent-warm) 45%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .lr-badge.disabled,
+body.theme-atelier-dark.atelier-tool .lr-badge.disabled {
+  opacity: 0.6;
+}
+
+body.theme-atelier-light.atelier-tool .lr-empty,
+body.theme-atelier-dark.atelier-tool .lr-empty {
+  font-family: var(--font-ui);
+  font-style: italic;
+  color: var(--text-muted);
+}

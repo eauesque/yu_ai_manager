@@ -1,0 +1,4 @@
+# Pi (Raspberry Pi 5) はコンパイルジョブを複数並列にするとシステムクラッシュするため
+# jobs = 1 を恒久設定。CARGO_BUILD_JOBS=1 環境変数の代替。
+[build]
+jobs = 1

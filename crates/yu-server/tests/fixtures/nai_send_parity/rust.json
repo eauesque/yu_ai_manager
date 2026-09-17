@@ -1,0 +1,986 @@
+{
+  "ai_choice_no_centers": {
+    "action": "generate",
+    "input": "2girls, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+    "model": "nai-diffusion-4-5-full",
+    "parameters": {
+      "add_original_image": true,
+      "cfg_rescale": 0.0,
+      "controlnet_strength": 1.0,
+      "dynamic_thresholding": false,
+      "height": 1216,
+      "image_format": "png",
+      "legacy": false,
+      "n_samples": 1,
+      "negative_prompt": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+      "noise_schedule": "karras",
+      "params_version": 3,
+      "qualityToggle": false,
+      "sampler": "k_euler_ancestral",
+      "scale": 5.0,
+      "skip_cfg_above_sigma": null,
+      "sm": false,
+      "sm_dyn": false,
+      "steps": 28,
+      "ucPreset": 2,
+      "uncond_scale": 1.0,
+      "use_coords": false,
+      "v4_negative_prompt": {
+        "caption": {
+          "base_caption": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": ""
+            }
+          ]
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "v4_prompt": {
+        "caption": {
+          "base_caption": "2girls, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "girl"
+            }
+          ]
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "width": 832
+    }
+  },
+  "empty_prompt_with_center": {
+    "action": "generate",
+    "input": "x, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+    "model": "nai-diffusion-4-5-full",
+    "parameters": {
+      "add_original_image": true,
+      "cfg_rescale": 0.0,
+      "controlnet_strength": 1.0,
+      "dynamic_thresholding": false,
+      "height": 1216,
+      "image_format": "png",
+      "legacy": false,
+      "n_samples": 1,
+      "negative_prompt": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, y",
+      "noise_schedule": "karras",
+      "params_version": 3,
+      "qualityToggle": false,
+      "sampler": "k_euler_ancestral",
+      "scale": 5.0,
+      "skip_cfg_above_sigma": null,
+      "sm": false,
+      "sm_dyn": false,
+      "steps": 28,
+      "ucPreset": 2,
+      "uncond_scale": 1.0,
+      "use_coords": false,
+      "v4_negative_prompt": {
+        "caption": {
+          "base_caption": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, y",
+          "char_captions": []
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "v4_prompt": {
+        "caption": {
+          "base_caption": "x, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+          "char_captions": []
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "width": 832
+    }
+  },
+  "minimal": {
+    "action": "generate",
+    "input": "a cat, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+    "model": "nai-diffusion-4-5-full",
+    "parameters": {
+      "add_original_image": true,
+      "cfg_rescale": 0.0,
+      "controlnet_strength": 1.0,
+      "dynamic_thresholding": false,
+      "height": 1216,
+      "image_format": "png",
+      "legacy": false,
+      "n_samples": 1,
+      "negative_prompt": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+      "noise_schedule": "karras",
+      "params_version": 3,
+      "qualityToggle": false,
+      "sampler": "k_euler_ancestral",
+      "scale": 5.0,
+      "skip_cfg_above_sigma": null,
+      "sm": false,
+      "sm_dyn": false,
+      "steps": 28,
+      "ucPreset": 2,
+      "uncond_scale": 1.0,
+      "use_coords": false,
+      "v4_negative_prompt": {
+        "caption": {
+          "base_caption": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+          "char_captions": []
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "v4_prompt": {
+        "caption": {
+          "base_caption": "a cat, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+          "char_captions": []
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "width": 832
+    }
+  },
+  "nonempty_prompt_empty_center": {
+    "action": "generate",
+    "input": "x, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+    "model": "nai-diffusion-4-5-full",
+    "parameters": {
+      "add_original_image": true,
+      "cfg_rescale": 0.0,
+      "controlnet_strength": 1.0,
+      "dynamic_thresholding": false,
+      "height": 1216,
+      "image_format": "png",
+      "legacy": false,
+      "n_samples": 1,
+      "negative_prompt": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, y",
+      "noise_schedule": "karras",
+      "params_version": 3,
+      "qualityToggle": false,
+      "sampler": "k_euler_ancestral",
+      "scale": 5.0,
+      "skip_cfg_above_sigma": null,
+      "sm": false,
+      "sm_dyn": false,
+      "steps": 28,
+      "ucPreset": 2,
+      "uncond_scale": 1.0,
+      "use_coords": false,
+      "v4_negative_prompt": {
+        "caption": {
+          "base_caption": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, y",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": ""
+            }
+          ]
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "v4_prompt": {
+        "caption": {
+          "base_caption": "x, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "a"
+            }
+          ]
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "width": 832
+    }
+  },
+  "v45_character_cap": {
+    "action": "generate",
+    "input": "crowd, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+    "model": "nai-diffusion-4-5-full",
+    "parameters": {
+      "add_original_image": true,
+      "cfg_rescale": 0.0,
+      "controlnet_strength": 1.0,
+      "dynamic_thresholding": false,
+      "height": 1216,
+      "image_format": "png",
+      "legacy": false,
+      "n_samples": 1,
+      "negative_prompt": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+      "noise_schedule": "karras",
+      "params_version": 3,
+      "qualityToggle": false,
+      "sampler": "k_euler_ancestral",
+      "scale": 5.0,
+      "skip_cfg_above_sigma": null,
+      "sm": false,
+      "sm_dyn": false,
+      "steps": 28,
+      "ucPreset": 2,
+      "uncond_scale": 1.0,
+      "use_coords": false,
+      "v4_negative_prompt": {
+        "caption": {
+          "base_caption": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad0"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad1"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad2"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad3"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad4"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad5"
+            }
+          ]
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "v4_prompt": {
+        "caption": {
+          "base_caption": "crowd, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char0"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char1"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char2"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char3"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char4"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char5"
+            }
+          ]
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "width": 832
+    }
+  },
+  "v4_grid_coords": {
+    "action": "generate",
+    "input": "2girls, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+    "model": "nai-diffusion-4-5-full",
+    "parameters": {
+      "add_original_image": true,
+      "cfg_rescale": 0.0,
+      "controlnet_strength": 1.0,
+      "dynamic_thresholding": false,
+      "height": 1216,
+      "image_format": "png",
+      "legacy": false,
+      "n_samples": 1,
+      "negative_prompt": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+      "noise_schedule": "karras",
+      "params_version": 3,
+      "qualityToggle": false,
+      "sampler": "k_euler_ancestral",
+      "scale": 5.0,
+      "skip_cfg_above_sigma": null,
+      "sm": false,
+      "sm_dyn": false,
+      "steps": 28,
+      "ucPreset": 2,
+      "uncond_scale": 1.0,
+      "use_coords": true,
+      "v4_negative_prompt": {
+        "caption": {
+          "base_caption": "blurry, lowres, upscaled, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, halftone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": ""
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.3,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": ""
+            }
+          ]
+        },
+        "use_coords": true,
+        "use_order": true
+      },
+      "v4_prompt": {
+        "caption": {
+          "base_caption": "2girls, very aesthetic, masterpiece, no text, -0.8::feet::, rating:general",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "girl"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.3,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "boy"
+            }
+          ]
+        },
+        "use_coords": true,
+        "use_order": true
+      },
+      "width": 832
+    }
+  },
+  "v5_character_cap": {
+    "action": "generate",
+    "input": "crowd, very aesthetic, masterpiece, no text",
+    "model": "nai-diffusion-5-full",
+    "parameters": {
+      "add_original_image": true,
+      "cfg_rescale": 0.0,
+      "controlnet_strength": 1.0,
+      "dynamic_thresholding": false,
+      "height": 1216,
+      "image_format": "png",
+      "legacy": false,
+      "n_samples": 1,
+      "negative_prompt": "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+      "noise_schedule": "karras",
+      "params_version": 3,
+      "qualityToggle": false,
+      "sampler": "k_euler_ancestral",
+      "scale": 5.0,
+      "skip_cfg_above_sigma": null,
+      "sm": false,
+      "sm_dyn": false,
+      "steps": 28,
+      "ucPreset": 2,
+      "uncond_scale": 1.0,
+      "use_coords": false,
+      "v4_negative_prompt": {
+        "caption": {
+          "base_caption": "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad0"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad1"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad2"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad3"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad4"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad5"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad6"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad7"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad8"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad9"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad10"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad11"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad12"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad13"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad14"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad15"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad16"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad17"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad18"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad19"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad20"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "bad21"
+            }
+          ]
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "v4_prompt": {
+        "caption": {
+          "base_caption": "crowd, very aesthetic, masterpiece, no text",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char0"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char1"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char2"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char3"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char4"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char5"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char6"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char7"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char8"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char9"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char10"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char11"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char12"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char13"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char14"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char15"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char16"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char17"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char18"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char19"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char20"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.5,
+                  "y": 0.5
+                }
+              ],
+              "char_caption": "char21"
+            }
+          ]
+        },
+        "use_coords": false,
+        "use_order": true
+      },
+      "width": 832
+    }
+  },
+  "v5_continuous_coords": {
+    "action": "generate",
+    "input": "2girls, very aesthetic, masterpiece, no text",
+    "model": "nai-diffusion-5-full",
+    "parameters": {
+      "add_original_image": true,
+      "cfg_rescale": 0.0,
+      "controlnet_strength": 1.0,
+      "dynamic_thresholding": false,
+      "height": 1216,
+      "image_format": "png",
+      "legacy": false,
+      "n_samples": 1,
+      "negative_prompt": "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+      "noise_schedule": "karras",
+      "params_version": 3,
+      "qualityToggle": false,
+      "sampler": "k_euler_ancestral",
+      "scale": 5.0,
+      "skip_cfg_above_sigma": null,
+      "sm": false,
+      "sm_dyn": false,
+      "steps": 28,
+      "ucPreset": 2,
+      "uncond_scale": 1.0,
+      "use_coords": true,
+      "v4_negative_prompt": {
+        "caption": {
+          "base_caption": "lowres, artistic error, film grain, scan artifacts, worst quality, bad quality, jpeg artifacts, very displeasing, chromatic aberration, dithering, halftone, screentone, multiple views, logo, too many watermarks, negative space, blank page, bad",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.495,
+                  "y": 0.519
+                }
+              ],
+              "char_caption": "naked"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.528,
+                  "y": 0.258
+                }
+              ],
+              "char_caption": ""
+            }
+          ]
+        },
+        "use_coords": true,
+        "use_order": true
+      },
+      "v4_prompt": {
+        "caption": {
+          "base_caption": "2girls, very aesthetic, masterpiece, no text",
+          "char_captions": [
+            {
+              "centers": [
+                {
+                  "x": 0.495,
+                  "y": 0.519
+                }
+              ],
+              "char_caption": "girl"
+            },
+            {
+              "centers": [
+                {
+                  "x": 0.528,
+                  "y": 0.258
+                }
+              ],
+              "char_caption": "boy"
+            }
+          ]
+        },
+        "use_coords": true,
+        "use_order": true
+      },
+      "width": 832
+    }
+  }
+}

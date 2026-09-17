@@ -1,0 +1,32 @@
+    <!-- Debug log viewer -->
+    <details class="tool-item" id="tool-debug-log">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.debug_log">📋 Debug Log</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.debug_log_desc">View, download, and clear server debug logs.</p>
+
+      <div id="debugLogDisabled">
+        <p data-i18n="tools.debug_log_disabled">Debug logging is not enabled. Start the server with <code>--debug-log on</code> to enable.</p>
+      </div>
+
+      <div id="debugLogEnabled">
+        <div class="stat-row">
+          <button data-action="toolsPageApi.loadDebugLog" data-action-arg="true" class="btn atelier-btn-ghost"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-refresh"/></svg> <span data-i18n="tools.debug_log_refresh">Refresh</span></button>
+          <button id="debugLogAutoBtn" data-action="toolsPageApi.toggleDebugLogAuto" class="btn atelier-btn-ghost"><span aria-hidden="true">▶</span> <span data-i18n="tools.debug_log_auto">Auto</span></button>
+          <button data-action="toolsPageApi.downloadDebugLog" class="btn atelier-btn-ghost"><span aria-hidden="true">📥</span> <span data-i18n="tools.debug_log_download">Download</span></button>
+          <button data-action="toolsPageApi.clearDebugLog" class="btn atelier-btn-danger"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-trash"/></svg> <span data-i18n="tools.debug_log_clear">Clear</span></button>
+          <label class="tool-label" for="debugLogFilterInput">
+            <span data-i18n="tools.debug_log_filter">Filter:</span>
+            <input class="tool-input" type="text" id="debugLogFilterInput" data-action="toolsPageApi.filterDebugLogClient" data-action-event="input" placeholder="...">
+          </label>
+        </div>
+
+        <pre id="debugLogContent" class="atelier-log atelier-log--compact"></pre>
+
+        <div id="debugLogStatus"></div>
+      </div>
+      </div>
+</details>

@@ -1,0 +1,283 @@
+<script nonce="{{ csp_nonce }}">
+/* ── Wildcard Manager JS — Replace / Sort / Sed ── */
+
+/* ── Replace bar ── */
+function wmShowReplace() {
+  document.getElementById('wmSedBar').style.display = 'none';
+  document.getElementById('wmGotoBar').style.display = 'none';
+  document.getElementById('wmReplaceBar').style.display = '';
+  var fi = document.getElementById('wmFindInput');
+  fi.focus();
+  fi.select();
+  wmCountMatches();
+}
+
+function wmHideReplace() {
+  document.getElementById('wmReplaceBar').style.display = 'none';
+  document.getElementById('wmReplaceCount').textContent = '';
+}
+
+function wmCountMatches() {
+  var find = document.getElementById('wmFindInput').value;
+  var countEl = document.getElementById('wmReplaceCount');
+  if (!find) { countEl.textContent = ''; return; }
+  var cs = document.getElementById('wmCaseSensitive').checked;
+  var text = _wmGetValue();
+  var flags = 'g' + (cs ? '' : 'i');
+  try {
+    var re = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags);
+    var m = text.match(re);
+    countEl.textContent = _wmt('replace_count').replace('{0}', m ? m.length : 0);
+  } catch (_e) {
+    countEl.textContent = '';
+  }
+}
+
+function wmReplaceNext() {
+  var find = document.getElementById('wmFindInput').value;
+  var repl = document.getElementById('wmReplaceInput').value;
+  if (!find) return;
+  var cs = document.getElementById('wmCaseSensitive').checked;
+  var text = _wmGetValue();
+  var flags = cs ? '' : 'i';
+  try {
+    var re = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags);
+    var newText = text.replace(re, repl);
+    if (newText !== text) {
+      _wmSetValue(newText);
+      wmCountMatches();
+    }
+  } catch (_e) {}
+}
+
+function wmReplaceAll() {
+  var find = document.getElementById('wmFindInput').value;
+  var repl = document.getElementById('wmReplaceInput').value;
+  if (!find) return;
+  var cs = document.getElementById('wmCaseSensitive').checked;
+  var text = _wmGetValue();
+  var flags = 'g' + (cs ? '' : 'i');
+  try {
+    var re = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), flags);
+    var m = text.match(re);
+    var count = m ? m.length : 0;
+    if (count > 0) {
+      _wmSetValue(text.replace(re, repl));
+      wmCountMatches();
+      wmToast(_wmt('replace_done').replace('{0}', count));
+    }
+  } catch (_e) {}
+}
+
+/* ── Sort ── */
+function wmSortEntries(e) {
+  var text = _wmGetValue();
+  if (!text.trim()) return;
+  var lines = text.split('\n');
+  var entries = lines.filter(function(l) { var t = l.trim(); return t !== '' && !t.startsWith('#'); });
+  var comments = lines.filter(function(l) { return l.trim().startsWith('#'); });
+  var empties = lines.filter(function(l) { return l.trim() === ''; });
+  var caseSensitive = e && e.shiftKey;
+  var reverse = e && e.ctrlKey;
+  entries.sort(function(a, b) {
+    var cmp = caseSensitive ? (a < b ? -1 : a > b ? 1 : 0) : a.localeCompare(b, undefined, { sensitivity: 'base' });
+    return reverse ? -cmp : cmp;
+  });
+  _wmSetValue(comments.concat(entries, empties).join('\n'));
+  var msg = reverse
+    ? _wmt('sort_reverse_done').replace('{0}', entries.length)
+    : _wmt('sort_done').replace('{0}', entries.length);
+  wmToast(msg);
+}
+
+/* ── Sed bar ── */
+function wmToggleSed() {
+  var bar = document.getElementById('wmSedBar');
+  if (bar.style.display === 'none') {
+    document.getElementById('wmReplaceBar').style.display = 'none';
+    document.getElementById('wmReplaceCount').textContent = '';
+    document.getElementById('wmGotoBar').style.display = 'none';
+    bar.style.display = '';
+    var si = document.getElementById('wmSedInput');
+    si.focus();
+    si.select();
+  } else {
+    wmHideSed();
+  }
+}
+
+function wmHideSed() {
+  document.getElementById('wmSedBar').style.display = 'none';
+}
+
+/* ── Sed parser helpers ── */
+function _wmSedParseDelimited(expr, pos, delim) {
+  /* Extract a delimited field (pattern or replacement) handling \delim escapes.
+     Returns { value, end } where end is the position after the closing delimiter. */
+  var cur = '', i = pos;
+  while (i < expr.length) {
+    if (expr[i] === '\\' && i + 1 < expr.length && expr[i + 1] === delim) {
+      cur += delim; i += 2;
+    } else if (expr[i] === delim) {
+      return { value: cur, end: i + 1 };
+    } else {
+      cur += expr[i]; i++;
+    }
+  }
+  return null; /* missing closing delimiter */
+}
+
+function _wmSedParseAddr(expr, pos) {
+  /* Parse /pattern/ address at pos. Returns { re:RegExp, end } or null. */
+  if (pos >= expr.length || expr[pos] !== '/') return null;
+  var r = _wmSedParseDelimited(expr, pos + 1, '/');
+  if (!r) return null;
+  try {
+    return { re: new RegExp(r.value), end: r.end };
+  } catch (_e) {
+    return null;
+  }
+}
+
+function _wmParseSedExpr(expr) {
+  /* Unified sed expression parser.
+     Returns { cmd, ... } or null on failure. */
+
+  /* 1. Try address-prefixed commands: /pattern/CMD */
+  if (expr[0] === '/') {
+    var addr = _wmSedParseAddr(expr, 0);
+    if (!addr) return null;
+    var rest = expr.substring(addr.end);
+
+    /* /pattern/!d — negate delete */
+    if (rest === '!d') return { cmd: 'd', addr: addr.re, negate: true };
+    /* /pattern/d — delete */
+    if (rest === 'd') return { cmd: 'd', addr: addr.re, negate: false };
+
+    /* /pattern/a\text — append after */
+    var mA = rest.match(/^a\\([\s\S]*)$/);
+    if (mA) return { cmd: 'a', addr: addr.re, text: mA[1] };
+
+    /* /pattern/i\text — insert before */
+    var mI = rest.match(/^i\\([\s\S]*)$/);
+    if (mI) return { cmd: 'i', addr: addr.re, text: mI[1] };
+
+    /* /pattern/s/old/new/flags — addressed substitute */
+    if (rest.length >= 4 && rest[0] === 's') {
+      var sub = _wmParseSedSub(rest);
+      if (sub) { sub.addr = addr.re; return sub; }
+    }
+    return null;
+  }
+
+  /* 2. y/source/dest/ — transliterate */
+  if (expr.length >= 4 && expr[0] === 'y') {
+    var yDelim = expr[1];
+    var r1 = _wmSedParseDelimited(expr, 2, yDelim);
+    if (!r1) return null;
+    var r2 = _wmSedParseDelimited(expr, r1.end, yDelim);
+    if (!r2) return null;
+    if (expr.substring(r2.end).trim() !== '') return null;
+    return { cmd: 'y', source: r1.value, dest: r2.value };
+  }
+
+  /* 3. s/old/new/flags — plain substitute (existing compat) */
+  if (expr.length >= 4 && expr[0] === 's') {
+    return _wmParseSedSub(expr);
+  }
+
+  return null;
+}
+
+function _wmParseSedSub(expr) {
+  /* Parse s/pattern/replacement/flags */
+  if (expr.length < 4 || expr[0] !== 's') return null;
+  var delim = expr[1];
+  var r1 = _wmSedParseDelimited(expr, 2, delim);
+  if (!r1) return null;
+  var r2 = _wmSedParseDelimited(expr, r1.end, delim);
+  if (!r2) return null;
+  var flags = expr.substring(r2.end);
+  if (!/^[gi]*$/.test(flags)) return null;
+  return { cmd: 's', addr: null, pattern: r1.value, replacement: r2.value, flags: flags };
+}
+
+function wmExecSed() {
+  var expr = document.getElementById('wmSedInput').value.trim();
+  var parsed = _wmParseSedExpr(expr);
+  if (!parsed) {
+    wmToast(_wmt('sed_error').replace('{0}', _wmt('sed_invalid_syntax')));
+    return;
+  }
+  var text = _wmGetValue();
+  var lines = text.split('\n');
+
+  switch (parsed.cmd) {
+    case 's': {
+      try { var re = new RegExp(parsed.pattern, parsed.flags); }
+      catch (err) { wmToast(_wmt('sed_error').replace('{0}', err.message)); return; }
+      var changed = 0;
+      var newLines = lines.map(function(line) {
+        if (parsed.addr && !parsed.addr.test(line)) return line;
+        var newLine = line.replace(re, parsed.replacement);
+        if (newLine !== line) changed++;
+        return newLine;
+      });
+      if (changed === 0) { wmToast(_wmt('sed_no_match')); }
+      else { _wmSetValue(newLines.join('\n')); wmToast(_wmt('sed_done').replace('{0}', changed)); }
+      break;
+    }
+    case 'd': {
+      var kept = [], removed = 0;
+      lines.forEach(function(line) {
+        var match = parsed.addr.test(line);
+        if (match ^ parsed.negate) { removed++; }
+        else { kept.push(line); }
+      });
+      if (removed === 0) { wmToast(_wmt('sed_no_match')); }
+      else {
+        _wmSetValue(kept.join('\n'));
+        if (parsed.negate) { wmToast(_wmt('sed_kept').replace('{0}', kept.length)); }
+        else { wmToast(_wmt('sed_deleted').replace('{0}', removed)); }
+      }
+      break;
+    }
+    case 'y': {
+      if (parsed.source.length !== parsed.dest.length) {
+        wmToast(_wmt('sed_error').replace('{0}', _wmt('sed_y_mismatch')));
+        return;
+      }
+      var map = {};
+      for (var ci = 0; ci < parsed.source.length; ci++) { map[parsed.source[ci]] = parsed.dest[ci]; }
+      var changed = 0;
+      var newLines = lines.map(function(line) {
+        var newLine = line.split('').map(function(ch) { return map[ch] !== undefined ? map[ch] : ch; }).join('');
+        if (newLine !== line) changed++;
+        return newLine;
+      });
+      if (changed === 0) { wmToast(_wmt('sed_no_match')); }
+      else { _wmSetValue(newLines.join('\n')); wmToast(_wmt('sed_translit').replace('{0}', changed)); }
+      break;
+    }
+    case 'a':
+    case 'i': {
+      var inserted = 0;
+      var newLines = [];
+      lines.forEach(function(line) {
+        if (parsed.addr.test(line)) {
+          if (parsed.cmd === 'i') { newLines.push(parsed.text); inserted++; }
+          newLines.push(line);
+          if (parsed.cmd === 'a') { newLines.push(parsed.text); inserted++; }
+        } else {
+          newLines.push(line);
+        }
+      });
+      if (inserted === 0) { wmToast(_wmt('sed_no_match')); }
+      else { _wmSetValue(newLines.join('\n')); wmToast(_wmt('sed_inserted').replace('{0}', inserted)); }
+      break;
+    }
+    default:
+      wmToast(_wmt('sed_error').replace('{0}', _wmt('sed_unknown_cmd')));
+  }
+}
+</script>

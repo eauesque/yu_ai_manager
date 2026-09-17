@@ -1,0 +1,110 @@
+/* Character prompt cards */
+.character-prompts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.character-prompt-card {
+  padding: 12px;
+  background: var(--bg);
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+}
+
+.character-prompt-card:hover {
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+body.dark .character-prompt-card:hover {
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+
+.char-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid var(--border);
+}
+
+.char-number {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--accent);
+  background: var(--card);
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.char-position {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 11px;
+  color: var(--text-secondary);
+  background: var(--card);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+/* Mini position grid in character header */
+.char-position-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.char-mini-grid {
+  display: inline-grid;
+  grid-template-columns: repeat(5, 1fr);
+  grid-template-rows: repeat(5, 1fr);
+  width: 40px;
+  height: 40px;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.char-mini-cell {
+  background: var(--card);
+  transition: background 0.15s ease;
+}
+
+.char-mini-cell.active {
+  border-radius: 1px;
+}
+
+.char-prompt-text {
+  font-family: 'Consolas', 'Monaco', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.vibe-transfer-box {
+  margin-top: 15px;
+  padding: 10px 12px;
+  background: var(--bg);
+  border-radius: 4px;
+  border-left: 3px solid #5856d6;
+  font-size: 12px;
+}
+
+.vibe-transfer-box h5 {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #5856d6;
+}
+
+.vibe-item {
+  padding: 4px 0;
+  color: var(--text-secondary);
+  font-family: 'Consolas', 'Monaco', monospace;
+}

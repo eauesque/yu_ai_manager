@@ -1,0 +1,23 @@
+  {% include "_nav.html" %}
+  <main id="main-content" class="container" style="padding-top:50px;">
+    <header>
+      <h1><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-link"/></svg> <span data-i18n="page.share.title">Prompt Share</span></h1>
+    </header>
+
+    <div class="card" style="margin-bottom:16px;">
+      <h2 style="margin:0 0 12px;" data-i18n="share.qr_decode_title">QR Code Reader</h2>
+      <p style="font-size:13px;color:var(--muted,#888);margin:0 0 12px;" data-i18n="share.qr_decode_desc">Select a QR image file to restore prompt information.</p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
+        <label style="cursor:pointer;padding:8px 16px;background:linear-gradient(135deg,#667eea,#764ba2);color:white;border-radius:6px;font-size:13px;">
+          <span data-i18n="share.qr_select_file">Select QR Image</span>
+          <input type="file" accept="image/*" id="qrFileInput" style="display:none;" data-action="sharePageApi.decodeQRFile" data-action-event="change" data-action-this="1">
+        </label>
+        <span id="qrDecodeStatus" style="font-size:12px;color:var(--muted,#888);"></span>
+      </div>
+      <div id="qrDecodeResult" style="margin-top:12px;display:none;"></div>
+    </div>
+
+    <div class="card" id="content">
+      <div class="loading" data-i18n="share.loading">Loading data...</div>
+    </div>
+  </main>

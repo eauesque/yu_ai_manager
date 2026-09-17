@@ -1,0 +1,67 @@
+  {% include "_nav.html" %}
+  <main id="main-content" class="container" style="padding-top:50px;">
+    <header class="report-header">
+      <h1><span aria-hidden="true">📋</span> <span data-i18n="page.report.title">Monthly Report</span></h1>
+      <div class="report-month-selector">
+        <button type="button" id="reportPrevMonth" class="report-nav-btn" aria-label="Previous month">&laquo;</button>
+        <select id="reportMonthSelect" class="report-month-select" aria-label="Month selector"></select>
+        <button type="button" id="reportNextMonth" class="report-nav-btn" aria-label="Next month">&raquo;</button>
+      </div>
+    </header>
+
+    <div id="reportLoading" class="report-loading" style="display:none;">
+      <p data-i18n="report.loading">Loading report...</p>
+    </div>
+
+    <div id="reportEmpty" class="report-empty" style="display:none;">
+      <p data-i18n="report.no_data">No data available for this month.</p>
+    </div>
+
+    <!-- Summary cards row -->
+    <div id="reportSummary" class="report-summary" style="display:none;">
+      <div class="report-card report-card-primary">
+        <div class="report-card-value" id="rptFileCount">0</div>
+        <div class="report-card-label" data-i18n="report.files_count">Files</div>
+        <div class="report-card-mom" id="rptMomChange"></div>
+      </div>
+      <div class="report-card">
+        <div class="report-card-value" id="rptUniqueTags">0</div>
+        <div class="report-card-label" data-i18n="report.unique_tags">Unique Tags</div>
+      </div>
+      <div class="report-card">
+        <div class="report-card-value" id="rptNewTags">0</div>
+        <div class="report-card-label" data-i18n="report.new_tags_count">New Tags</div>
+      </div>
+      <div class="report-card">
+        <div class="report-card-value" id="rptActiveDay">-</div>
+        <div class="report-card-label" data-i18n="report.most_active">Most Active Day</div>
+        <div class="report-card-sub" id="rptActiveDayCount"></div>
+      </div>
+    </div>
+
+    <!-- Trophies -->
+    <div id="reportTrophies" class="report-trophies" style="display:none;"></div>
+
+    <!-- Rankings + Sources -->
+    <div id="reportBody" class="report-body" style="display:none;">
+      <section class="report-section">
+        <h2 data-i18n="report.top_tags">Top Tags</h2>
+        <div id="rptRankingList" class="report-ranking-list"></div>
+      </section>
+
+      <section class="report-section report-section-side">
+        <div class="report-side-block">
+          <h2 style="font-size:16px;" data-i18n="report.sources">Sources</h2>
+          <div id="rptSources" class="report-sources"></div>
+        </div>
+        <div class="report-side-block">
+          <h2 style="font-size:16px;" data-i18n="report.new_tags">New Tags</h2>
+          <div id="rptNewTagsList" class="report-new-tags"></div>
+        </div>
+        <div class="report-side-block">
+          <h2 style="font-size:16px;" data-i18n="report.daily_chart">Daily Activity</h2>
+          <div id="rptSparkline" class="report-sparkline"></div>
+        </div>
+      </section>
+    </div>
+  </main>

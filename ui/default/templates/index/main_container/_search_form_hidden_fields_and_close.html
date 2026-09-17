@@ -1,0 +1,58 @@
+        <!-- Hidden fields (always present but hidden - used for JS to read values) -->
+        <div style="display:none;" aria-hidden="true">
+          <input type="text" id="artist" value="" aria-label="Artist filter" />
+          <input type="date" id="fromDate" value="" aria-label="From date" />
+          <input type="date" id="toDate" value="" aria-label="To date" />
+          <select id="fileFormat" aria-label="File format">
+            <option value="all" data-i18n="search.format_all">All</option>
+            <optgroup data-i18n-label="search.format_category" label="Category">
+              <option value="image" data-i18n="search.format_image">Image</option>
+              <option value="video" data-i18n="search.format_video">Video</option>
+              <option value="audio" data-i18n="search.format_audio">Audio</option>
+            </optgroup>
+            <optgroup data-i18n-label="search.format_image_type" label="Image format">
+              <option value="png">PNG</option>
+              <option value="jpg">JPG/JPEG</option>
+              <option value="webp">WebP</option>
+              <option value="gif">GIF</option>
+              <option value="avif">AVIF</option>
+              <option value="jxl">JPEG XL</option>
+              <option value="heif">HEIF/HEIC</option>
+            </optgroup>
+            <optgroup data-i18n-label="search.format_video_type" label="Video format">
+              <option value="webm">WEBM</option>
+              <option value="mp4">MP4</option>
+            </optgroup>
+            <optgroup data-i18n-label="search.format_container" label="Container">
+              <option value="zip_member" data-i18n="search.format_zip_member">Files in ZIP/7z</option>
+            </optgroup>
+          </select>
+          <select id="modelFilter" aria-label="Model filter"><option value="all" data-i18n="search.model_all">All</option><option value="sd">Stable Diffusion</option><option value="nai">NovelAI</option><option value="comfy">ComfyUI</option><option value="tensor">Tensor.art</option><option value="unknown" data-i18n="search.model_unknown">Unknown</option></select>
+          <select id="wdModelFilter" aria-label="WD tagger model filter"><option value="" data-i18n="search.wd_model_active">Active model</option><option value="all" data-i18n="search.wd_model_all">Any model</option></select>
+          <select id="sortBy" aria-label="Sort order"><option value="date_new" data-i18n="search.sort_date_new">Newest first</option><option value="date_old" data-i18n="search.sort_date_old">Oldest first</option><option value="folder" data-i18n="search.sort_folder">Folder order</option><option value="path" data-i18n="search.sort_path">Path order</option><option value="random" data-i18n="search.sort_random">Random</option></select>
+          <select id="limit" aria-label="Results per page"><option value="50">50</option><option value="100" selected>100</option><option value="200">200</option></select>
+<input type="text" id="inPrompt" value="" aria-label="Prompt filter" />
+          <input type="checkbox" id="inPromptRegex" aria-label="Prompt regex" />
+          <input type="checkbox" id="tagRegex" aria-label="Tag regex" />
+          <input type="checkbox" id="tagCaseSensitive" aria-label="Tag case sensitive" />
+          <input type="text" id="checkpointFilter" value="" aria-label="Checkpoint filter" />
+          <datalist id="checkpointList"></datalist>
+          <input type="text" id="inNegative" value="" aria-label="Negative prompt filter" />
+          <input type="text" id="inCharPositive" value="" aria-label="Character positive filter" />
+          <input type="text" id="inCharNegative" value="" aria-label="Character negative filter" />
+          <input type="text" id="orTags" value="" aria-label="OR tags" />
+          <input type="text" id="inPath" value="" aria-label="Path filter" />
+          <input type="number" id="minWidth" value="" aria-label="Min width" />
+          <input type="number" id="maxWidth" value="" aria-label="Max width" />
+          <input type="number" id="minHeight" value="" aria-label="Min height" />
+          <input type="number" id="maxHeight" value="" aria-label="Max height" />
+          <input type="checkbox" id="favOnly" aria-label="Favorites only" />
+          <input type="checkbox" id="aiAnalyzed" aria-label="AI analyzed only" />
+          <input type="checkbox" id="hasTags" aria-label="Tagged only" />
+          <input type="checkbox" id="hasAnnotation" aria-label="Has annotation" />
+          <input type="checkbox" id="hasSweep" aria-label="Has bridge sweep metadata" />
+          <select id="collectionFilter" aria-label="Collection filter"><option value="">---</option><option value="all">All Favorites</option></select>
+        </div>
+
+</form>
+    </div>

@@ -1,0 +1,641 @@
+<div class="nab-container brp-container" data-1p-ignore data-lpignore="true">
+  <h1><span class="icon" aria-hidden="true">&#10024;</span> <span data-i18n="nai_bridge.heading">NAI Bridge</span></h1>
+
+  <!-- Connection status -->
+  <div class="nab-conn" id="nabConn">
+    <span class="nab-conn-dot" id="nabConnDot"></span>
+    <span class="nab-conn-text" id="nabConnText" data-i18n="nai_bridge.not_connected">Not connected</span>
+    <button class="nab-btn nab-conn-btn" data-action="nabTestConnection" data-i18n="nai_bridge.test_connection_btn">Test Connection</button>
+  </div>
+  <div id="nabConnHint" style="display:none;margin-top:4px;padding-left:20px;"></div>
+
+  <!-- Editor toolbar -->
+  <div class="bridge-editor-toolbar">
+    <button class="nab-btn small" data-action="_nabToggleSed" title="sed (stream editor)" data-i18n-title="nai_bridge.sed_btn_title" aria-label="sed stream editor">Sed</button>
+    <button class="nab-btn small" data-action="_nabToggleDedup" title="重複タグを削除" data-i18n-title="nai_bridge.dedup_tooltip" aria-label="Dedup tags">Dedup</button>
+    <button class="nab-btn small on nab-ac-toggle" data-action="_nabToggleAc" title="Danbooru tag autocomplete" data-i18n-title="nai_bridge.tags_btn_title" data-i18n="nai_bridge.tags_btn">Tags</button>
+    <button class="nab-btn small nab-wc-toggle" data-action="_nabToggleWc" title="Wildcard / Dynamic Prompt 展開 (server-side)" data-i18n-title="nai_bridge.wc_btn_title" aria-label="Wildcard browser">Wildcard</button>
+    <span class="bridge-toolbar-hint" data-i18n="nai_bridge.toolbar_hint">Ctrl+Enter: Generate / Alt+W: Vim word</span>
+  </div>
+
+  <!-- Sed bar (hidden by default) -->
+  <div class="bridge-sed-bar" id="nabSedBar" style="display:none;">
+    <label data-i18n="nai_bridge.sed_label">sed:</label>
+    <input id="nabSedInput" type="text" placeholder="s/old/new/g" data-i18n-placeholder="nai_bridge.sed_placeholder" aria-label="Sed expression" spellcheck="false">
+    <span class="bridge-sed-toast" id="nabSedToast" style="display:none;"></span>
+  </div>
+
+  <!-- Dedup bar (hidden by default) -->
+  <div class="bridge-sed-bar" id="nabDedupBar" style="display:none;">
+    <label data-i18n="nai_bridge.dedup_label">Dedup:</label>
+    <button class="nab-btn small" data-action="_nabDedupFirst" data-i18n="nai_bridge.dedup_keep_first">最初を残す</button>
+    <button class="nab-btn small" data-action="_nabDedupLast" data-i18n="nai_bridge.dedup_keep_last">最後を残す</button>
+    <span class="bridge-sed-toast" id="nabDedupToast" style="display:none;"></span>
+  </div>
+
+  <!-- Positive prompt -->
+  <div class="nab-field">
+    <h2 style="font-size:16px;" data-i18n="nai_bridge.positive_prompt_heading">Positive Prompt</h2>
+    <div class="nab-prompt-with-wc">
+      <div id="nabPromptWrap" class="nab-editor-wrap" style="flex:1;min-width:0;">
+        <textarea id="nabPrompt" rows="4" placeholder="1girl, masterpiece, best quality" data-i18n-placeholder="nai_bridge.positive_prompt_placeholder" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other"></textarea>
+      </div>
+      <div id="nabWcBrowser" class="bwc-panel" style="display:none;"></div>
+    </div>
+    <div id="nabSyntaxBanner" class="syntax-warning-banner" role="status" aria-live="polite" hidden>
+      <span class="syntax-warning-msg" data-i18n="bridge.syntax_warning.sd_to_nai"></span>
+      <button class="syntax-warning-convert" data-i18n="bridge.syntax_warning.convert_btn" data-action="nab-syntax-convert"></button>
+      <button class="syntax-warning-dismiss" data-i18n="bridge.syntax_warning.dismiss_btn" data-action="nab-syntax-dismiss" aria-label="閉じる"></button>
+    </div>
+  </div>
+
+  <!-- Negative prompt -->
+  <div class="nab-field">
+    <h2 style="font-size:16px;" data-i18n="nai_bridge.negative_prompt_heading">Negative Prompt</h2>
+    <div id="nabNegativeWrap" class="nab-editor-wrap">
+      <textarea id="nabNegative" rows="2" placeholder="lowres, bad anatomy, worst quality" data-i18n-placeholder="nai_bridge.negative_prompt_placeholder" autocomplete="off" data-1p-ignore data-lpignore="true" data-form-type="other"></textarea>
+    </div>
+    <div id="nabNegSyntaxBanner" class="syntax-warning-banner" role="status" aria-live="polite" hidden>
+      <span class="syntax-warning-msg" data-i18n="bridge.syntax_warning.sd_to_nai"></span>
+      <button class="syntax-warning-convert" data-i18n="bridge.syntax_warning.convert_btn" data-action="nab-neg-syntax-convert"></button>
+      <button class="syntax-warning-dismiss" data-i18n="bridge.syntax_warning.dismiss_btn" data-action="nab-neg-syntax-dismiss" aria-label="閉じる"></button>
+    </div>
+  </div>
+
+  <!-- Action buttons -->
+  <div class="nab-actions">
+    <button class="nab-btn primary" id="nabGenBtn" data-action="nabGenerate" data-i18n="nai_bridge.generate_btn">Generate</button>
+    <button class="nab-btn small" id="nabRestoreBtn" data-action="nabRestoreLast" title="前回のパラメータを復元（ブラウザ保存のため、キャッシュクリアで消去されます）" data-i18n-title="nai_bridge.restore_btn_title" data-i18n="nai_bridge.restore_btn">🔄 前回</button>
+    <button class="nab-btn small" data-action="nabClearPrompts" data-i18n="nai_bridge.clear_prompts" data-i18n-title="nai_bridge.clear_prompts_title" title="プロンプトをクリア（Ctrl+Z で元に戻せます）" aria-label="Clear prompts">🗑️</button>
+    <button class="nab-btn small" data-action="nabSendToBridge" data-action-arg="sd" title="SD Bridge に送る (自動変換)" data-i18n-title="nai_bridge.send_to_sd_title" data-i18n="nai_bridge.send_to_sd_btn">→SD</button>
+    <button class="nab-btn small" data-action="nabSendToBridge" data-action-arg="comfyui" title="ComfyUI に送る (自動変換)" data-i18n-title="nai_bridge.send_to_comfyui_title" data-i18n="nai_bridge.send_to_comfyui_btn">→ComfyUI</button>
+    <button class="nab-btn small" id="nabBatchCancelBtn" type="button"
+            style="display:none;margin-left:8px;"
+            data-action="nabRequestBatchCancel"
+            data-i18n="bridge.action.stop_after_current">Stop after current</button>
+    <span class="nab-cost-badge" id="nabCostBadge" data-i18n="nai_bridge.cost_free">Free</span>
+  </div>
+
+  <!-- Progress bar (indeterminate) -->
+  <div class="nab-progress" id="nabProgress">
+    <div class="nab-progress-bar">
+      <div class="nab-progress-fill" id="nabProgressFill"></div>
+    </div>
+    <div class="nab-progress-text" id="nabProgressText" data-i18n="nai_bridge.generating">Generating...</div>
+  </div>
+
+  <!-- Character Prompts (V4) -->
+  <details class="nab-char-section" id="nabCharSection">
+    <summary><span data-i18n="nai_bridge.char_prompts_summary">Character Prompts (V4)</span> <span class="nab-char-count" id="nabCharCount"></span></summary>
+    <div class="nab-char-list" id="nabCharList"></div>
+    <button class="nab-btn small" id="nabAddCharBtn" data-action="nabAddCharacter" data-i18n="nai_bridge.add_character_btn">+ キャラクター追加</button>
+  </details>
+
+  <!-- Vibe Transfer -->
+  <details class="nab-vibe-section" id="nabVibeSection">
+    <summary><span data-i18n="nai_bridge.vibe_transfer_summary">Vibe Transfer</span> <span id="nabVibeStatus"></span></summary>
+    <div class="nab-vibe-drop" id="nabVibeDrop" data-action="nabClickVibeFile">
+      <input type="file" id="nabVibeFile" aria-label="Vibe transfer image" accept="image/*,.naiv4vibe,.naiv4vibebundle" hidden data-action="nabSetVibeFile" data-action-event="change" data-action-this="1">
+      <div id="nabVibePlaceholder" data-i18n="nai_bridge.drop_or_click">画像をドロップまたはクリック</div>
+      <div id="nabVibePreview" style="display:none;">
+        <img id="nabVibeImg" alt="Vibe reference" data-i18n-alt="nai_bridge.vibe_img_alt">
+        <button class="nab-btn small" data-action="nabDownloadVibe" data-i18n="nai_bridge.vibe_download_btn">ダウンロード</button>
+        <button class="nab-btn small" data-action="nabClearVibe" data-i18n="nai_bridge.delete_btn">削除</button>
+      </div>
+    </div>
+    <div class="nab-vibe-params">
+      <div class="nab-param">
+        <label data-i18n="nai_bridge.ref_strength_label">参照強度</label>
+        <input id="nabVibeStrength" aria-label="Vibe strength" type="range" min="0" max="1" step="0.05" value="0.6"
+               data-mirror-target="nabVibeStrengthVal" data-mirror-format="float2">
+        <span id="nabVibeStrengthVal">0.60</span>
+      </div>
+      <div class="nab-param">
+        <label data-i18n="nai_bridge.info_extracted_label">情報抽出度</label>
+        <input id="nabVibeInfoExtracted" aria-label="Vibe info extracted" type="range" min="0" max="1" step="0.05" value="1.0"
+               data-mirror-target="nabVibeInfoVal" data-mirror-format="float2">
+        <span id="nabVibeInfoVal">1.00</span>
+      </div>
+    </div>
+  </details>
+
+  <!-- Reference Images (Precise Reference) -->
+  <details class="nab-ref-section" id="nabRefSection">
+    <summary><span data-i18n="nai_bridge.ref_images_summary">Reference Images</span> <span id="nabRefCount"></span></summary>
+    <div id="nabRefList"></div>
+    <button class="nab-btn small" id="nabAddRefBtn" data-action="nabAddReference" data-i18n="nai_bridge.add_ref_btn">+ 参照画像追加</button>
+    <button class="nab-btn small" data-action="nabDownloadVibe" data-i18n="nai_bridge.vibe_download_btn">ダウンロード</button>
+  </details>
+
+  <!-- img2img -->
+  <details class="nab-img2img-section" id="nabImg2ImgSection">
+    <summary>img2img <span id="nabImg2ImgStatus"></span></summary>
+    <div class="nab-vibe-drop" id="nabImg2ImgDrop" data-action="nabClickImg2ImgFile">
+      <input type="file" id="nabImg2ImgFile" aria-label="img2img source image" accept="image/*" hidden data-action="nabSetImg2ImgFile" data-action-event="change" data-action-this="1">
+      <div id="nabImg2ImgPlaceholder" data-i18n="nai_bridge.drop_or_click">画像をドロップまたはクリック</div>
+      <div id="nabImg2ImgPreview" style="display:none;">
+        <img id="nabImg2ImgImg" alt="img2img source" data-i18n-alt="nai_bridge.img2img_img_alt">
+        <button class="nab-btn small" data-action="nabClearImg2Img" data-i18n="nai_bridge.delete_btn">削除</button>
+      </div>
+    </div>
+    <div class="nab-vibe-params">
+      <div class="nab-param">
+        <label data-i18n="nai_bridge.strength_label">Strength</label>
+        <input id="nabImg2ImgStrength" aria-label="img2img strength" type="range" min="0" max="1" step="0.05" value="0.7"
+               data-mirror-target="nabImg2ImgStrengthVal">
+        <span id="nabImg2ImgStrengthVal">0.7</span>
+      </div>
+      <div class="nab-param">
+        <label data-i18n="nai_bridge.noise_label">Noise</label>
+        <input id="nabImg2ImgNoise" aria-label="img2img noise" type="range" min="0" max="1" step="0.05" value="0.0"
+               data-mirror-target="nabImg2ImgNoiseVal">
+        <span id="nabImg2ImgNoiseVal">0.0</span>
+      </div>
+    </div>
+  </details>
+
+  <!-- Inpainting -->
+  <details class="nab-inpaint-section" id="nabInpaintSection">
+    <summary><span data-i18n="nai_bridge.inpainting_summary">Inpainting</span> <span id="nabInpaintStatus"></span></summary>
+    <div class="nab-vibe-drop" id="nabInpaintDrop" data-action="nabClickInpaintFile">
+      <input type="file" id="nabInpaintFile" aria-label="Inpaint source image" accept="image/*" hidden data-action="nabSetInpaintFile" data-action-event="change" data-action-this="1">
+      <div id="nabInpaintPlaceholder" data-i18n="nai_bridge.drop_or_click">画像をドロップまたはクリック</div>
+      <div id="nabInpaintPreview" style="display:none;">
+        <div class="nab-inpaint-canvas-wrap" id="nabInpaintCanvasWrap">
+          <img id="nabInpaintImg" alt="Inpaint source" data-i18n-alt="nai_bridge.inpaint_img_alt">
+          <canvas id="nabInpaintCanvas"></canvas>
+        </div>
+        <div class="nab-inpaint-toolbar">
+          <button class="nab-btn small active" id="nabInpaintBrushBtn"
+                  data-action="nabSetInpaintTool" data-action-arg="brush" data-i18n="nai_bridge.brush_btn">Brush</button>
+          <button class="nab-btn small" id="nabInpaintEraserBtn"
+                  data-action="nabSetInpaintTool" data-action-arg="eraser" data-i18n="nai_bridge.eraser_btn">Eraser</button>
+          <label class="nab-inpaint-size-label">
+            <span data-i18n="nai_bridge.brush_size_label">Size</span>
+            <input id="nabInpaintBrushSize" aria-label="Brush size" type="range" min="5" max="100" value="30"
+                   data-mirror-target="nabInpaintBrushSizeVal">
+            <span id="nabInpaintBrushSizeVal">30</span>
+          </label>
+          <button class="nab-btn small" data-action="nabClearMask" data-i18n="nai_bridge.clear_mask_btn">Clear</button>
+          <button class="nab-btn small" data-action="nabFillMask" data-i18n="nai_bridge.fill_mask_btn">Fill</button>
+          <button class="nab-btn small" data-action="nabClearInpaint"
+                  style="margin-left:auto;" data-i18n="nai_bridge.delete_btn">削除</button>
+        </div>
+      </div>
+    </div>
+    <div class="nab-vibe-params">
+      <div class="nab-param">
+        <label data-i18n="nai_bridge.strength_label">Strength</label>
+        <input id="nabInpaintStrength" aria-label="Inpaint strength" type="range" min="0" max="1" step="0.05" value="0.7"
+               data-mirror-target="nabInpaintStrengthVal">
+        <span id="nabInpaintStrengthVal">0.7</span>
+      </div>
+      <div class="nab-param">
+        <label data-i18n="nai_bridge.noise_label">Noise</label>
+        <input id="nabInpaintNoise" aria-label="Inpaint noise" type="range" min="0" max="1" step="0.05" value="0.0"
+               data-mirror-target="nabInpaintNoiseVal">
+        <span id="nabInpaintNoiseVal">0.0</span>
+      </div>
+    </div>
+  </details>
+
+  <!-- Parameters -->
+  <div class="nab-params">
+    <div class="nab-param" style="grid-column: 1 / -1;">
+      <label for="nabResPreset" data-i18n="nai_bridge.resolution_label">Resolution</label>
+      <div style="display:flex; gap:6px; align-items:stretch;">
+        <select id="nabResPreset" data-action="nabApplyPreset" data-action-event="change" style="flex:1; min-width:0;">
+          <optgroup label="Normal" data-i18n-label="nai_bridge.res_normal">
+            <option value="832,1216" selected data-i18n="nai_bridge.res_normal_portrait">Portrait (832×1216)</option>
+            <option value="1216,832" data-i18n="nai_bridge.res_normal_landscape">Landscape (1216×832)</option>
+            <option value="1024,1024" data-i18n="nai_bridge.res_normal_square">Square (1024×1024)</option>
+          </optgroup>
+          <optgroup label="Large" data-i18n-label="nai_bridge.res_large">
+            <option value="1024,1536" data-i18n="nai_bridge.res_large_portrait">Portrait (1024×1536)</option>
+            <option value="1536,1024" data-i18n="nai_bridge.res_large_landscape">Landscape (1536×1024)</option>
+            <option value="1472,1472" data-i18n="nai_bridge.res_large_square">Square (1472×1472)</option>
+          </optgroup>
+          <optgroup label="Wallpaper" data-i18n-label="nai_bridge.res_wallpaper">
+            <option value="1088,1920" data-i18n="nai_bridge.res_wallpaper_portrait">Portrait (1088×1920)</option>
+            <option value="1920,1088" data-i18n="nai_bridge.res_wallpaper_landscape">Landscape (1920×1088)</option>
+          </optgroup>
+          <optgroup label="Small" data-i18n-label="nai_bridge.res_small">
+            <option value="512,768" data-i18n="nai_bridge.res_small_portrait">Portrait (512×768)</option>
+            <option value="768,512" data-i18n="nai_bridge.res_small_landscape">Landscape (768×512)</option>
+            <option value="640,640" data-i18n="nai_bridge.res_small_square">Square (640×640)</option>
+          </optgroup>
+          <optgroup label="SDXL Trained" data-i18n-label="nai_bridge.res_sdxl_trained">
+            <option value="896,1152">Portrait 3:4 — 896×1152</option>
+            <option value="1152,896">Landscape 4:3 — 1152×896</option>
+            <option value="768,1344">Portrait 9:16 — 768×1344</option>
+            <option value="1344,768">Landscape 16:9 — 1344×768</option>
+            <option value="640,1536">Portrait tall — 640×1536</option>
+            <option value="1536,640">Landscape wide — 1536×640</option>
+          </optgroup>
+          <option value="custom" data-i18n="nai_bridge.res_custom">Custom</option>
+        </select>
+        <button id="nabSwapWH" type="button" class="nab-btn small"
+                data-action="nabSwapWH"
+                style="min-width:36px;"
+                data-i18n-title="nai_bridge.swap_dimensions"
+                data-i18n-aria-label="nai_bridge.swap_dimensions"
+                title="Swap W/H" aria-label="Swap W/H">⇄</button>
+      </div>
+    </div>
+    <div class="nab-param">
+      <label for="nabModel" data-i18n="nai_bridge.model_label">Model</label>
+      <select id="nabModel" data-action="nabSyncUcPresetOptions" data-action-event="change">
+        <option value="" data-i18n="nai_bridge.loading">Loading...</option>
+      </select>
+    </div>
+    <div class="nab-param">
+      <label for="nabSampler" data-i18n="nai_bridge.sampler_label">Sampler</label>
+      <select id="nabSampler">
+        <option value="" data-i18n="nai_bridge.loading">Loading...</option>
+      </select>
+    </div>
+    <div class="nab-param">
+      <label for="nabNoiseSchedule" data-i18n="nai_bridge.noise_schedule_label">Noise Schedule</label>
+      <select id="nabNoiseSchedule">
+        <option value="" data-i18n="nai_bridge.loading">Loading...</option>
+      </select>
+    </div>
+    <div class="nab-param">
+      <label for="nabSteps" data-i18n="nai_bridge.steps_label">Steps</label>
+      <input id="nabSteps" type="number" value="28" min="1" max="50" data-action="nabUpdateCost" data-action-event="input">
+    </div>
+    <div class="nab-param">
+      <label for="nabScale" data-i18n="nai_bridge.scale_label">Prompt Guidance (cfg)</label>
+      <input id="nabScale" type="number" value="5" min="0" max="10" step="0.1">
+    </div>
+    <div class="nab-param">
+      <label for="nabCfgRescale" data-i18n="nai_bridge.cfg_rescale_label">Prompt Guidance Rescale (cfg_rescale)</label>
+      <input id="nabCfgRescale" type="number" value="0" min="0" max="1" step="0.01">
+    </div>
+    <div class="nab-param">
+      <label for="nabWidth" data-i18n="nai_bridge.width_label">Width</label>
+      <input id="nabWidth" type="number" value="832" min="64" max="1600" step="64" data-action="nabOnManualSize" data-action-event="input">
+    </div>
+    <div class="nab-param">
+      <label for="nabAspectRatio" data-i18n="bridge.aspect_lock_label">Aspect</label>
+      <div class="bridge-aspect-cell">
+        <button id="nabAspectLock" type="button" class="nab-btn small bridge-aspect-lock-btn"
+                aria-pressed="false" title="Lock aspect ratio" aria-label="Lock aspect ratio">🔗</button>
+        <input id="nabAspectRatio" type="text" class="bridge-aspect-ratio-input"
+               placeholder="W:H" aria-label="Aspect ratio">
+      </div>
+    </div>
+    <div class="nab-param">
+      <label for="nabHeight" data-i18n="nai_bridge.height_label">Height</label>
+      <input id="nabHeight" type="number" value="1216" min="64" max="1600" step="64" data-action="nabOnManualSize" data-action-event="input">
+    </div>
+    <div class="nab-param">
+      <label for="nabSeed" data-i18n="nai_bridge.seed_label">Seed (-1 = random)</label>
+      <div style="display:flex;gap:4px;align-items:center;">
+        <input id="nabSeed" type="number" value="-1" style="flex:1;">
+        <button class="nab-btn small" data-action="nabResetSeed" title="Seed をランダムに戻す" data-i18n-title="nai_bridge.seed_random_title" aria-label="Random seed">🎲</button>
+      </div>
+      <label style="display:flex;align-items:center;gap:4px;font-size:11px;margin-top:2px;cursor:pointer;" title="生成後に Seed を -1 (ランダム) に戻します" data-i18n-title="nai_bridge.seed_auto_reset_tooltip">
+        <input id="nabSeedAutoReset" type="checkbox">
+        <span data-i18n="nai_bridge.seed_auto_reset_label">生成後にランダム (-1) に戻す</span>
+      </label>
+    </div>
+    <div class="nab-param">
+      <label for="nabBatchCount" data-i18n="bridge.batch_count">Batch count</label>
+      <input id="nabBatchCount" name="nabBatchCount" type="number" value="1" min="1" max="50" data-action="nabUpdateCost" data-action-event="input">
+      <span class="nab-batch-total" id="nabBatchTotal" style="margin-left:8px;font-size:11px;opacity:0.7;">Total: 1</span>
+    </div>
+    <!-- Advanced parameters -->
+    <div class="nab-param">
+      <label for="nabQualityToggle" data-i18n="nai_bridge.quality_tags_label">Quality Tags</label>
+      <input id="nabQualityToggle" type="checkbox" checked>
+    </div>
+    <div class="nab-param">
+      <label for="nabMode" data-i18n="nai_bridge.mode_label">Dataset Mode</label>
+      <select id="nabMode">
+        <option value="anime" data-i18n="nai_bridge.mode_anime">Anime</option>
+        <option value="furry" data-i18n="nai_bridge.mode_furry">Furry</option>
+      </select>
+    </div>
+    <div class="nab-param">
+      <label for="nabUcPreset" data-i18n="nai_bridge.uc_preset_label">Undesired Content Preset</label>
+      <select id="nabUcPreset">
+        <option value="0" data-i18n="nai_bridge.uc_heavy">Heavy</option>
+        <option value="1" data-i18n="nai_bridge.uc_light">Light</option>
+        <option value="3" data-i18n="nai_bridge.uc_human_focus">Human Focus</option>
+        <option value="4" data-i18n="nai_bridge.uc_furry_focus">Furry Focus</option>
+        <option value="2" data-i18n="nai_bridge.uc_none">None</option>
+      </select>
+    </div>
+    <div class="nab-param">
+      <label for="nabDynThreshold" data-i18n="nai_bridge.dyn_threshold_label">Decrisper (Dynamic Thresholding)</label>
+      <input id="nabDynThreshold" type="checkbox">
+    </div>
+    <div class="nab-param">
+      <label for="nabUncondScale" data-i18n="nai_bridge.uncond_scale_label">Uncond Scale</label>
+      <input id="nabUncondScale" type="number" value="1.0" min="0" max="1.5" step="0.05">
+    </div>
+    <div class="nab-param">
+      <label for="nabVarietyBoost" data-i18n="nai_bridge.variety_boost_label">Variety+</label>
+      <input id="nabVarietyBoost" type="checkbox">
+    </div>
+    <div class="nab-param">
+      <label for="nabImageFormat" data-i18n="nai_bridge.image_format_label">Image Format</label>
+      <select id="nabImageFormat">
+        <option value="png">PNG</option>
+        <option value="webp">WebP</option>
+        <option value="jpg">JPEG</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Sweep (1-axis or 2-axis parameter sweep) -->
+  <details class="nab-sweep-section" id="nabSweepSection">
+    <summary>
+      <span data-i18n="nai_bridge.sweep_summary">Sweep（1軸 / 2軸パラメータ振り）</span>
+      <span id="nabSweepStatus" style="font-size:12px;opacity:0.7;"></span>
+    </summary>
+    <div class="nab-sweep-grid" style="display:grid;grid-template-columns:auto 1fr;gap:8px 12px;align-items:center;margin-top:8px;">
+      <label for="nabSweepEnabled" data-i18n="nai_bridge.sweep_enable_label">有効化</label>
+      <input id="nabSweepEnabled" type="checkbox" aria-label="Enable sweep">
+
+      <!-- X axis -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:4px;" data-i18n="nai_bridge.sweep_x_axis_heading">X 軸</div>
+
+      <label for="nabSweepParam" data-i18n="nai_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="nabSweepParam" aria-label="Sweep X-axis parameter">
+        <option value="scale" data-i18n="nai_bridge.sweep_param_scale">Prompt Guidance (cfg)</option>
+        <option value="cfg_rescale" data-i18n="nai_bridge.sweep_param_cfg_rescale">Prompt Guidance Rescale (cfg_rescale)</option>
+        <option value="steps" data-i18n="nai_bridge.sweep_param_steps">Steps</option>
+        <option value="uncond_scale" data-i18n="nai_bridge.sweep_param_uncond_scale">Uncond Scale</option>
+        <option value="img2img_strength" data-i18n="nai_bridge.sweep_param_img2img_strength">img2img Strength</option>
+        <option value="img2img_noise" data-i18n="nai_bridge.sweep_param_img2img_noise">img2img Noise</option>
+        <option value="inpaint_strength" data-i18n="nai_bridge.sweep_param_inpaint_strength">Inpaint Strength</option>
+        <option value="inpaint_noise" data-i18n="nai_bridge.sweep_param_inpaint_noise">Inpaint Noise</option>
+        <option value="_macros" data-i18n="nai_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <!-- Macro editor: shown only when "_macros" axis param is selected.
+           Visibility is toggled by _sweepApplyMacrosVisibility(). -->
+      <div id="nabSweepMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <strong style="font-size:12px;" data-i18n="nai_bridge.sweep_macros_title">マクロ slot</strong>
+          <span style="font-size:11px;opacity:0.7;" data-i18n="nai_bridge.sweep_macros_help">プロンプトに <code>$x1</code>, <code>$x2</code>, ... を書くと置換される (Y/Z 軸は <code>$y1</code>/<code>$z1</code>)。<code>$1</code> は <code>$x1</code> のエイリアス。テキスト slot に <code>__name__</code> を書くと軸ファイルの全行に展開。</span>
+          <span style="flex:1;"></span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="font-size:11px;text-decoration:none;opacity:0.85;" data-i18n="nai_bridge.sweep_axes_manager_link" aria-label="Open sweep axis manager">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="nabSweepMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="nabSweepMacrosSharedCount" style="font-size:12px;" data-i18n="nai_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="nabSweepMacrosSharedCount" type="number" value="6" min="2" max="500" style="width:80px;">
+          <label style="font-size:11px;display:flex;align-items:center;gap:4px;cursor:pointer;">
+            <input id="nabSweepMacrosPadShort" type="checkbox">
+            <span data-i18n="nai_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="nabSweepMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="nabSweepMacroAddBtn" class="nab-btn small" style="margin-top:6px;" data-i18n="nai_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="nabSweepMin" data-i18n="nai_bridge.sweep_min_label">下限</label>
+      <input id="nabSweepMin" type="number" value="3" step="0.1" aria-label="Sweep X min">
+
+      <label for="nabSweepMax" data-i18n="nai_bridge.sweep_max_label">上限</label>
+      <input id="nabSweepMax" type="number" value="8" step="0.1" aria-label="Sweep X max">
+
+      <label for="nabSweepMode" data-i18n="nai_bridge.sweep_mode_label">分割方法</label>
+      <select id="nabSweepMode" aria-label="Sweep X mode">
+        <option value="count" data-i18n="nai_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="nai_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="nabSweepCount" data-i18n="nai_bridge.sweep_count_label">枚数</label>
+      <input id="nabSweepCount" type="number" value="6" min="2" max="50" aria-label="Sweep X count">
+
+      <label for="nabSweepStep" data-i18n="nai_bridge.sweep_step_label">間隔</label>
+      <input id="nabSweepStep" type="number" value="0.5" step="0.1" min="0.0001" aria-label="Sweep X step">
+
+      <!-- Y axis (opt-in 2nd axis). When the checkbox is off, sweep behaves exactly like 1-axis. -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:8px;display:flex;align-items:center;gap:8px;">
+        <input id="nabSweepYEnabled" type="checkbox" aria-label="Enable Y axis">
+        <label for="nabSweepYEnabled" data-i18n="nai_bridge.sweep_y_axis_heading" style="cursor:pointer;">Y 軸を追加（2軸 sweep）</label>
+      </div>
+
+      <label for="nabSweepYParam" data-i18n="nai_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="nabSweepYParam" aria-label="Sweep Y-axis parameter" disabled>
+        <option value="scale" data-i18n="nai_bridge.sweep_param_scale">Prompt Guidance (cfg)</option>
+        <option value="cfg_rescale" data-i18n="nai_bridge.sweep_param_cfg_rescale">Prompt Guidance Rescale (cfg_rescale)</option>
+        <option value="steps" data-i18n="nai_bridge.sweep_param_steps">Steps</option>
+        <option value="uncond_scale" data-i18n="nai_bridge.sweep_param_uncond_scale">Uncond Scale</option>
+        <option value="img2img_strength" data-i18n="nai_bridge.sweep_param_img2img_strength">img2img Strength</option>
+        <option value="img2img_noise" data-i18n="nai_bridge.sweep_param_img2img_noise">img2img Noise</option>
+        <option value="inpaint_strength" data-i18n="nai_bridge.sweep_param_inpaint_strength">Inpaint Strength</option>
+        <option value="inpaint_noise" data-i18n="nai_bridge.sweep_param_inpaint_noise">Inpaint Noise</option>
+        <option value="_macros" data-i18n="nai_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <div id="nabSweepYMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="font-size:11px;opacity:0.8;margin-bottom:6px;">
+          <span data-i18n="nai_bridge.sweep_macros_y_hint">Y 軸: 置換子は <code>$y1</code>, <code>$y2</code>, ...</span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="margin-left:8px;text-decoration:none;font-size:11px;opacity:0.85;"
+             data-i18n="nai_bridge.sweep_axes_manager_link">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="nabSweepYMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="nabSweepYMacrosSharedCount" style="font-size:12px;" data-i18n="nai_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="nabSweepYMacrosSharedCount" type="number" value="3" min="2" max="500" style="width:80px;">
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;opacity:0.8;cursor:pointer;">
+            <input id="nabSweepYMacrosPadShort" type="checkbox">
+            <span data-i18n="nai_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="nabSweepYMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="nabSweepYMacroAddBtn" class="nab-btn small" style="margin-top:6px;" data-i18n="nai_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="nabSweepYMin" data-i18n="nai_bridge.sweep_min_label">下限</label>
+      <input id="nabSweepYMin" type="number" value="0" step="0.1" aria-label="Sweep Y min" disabled>
+
+      <label for="nabSweepYMax" data-i18n="nai_bridge.sweep_max_label">上限</label>
+      <input id="nabSweepYMax" type="number" value="1" step="0.1" aria-label="Sweep Y max" disabled>
+
+      <label for="nabSweepYMode" data-i18n="nai_bridge.sweep_mode_label">分割方法</label>
+      <select id="nabSweepYMode" aria-label="Sweep Y mode" disabled>
+        <option value="count" data-i18n="nai_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="nai_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="nabSweepYCount" data-i18n="nai_bridge.sweep_count_label">枚数</label>
+      <input id="nabSweepYCount" type="number" value="3" min="2" max="50" aria-label="Sweep Y count" disabled>
+
+      <label for="nabSweepYStep" data-i18n="nai_bridge.sweep_step_label">間隔</label>
+      <input id="nabSweepYStep" type="number" value="0.1" step="0.1" min="0.0001" aria-label="Sweep Y step" disabled>
+
+      <!-- Z axis (opt-in 3rd axis). Renders one X*Y grid per Z value, switched by a tab strip. -->
+      <div style="grid-column:1 / span 2;font-weight:600;font-size:12px;opacity:0.85;margin-top:8px;display:flex;align-items:center;gap:8px;">
+        <input id="nabSweepZEnabled" type="checkbox" aria-label="Enable Z axis">
+        <label for="nabSweepZEnabled" data-i18n="nai_bridge.sweep_z_axis_heading" style="cursor:pointer;">Z 軸を追加（3軸 sweep、Z はタブ切替）</label>
+      </div>
+
+      <label for="nabSweepZParam" data-i18n="nai_bridge.sweep_param_label">対象パラメータ</label>
+      <select id="nabSweepZParam" aria-label="Sweep Z-axis parameter" disabled>
+        <option value="scale" data-i18n="nai_bridge.sweep_param_scale">Prompt Guidance (cfg)</option>
+        <option value="cfg_rescale" data-i18n="nai_bridge.sweep_param_cfg_rescale">Prompt Guidance Rescale (cfg_rescale)</option>
+        <option value="steps" data-i18n="nai_bridge.sweep_param_steps">Steps</option>
+        <option value="uncond_scale" data-i18n="nai_bridge.sweep_param_uncond_scale">Uncond Scale</option>
+        <option value="img2img_strength" data-i18n="nai_bridge.sweep_param_img2img_strength">img2img Strength</option>
+        <option value="img2img_noise" data-i18n="nai_bridge.sweep_param_img2img_noise">img2img Noise</option>
+        <option value="inpaint_strength" data-i18n="nai_bridge.sweep_param_inpaint_strength">Inpaint Strength</option>
+        <option value="inpaint_noise" data-i18n="nai_bridge.sweep_param_inpaint_noise">Inpaint Noise</option>
+        <option value="_macros" data-i18n="nai_bridge.sweep_param_macros">Prompt macros (S/R)</option>
+      </select>
+
+      <div id="nabSweepZMacrosEditor" style="display:none;grid-column:1 / span 2;border:1px solid rgba(127,127,127,0.18);border-radius:6px;padding:8px;background:rgba(127,127,127,0.04);">
+        <div style="font-size:11px;opacity:0.8;margin-bottom:6px;">
+          <span data-i18n="nai_bridge.sweep_macros_z_hint">Z 軸: 置換子は <code>$z1</code>, <code>$z2</code>, ...</span>
+          <a href="/ext/prompt-sim/sweep-axes-manager" target="_blank" rel="noopener" style="margin-left:8px;text-decoration:none;font-size:11px;opacity:0.85;"
+             data-i18n="nai_bridge.sweep_axes_manager_link">🎯 軸ファイル管理 ↗</a>
+        </div>
+        <div id="nabSweepZMacrosSharedCountRow" style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap;">
+          <label for="nabSweepZMacrosSharedCount" style="font-size:12px;" data-i18n="nai_bridge.sweep_macros_shared_count">共有枚数 (全 slot 共通)</label>
+          <input id="nabSweepZMacrosSharedCount" type="number" value="3" min="2" max="500" style="width:80px;">
+          <label style="display:inline-flex;align-items:center;gap:4px;font-size:11px;opacity:0.8;cursor:pointer;">
+            <input id="nabSweepZMacrosPadShort" type="checkbox">
+            <span data-i18n="nai_bridge.sweep_macros_pad_short">短い slot は空白で埋める</span>
+          </label>
+        </div>
+        <div id="nabSweepZMacrosList" style="display:flex;flex-direction:column;gap:6px;"></div>
+        <button type="button" id="nabSweepZMacroAddBtn" class="nab-btn small" style="margin-top:6px;" data-i18n="nai_bridge.sweep_macros_add_slot">+ slot 追加</button>
+      </div>
+
+      <label for="nabSweepZMin" data-i18n="nai_bridge.sweep_min_label">下限</label>
+      <input id="nabSweepZMin" type="number" value="0" step="0.1" aria-label="Sweep Z min" disabled>
+
+      <label for="nabSweepZMax" data-i18n="nai_bridge.sweep_max_label">上限</label>
+      <input id="nabSweepZMax" type="number" value="1" step="0.1" aria-label="Sweep Z max" disabled>
+
+      <label for="nabSweepZMode" data-i18n="nai_bridge.sweep_mode_label">分割方法</label>
+      <select id="nabSweepZMode" aria-label="Sweep Z mode" disabled>
+        <option value="count" data-i18n="nai_bridge.sweep_mode_count">枚数で等分割</option>
+        <option value="step" data-i18n="nai_bridge.sweep_mode_step">間隔で刻む</option>
+      </select>
+
+      <label for="nabSweepZCount" data-i18n="nai_bridge.sweep_count_label">枚数</label>
+      <input id="nabSweepZCount" type="number" value="3" min="2" max="50" aria-label="Sweep Z count" disabled>
+
+      <label for="nabSweepZStep" data-i18n="nai_bridge.sweep_step_label">間隔</label>
+      <input id="nabSweepZStep" type="number" value="0.1" step="0.1" min="0.0001" aria-label="Sweep Z step" disabled>
+
+      <div id="nabSweepEstimateRow" style="grid-column:1 / span 2;margin-top:6px;font-size:12px;">
+        <span data-i18n="nai_bridge.sweep_total_estimate_label">合計</span>:
+        <span id="nabSweepTotalEstimate" style="font-weight:600;">—</span>
+      </div>
+
+      <label for="nabSweepDeferSave" data-i18n="nai_bridge.sweep_defer_save_label">一括保存</label>
+      <span style="display:flex;align-items:center;gap:6px;">
+        <input id="nabSweepDeferSave" type="checkbox" checked aria-label="Defer save until sweep ends">
+        <span style="font-size:11px;opacity:0.7;" data-i18n="nai_bridge.sweep_defer_save_hint">完了/停止時にまとめて保存（DB 連鎖負荷を回避）</span>
+      </span>
+    </div>
+    <div id="nabSweepCancelRow" style="display:none;margin-top:10px;gap:8px;">
+      <button class="nab-btn small" data-action="nabStopSweepGraceful"
+              data-i18n="nai_bridge.sweep_stop_graceful_btn"
+              data-i18n-title="nai_bridge.sweep_stop_graceful_title"
+              title="現在の生成が終わったら停止（途中の画像は捨てない）">現在の画像で停止</button>
+      <button type="button" id="naib-sweep-open" class="nab-btn small" disabled
+              title="Sweep ページで結果を開く（最初の画像が保存されると有効化）" aria-label="Open sweep page">📊 Sweep ページを開く</button>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+      <button type="button" id="naib-sweep-history" class="nab-btn small"
+              title="最近の Sweep 履歴" aria-label="Sweep 履歴">🕘 Sweep 履歴</button>
+    </div>
+    <div id="nabSweepGrid" class="nab-sweep-grid" style="display:none;margin-top:10px;overflow-x:auto;"></div>
+    <p style="font-size:11px;opacity:0.7;margin:8px 0 0;" data-i18n="nai_bridge.sweep_hint">
+      seed は固定（-1 の場合は1つ生成して全枚数で再利用）。1枚ずつ順次生成し下に追記します。安全装置として最大 50 枚に制限されます。
+    </p>
+  </details>
+
+  <!-- Result area -->
+  <div class="nab-result" id="nabResult"></div>
+
+  <!-- Settings -->
+  <details class="nab-config">
+    <summary><h2 style="display:inline;font-size:16px;" data-i18n="nai_bridge.settings_heading">Settings</h2></summary>
+    <div style="margin-top: 10px;">
+      <form autocomplete="off" data-no-submit="1">
+      <div class="nab-config-row">
+        <label for="nabCfgToken" data-i18n="nai_bridge.api_token_label">API Token</label>
+        <div class="nab-token-wrap">
+          <input id="nabCfgToken" type="password" placeholder="pst-..." data-i18n-placeholder="nai_bridge.api_token_placeholder" aria-label="NAI API Token" autocomplete="off" data-1p-ignore data-lpignore="true">
+          <button class="nab-token-toggle" data-action="nabToggleToken" id="nabTokenToggle" data-i18n="nai_bridge.token_show_btn">Show</button>
+        </div>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgModel" data-i18n="nai_bridge.default_model_label">Default Model</label>
+        <select id="nabCfgModel" aria-label="Default model">
+          <option value="" data-i18n="nai_bridge.loading">Loading...</option>
+        </select>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgSampler" data-i18n="nai_bridge.default_sampler_label">Default Sampler</label>
+        <select id="nabCfgSampler" aria-label="Default sampler">
+          <option value="" data-i18n="nai_bridge.loading">Loading...</option>
+        </select>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgNoise" data-i18n="nai_bridge.default_noise_schedule_label">Default Noise Schedule</label>
+        <select id="nabCfgNoise" aria-label="Noise schedule">
+          <option value="" data-i18n="nai_bridge.loading">Loading...</option>
+        </select>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgAutoSend" data-i18n="nai_bridge.auto_send_label">Auto-send</label>
+        <input id="nabCfgAutoSend" type="checkbox" aria-label="Auto send">
+        <span style="font-size:12px;" data-i18n="nai_bridge.auto_send_desc">確認ダイアログ省略</span>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgSaveFolder" data-i18n="nai_bridge.save_folder_label">Save Folder</label>
+        <div class="nab-token-wrap">
+          <input id="nabCfgSaveFolder" type="text" placeholder="/path/to/save" data-i18n-placeholder="nai_bridge.save_folder_placeholder" aria-label="Save folder path">
+          <button class="nab-btn small" data-action="nabBrowseSaveFolder" data-i18n="nai_bridge.browse_btn">Browse</button>
+        </div>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgAutoSave" data-i18n="nai_bridge.auto_save_label">Auto-save</label>
+        <input id="nabCfgAutoSave" type="checkbox" aria-label="Auto save">
+        <span style="font-size:12px;" data-i18n="nai_bridge.auto_save_desc">生成後に自動保存</span>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgAutoImport" data-i18n="nai_bridge.auto_import_label">Auto-import</label>
+        <input id="nabCfgAutoImport" type="checkbox" aria-label="Auto import" checked>
+        <span style="font-size:12px;" data-i18n="nai_bridge.auto_import_desc">保存時にDBに自動登録</span>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgBlockAnlasOnV5Limit" data-i18n="nai_bridge.block_anlas_on_v5_limit_label">V5 Usage Limit到達時にAnlas消費を止める</label>
+        <input id="nabCfgBlockAnlasOnV5Limit" type="checkbox" aria-label="Block Anlas fallback on V5 usage limit">
+        <span style="font-size:12px;" data-i18n="nai_bridge.block_anlas_on_v5_limit_desc">V5・通常解像度・28 steps以下の生成のみ対象。高解像度/高stepsは元々Anlas消費のため対象外</span>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgSaveNaming" data-i18n="nai_bridge.save_naming_label">Save Naming</label>
+        <select id="nabCfgSaveNaming" aria-label="Save naming">
+          <option value="daily_folder" data-i18n="nai_bridge.naming_daily_folder">Daily Folder (2026-02-25/seed_0.png)</option>
+          <option value="date_prefix" data-i18n="nai_bridge.naming_date_prefix">Date Prefix (2026-02-25_143022_seed_0.png)</option>
+          <option value="timestamp" data-i18n="nai_bridge.naming_timestamp">Timestamp (seed_unix_0.png)</option>
+        </select>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgImageFormat" data-i18n="nai_bridge.default_image_format_label">Default Image Format</label>
+        <select id="nabCfgImageFormat" aria-label="Image format">
+          <option value="png">PNG</option>
+          <option value="webp" data-i18n="nai_bridge.webp_lossless">WebP (Lossless)</option>
+        </select>
+      </div>
+      <div class="nab-config-row">
+        <label for="nabCfgPromptOpen" data-i18n="nai_bridge.prompt_open_label">プロンプトを展開して表示</label>
+        <input id="nabCfgPromptOpen" type="checkbox" checked aria-label="Show prompt expanded">
+      </div>
+      <div class="nab-config-row">
+        <button class="nab-btn small" data-action="nabSaveConfig" data-i18n="nai_bridge.save_settings_btn">Save Settings</button>
+      </div>
+      </form>
+    </div>
+  </details>
+</div>

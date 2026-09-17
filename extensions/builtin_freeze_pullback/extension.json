@@ -1,0 +1,17 @@
+{
+  "name": "builtin-freeze-pullback",
+  "version": "1.0.0",
+  "type": "ui_widget",
+  "category": "library",
+  "entry": "freeze_pullback_ext.py",
+  "has_blueprint": true,
+  "blueprint_prefix": "/ext/freeze-pullback",
+  "nav": {
+    "label": "Freeze & Pull-back",
+    "icon": "\ud83c\udfac"
+  },
+  "config": {
+    "enabled": true,
+    "priority": 280
+  }
+}

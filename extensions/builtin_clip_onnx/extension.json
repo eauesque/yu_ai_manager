@@ -1,0 +1,15 @@
+{
+  "name": "builtin-clip-onnx",
+  "version": "1.0.0",
+  "description": "CLIP ONNX Runtime encoder backend for semantic search",
+  "type": "general",
+  "category": "ai",
+  "entry": "clip_onnx_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "clip_onnx_core",
+  "config": {
+    "enabled": true,
+    "priority": 150
+  }
+}

@@ -1,0 +1,139 @@
+<style>
+/* ── Waypoint マーカー (プレビュー上) ────────────────── */
+.fpb-wp-marker {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent, #60a5fa);
+  border: 2px solid #fff;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+.fpb-wp-marker-num {
+  font-size: 11px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1;
+}
+
+/* ── Waypoint パス SVG ───────────────────────────────── */
+.fpb-wp-path {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ── Waypoint リスト (サイドバー) ────────────────────── */
+.fpb-waypoint-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+.fpb-wp-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  background: var(--bg, #0f1115);
+  border: 1px solid var(--border, #2b3240);
+  border-radius: 6px;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+.fpb-wp-item-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent, #60a5fa);
+  color: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.fpb-wp-item-coord {
+  font-size: 11px;
+  color: var(--muted, #aab2c0);
+  min-width: 80px;
+  flex-shrink: 0;
+}
+.fpb-wp-item label {
+  font-size: 11px;
+  color: var(--muted, #aab2c0);
+  min-width: unset;
+}
+.fpb-wp-item input {
+  width: 48px;
+  padding: 2px 4px;
+  border: 1px solid var(--border, #2b3240);
+  border-radius: 4px;
+  background: var(--card, #1b1f2a);
+  color: var(--text, #e7eaf0);
+  font-size: 11px;
+  text-align: center;
+}
+.fpb-wp-item-del {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--muted, #aab2c0);
+  cursor: pointer;
+  font-size: 14px;
+  padding: 2px 4px;
+  flex-shrink: 0;
+}
+.fpb-wp-item-del:hover {
+  color: #e74c3c;
+}
+.fpb-wp-total-time {
+  font-size: 11px;
+  color: var(--muted, #aab2c0);
+  text-align: right;
+  padding: 4px 0;
+}
+.fpb-wp-time-warning {
+  font-size: 11px;
+  color: #e74c3c;
+  text-align: right;
+  padding: 2px 0;
+}
+.fpb-waypoint-hint {
+  font-size: 12px;
+  color: var(--muted, #aab2c0);
+  margin-bottom: 8px;
+}
+
+/* ── Responsive ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .fpb-layout {
+    flex-direction: column;
+    height: auto;
+    min-height: calc(100vh - var(--nav-h, 50px));
+  }
+  .fpb-sidebar {
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--border, #2b3240);
+    max-height: 50vh;
+    overflow-y: auto;
+  }
+  .fpb-content {
+    min-height: 50vh;
+  }
+}
+</style>

@@ -1,0 +1,17 @@
+/* Fixed navigation bar */
+#fixedNav a.nav-link:hover {
+  color: var(--accent, #667eea) !important;
+}
+
+#fixedNav {
+  transition: box-shadow 0.3s;
+}
+
+body.dark #fixedNav {
+  background: rgba(26, 26, 46, 0.95);
+}
+
+body:not(.dark) #fixedNav {
+  background: rgba(255, 255, 255, 0.95);
+  border-bottom-color: rgba(0, 0, 0, 0.1);
+}

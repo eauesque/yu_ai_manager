@@ -1,0 +1,74 @@
+/* Inline copy feedback near button */
+.copy-wrap{ position: relative; display: inline-flex; align-items: center; }
+
+.copy-pop{
+  position: absolute;
+  left: 50%;
+  top: -10px;
+  transform: translateX(-50%) translateY(-100%);
+  background: rgba(0,0,0,0.78);
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .12s ease, transform .12s ease;
+  z-index: 20;
+}
+
+.copy-pop.show{
+  opacity: 1;
+  transform: translateX(-50%) translateY(-108%);
+}
+
+.copy-pop.ok{ background: rgba(0,0,0,0.78); }
+.copy-pop.ng{ background: rgba(180,40,40,0.86); }
+
+/* Copy badge for examples */
+.copy-ex{ position: relative; }
+.ex-badge{
+  position:absolute; top:-7px; right:-7px;
+  width: 18px; height: 18px; border-radius: 999px;
+  display:none; align-items:center; justify-content:center;
+  font-size: 12px; font-weight: 800;
+  border:1px solid rgba(0,0,0,0.18);
+  background: rgba(255,255,255,0.9);
+}
+
+body.dark .ex-badge{ border-color: rgba(255,255,255,0.18); background: rgba(0,0,0,0.55); color: #e8eefc; }
+.ex-badge.ok{ display:flex; color: #0a7a2f; }
+.ex-badge.ng{ display:flex; color: #b42318; }
+
+/* Make cheat examples clickable too */
+.cheat-item code, .cheat-item .cheat-example, .cheat-item .tricky-example { cursor:pointer; position: relative; }
+.cheat-item code:hover, .intro-ex:hover{ filter: brightness(0.98); }
+body.dark .cheat-item code:hover, body.dark .intro-ex:hover{ filter: brightness(1.08); }
+
+/* ===== Copyable examples (regex intro + cheat sheet) ===== */
+code.copyable{ position:relative; display:inline-block; cursor:pointer; }
+code.copyable .ex-badge{
+  position:absolute;
+  top:-8px;
+  right:-8px;
+  width:18px;
+  height:18px;
+  border-radius:10px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:12px;
+  font-weight:800;
+  opacity:0;
+  transform:scale(0.9);
+  transition:opacity .12s ease, transform .12s ease;
+  background: rgba(0,0,0,.6);
+  color:#fff;
+  pointer-events:none;
+}
+
+body.dark code.copyable .ex-badge{ background: rgba(255,255,255,.25); }
+code.copyable .ex-badge.show{ opacity:1; transform:scale(1); }
+code.copyable .ex-badge.ok{ background: rgba(34,197,94,.9); }
+code.copyable .ex-badge.ng{ background: rgba(239,68,68,.9); }

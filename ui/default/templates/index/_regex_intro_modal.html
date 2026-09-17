@@ -1,0 +1,44 @@
+  <!-- Regex Intro Modal -->
+  <div id="regexIntroOverlay" class="overlay" aria-hidden="true" style="display:none;">
+    <div class="overlay-backdrop" data-action="runtimeToolsApi.closeRegexIntro"></div>
+    <div class="overlay-dialog" role="dialog" aria-modal="true" aria-labelledby="regexIntroTitle">
+      <div class="overlay-header">
+        <div id="regexIntroTitle" class="overlay-title" data-i18n="regex_intro.title">What is Regex? (Basics)</div>
+        <button class="overlay-close" type="button" data-action="runtimeToolsApi.closeRegexIntro" data-i18n-aria-label="common.close" aria-label="Close">×</button>
+      </div>
+      <div class="overlay-body">
+
+        <p class="overlay-lead">
+          <span data-i18n="regex_intro.lead">Regular expressions (RegExp) are a pattern notation for finding parts of strings that match conditions.</span>
+          <br><span data-i18n="regex_intro.lead2">Check "Regex" in the prompt search to interpret input as a regular expression.</span>
+          <span class="muted" data-i18n="regex_intro.click_to_copy">(Click examples below to copy)</span>
+        </p>
+
+        <div class="intro-grid">
+          <div class="intro-card">
+            <div class="intro-h" data-i18n="regex_intro.or_title">1) OR (match any)</div>
+            <div class="intro-ex"><code class="copyable">cat|dog</code></div>
+            <div class="intro-note" data-i18n="regex_intro.or_note">Matches "cat" or "dog"</div>
+          </div>
+
+          <div class="intro-card">
+            <div class="intro-h" data-i18n="regex_intro.word_title">2) Word boundary (avoid partial match)</div>
+            <div class="intro-ex"><code class="copyable">\b1girl\b</code></div>
+            <div class="intro-note" data-i18n="regex_intro.word_note">Excludes "12girls" etc.</div>
+          </div>
+
+          <div class="intro-card">
+            <div class="intro-h" data-i18n="regex_intro.exclude_title">3) Exclude (negative lookahead)</div>
+            <div class="intro-ex"><code class="copyable">^(?!.*\bnsfw\b).*$</code></div>
+            <div class="intro-note" data-i18n="regex_intro.exclude_note">Excludes lines containing "nsfw"</div>
+          </div>
+        </div>
+
+        <div class="overlay-sep"></div>
+
+        <div class="overlay-note" data-i18n="regex_intro.footer_note">For more examples (tag exclusion, lookbehind, etc.), see the Regex Cheatsheet (Ctrl+/). Start with the 3 patterns above, then refer to the cheatsheet.</div>
+
+      <div class="overlay-footer muted" data-i18n="regex_intro.shortcuts">Shortcuts: Toggle cheatsheet Ctrl+/ / Toggle regex Ctrl+Shift+E (alt: Ctrl+Alt+R)</div>
+      </div>
+    </div>
+  </div>

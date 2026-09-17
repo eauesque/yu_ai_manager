@@ -1,0 +1,15 @@
+{
+  "name": "builtin-trophy",
+  "version": "1.0.0",
+  "description": "Trophy / achievement system with milestone tracking",
+  "type": "general",
+  "category": "library",
+  "entry": "trophy_ext.py",
+  "hooks": [],
+  "has_blueprint": true,
+  "core_shim": "trophy_core",
+  "config": {
+    "enabled": true,
+    "priority": 200
+  }
+}

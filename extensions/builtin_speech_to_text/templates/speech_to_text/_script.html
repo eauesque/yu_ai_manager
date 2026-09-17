@@ -1,0 +1,283 @@
+  <script nonce="{{ csp_nonce }}">
+  (function() {
+    var dropZone = document.getElementById('s2t-drop');
+    var dropLabel = document.getElementById('s2t-drop-label');
+    var fileInput = document.getElementById('s2t-file');
+    var btn = document.getElementById('s2t-btn');
+    var btnHint = document.getElementById('s2t-btn-hint');
+    var loading = document.getElementById('s2t-loading');
+    var resultCard = document.getElementById('s2t-result-card');
+    var textEl = document.getElementById('s2t-text');
+    var segsEl = document.getElementById('s2t-segs');
+    var backendEl = document.getElementById('s2t-backend-name');
+    var announce = document.getElementById('s2t-announce');
+    var selectedFile = null;
+
+    // Custom language code support
+    function getResolvedLang(selectEl) {
+      if (selectEl.value === 'custom') {
+        var customInput = selectEl.parentElement.querySelector('.s2t-custom-lang');
+        return customInput ? customInput.value.trim() || 'en' : 'en';
+      }
+      return selectEl.value;
+    }
+
+    // Show/hide custom language input for file/batch selects only (stream select is handled in _script_stream.html)
+    document.querySelectorAll('#s2t-lang, #s2t-batch-lang').forEach(function(sel) {
+      sel.addEventListener('change', function() {
+        var customInput = this.parentElement.querySelector('.s2t-custom-lang');
+        if (customInput) {
+          customInput.style.display = this.value === 'custom' ? 'inline-block' : 'none';
+        }
+      });
+    });
+
+    function say(msg) { announce.textContent = msg; }
+
+    // Load status
+    fetch('api/s2t/status', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        var html = '';
+        (d.backends || []).forEach(function(b) {
+          var cls = b.available ? 's2t-badge-ok' : 's2t-badge-na';
+          var label = b.available ? window.tr('s2t.backend_available', 'Available') : window.tr('s2t.backend_not_installed', 'Not installed');
+          html += '<div class="s2t-status-item"><span class="s2t-badge ' + cls + '" title="' + label + '">'
+            + escHtml(b.name) + '</span><span class="s2t-priority">P' + b.priority + '</span></div>';
+        });
+        document.getElementById('s2t-backends').innerHTML = html;
+        if (d.active) {
+          document.getElementById('s2t-active').innerHTML =
+            window.tr('s2t.active_label', 'Active') + ': <span class="s2t-badge s2t-badge-active">'
+            + escHtml(d.active.name) + ' (' + escHtml(d.active.model_size) + ')</span>';
+        }
+                // Model cache status
+        var modelsHtml = '';
+        (d.backends || []).forEach(function(b) {
+          var cached = b.cached_models || [];
+          if (!b.available && !cached.length) return;
+          modelsHtml += '<div style="margin-bottom:8px;">';
+          modelsHtml += '<strong style="font-size:13px;">' + escHtml(b.name) + '</strong>';
+          if (!cached.length) {
+            modelsHtml += ' <span style="font-size:12px;color:var(--text-muted,#6b7280);">— ' + window.tr('s2t.no_cached_models', 'No cached models') + '</span>';
+          } else {
+            modelsHtml += '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:4px;">';
+            cached.forEach(function(m) {
+              var sizeStr = m.size_bytes < 1048576
+                ? (m.size_bytes / 1024).toFixed(0) + ' KB'
+                : m.size_bytes < 1073741824
+                  ? (m.size_bytes / 1048576).toFixed(0) + ' MB'
+                  : (m.size_bytes / 1073741824).toFixed(1) + ' GB';
+              modelsHtml += '<span class="s2t-badge s2t-badge-ok" style="font-size:11px;" title="' + escHtml(m.path) + '">'
+                + escHtml(m.size) + ' (' + sizeStr + ')</span>';
+            });
+            modelsHtml += '</div>';
+          }
+          modelsHtml += '</div>';
+        });
+        if (modelsHtml) {
+          document.getElementById('s2t-models').innerHTML =
+            '<h3 style="font-size:14px;margin-bottom:8px;">' + window.tr('s2t.cached_models', 'Cached Models') + '</h3>' + modelsHtml;
+        }
+      })
+      .catch(function() {
+        document.getElementById('s2t-backends').textContent = window.tr('s2t.failed_load_status', 'Failed to load backend status');
+      });
+
+    // File selection
+    dropZone.addEventListener('click', function() { fileInput.click(); });
+    dropZone.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInput.click(); }
+    });
+    dropZone.addEventListener('dragover', function(e) { e.preventDefault(); dropZone.classList.add('dragover'); });
+    dropZone.addEventListener('dragleave', function() { dropZone.classList.remove('dragover'); });
+    dropZone.addEventListener('drop', function(e) {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      if (e.dataTransfer.files.length) selectFile(e.dataTransfer.files[0]);
+    });
+    fileInput.addEventListener('change', function() {
+      if (fileInput.files.length) selectFile(fileInput.files[0]);
+    });
+
+    function selectFile(f) {
+      selectedFile = f;
+      var size = f.size < 1048576
+        ? (f.size / 1024).toFixed(1) + ' KB'
+        : (f.size / 1048576).toFixed(1) + ' MB';
+      dropLabel.textContent = f.name + ' (' + size + ')';
+      btn.disabled = false;
+      btnHint.style.display = 'none';
+      say(window.tr('s2t.file_selected', 'File selected') + ': ' + f.name);
+    }
+
+    // Show hint when no file
+    btnHint.style.display = '';
+
+    // Transcribe
+    btn.addEventListener('click', function() {
+      if (!selectedFile) return;
+      btn.disabled = true;
+      loading.style.display = '';
+      resultCard.style.display = 'none';
+      say(window.tr('s2t.transcription_started', 'Transcription started...'));
+
+      var fd = new FormData();
+      fd.append('audio', selectedFile);
+      fd.append('language', getResolvedLang(document.getElementById('s2t-lang')));
+
+      fetch('api/s2t/transcribe', {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+        body: fd,
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        loading.style.display = 'none';
+        btn.disabled = false;
+        if (d.status === 'ok') {
+          textEl.textContent = d.text || window.tr('s2t.result_empty', '(empty)');
+          backendEl.textContent = d.backend || '';
+          var sh = '';
+          (d.segments || []).forEach(function(s) {
+            sh += '<div class="s2t-seg"><span class="s2t-seg-time">'
+              + fmtTime(s.start) + ' - ' + fmtTime(s.end)
+              + '</span> ' + escHtml(s.text) + '</div>';
+          });
+          segsEl.innerHTML = sh;
+          resultCard.style.display = '';
+          say(window.tr('s2t.transcription_complete', 'Transcription complete'));
+        } else {
+          textEl.textContent = window.tr('s2t.error_prefix', 'Error') + ': ' + (d.message || window.tr('s2t.unknown', 'unknown'));
+          resultCard.style.display = '';
+          say(window.tr('s2t.transcription_failed', 'Transcription failed') + ': ' + (d.message || window.tr('s2t.unknown_error', 'unknown error')));
+        }
+      })
+      .catch(function(err) {
+        loading.style.display = 'none';
+        btn.disabled = false;
+        textEl.textContent = window.tr('s2t.request_failed', 'Request failed') + ': ' + err.message;
+        resultCard.style.display = '';
+        say(window.tr('s2t.request_failed', 'Request failed') + ': ' + err.message);
+      });
+    });
+
+    // ── Batch transcription ────────────────────
+    var batchBtn = document.getElementById('s2t-batch-btn');
+    var batchProgress = document.getElementById('s2t-batch-progress');
+    var batchBar = document.getElementById('s2t-batch-bar');
+    var batchLabel = document.getElementById('s2t-batch-label');
+    var batchPct = document.getElementById('s2t-batch-pct');
+    var batchResult = document.getElementById('s2t-batch-result');
+
+    batchBtn.addEventListener('click', function() {
+      var idsInput = document.getElementById('s2t-batch-ids').value.trim();
+      var lang = getResolvedLang(document.getElementById('s2t-batch-lang'));
+      var fileIds = [];
+      if (idsInput) {
+        fileIds = idsInput.split(',').map(function(s) { return parseInt(s.trim(), 10); }).filter(function(n) { return !isNaN(n); });
+      }
+
+      batchBtn.disabled = true;
+      batchProgress.style.display = '';
+      batchBar.style.width = '0%';
+      batchLabel.textContent = window.tr('s2t.batch_starting', 'Starting...');
+      batchPct.textContent = '0%';
+      batchResult.textContent = '';
+
+      var body = { language: lang };
+      if (fileIds.length) body.file_ids = fileIds;
+
+      fetch('api/s2t/batch-transcribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+        body: JSON.stringify(body),
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(d) {
+        if (d.status === 'started') {
+          batchLabel.textContent = window.tr('s2t.batch_processing_files', 'Processing') + ' ' + (d.total || '?') + ' ' + window.tr('s2t.files', 'files') + '...';
+          startBatchSSE();
+        } else {
+          batchResult.textContent = window.tr('s2t.error_prefix', 'Error') + ': ' + (d.message || JSON.stringify(d));
+          batchBtn.disabled = false;
+        }
+      })
+      .catch(function(err) {
+        batchResult.textContent = window.tr('s2t.request_failed', 'Request failed') + ': ' + err.message;
+        batchBtn.disabled = false;
+        batchProgress.style.display = 'none';
+      });
+    });
+
+    function startBatchSSE() {
+            // Receive progress in real-time via SSE (no polling needed)
+      if (window.sseSubscribe) {
+        window.sseSubscribe('s2t.batch_progress', function(d) {
+          var data = d.data || d;
+          var pct = data.percent || 0;
+          batchBar.style.width = pct + '%';
+          batchPct.textContent = Math.round(pct) + '%';
+          batchLabel.textContent = window.tr('s2t.batch_processing_files', 'Processing') + ' ' + (data.processed || 0) + '/' + (data.total || '?')
+            + ' (' + (data.errors || 0) + ' ' + window.tr('s2t.errors', 'errors') + ', ' + (data.elapsed || 0) + 's)';
+        });
+        window.sseSubscribe('s2t.batch_complete', function(d) {
+          var data = d.data || d;
+          batchBtn.disabled = false;
+          batchBar.style.width = '100%';
+          batchPct.textContent = '100%';
+          var msg = window.tr('s2t.batch_complete_label', 'Complete') + ': ' + (data.processed || 0) + ' ' + window.tr('s2t.processed', 'processed') + ', '
+            + (data.errors || 0) + ' ' + window.tr('s2t.errors', 'errors') + ' in ' + (data.elapsed_seconds || 0) + 's';
+          batchResult.innerHTML = '<span style="color:#22c55e">' + escHtml(msg) + '</span>';
+        });
+      } else {
+                // Fallback when SSE is unavailable: polling
+        var poll = setInterval(function() {
+          fetch('/api/jobs/status', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function(r) { return r.json(); })
+            .then(function(d) {
+              var job = (d.active || []).find(function(j) { return j.job_id === 's2t_batch'; })
+                     || (d.recent || []).find(function(j) { return j.job_id === 's2t_batch'; });
+              if (!job) return;
+              var pct = job.percent || 0;
+              batchBar.style.width = pct + '%';
+              batchPct.textContent = Math.round(pct) + '%';
+              batchLabel.textContent = job.message || window.tr('s2t.processing', 'Processing...');
+              if (!job.running) {
+                clearInterval(poll);
+                batchBtn.disabled = false;
+                batchResult.innerHTML = '<span style="color:#22c55e">' + escHtml(job.message || window.tr('s2t.batch_complete_label', 'Complete')) + '</span>';
+              }
+            })
+            .catch(function() {});
+        }, 2000);
+      }
+    }
+
+    function fmtTime(sec) {
+      var m = Math.floor(sec / 60);
+      var s = (sec % 60).toFixed(1);
+      return m + ':' + (s < 10 ? '0' : '') + s;
+    }
+    function escHtml(t) {
+      var d = document.createElement('div');
+      d.textContent = t;
+      return d.innerHTML;
+    }
+
+  })();
+
+  // Expose shared utilities for _script_stream.html (cross-IIFE access via window)
+  window._s2tFmtTime = function(sec) {
+    var m = Math.floor(sec / 60);
+    var s = (sec % 60).toFixed(1);
+    return m + ':' + (s < 10 ? '0' : '') + s;
+  };
+  window._s2tGetResolvedLang = function(selectEl) {
+    if (selectEl.value === 'custom') {
+      var customInput = selectEl.parentElement.querySelector('.s2t-custom-lang');
+      return customInput ? customInput.value.trim() || 'en' : 'en';
+    }
+    return selectEl.value;
+  };
+  </script>

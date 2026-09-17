@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="watcher.title">Auto Scan Watcher</title>
+  <style>
+    :root { --bg: #1a1a2e; --fg: #e0e0e0; --card: #16213e; --accent: #0f3460;
+            --ok: #4ecca3; --err: #e94560; --border: #2a2a4a; --root-border: rgba(255,255,255,0.08); }
+    @media (prefers-color-scheme: light) {
+      :root { --bg: #f5f5f5; --fg: #1a1a2e; --card: #ffffff; --accent: #e3eaf3;
+              --ok: #2e9e6e; --err: #d03050; --border: #d0d0d0; --root-border: rgba(0,0,0,0.08); }
+    }
+    html[data-theme="light"] { --bg: #f5f5f5; --fg: #1a1a2e; --card: #ffffff; --accent: #e3eaf3;
+              --ok: #2e9e6e; --err: #d03050; --border: #d0d0d0; --root-border: rgba(0,0,0,0.08); }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: var(--bg); color: var(--fg);
+           padding-top: calc(var(--nav-h, 50px) + 24px); padding-left: 24px; padding-right: 24px; }
+    h1 { font-size: 1.4rem; margin-bottom: 16px; }
+    .card { background: var(--card); border-radius: 8px; padding: 20px; margin-bottom: 16px;
+            border: 1px solid var(--border); }
+    .status-badge { display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; }
+    .status-badge.running { background: var(--ok); color: #111; }
+    .status-badge.stopped { background: var(--err); color: #fff; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; margin-top: 12px; }
+    .stat-item { text-align: center; padding: 12px; background: var(--accent); border-radius: 6px; }
+    .stat-value { font-size: 1.6rem; font-weight: 700; }
+    .stat-label { font-size: 0.8rem; color: #fff; margin-top: 4px; }
+    .roots-list { list-style: none; margin-top: 8px; }
+    .roots-list li { padding: 6px 0; border-bottom: 1px solid var(--root-border); font-family: ui-monospace, "Cascadia Mono", "Cascadia Code", Consolas, "Courier New", monospace; font-size: 0.85rem; }
+    .roots-list .empty { color: var(--fg); }
+    .btn { display: inline-block; padding: 10px 24px; border: none; border-radius: 6px; cursor: pointer;
+           font-size: 0.95rem; font-weight: 600; transition: opacity 0.15s; min-height: 40px; }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-start { background: var(--ok); color: #111; }
+    .btn-stop { background: var(--err); color: #fff; }
+    .btn-group { display: flex; gap: 8px; margin-top: 16px; }
+  </style>
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+    <h1 data-i18n="watcher.title">Auto Scan Watcher</h1>
+
+    <div class="card">
+      <span data-i18n="watcher.status_label">Status: </span>
+      <span id="badge" class="status-badge stopped" data-i18n="watcher.stopped">停止</span>
+      <div class="btn-group">
+        <button id="btn-start" class="btn btn-start" data-action="doStart" data-i18n="watcher.start">Start</button>
+        <button id="btn-stop" class="btn btn-stop" disabled data-action="doStop" data-i18n="watcher.stop">Stop</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.1rem; margin-bottom:8px;" data-i18n="watcher.statistics">Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-item"><div class="stat-value" id="st-added">0</div><div class="stat-label" data-i18n="watcher.added">Added</div></div>
+        <div class="stat-item"><div class="stat-value" id="st-modified">0</div><div class="stat-label" data-i18n="watcher.modified">Modified</div></div>
+        <div class="stat-item"><div class="stat-value" id="st-deleted">0</div><div class="stat-label" data-i18n="watcher.deleted">Deleted</div></div>
+        <div class="stat-item"><div class="stat-value" id="st-errors">0</div><div class="stat-label" data-i18n="watcher.errors">Errors</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="font-size:1.1rem; margin-bottom:8px;" data-i18n="watcher.watched_roots">Watched Roots</h2>
+      <ul id="roots-list" class="roots-list">
+        <li class="empty" data-i18n="watcher.no_roots">No roots watched</li>
+      </ul>
+    </div>
+  </main>
+
+  <script nonce="{{ csp_nonce }}">
+    var BASE = '/ext/watcher';
+
+    function _escHtml(s) {
+      var d = document.createElement('div');
+      d.textContent = s || '';
+      return d.innerHTML;
+    }
+
+    function refresh() {
+      fetch(BASE + '/info').then(function(r){ return r.json(); }).then(function(d){
+        var badge = document.getElementById('badge');
+        badge.textContent = d.running ? window.tr('watcher.running', '稼働中') : window.tr('watcher.stopped', '停止');
+        badge.className = 'status-badge ' + (d.running ? 'running' : 'stopped');
+        document.getElementById('btn-start').disabled = d.running;
+        document.getElementById('btn-stop').disabled = !d.running;
+        document.getElementById('st-added').textContent = d.stats.added;
+        document.getElementById('st-modified').textContent = d.stats.modified;
+        document.getElementById('st-deleted').textContent = d.stats.deleted;
+        document.getElementById('st-errors').textContent = d.stats.errors;
+        var ul = document.getElementById('roots-list');
+        if (d.watched_roots && d.watched_roots.length) {
+          ul.innerHTML = d.watched_roots.map(function(r){ return '<li>' + _escHtml(r) + '</li>'; }).join('');
+        } else {
+          ul.innerHTML = '<li class="empty" data-i18n="watcher.no_roots">' + (window.tr ? window.tr('watcher.no_roots', 'No roots watched') : 'No roots watched') + '</li>';
+        }
+      });
+    }
+
+    function _hdr() {
+      return {'Content-Type':'application/json', 'X-Requested-With':'XMLHttpRequest'};
+    }
+
+    function doStart() {
+      fetch(BASE + '/start', {method:'POST', headers:_hdr(), body:'{}'})
+        .then(function(){ refresh(); });
+    }
+    function doStop() {
+      fetch(BASE + '/stop', {method:'POST', headers:_hdr(), body:'{}'})
+        .then(function(){ refresh(); });
+    }
+
+    refresh();
+    setInterval(refresh, 5000);
+  </script>
+</body>
+</html>

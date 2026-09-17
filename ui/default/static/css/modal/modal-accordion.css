@@ -1,0 +1,70 @@
+/* Accordion */
+.metadata-accordion {
+  margin: 15px 0;
+  border: 1px solid var(--border, #e0e0e0);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--card);
+  color: var(--text);
+}
+
+.accordion-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.2s;
+  background: var(--btn-bg, #fafafa);
+}
+
+.accordion-header:hover {
+  background: var(--btn-hover, #f0f0f0);
+}
+
+.accordion-icon {
+  display: inline-block;
+  width: 20px;
+  margin-right: 10px;
+  font-size: 12px;
+  transition: transform 0.2s;
+  color: var(--muted, #666);
+}
+
+.accordion-content {
+  padding: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease-out;
+}
+
+.param-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 8px;
+  padding: 15px;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+.param-item {
+  display: flex;
+  gap: 8px;
+  padding: 6px 10px;
+  background: var(--card);
+  color: var(--text);
+  border-radius: 4px;
+  font-size: 13px;
+  border: 1px solid var(--border, #e8e8e8);
+}
+
+.param-key {
+  font-weight: 600;
+  color: var(--muted, #555);
+  min-width: 100px;
+}
+
+.param-value {
+  color: var(--text, #333);
+  word-break: break-all;
+}

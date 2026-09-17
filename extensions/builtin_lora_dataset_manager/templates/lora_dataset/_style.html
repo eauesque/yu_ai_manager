@@ -1,0 +1,244 @@
+<link rel="stylesheet" href="/static/css/main.css?v=20260323">
+<style>
+/* LoRA Dataset Manager styles */
+.ldm-layout {
+  display: flex;
+  gap: 16px;
+  padding: 16px;
+  min-height: calc(100vh - 60px);
+}
+
+/* Sidebar */
+.ldm-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--bg-card);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 12px;
+  overflow-y: auto;
+  max-height: calc(100vh - 92px);
+}
+.ldm-sidebar h3 {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0 0 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ldm-project-item {
+  display: flex;
+  align-items: center;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s;
+}
+.ldm-project-item:hover { background: var(--bg-input); }
+.ldm-project-item.active { background: var(--accent-bg, rgba(102,126,234,0.15)); color: var(--accent, #667eea); font-weight: 600; }
+.ldm-project-item .ldm-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--muted);
+  background: var(--bg-input);
+  padding: 1px 6px;
+  border-radius: 8px;
+}
+.ldm-new-btn {
+  width: 100%;
+  padding: 8px;
+  margin-top: 8px;
+  border: 1px dashed var(--border);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+}
+.ldm-new-btn:hover { border-color: var(--accent, #667eea); color: var(--accent, #667eea); }
+
+/* Main area */
+.ldm-main {
+  flex: 1;
+  min-width: 0;
+}
+.ldm-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+/* Tabs */
+.ldm-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.ldm-tab {
+  padding: 10px 20px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 13px;
+  border-bottom: 2px solid transparent;
+  transition: color 0.15s, border-color 0.15s;
+}
+.ldm-tab:hover { color: var(--fg); }
+.ldm-tab.active { color: var(--accent, #667eea); border-bottom-color: var(--accent, #667eea); font-weight: 600; }
+.ldm-tab-panel { display: none; }
+.ldm-tab-panel.active { display: block; }
+
+/* Tag chips */
+.ldm-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.ldm-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border-radius: 12px;
+  font-size: 12px;
+  cursor: pointer;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  transition: background 0.15s, opacity 0.15s;
+}
+.ldm-tag-chip:hover { background: var(--bg-card); }
+.ldm-tag-chip.excluded {
+  opacity: 0.4;
+  text-decoration: line-through;
+  background: rgba(231,76,60,0.1);
+  border-color: rgba(231,76,60,0.3);
+}
+.ldm-tag-count {
+  font-size: 10px;
+  color: var(--muted);
+}
+
+/* Export / Train panels */
+.ldm-form-group {
+  margin-bottom: 14px;
+}
+.ldm-form-group label {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.ldm-form-group input,
+.ldm-form-group select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--fg);
+  font-size: 13px;
+}
+.ldm-caption-preview {
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: monospace;
+  font-size: 12px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  max-height: 200px;
+  overflow-y: auto;
+  color: var(--fg);
+}
+.ldm-log-output {
+  background: #1a1a2e;
+  color: #e0e0e0;
+  border-radius: 6px;
+  padding: 10px 12px;
+  font-family: monospace;
+  font-size: 11px;
+  max-height: 400px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Selected files grid */
+.ldm-file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+.ldm-file-thumb {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+}
+
+/* Settings panel */
+.ldm-settings-form {
+  max-width: 600px;
+  padding: var(--space-md, 16px);
+}
+.ldm-settings-form h3 {
+  font-size: 15px;
+  margin: 0 0 16px;
+}
+.ldm-field-group {
+  margin-bottom: var(--space-md, 16px);
+}
+.ldm-field-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: var(--space-xs, 4px);
+  font-size: var(--font-sm, 13px);
+}
+.ldm-input, .ldm-select {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-input);
+  color: var(--fg);
+  font-size: 13px;
+  box-sizing: border-box;
+}
+.ldm-field-hint {
+  display: block;
+  font-size: var(--font-xs, 11px);
+  color: var(--muted);
+  margin-top: 2px;
+}
+.ldm-settings-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm, 8px);
+  margin-top: var(--space-lg, 24px);
+}
+.ldm-save-status {
+  font-size: var(--font-sm, 13px);
+}
+.ldm-save-status.ok  { color: var(--color-success, #4caf50); }
+.ldm-save-status.err { color: var(--color-error,   #f44336); }
+
+/* Responsive */
+@media (max-width: 768px) {
+  .ldm-layout { flex-direction: column; }
+  .ldm-sidebar { width: 100%; max-height: none; }
+}
+</style>

@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title data-i18n="lc_peers.page_title">Peer 管理 - LAN Cowork</title>
+  <link rel="stylesheet" href="/static/css/base/base-theme.css">
+  <link rel="stylesheet" href="/static/css/main.css?v=20260213">
+  <link rel="stylesheet" href="/static/css/dark-mode/fix/dark-mode-fix-v2.css?v=20260225">
+  <link rel="stylesheet" href="/static/css/pages/lan_cowork.css?v=20260420a">
+  {% include "_peers_style.html" %}
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+
+  <!-- Fleet consent banner — hidden until a consent request arrives -->
+  <div id="fleetConsentBanner" class="fleet-consent-banner" hidden
+       role="alert" aria-live="assertive">
+    <div class="fleet-consent-banner__inner">
+      <span id="fleetConsentBannerMsg" class="fleet-consent-banner__msg"></span>
+      <span id="fleetConsentBannerCountdown" class="fleet-consent-banner__countdown"></span>
+      <div class="fleet-consent-banner__actions">
+        <button type="button" id="fleetConsentApproveOnce"
+                class="fleet-consent-btn fleet-consent-btn--approve"
+                data-i18n="fleet.consent.banner.approve_once">今回だけ承認</button>
+        <button type="button" id="fleetConsentApprovePermanent"
+                class="fleet-consent-btn fleet-consent-btn--approve"
+                data-i18n="fleet.consent.banner.approve_permanent">永続的に承認</button>
+        <button type="button" id="fleetConsentDeny"
+                class="fleet-consent-btn fleet-consent-btn--deny"
+                data-i18n="fleet.consent.banner.deny">拒否</button>
+      </div>
+    </div>
+  </div>
+
+  <main id="main-content" class="lc-peers-page">
+
+    <div class="lc-peers-nav">
+      <a href="/lan-cowork" data-i18n="lc_peers.nav.back">← LAN Cowork</a>
+    </div>
+
+    <div class="lc-peers-header">
+      <h1 data-i18n="lc_peers.title">Peer 管理</h1>
+    </div>
+
+    <!-- ── Section 1: Incoming pair requests ── -->
+    <section class="lc-peers-section" id="lcPeersRequestsSection">
+      <div class="lc-peers-section-header">
+        <h2 data-i18n="lc_peers.requests.title">承認待ちペアリングリクエスト</h2>
+        <button type="button" class="lc-peers-btn" data-action="lc-peers-refresh-requests"
+                data-i18n="lc_peers.requests.refresh">更新</button>
+      </div>
+
+      <div class="lc-peers-table-wrap">
+        <table class="lc-peers-table" id="lcPeersRequestsTable" hidden>
+          <thead>
+            <tr>
+              <th data-i18n="lc_peers.requests.col.requester">リクエスト元</th>
+              <th data-i18n="lc_peers.requests.col.peer_name">ピア名</th>
+              <th data-i18n="lc_peers.requests.col.time">受信時刻</th>
+              <th data-i18n="lc_peers.requests.col.actions">操作</th>
+            </tr>
+          </thead>
+          <tbody id="lcPeersRequestsTbody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        <p id="lcPeersRequestsEmpty" class="lc-peers-empty"
+           data-i18n="lc_peers.requests.empty">承認待ちのペアリングリクエストはありません</p>
+      </div>
+    </section>
+
+    <!-- ── Section 2: Connected peers ── -->
+    <section class="lc-peers-section" id="lcPeersPeersSection">
+      <div class="lc-peers-section-header">
+        <h2 data-i18n="lc_peers.peers.title">接続ピア一覧</h2>
+        <button type="button" class="lc-peers-btn" data-action="lc-peers-refresh-peers"
+                data-i18n="lc_peers.peers.refresh">更新</button>
+      </div>
+
+      <div class="lc-peers-table-wrap">
+        <table class="lc-peers-table" id="lcPeersPeersTable" hidden>
+          <thead>
+            <tr>
+              <th data-i18n="lc_peers.peers.col.name">ピア名</th>
+              <th data-i18n="lc_peers.peers.col.address">アドレス</th>
+              <th data-i18n="lc_peers.peers.col.status">ステータス</th>
+              <th data-i18n="lc_peers.peers.col.token_expires">トークン有効期限</th>
+              <th data-i18n="lc_peers.peers.col.actions">操作</th>
+            </tr>
+          </thead>
+          <tbody id="lcPeersPeersTbody">
+            <!-- Populated by JS -->
+          </tbody>
+        </table>
+        <p id="lcPeersPeersEmpty" class="lc-peers-empty"
+           data-i18n="lc_peers.peers.empty">接続されているピアがありません</p>
+      </div>
+    </section>
+
+    <!-- ── Section 3: Fleet settings ── -->
+    <section class="lc-peers-section" id="lcPeersFleetSection">
+      <div class="lc-peers-section-header">
+        <h2 data-i18n="lc_peers.fleet.title">Fleet 設定</h2>
+      </div>
+      <div class="lc-peers-fleet-form">
+        <label class="lc-peers-fleet-row">
+          <span class="lc-peers-fleet-label">
+            <span data-i18n="lc_peers.fleet.chief_label">Fleet 管理ノード (Chief)</span>
+            <span class="lc-peers-fleet-hint" data-i18n="lc_peers.fleet.chief_hint">
+              有効にすると Fleet Admin ページが使用可能になり、他ノードを管理できます
+            </span>
+          </span>
+          <input type="checkbox" id="lcFleetChiefToggle" name="fleet_chief">
+        </label>
+        <div id="lcFleetSaveStatus" class="lc-peers-fleet-status" hidden></div>
+        <div id="lcFleetAdminLinkRow" class="lc-peers-fleet-status" hidden>
+          <a id="lcFleetAdminLinkPeers" href="/ext/lan_cowork/fleet/ui"
+             data-i18n="lc_peers.fleet.open_admin">Fleet Admin を開く →</a>
+        </div>
+        <div class="lc-peers-fleet-hint" style="margin-top:6px;font-size:12px;">
+          <span data-i18n="lc_peers.fleet.perm_section_hint">他のピアにこのノードの再起動・ログ配信を許可するには →</span>
+          <a href="#lcFleetPermissionsSection" data-i18n="lc_peers.fleet.perm_section_link">Fleet 許可</a>
+        </div>
+        <div class="lc-peers-fleet-row" id="lcFleetNotificationRow">
+          <button type="button" id="lcFleetEnableNotifications"
+                  class="lc-peers-btn lc-peers-btn--sm"
+                  data-i18n="lc_peers.fleet.enable_notifications">通知を有効化</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Section 4: Fleet 許可 ── -->
+    <section class="lc-peers-section" id="lcFleetPermissionsSection">
+      <div class="lc-peers-section-header">
+        <h2 data-i18n="lc_peers.fleet_permissions.title">Fleet 許可</h2>
+        <button type="button" id="lcFleetPermRefreshBtn" class="lc-peers-btn lc-peers-btn--sm"
+                data-i18n="lc_peers.fleet_permissions.btn_refresh">更新</button>
+      </div>
+
+      <label class="lc-peers-fleet-row lc-peers-fleet-row--master" id="lcFleetPermMasterRow">
+        <input type="checkbox" id="lcFleetPermMasterSwitch" class="lc-peers-fleet-master-cb">
+        <span class="lc-peers-fleet-label">
+          <span data-i18n="lc_peers.fleet_permissions.master_switch">Fleet 許可を有効にする</span>
+          <span class="lc-peers-fleet-hint"
+                data-i18n="lc_peers.fleet_permissions.master_switch_help">
+            OFFにすると下表の設定に関わらず全ピアからの操作を一括拒否
+          </span>
+        </span>
+        <span id="lcFleetPermMasterOffBadge" hidden
+              style="font-size:12px;color:#e88000;font-weight:600;white-space:nowrap;margin-left:auto;"
+              data-i18n="lc_peers.fleet_permissions.master_off_badge">⚠ 現在OFF（全拒否中）</span>
+      </label>
+
+      <div class="lc-peers-table-wrap" id="lcFleetPermTableWrap">
+        <table class="lc-peers-table" id="lcFleetPermTable">
+          <thead>
+            <tr>
+              <th data-i18n="lc_peers.fleet_permissions.col_peer">ピア</th>
+              <th data-i18n="lc_peers.fleet_permissions.col_restart">再起動</th>
+              <th data-i18n="lc_peers.fleet_permissions.col_update">更新+再起動</th>
+              <th data-i18n="lc_peers.fleet_permissions.col_log_stream">ログ配信</th>
+            </tr>
+          </thead>
+          <tbody id="lcFleetPermTbody"></tbody>
+        </table>
+        <p id="lcFleetPermEmpty" class="lc-empty" hidden
+           data-i18n="lc_peers.fleet_permissions.empty">
+          ペアリング済みのピアがありません。先に「接続ピア」セクションでペアリングしてください。
+        </p>
+        <a id="lcFleetPermEmptyLink" href="#lcPeersRequestsSection" hidden
+           class="lc-peers-fleet-hint" style="font-size:12px;">
+          ↑ 接続ピアセクションへ
+        </a>
+      </div>
+
+      <div class="lc-peers-fleet-row" style="margin-top:8px;">
+        <small class="lc-peers-fleet-hint"
+               data-i18n="lc_peers.fleet_permissions.note_update_includes_restart">
+          更新+再起動を許可すると再起動も自動的に許可されます
+        </small>
+      </div>
+
+      <div class="lc-peers-fleet-row" style="margin-top:12px;gap:8px;">
+        <button type="button" id="lcFleetPermSaveBtn"
+                class="lc-peers-btn lc-peers-btn-primary"
+                data-i18n="lc_peers.fleet_permissions.btn_save">保存</button>
+        <span id="lcFleetPermSaveStatus" class="lc-peers-fleet-status" hidden></span>
+      </div>
+    </section>
+
+    <!-- ── Section 5: 自分の権限 ── -->
+    <section class="lc-peers-section" id="lcMyPermissionsSection">
+      <div class="lc-peers-section-header">
+        <h2 data-i18n="lc_peers.my_permissions.title">自分の権限</h2>
+        <button type="button" id="lcMyPermRefreshBtn" class="lc-peers-btn lc-peers-btn--sm"
+                data-i18n="lc_peers.my_permissions.btn_refresh">更新</button>
+      </div>
+      <p class="lc-peers-fleet-hint"
+         data-i18n="lc_peers.my_permissions.description">
+        リモートピアがこのノードに対して許可している操作
+      </p>
+      <p class="lc-peers-fleet-hint" style="margin-bottom:8px;"
+         data-i18n="lc_peers.my_permissions.hint">
+        変更はリモートノードの「Fleet 許可」セクションから行ってください
+      </p>
+
+      <div class="lc-peers-table-wrap">
+        <table class="lc-peers-table" id="lcMyPermTable">
+          <thead>
+            <tr>
+              <th data-i18n="lc_peers.fleet_permissions.col_peer">ピア</th>
+              <th data-i18n="lc_peers.fleet_permissions.col_restart">再起動</th>
+              <th data-i18n="lc_peers.fleet_permissions.col_update">更新+再起動</th>
+              <th data-i18n="lc_peers.fleet_permissions.col_log_stream">ログ配信</th>
+            </tr>
+          </thead>
+          <tbody id="lcMyPermTbody"></tbody>
+        </table>
+        <p id="lcMyPermEmpty" class="lc-empty" hidden
+           data-i18n="lc_peers.my_permissions.empty">
+          ペアリング済みのピアがありません。先に「接続ピア」セクションでペアリングしてください。
+        </p>
+        <a id="lcMyPermEmptyLink" href="#lcPeersRequestsSection" hidden
+           class="lc-peers-fleet-hint" style="font-size:12px;">
+          ↑ 接続ピアセクションへ
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Pairing modal ── -->
+  <div id="lcPeersPairModal" class="lc-peers-modal-overlay" role="dialog"
+       aria-modal="true" aria-labelledby="lcPeersPairModalTitle">
+    <div class="lc-peers-modal">
+      <h3 id="lcPeersPairModalTitle" data-i18n="lc_peers.pair_modal.title">ペアリング</h3>
+
+      <!-- Step 1: sending request -->
+      <div id="lcPeersPairStep1" class="lc-peers-modal-step active">
+        <p class="lc-peers-modal-msg" data-i18n="lc_peers.pair_modal.step1.msg">
+          ペアリングリクエストを送信中...
+        </p>
+        <div class="lc-peers-modal-actions">
+          <button type="button" class="lc-peers-btn" data-action="lc-peers-pair-cancel"
+                  data-i18n="lc_peers.pair_modal.cancel">キャンセル</button>
+        </div>
+      </div>
+
+      <!-- Step 2: PIN entry -->
+      <div id="lcPeersPairStep2" class="lc-peers-modal-step">
+        <p id="lcPeersPairStep2Msg" class="lc-peers-modal-msg" data-i18n="lc_peers.pair_modal.step2.msg">
+          相手のホストで PIN を承認してから、表示された PIN を入力してください。
+        </p>
+        <div id="lcPeersPairSas" class="lc-peers-sas-box" hidden>
+          <span class="lc-peers-sas-label">認証コード</span>
+          <span id="lcPeersPairSasCode" class="lc-peers-sas-code"></span>
+          <span class="lc-peers-sas-label">↑ このコードを相手ノードの管理者に確認してもらってください</span>
+        </div>
+        <form id="lcPeersPinForm" autocomplete="off">
+          <div class="lc-peers-pin-field">
+            <label for="lcPeersPinInput" data-i18n="lc_peers.pair_modal.pin.label">PIN（8桁）</label>
+            <input type="password" id="lcPeersPinInput" name="pin"
+                   class="lc-peers-pin-input" maxlength="8"
+                   inputmode="numeric" pattern="[0-9]{8}"
+                   autocomplete="one-time-code"
+                   placeholder="••••••••"
+                   data-i18n-placeholder="lc_peers.pair_modal.pin.placeholder">
+          </div>
+          <div id="lcPeersPinError" class="lc-peers-error"
+               data-i18n="lc_peers.pair_modal.pin.error.invalid">PIN が正しくありません</div>
+          <!-- Fleet permission grant (shown only in approve flow) -->
+          <div id="lcPeersPairFleetPerms" hidden
+               style="margin:12px 0 4px;padding:10px 12px;background:var(--bg-secondary,#f5f5f5);border-radius:6px;">
+            <p style="margin:0 0 8px;font-size:13px;font-weight:600;"
+               data-i18n="lc_peers.pair_modal.fleet_perms.title">このピアへの Fleet 操作を許可する（任意）</p>
+            <label style="display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:13px;">
+              <input type="checkbox" id="lcPeersPairGrantRestart" checked>
+              <span data-i18n="lc_peers.pair_modal.fleet_perms.restart">再起動を許可</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;font-size:13px;">
+              <input type="checkbox" id="lcPeersPairGrantLog" checked>
+              <span data-i18n="lc_peers.pair_modal.fleet_perms.log_stream">ログ配信を許可</span>
+            </label>
+          </div>
+          <div class="lc-peers-modal-actions">
+            <button type="button" id="lcPeersPinCancel" class="lc-peers-btn" data-action="lc-peers-pair-cancel"
+                    data-i18n="lc_peers.pair_modal.cancel">キャンセル</button>
+            <button type="submit" id="lcPeersPinConfirm" class="lc-peers-btn lc-peers-btn-primary"
+                    data-action="lc-peers-pin-confirm"
+                    data-i18n="lc_peers.pair_modal.confirm">確認</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Step 3: success -->
+      <div id="lcPeersPairStep3" class="lc-peers-modal-step">
+        <p class="lc-peers-modal-msg" data-i18n="lc_peers.pair_modal.step3.msg">
+          ペアリングが完了しました。
+        </p>
+        <div class="lc-peers-modal-actions">
+          <button type="button" class="lc-peers-btn lc-peers-btn-primary"
+                  data-action="lc-peers-pair-done"
+                  data-i18n="lc_peers.pair_modal.done">閉じる</button>
+        </div>
+      </div>
+
+      <!-- Generic error display -->
+      <div id="lcPeersPairError" class="lc-peers-error"
+           data-i18n="lc_peers.pair_modal.error.generic">エラーが発生しました</div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <script nonce="{{ csp_nonce }}" type="module" src="/static/dist/lan-cowork-app.js?v=20260428c"></script>
+</body>
+</html>

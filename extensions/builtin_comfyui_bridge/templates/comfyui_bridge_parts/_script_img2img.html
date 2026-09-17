@@ -1,0 +1,101 @@
+<script nonce="{{ csp_nonce }}">
+  // -- img2img ---------------------------------------------------------
+
+  // Sibling <script> tags don't share scope with _script.html's IIFE,
+  // so re-declare the $ shorthand here.
+  function $(id) { return document.getElementById(id); }
+
+  var _cfbImg2ImgData = null;
+
+  function cfbUpdateImg2ImgStatus() {
+    var el = $("cfbImg2ImgStatus");
+    if (el) {
+      el.textContent = _cfbImg2ImgData
+        ? "(" + window.tr('comfyui_bridge.img2img_one_image', '1 image') + ")"
+        : "";
+    }
+  }
+
+  function cfbToggleSizeInputs(disabled) {
+    var w = $("cfbWidth"), h = $("cfbHeight");
+    if (w) w.disabled = disabled;
+    if (h) h.disabled = disabled;
+  }
+
+  function cfbSyncDenoise(srcId, dstId) {
+    var src = $(srcId), dst = $(dstId);
+    if (!src || !dst) return;
+    src.addEventListener("input", function() { dst.value = src.value; });
+  }
+
+  window.cfbSetImg2ImgFile = function(file) {
+    if (!file || !file.type.startsWith("image/")) return;
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      _cfbImg2ImgData = dataUrl.replace(/^data:image\/[^;]+;base64,/, "");
+      $("cfbImg2ImgImg").src = dataUrl;
+      $("cfbImg2ImgPlaceholder").style.display = "none";
+      $("cfbImg2ImgPreview").style.display = "";
+      cfbUpdateImg2ImgStatus();
+      cfbToggleSizeInputs(true);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.cfbClearImg2Img = function() {
+    _cfbImg2ImgData = null;
+    var img = $("cfbImg2ImgImg");
+    if (img) img.src = "";
+    var ph = $("cfbImg2ImgPlaceholder");
+    if (ph) ph.style.display = "";
+    var pv = $("cfbImg2ImgPreview");
+    if (pv) pv.style.display = "none";
+    var f = $("cfbImg2ImgFile");
+    if (f) f.value = "";
+    cfbUpdateImg2ImgStatus();
+    cfbToggleSizeInputs(false);
+  };
+
+  // Called by cfb generate handler in _script_generate.html
+  window.cfbCollectImg2Img = function() {
+    if (!_cfbImg2ImgData) return null;
+    var dn = parseFloat(($("cfbDenoise") || {}).value);
+    if (isNaN(dn)) dn = 0.75;
+    return { image_base64: _cfbImg2ImgData, denoise: dn };
+  };
+
+  // -- Drag & drop ----------------------------------------------------
+
+  (function() {
+    var drop = $("cfbImg2ImgDrop");
+    if (!drop) return;
+
+    drop.addEventListener("dragover", function(e) {
+      e.preventDefault();
+      drop.classList.add("dragover");
+    });
+    drop.addEventListener("dragleave", function() {
+      drop.classList.remove("dragover");
+    });
+    drop.addEventListener("drop", function(e) {
+      e.preventDefault();
+      drop.classList.remove("dragover");
+      var files = e.dataTransfer && e.dataTransfer.files;
+      if (files && files.length > 0) {
+        cfbSetImg2ImgFile(files[0]);
+      }
+    });
+
+    var fileInput = $("cfbImg2ImgFile");
+    if (fileInput) {
+      fileInput.addEventListener("change", function(e) {
+        var f = e.target.files && e.target.files[0];
+        if (f) cfbSetImg2ImgFile(f);
+      });
+    }
+
+    cfbSyncDenoise("cfbDenoise", "cfbDenoiseNum");
+    cfbSyncDenoise("cfbDenoiseNum", "cfbDenoise");
+  })();
+</script>

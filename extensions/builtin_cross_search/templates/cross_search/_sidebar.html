@@ -1,0 +1,55 @@
+<div class="cxs-sidebar" id="cxsSidebar">
+  <div class="cxs-sidebar-header">
+    <input type="text" class="cxs-search-input" id="cxsSearch"
+           placeholder="横断検索..." data-i18n-placeholder="cross_search.search_placeholder" autocomplete="off" aria-label="横断テキスト検索" data-i18n-aria-label="cross_search.search_aria">
+    <div class="cxs-target-row" id="cxsTargetRow">
+      <label class="cxs-target-chk"><input type="checkbox" value="md" checked> MD</label>
+      <label class="cxs-target-chk"><input type="checkbox" value="chat" checked> Chat</label>
+      <label class="cxs-target-chk"><input type="checkbox" value="prompt" checked> Prompt</label>
+      <label class="cxs-target-chk"><input type="checkbox" value="txt" checked> Doc</label>
+    </div>
+  </div>
+
+  <!-- Scan directory management -->
+  <div class="cxs-roots-section">
+    <div class="cxs-roots-header" id="cxsRootsToggle" role="button" tabindex="0"
+         aria-expanded="false" aria-controls="cxsRootsBody">
+      <span class="cxs-roots-arrow" id="cxsRootsArrow" aria-hidden="true">&#9654;</span>
+      <span data-i18n="cross_search.scan_directories">スキャンディレクトリ</span>
+      <span class="cxs-roots-count" id="cxsRootsCount">0</span>
+    </div>
+    <div class="cxs-roots-body" id="cxsRootsBody" style="display:none" aria-hidden="true">
+      <div class="cxs-roots-list" id="cxsRootsList"></div>
+      <div class="cxs-roots-actions">
+        <button class="cxs-btn cxs-btn-sm" id="cxsRootBrowse"
+                title="OS ダイアログでフォルダを選択" data-i18n-title="cross_search.browse_folder_title" aria-label="フォルダ選択ダイアログを開く" data-i18n-aria-label="cross_search.browse_folder_aria" data-i18n="cross_search.browse_folder">+ フォルダ選択</button>
+        <button class="cxs-btn cxs-btn-sm" id="cxsRootManual"
+                title="パスを手入力で追加" data-i18n-title="cross_search.manual_input_title" aria-label="パスを手入力で追加" data-i18n-aria-label="cross_search.manual_input_aria" data-i18n="cross_search.manual_input">+ 手入力</button>
+      </div>
+      <div class="cxs-roots-input-row" id="cxsRootInputRow" style="display:none" aria-hidden="true">
+        <input type="text" class="cxs-roots-input" id="cxsRootInput"
+               placeholder="パスを入力..." data-i18n-placeholder="cross_search.path_input_placeholder" autocomplete="off" aria-label="ディレクトリパスを入力" data-i18n-aria-label="cross_search.path_input_aria">
+        <button class="cxs-btn cxs-btn-sm cxs-btn-primary" id="cxsRootInputOk" aria-label="パスを追加" data-i18n-aria-label="cross_search.add_path_aria" data-i18n="cross_search.add">追加</button>
+        <button class="cxs-btn cxs-btn-sm" id="cxsRootInputCancel" aria-label="入力を取り消す" data-i18n-aria-label="cross_search.cancel_input_aria" data-i18n="cross_search.cancel_input">取消</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cxs-sidebar-actions">
+    <button class="cxs-btn cxs-btn-sm" id="cxsScanBtn" title="ドキュメントファイルをスキャン" data-i18n-title="cross_search.scan_title" aria-label="ドキュメントファイルをスキャン" data-i18n-aria-label="cross_search.scan_aria" data-i18n="cross_search.scan">Scan</button>
+    <span class="cxs-result-count" id="cxsResultCount" data-i18n="cross_search.result_count">0 件</span>
+  </div>
+  <div class="cxs-scan-bar" id="cxsScanBar">
+    <div class="cxs-scan-top-row">
+      <span id="cxsScanMsg" data-i18n="cross_search.scanning">スキャン中...</span>
+      <button class="cxs-scan-stop-btn" id="cxsScanStop" title="スキャン中止" data-i18n-title="cross_search.stop_scan_title" aria-label="スキャン中止" data-i18n-aria-label="cross_search.stop_scan_aria">&times;</button>
+    </div>
+    <div class="cxs-scan-progress">
+      <div class="cxs-scan-progress-fill" id="cxsScanFill"></div>
+    </div>
+    <div class="cxs-scan-detail" id="cxsScanDetail"></div>
+  </div>
+  <div class="cxs-result-list" id="cxsResultList">
+    <div class="cxs-placeholder" data-i18n="cross_search.enter_keyword">検索キーワードを入力してください</div>
+  </div>
+</div>

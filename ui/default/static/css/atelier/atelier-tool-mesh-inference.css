@@ -1,0 +1,104 @@
+/*
+ * Atelier System (γ) — mesh_inference.html
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool.
+ */
+
+/* ----- Header h1 polish ----- */
+
+body.theme-atelier-light.atelier-tool .mi-header h1,
+body.theme-atelier-dark.atelier-tool .mi-header h1 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 28px;
+  line-height: 1.15;
+  letter-spacing: -0.005em;
+  color: var(--text);
+  margin: 4px 0 16px;
+}
+
+body.theme-atelier-light.atelier-tool .mi-subtitle,
+body.theme-atelier-dark.atelier-tool .mi-subtitle {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  color: var(--text-muted);
+  margin: 0 0 var(--space-3);
+}
+
+/* ----- Toolbar / matrix ----- */
+
+body.theme-atelier-light.atelier-tool .mi-toolbar,
+body.theme-atelier-dark.atelier-tool .mi-toolbar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  margin-bottom: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .mi-matrix-wrap,
+body.theme-atelier-dark.atelier-tool .mi-matrix-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .mi-matrix,
+body.theme-atelier-dark.atelier-tool .mi-matrix {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  border-collapse: collapse;
+}
+
+body.theme-atelier-light.atelier-tool .mi-matrix th,
+body.theme-atelier-dark.atelier-tool .mi-matrix th {
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font-size: var(--fs-small);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .mi-matrix td,
+body.theme-atelier-dark.atelier-tool .mi-matrix td {
+  border-bottom: 1px solid var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .mi-row-local,
+body.theme-atelier-dark.atelier-tool .mi-row-local {
+  background: color-mix(in srgb, var(--accent-warm) 8%, var(--surface));
+}
+
+/* ----- Badges / cells ----- */
+
+body.theme-atelier-light.atelier-tool .mi-badge-online,
+body.theme-atelier-dark.atelier-tool .mi-badge-online {
+  background: color-mix(in srgb, var(--accent-tool) 14%, var(--surface));
+  color: var(--accent-tool);
+  border: 1px solid color-mix(in srgb, var(--accent-tool) 35%, var(--border));
+}
+
+body.theme-atelier-light.atelier-tool .mi-badge-offline,
+body.theme-atelier-dark.atelier-tool .mi-badge-offline {
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+
+body.theme-atelier-light.atelier-tool .mi-cell-label,
+body.theme-atelier-dark.atelier-tool .mi-cell-label {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light.atelier-tool .mi-device,
+body.theme-atelier-dark.atelier-tool .mi-device {
+  font-family: var(--font-mono);
+  font-size: var(--fs-small);
+  color: var(--text);
+}

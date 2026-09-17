@@ -1,0 +1,64 @@
+/* File header improvements */
+.file-header {
+  margin-bottom: 15px;
+}
+
+.filename-clickable {
+  cursor: pointer;
+  display: inline-block;
+  transition: color 0.2s;
+  margin-bottom: 8px;
+  max-width: 100%;
+  word-break: break-all;
+  overflow-wrap: anywhere;
+}
+
+.filename-clickable:hover {
+  color: #4caf50;
+  text-decoration: underline;
+}
+
+body.dark .filename-clickable:hover {
+  color: #66bb6a;
+}
+
+.file-path-container {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-size: 13px;
+  color: #666;
+  margin-top: 5px;
+}
+
+body.dark .file-path-container {
+  color: #999;
+}
+
+.file-path-label {
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.file-path-clickable {
+  cursor: pointer;
+  word-break: break-all;
+  transition: all 0.2s;
+  padding: 3px 6px;
+  border-radius: 3px;
+  background: rgba(76, 175, 80, 0.1);
+}
+
+.file-path-clickable:hover {
+  background: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+body.dark .file-path-clickable {
+  background: rgba(102, 187, 106, 0.15);
+}
+
+body.dark .file-path-clickable:hover {
+  background: rgba(102, 187, 106, 0.25);
+  color: #66bb6a;
+}

@@ -1,0 +1,194 @@
+/*
+ * Atelier System (γ) — Stats page (atelier-tool variant) retrofit
+ *
+ * Stats is a data dashboard. Use the atelier-tool density (Inter UI, 13px
+ * body, compact spacing) and let the numeric values stand out via Fraunces
+ * lining figures. Charts and percent bars stay quiet.
+ *
+ * Scoped under body.theme-atelier-{light,dark}.atelier-tool so classic /
+ * dark themes keep pages/stats.css untouched.
+ */
+
+/* ----- Page title ----- */
+
+body.theme-atelier-light.atelier-tool main#main-content > header h1,
+body.theme-atelier-dark.atelier-tool main#main-content > header h1 {
+  margin: 4px 0 16px;
+}
+
+body.theme-atelier-light.atelier-tool main#main-content > header h1 [aria-hidden="true"],
+body.theme-atelier-dark.atelier-tool main#main-content > header h1 [aria-hidden="true"] {
+  font-size: 0.7em;
+  vertical-align: middle;
+  margin-right: 0.25em;
+  opacity: 0.7;
+}
+
+/* ----- Top stat cards ----- */
+
+body.theme-atelier-light.atelier-tool .stats-grid,
+body.theme-atelier-dark.atelier-tool .stats-grid {
+  gap: var(--space-3);
+}
+
+body.theme-atelier-light.atelier-tool .stat-card,
+body.theme-atelier-dark.atelier-tool .stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+}
+
+body.theme-atelier-light.atelier-tool .stat-card h2,
+body.theme-atelier-light.atelier-tool .stat-card h3,
+body.theme-atelier-dark.atelier-tool .stat-card h2,
+body.theme-atelier-dark.atelier-tool .stat-card h3 {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 0 0 var(--space-2);
+}
+
+body.theme-atelier-light.atelier-tool .stat-value,
+body.theme-atelier-dark.atelier-tool .stat-value {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 32px;
+  line-height: 1.05;
+  color: var(--text);
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+
+/* ----- Chart container ----- */
+
+body.theme-atelier-light.atelier-tool .chart-container,
+body.theme-atelier-dark.atelier-tool .chart-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+body.theme-atelier-light.atelier-tool .chart-container h2,
+body.theme-atelier-dark.atelier-tool .chart-container h2 {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 18px;
+  line-height: 1.2;
+  color: var(--text);
+  margin: 0 0 var(--space-3);
+}
+
+/* CSV export button — ghost style */
+body.theme-atelier-light.atelier-tool .stats-csv-btn,
+body.theme-atelier-dark.atelier-tool .stats-csv-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  border-radius: var(--radius-sm);
+  padding: 4px 10px;
+}
+
+body.theme-atelier-light.atelier-tool .stats-csv-btn:hover,
+body.theme-atelier-dark.atelier-tool .stats-csv-btn:hover {
+  background: var(--surface-raised);
+  color: var(--text);
+  border-color: color-mix(in srgb, var(--accent-tool) 40%, var(--border));
+}
+
+/* ----- Time-period bars ----- */
+
+body.theme-atelier-light.atelier-tool .period-label,
+body.theme-atelier-dark.atelier-tool .period-label {
+  font-family: var(--font-ui);
+  font-size: var(--fs-small);
+  color: var(--text-muted);
+}
+
+body.theme-atelier-light.atelier-tool .period-label > :last-child,
+body.theme-atelier-dark.atelier-tool .period-label > :last-child {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+body.theme-atelier-light.atelier-tool .period-bar,
+body.theme-atelier-dark.atelier-tool .period-bar {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  height: 8px;
+}
+
+body.theme-atelier-light.atelier-tool .period-fill,
+body.theme-atelier-dark.atelier-tool .period-fill {
+  background: var(--accent-tool);
+}
+
+/* ----- Personality card ----- */
+
+body.theme-atelier-light.atelier-tool .personality-card,
+body.theme-atelier-dark.atelier-tool .personality-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  padding: var(--space-4);
+  margin-top: var(--space-4);
+}
+
+body.theme-atelier-light.atelier-tool .personality-type,
+body.theme-atelier-dark.atelier-tool .personality-type {
+  font-family: var(--font-display);
+  font-variation-settings: "opsz" var(--opsz-display), "wght" 500;
+  font-size: 22px;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+body.theme-atelier-light.atelier-tool .personality-desc,
+body.theme-atelier-dark.atelier-tool .personality-desc {
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  color: var(--text-muted);
+  margin-top: var(--space-2);
+}
+
+body.theme-atelier-light.atelier-tool .personality-advice,
+body.theme-atelier-dark.atelier-tool .personality-advice {
+  background: var(--surface-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+  margin-top: var(--space-3);
+  padding: var(--space-3);
+}
+
+/* ----- Turning point ----- */
+
+body.theme-atelier-light.atelier-tool .turning-point,
+body.theme-atelier-dark.atelier-tool .turning-point {
+  background: color-mix(in srgb, var(--accent-warm) 14%, var(--surface));
+  border: 1px solid color-mix(in srgb, var(--accent-warm) 50%, var(--border));
+  border-radius: var(--radius-md);
+  font-family: var(--font-ui);
+  font-size: var(--fs-body);
+}
+
+/* ----- Loading text ----- */
+
+body.theme-atelier-light.atelier-tool .loading,
+body.theme-atelier-dark.atelier-tool .loading {
+  font-family: var(--font-ui);
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: var(--fs-body);
+}

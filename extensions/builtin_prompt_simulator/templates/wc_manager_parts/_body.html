@@ -1,0 +1,170 @@
+<div class="wm-container">
+  <!-- Top bar -->
+  <div class="wm-topbar">
+    <h1><span aria-hidden="true">🗂️</span> <span data-wm-i18n="title" data-i18n="wc_manager.title">Wildcard Manager</span></h1>
+    <label class="wm-btn" style="cursor:pointer;">
+      📂 <span class="wm-btn-label" data-wm-i18n="btn_upload_label" data-i18n="wc_manager.btn_upload_label">Upload</span>
+      <input type="file" id="wmFileInput" aria-label="Wildcard files" multiple accept=".txt,.zip" style="display:none;" data-action="wmLoadFiles" data-action-event="change" data-action-this="1">
+    </label>
+    <button class="wm-btn" data-action="wmShowDirConfig">📁 <span class="wm-btn-label" data-wm-i18n="btn_dirs_label" data-i18n="wc_manager.btn_dirs_label">Dirs</span></button>
+    <button class="wm-btn" data-action="wmLoadFromDirs">⬇ <span class="wm-btn-label" data-wm-i18n="btn_load_dirs_label" data-i18n="wc_manager.btn_load_dirs_label">Load</span></button>
+    <a class="wm-btn" href="/ext/prompt-sim/sweep-axes-manager">🎯 <span class="wm-btn-label" data-wm-i18n="btn_sweep_axes_label" data-i18n="wc_manager.btn_sweep_axes_label">Sweep Axes</span></a>
+    <a class="wm-btn" href="/ext/prompt-sim/">← <span class="wm-btn-label" data-wm-i18n="btn_back_label" data-i18n="wc_manager.btn_back_label">Sim</span></a>
+  </div>
+  <!-- Body: sidebar + main -->
+  <div class="wm-body">
+    <!-- Sidebar -->
+    <div class="wm-sidebar" role="complementary" aria-label="Wildcard list" data-i18n-aria-label="wc_manager.sidebar_aria_label">
+      <div class="wm-filter">
+        <input class="wm-input wm-filter-input" type="search" id="wmFilter" placeholder="Filter wildcards..." data-action="wmRenderTree" data-action-event="input" data-wm-i18n-attr="placeholder:filter_placeholder" data-i18n-placeholder="wc_manager.filter_placeholder" aria-label="Filter wildcards" data-i18n-aria-label="wc_manager.filter_aria_label">
+      </div>
+      <div class="wm-tree" id="wmTree" role="list" aria-label="Wildcards" data-i18n-aria-label="wc_manager.tree_aria_label" aria-busy="true"></div>
+      <div class="wm-sidebar-footer">
+        <span id="wmTotalCount">0</span> <span data-wm-i18n="wildcards_label" data-i18n="wc_manager.wildcards_label">wildcards</span>
+        &nbsp;|&nbsp;
+        <button class="wm-btn-sm" data-action="wmCreateNew" data-wm-i18n="btn_new" data-i18n="wc_manager.btn_new">+ New</button>
+        <button class="wm-btn-sm danger" data-action="wmClearAll" data-wm-i18n="btn_clear_all" data-i18n="wc_manager.btn_clear_all">Clear All</button>
+      </div>
+    </div>
+    <!-- Main editor panel -->
+    <div class="wm-main">
+      <div id="wmEmptyHint" class="wm-main-empty" data-wm-i18n="select_hint" data-i18n="wc_manager.select_hint">Select a wildcard to edit</div>
+      <div id="wmEditor" class="wm-editor" style="display:none;">
+        <div class="wm-editor-header">
+          <code id="wmEditorName" class="wm-editor-name" tabindex="0" role="button" data-wm-i18n-attr="title:rename_tip" data-i18n-title="wc_manager.rename_tip"></code>
+          <span class="wm-count" id="wmEditorCount"></span>
+          <span style="flex:1;"></span>
+          <button class="wm-btn-sm danger" data-action="wmDeleteSelected" data-wm-editable data-wm-i18n="btn_delete" data-i18n="wc_manager.btn_delete">Delete</button>
+        </div>
+        <div id="wmYamlHint" class="wm-yaml-hint" style="display:none;" data-i18n="wc_manager.yaml_readonly_hint">
+          🔒 YAML wildcard — edit the source file directly
+        </div>
+        <!-- Editor toolbar -->
+        <div class="wm-editor-toolbar">
+          <button class="wm-btn-sm" data-action="wmShowReplace" data-wm-editable data-wm-i18n="btn_replace" data-i18n="wc_manager.btn_replace">🔍 Replace</button>
+          <button class="wm-btn-sm" data-action="wmSortEntries" data-wm-editable data-wm-i18n="btn_sort" data-wm-i18n-attr="title:sort_tip" title="Shift+click: case-sensitive" data-i18n="wc_manager.btn_sort" data-i18n-title="wc_manager.sort_tip">↕ Sort</button>
+          <button class="wm-btn-sm" data-action="wmToggleSed" data-wm-editable data-wm-i18n="btn_sed" data-i18n="wc_manager.btn_sed">sed</button>
+          <button class="wm-btn-sm" data-action="wmToggleGotoLine" data-wm-i18n="btn_goto" data-i18n="wc_manager.btn_goto">Ln</button>
+        </div>
+        <!-- Replace bar -->
+        <div id="wmReplaceBar" class="wm-tool-bar" style="display:none;">
+          <div class="wm-tool-row">
+            <input class="wm-input" id="wmFindInput" type="text" placeholder="Find..." data-wm-i18n-attr="placeholder:find_placeholder" data-i18n-placeholder="wc_manager.find_placeholder" data-action="wmCountMatches" data-action-event="input" aria-label="Find text" data-i18n-aria-label="wc_manager.find_aria_label">
+            <input class="wm-input" id="wmReplaceInput" type="text" placeholder="Replace..." data-wm-i18n-attr="placeholder:replace_placeholder" data-i18n-placeholder="wc_manager.replace_placeholder" aria-label="Replace text" data-i18n-aria-label="wc_manager.replace_aria_label">
+            <label class="wm-case-pill" title="Case sensitive" data-i18n-title="wc_manager.case_sensitive_title">
+              <input type="checkbox" id="wmCaseSensitive" checked aria-label="Case sensitive" data-action="wmCountMatches" data-action-event="change"> <span>Aa</span>
+            </label>
+          </div>
+          <div class="wm-tool-row">
+            <button class="wm-btn-sm" data-action="wmReplaceNext" data-wm-i18n="btn_replace_next" data-i18n="wc_manager.btn_replace_next">Replace</button>
+            <button class="wm-btn-sm" data-action="wmReplaceAll" data-wm-i18n="btn_replace_all" data-i18n="wc_manager.btn_replace_all">Replace All</button>
+            <span id="wmReplaceCount" style="font-size:11px;color:var(--muted,#aab2c0);"></span>
+            <span style="flex:1;"></span>
+            <button class="wm-btn-sm" data-action="wmHideReplace" aria-label="Close" data-i18n-aria-label="wc_manager.btn_close_aria">✕</button>
+          </div>
+        </div>
+        <!-- Sed bar -->
+        <div id="wmSedBar" class="wm-tool-bar" style="display:none;">
+          <div class="wm-tool-row">
+            <code style="color:#e67e22;font-size:12px;">sed</code>
+            <input class="wm-input" id="wmSedInput" type="text" placeholder="s/pattern/replacement/gi" data-wm-i18n-attr="placeholder:sed_placeholder" data-i18n-placeholder="wc_manager.sed_placeholder" aria-label="sed expression" data-i18n-aria-label="wc_manager.sed_aria_label"
+                   data-action-enter="wmExecSed">
+            <button class="wm-btn-sm" data-action="wmExecSed" data-i18n="wc_manager.btn_run">Run</button>
+            <button class="wm-btn-sm" data-action="wmShowSedRef" title="Reference" data-i18n-title="wc_manager.sed_ref_btn_title">?</button>
+            <button class="wm-btn-sm" data-action="wmHideSed" aria-label="Close" data-i18n-aria-label="wc_manager.btn_close_aria">✕</button>
+          </div>
+        </div>
+        <!-- Go to Line bar -->
+        <div id="wmGotoBar" class="wm-tool-bar" style="display:none;">
+          <div class="wm-tool-row">
+            <span style="font-size:11px;color:var(--muted,#aab2c0);" data-wm-i18n="goto_label" data-i18n="wc_manager.goto_label">Go to Line:</span>
+            <input class="wm-input" id="wmGotoInput" type="number" min="1" placeholder="123" aria-label="Go to line number" data-i18n-aria-label="wc_manager.goto_aria_label"
+                   data-action-enter="wmGotoLine">
+            <button class="wm-btn-sm" data-action="wmGotoLine" data-i18n="wc_manager.btn_go">Go</button>
+            <span style="flex:1;"></span>
+            <button class="wm-btn-sm" data-action="wmHideGotoLine" aria-label="Close" data-i18n-aria-label="wc_manager.btn_close_aria">✕</button>
+          </div>
+        </div>
+        <div id="wmEditorContainer"></div>
+        <div class="wm-editor-actions">
+          <span id="wmLineInfo" style="font-size:11px;color:var(--muted,#aab2c0);">Ln 1, Col 1</span>
+          <span style="flex:1;"></span>
+          <button class="wm-btn primary" data-action="wmSave" data-wm-editable data-wm-i18n="btn_save" data-i18n="wc_manager.btn_save">Save</button>
+          <button class="wm-btn" data-action="wmAddEntry" data-wm-editable data-wm-i18n="btn_add_entry" data-i18n="wc_manager.btn_add_entry">+ Add Entry</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Dir config modal -->
+<div class="wm-overlay" id="wmDirOverlay" data-action="wmHideDirConfig" data-action-self="1" role="dialog" aria-modal="true" aria-labelledby="wmDirTitle">
+  <div class="wm-modal">
+    <h2 id="wmDirTitle" style="font-size:16px;" data-wm-i18n="dir_title" data-i18n="wc_manager.dir_title">Wildcard Directories</h2>
+    <div id="wmDirList" style="margin-bottom:10px;"></div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <button class="wm-btn" data-action="wmBrowseDir" data-wm-i18n="btn_dir_browse" title="Browse" data-i18n="wc_manager.btn_dir_browse" data-i18n-title="wc_manager.browse_title">📂</button>
+      <input class="wm-input" type="text" id="wmDirInput" placeholder="/path/to/wildcards" data-i18n-placeholder="wc_manager.dir_path_placeholder" aria-label="Wildcard directory path" data-i18n-aria-label="wc_manager.dir_path_aria_label"
+             data-action-enter="wmAddDir"
+             style="flex:1;">
+      <button class="wm-btn" data-action="wmAddDir" data-wm-i18n="btn_dir_add" data-i18n="wc_manager.btn_dir_add">Add</button>
+    </div>
+    <div style="text-align:right;margin-top:14px;">
+      <button class="wm-btn" data-action="wmHideDirConfig" data-wm-i18n="btn_close" data-i18n="wc_manager.btn_close">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sed reference modal -->
+{% raw %}
+<div class="wm-overlay" id="wmSedRefOverlay" data-action="wmHideSedRef" data-action-self="1" role="dialog" aria-modal="true" aria-labelledby="wmSedRefTitle">
+  <div class="wm-modal wm-sed-ref">
+    <div style="display:flex;align-items:center;margin-bottom:12px;">
+      <h2 id="wmSedRefTitle" style="flex:1;font-size:16px;" data-wm-i18n="sed_ref_title" data-i18n="wc_manager.sed_ref_title">sed Reference</h2>
+      <button class="wm-btn-sm" data-action="wmHideSedRef" aria-label="Close" data-i18n-aria-label="wc_manager.btn_close_aria">✕</button>
+    </div>
+    <div class="wm-sed-ref-body">
+      <table class="wm-sed-ref-table">
+        <thead>
+          <tr><th data-wm-i18n="sed_ref_syntax" data-i18n="wc_manager.sed_ref_syntax">Syntax</th><th data-wm-i18n="sed_ref_desc" data-i18n="wc_manager.sed_ref_desc">Description</th><th data-wm-i18n="sed_ref_example" data-i18n="wc_manager.sed_ref_example">Example</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>s/old/new/flags</code></td><td data-wm-i18n="sed_ref_s" data-i18n="wc_manager.sed_ref_s">Replace — all lines</td><td><code>s/cat/dog/g</code></td></tr>
+          <tr><td><code>/pat/s/old/new/flags</code></td><td data-wm-i18n="sed_ref_addr_s" data-i18n="wc_manager.sed_ref_addr_s">Replace — matching lines only</td><td><code>/^cat/s/,/|/g</code></td></tr>
+          <tr><td><code>/pat/d</code></td><td data-wm-i18n="sed_ref_d" data-i18n="wc_manager.sed_ref_d">Delete matching lines</td><td><code>/^#/d</code></td></tr>
+          <tr><td><code>/pat/!d</code></td><td data-wm-i18n="sed_ref_nd" data-i18n="wc_manager.sed_ref_nd">Keep only matching lines (grep)</td><td><code>/blue/!d</code></td></tr>
+          <tr><td><code>y/src/dst/</code></td><td data-wm-i18n="sed_ref_y" data-i18n="wc_manager.sed_ref_y">Transliterate chars (like tr)</td><td><code>y/ABC/abc/</code></td></tr>
+          <tr><td><code>/pat/a\text</code></td><td data-wm-i18n="sed_ref_a" data-i18n="wc_manager.sed_ref_a">Insert text after matching lines</td><td><code>/header/a\---</code></td></tr>
+          <tr><td><code>/pat/i\text</code></td><td data-wm-i18n="sed_ref_i" data-i18n="wc_manager.sed_ref_i">Insert text before matching lines</td><td><code>/footer/i\---</code></td></tr>
+        </tbody>
+      </table>
+      <h3 style="font-size:14px;" data-wm-i18n="sed_ref_flags_title" data-i18n="wc_manager.sed_ref_flags_title">Flags (s command)</h3>
+      <table class="wm-sed-ref-table">
+        <tbody>
+          <tr><td><code>g</code></td><td data-wm-i18n="sed_ref_flag_g" data-i18n="wc_manager.sed_ref_flag_g">Replace all occurrences in each line</td></tr>
+          <tr><td><code>i</code></td><td data-wm-i18n="sed_ref_flag_i" data-i18n="wc_manager.sed_ref_flag_i">Case-insensitive matching</td></tr>
+        </tbody>
+      </table>
+      <h3 style="font-size:14px;" data-wm-i18n="sed_ref_regex_title" data-i18n="wc_manager.sed_ref_regex_title">Regex (JavaScript RegExp)</h3>
+      <table class="wm-sed-ref-table">
+        <tbody>
+          <tr><td><code>.</code></td><td data-wm-i18n="sed_ref_re_dot" data-i18n="wc_manager.sed_ref_re_dot">Any character</td></tr>
+          <tr><td><code>^</code> <code>$</code></td><td data-wm-i18n="sed_ref_re_anchor" data-i18n="wc_manager.sed_ref_re_anchor">Start / end of line</td></tr>
+          <tr><td><code>*</code> <code>+</code> <code>?</code></td><td data-wm-i18n="sed_ref_re_quant" data-i18n="wc_manager.sed_ref_re_quant">Quantifiers (0+, 1+, 0-1)</td></tr>
+          <tr><td><code>\d</code> <code>\w</code> <code>\s</code></td><td data-wm-i18n="sed_ref_re_class" data-i18n="wc_manager.sed_ref_re_class">Digit, word char, whitespace</td></tr>
+          <tr><td><code>[abc]</code> <code>[^abc]</code></td><td data-wm-i18n="sed_ref_re_set" data-i18n="wc_manager.sed_ref_re_set">Character set / negated set</td></tr>
+          <tr><td><code>(foo|bar)</code></td><td data-wm-i18n="sed_ref_re_alt" data-i18n="wc_manager.sed_ref_re_alt">Alternation & grouping</td></tr>
+          <tr><td><code>\b</code></td><td data-wm-i18n="sed_ref_re_boundary" data-i18n="wc_manager.sed_ref_re_boundary">Word boundary</td></tr>
+          <tr><td><code>(?=pat)</code> <code>(?!pat)</code></td><td data-wm-i18n="sed_ref_re_look" data-i18n="wc_manager.sed_ref_re_look">Lookahead / negative lookahead</td></tr>
+          <tr><td><code>$1</code> <code>$2</code></td><td data-wm-i18n="sed_ref_re_backref" data-i18n="wc_manager.sed_ref_re_backref">Back-reference in replacement</td></tr>
+        </tbody>
+      </table>
+      <h3 style="font-size:14px;" data-wm-i18n="sed_ref_delim_title" data-i18n="wc_manager.sed_ref_delim_title">Delimiter</h3>
+      <p data-wm-i18n="sed_ref_delim_body" data-i18n="wc_manager.sed_ref_delim_body">The character after s or y is the delimiter. Use \/ to include a literal delimiter.</p>
+    </div>
+  </div>
+</div>
+{% endraw %}
+
+<!-- Toast -->
+<div class="wm-toast" id="wmToast" role="status" aria-live="polite" aria-atomic="true"></div>

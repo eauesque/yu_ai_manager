@@ -1,0 +1,90 @@
+/* Toast container — stacks toasts from bottom */
+#toast-container{
+  position: fixed;
+  left: 50%;
+  bottom: 62px;
+  transform: translateX(-50%);
+  z-index: 2000;
+  display: flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  gap: 8px;
+  pointer-events: none;
+  max-width: min(520px, calc(100vw - 24px));
+}
+
+/* Standalone toast singleton (used by pages that don't mount #toast-container).
+   Pin to viewport so it stays visible even when the page is scrolled.
+   Horizontal centering uses left:0 + right:0 + margin:auto so it does not
+   collide with the `.toast.show/.hide` translateY transforms. */
+#toast.toast{
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 62px;
+  margin-left: auto;
+  margin-right: auto;
+  width: fit-content;
+  z-index: 2000;
+}
+
+/* Individual toast */
+.toast{
+  background: rgba(0,0,0,0.78);
+  color: #fff;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 14px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .16s ease, transform .16s ease;
+  max-width: min(520px, calc(100vw - 24px));
+  text-align: center;
+  transform: translateY(8px);
+}
+
+.toast.show{
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: none;
+}
+
+.toast.hide{
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+/* Accordion-style expand button */
+.accordion-btn{
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.accordion-btn:hover{ background: var(--btn-hover); }
+
+.accordion-btn .chev{
+  width: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  opacity: 0.9;
+}
+
+.hidden{ display:none !important; }
+
+/* Interrupted scan toast slide-in */
+@keyframes toast-slide-in {
+  from { opacity: 0; transform: translateX(40px); }
+  to   { opacity: 1; transform: translateX(0); }
+}

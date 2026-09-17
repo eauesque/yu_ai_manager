@@ -1,0 +1,45 @@
+/* Clickable Seed and Model in header */
+.seed-clickable,
+.model-clickable {
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: all 0.2s;
+  display: inline-block;
+}
+
+.seed-clickable {
+  background: rgba(33, 150, 243, 0.1);
+}
+
+.seed-clickable:hover {
+  background: rgba(33, 150, 243, 0.25);
+  color: #2196f3;
+}
+
+body.dark .seed-clickable {
+  background: rgba(66, 165, 245, 0.15);
+}
+
+body.dark .seed-clickable:hover {
+  background: rgba(66, 165, 245, 0.25);
+  color: #42a5f5;
+}
+
+.model-clickable {
+  background: rgba(156, 39, 176, 0.1);
+}
+
+.model-clickable:hover {
+  background: rgba(156, 39, 176, 0.25);
+  color: #9c27b0;
+}
+
+body.dark .model-clickable {
+  background: rgba(186, 104, 200, 0.15);
+}
+
+body.dark .model-clickable:hover {
+  background: rgba(186, 104, 200, 0.25);
+  color: #ba68c8;
+}

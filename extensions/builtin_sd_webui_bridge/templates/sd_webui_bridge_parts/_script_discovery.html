@@ -1,0 +1,228 @@
+<script nonce="{{ csp_nonce }}">
+/* -- SD WebUI Bridge: Discovery Panel (LoRA / Embeddings / Extensions) -- */
+(function() {
+  "use strict";
+
+  var BASE = "/ext/sd-webui";
+  var _activeTab = "lora";
+  var _cache = { lora: null, emb: null, ext: null };
+  // Avoid double-firing fetches when the user toggles tabs while the first
+  // scan is still talking to a slow SD WebUI / Forge backend.
+  var _inflight = { lora: false, emb: false, ext: false };
+
+  function $(id) { return document.getElementById(id); }
+
+  function escHtml(s) {
+    var d = document.createElement("div");
+    d.appendChild(document.createTextNode(s));
+    return d.innerHTML;
+  }
+
+  function insertToPrompt(text) {
+    // Insert at cursor via editor API if available, otherwise append
+    if (typeof _sdwbGetPrompt === "function" && typeof _sdwbSetPrompt === "function") {
+      var current = _sdwbGetPrompt();
+      var sep = (current && !current.endsWith(" ") && !current.endsWith(",") && !current.endsWith("\n")) ? ", " : "";
+      _sdwbSetPrompt(current + sep + text);
+    } else {
+      var ta = $("sdwbPrompt");
+      if (!ta) return;
+      var pos = ta.selectionStart || ta.value.length;
+      var before = ta.value.substring(0, pos);
+      var after = ta.value.substring(pos);
+      var sep = (before && !before.endsWith(" ") && !before.endsWith(",") && !before.endsWith("\n")) ? ", " : "";
+      ta.value = before + sep + text + after;
+      ta.selectionStart = ta.selectionEnd = pos + sep.length + text.length;
+      ta.focus();
+    }
+    if (window.showToast) window.showToast(window.tr("sd_bridge.inserted", "Inserted: ") + text);
+  }
+
+  // -- Tab switching --
+  window.sdwbSwitchDiscTab = function(tab) {
+    _activeTab = tab;
+    var tabs = document.querySelectorAll(".sdwb-disc-tab");
+    tabs.forEach(function(t) {
+      t.classList.toggle("active", t.getAttribute("data-action-arg") === tab);
+    });
+    $("sdwbDiscSearch").value = "";
+    _renderTab();
+  };
+
+  // -- Filter --
+  window.sdwbFilterDiscovery = function() {
+    _renderTab();
+  };
+
+  // -- Load data --
+  window.sdwbLoadDiscovery = function() {
+    _cache = { lora: null, emb: null, ext: null };
+    _inflight = { lora: false, emb: false, ext: false };
+    _loadTab("lora");
+  };
+
+  function _loadTab(tab) {
+    var urls = {
+      lora: BASE + "/api/loras",
+      emb: BASE + "/api/embeddings",
+      ext: BASE + "/api/extensions",
+    };
+    var url = urls[tab];
+    if (!url) return;
+    if (_inflight[tab]) return;
+    _inflight[tab] = true;
+
+    fetch(url).then(function(r) { return r.json(); }).then(function(data) {
+      if (tab === "lora") _cache.lora = (data && data.loras) || [];
+      else if (tab === "emb") _cache.emb = data || { loaded: [], skipped: [] };
+      else if (tab === "ext") _cache.ext = (data && data.extensions) || [];
+
+      if (_activeTab === tab) _renderTab();
+      _updateBadge();
+    }).catch(function() {
+      if (_activeTab === tab) {
+        $("sdwbDiscContent").innerHTML = '<div class="sdwb-disc-empty">Failed to load</div>';
+      }
+    }).then(function() {
+      _inflight[tab] = false;
+    });
+  }
+
+  function _ensureLoaded(tab) {
+    if (_cache[tab] !== null) return;
+    _loadTab(tab);
+  }
+
+  function _updateBadge() {
+    var badge = $("sdwbDiscoveryBadge");
+    if (!badge) return;
+    var parts = [];
+    if (_cache.lora) parts.push(_cache.lora.length + " LoRA");
+    if (_cache.emb) {
+      var embCount = (_cache.emb.loaded || []).length;
+      if (embCount) parts.push(embCount + " Emb");
+    }
+    if (_cache.ext) parts.push(_cache.ext.length + " Ext");
+    badge.textContent = parts.length ? "(" + parts.join(", ") + ")" : "";
+  }
+
+  function _renderTab() {
+    _ensureLoaded(_activeTab);
+    var content = $("sdwbDiscContent");
+    if (!content) return;
+    var q = ($("sdwbDiscSearch").value || "").trim().toLowerCase();
+
+    if (_activeTab === "lora") _renderLoras(content, q);
+    else if (_activeTab === "emb") _renderEmbeddings(content, q);
+    else if (_activeTab === "ext") _renderExtensions(content, q);
+  }
+
+  function _renderLoras(el, q) {
+    var loras = _cache.lora;
+    if (!loras) { el.innerHTML = '<div class="sdwb-disc-empty">Loading...</div>'; return; }
+    if (!loras.length) { el.innerHTML = '<div class="sdwb-disc-empty">No LoRAs found</div>'; return; }
+
+    var filtered = q ? loras.filter(function(l) {
+      return (l.name || "").toLowerCase().indexOf(q) >= 0 || (l.alias || "").toLowerCase().indexOf(q) >= 0;
+    }) : loras;
+
+    if (!filtered.length) { el.innerHTML = '<div class="sdwb-disc-empty">No matches</div>'; return; }
+
+    var html = "";
+    for (var i = 0; i < filtered.length; i++) {
+      var l = filtered[i];
+      var name = escHtml(l.name || "");
+      var alias = l.alias ? escHtml(l.alias) : "";
+      html += '<div class="sdwb-disc-item" data-lora-name="' + escHtml(l.name) + '">';
+      html += '<span class="sdwb-disc-item-name">' + name + '</span>';
+      if (alias && alias !== name) html += '<span class="sdwb-disc-item-alias">' + alias + '</span>';
+      html += '<button class="sdwb-disc-item-insert" type="button">+ Insert</button>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+
+    // Attach click handlers
+    el.querySelectorAll(".sdwb-disc-item").forEach(function(item) {
+      item.querySelector(".sdwb-disc-item-insert").addEventListener("click", function(e) {
+        e.stopPropagation();
+        var loraName = item.getAttribute("data-lora-name");
+        insertToPrompt("<lora:" + loraName + ":1>");
+      });
+      item.addEventListener("click", function() {
+        var loraName = item.getAttribute("data-lora-name");
+        insertToPrompt("<lora:" + loraName + ":1>");
+      });
+    });
+  }
+
+  function _renderEmbeddings(el, q) {
+    var emb = _cache.emb;
+    if (!emb) { el.innerHTML = '<div class="sdwb-disc-empty">Loading...</div>'; return; }
+    var loaded = emb.loaded || [];
+    var skipped = emb.skipped || [];
+    if (!loaded.length && !skipped.length) { el.innerHTML = '<div class="sdwb-disc-empty">No embeddings found</div>'; return; }
+
+    var all = loaded.map(function(n) { return { name: n, loaded: true }; })
+      .concat(skipped.map(function(n) { return { name: n, loaded: false }; }));
+
+    if (q) all = all.filter(function(e) { return e.name.toLowerCase().indexOf(q) >= 0; });
+    if (!all.length) { el.innerHTML = '<div class="sdwb-disc-empty">No matches</div>'; return; }
+
+    var html = "";
+    for (var i = 0; i < all.length; i++) {
+      var e = all[i];
+      html += '<div class="sdwb-disc-item" data-emb-name="' + escHtml(e.name) + '">';
+      html += '<span class="sdwb-disc-item-name">' + escHtml(e.name) + '</span>';
+      html += '<span class="sdwb-disc-item-badge ' + (e.loaded ? "on" : "off") + '">' + (e.loaded ? "loaded" : "skipped") + '</span>';
+      if (e.loaded) html += '<button class="sdwb-disc-item-insert" type="button">+ Insert</button>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+
+    el.querySelectorAll(".sdwb-disc-item").forEach(function(item) {
+      var btn = item.querySelector(".sdwb-disc-item-insert");
+      if (!btn) return;
+      function doInsert(e) {
+        if (e) e.stopPropagation();
+        insertToPrompt(item.getAttribute("data-emb-name"));
+      }
+      btn.addEventListener("click", doInsert);
+      item.addEventListener("click", doInsert);
+    });
+  }
+
+  function _renderExtensions(el, q) {
+    var exts = _cache.ext;
+    if (!exts) { el.innerHTML = '<div class="sdwb-disc-empty">Loading...</div>'; return; }
+    if (!exts.length) { el.innerHTML = '<div class="sdwb-disc-empty">No extensions found</div>'; return; }
+
+    var filtered = q ? exts.filter(function(e) {
+      return (e.name || "").toLowerCase().indexOf(q) >= 0;
+    }) : exts;
+
+    if (!filtered.length) { el.innerHTML = '<div class="sdwb-disc-empty">No matches</div>'; return; }
+
+    var html = "";
+    for (var i = 0; i < filtered.length; i++) {
+      var e = filtered[i];
+      html += '<div class="sdwb-disc-item" style="cursor:default;">';
+      html += '<span class="sdwb-disc-item-name">' + escHtml(e.name || "") + '</span>';
+      if (e.version) html += '<span class="sdwb-disc-item-alias">v' + escHtml(e.version) + '</span>';
+      html += '<span class="sdwb-disc-item-badge ' + (e.enabled ? "on" : "off") + '">' + (e.enabled ? "ON" : "OFF") + '</span>';
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  }
+
+  // Auto-load when connected — hook into sdwbTestConnection success
+  var _origTestConn = window.sdwbTestConnection;
+  if (_origTestConn) {
+    window.sdwbTestConnection = function() {
+      var p = _origTestConn.apply(this, arguments);
+      // Load discovery data after a short delay to let connection settle
+      setTimeout(function() { window.sdwbLoadDiscovery(); }, 500);
+      return p;
+    };
+  }
+})();
+</script>

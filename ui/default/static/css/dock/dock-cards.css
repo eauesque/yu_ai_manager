@@ -1,0 +1,72 @@
+/* Regex cheat dock: cards/body/help link */
+.cheat-body {
+  padding: 12px;
+  padding-right: 12px;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: auto;
+  scroll-snap-type: x proximity;
+  scrollbar-gutter: stable;
+  flex: 1 1 auto;
+  min-height: 160px;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+}
+
+.cheat-item {
+  scroll-snap-align: start;
+  flex: 0 0 240px;
+  min-width: 200px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.6);
+  border-radius: 12px;
+  padding: 10px 10px 9px 10px;
+  color: var(--cheat-text);
+}
+
+body.dark .cheat-item { background: rgba(0, 0, 0, 0.18); }
+.cheat-item b { color: var(--cheat-text); }
+
+.cheat-item code {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  background: var(--cheat-chip-bg);
+  border: 1px solid var(--border);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  color: var(--cheat-text);
+  user-select: text;
+}
+
+.cheat-note {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--cheat-muted);
+}
+
+.help-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
+body.dark .help-link {
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(232, 238, 252, 0.92);
+}

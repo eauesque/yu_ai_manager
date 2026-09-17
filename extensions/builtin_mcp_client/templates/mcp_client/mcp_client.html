@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="mcp_client.title">MCP Client</title>
+  <style>
+    :root { --bg:#1a1a2e; --fg:#e0e0e0; --card:#16213e; --accent:#0f3460;
+            --ok:#4ecca3; --err:#e94560; --warn:#f0a500; --border:#2a2a4a; }
+    @media (prefers-color-scheme: light) {
+      :root { --bg:#f5f5f5; --fg:#1a1a2e; --card:#ffffff; --accent:#e3eaf3;
+              --ok:#2e9e6e; --err:#d03050; --warn:#c08600; --border:#d0d0d0; }
+    }
+    html[data-theme="light"] { --bg:#f5f5f5; --fg:#1a1a2e; --card:#ffffff; --accent:#e3eaf3;
+              --ok:#2e9e6e; --err:#d03050; --warn:#c08600; --border:#d0d0d0; }
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--fg);
+         padding:calc(var(--nav-h,50px) + 24px) 24px 24px;}
+    h1{font-size:1.4rem;margin-bottom:16px;}
+    .toolbar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;}
+    .btn{display:inline-block;padding:10px 20px;border:none;border-radius:6px;cursor:pointer;
+         font-size:.9rem;font-weight:600;transition:opacity .15s;color:#fff;min-height:40px;}
+    .btn:hover{opacity:.85;} .btn:disabled{opacity:.4;cursor:not-allowed;}
+    .btn-primary{background:#4060e0;} .btn-ok{background:var(--ok);color:#111;}
+    .btn-err{background:var(--err);} .btn-sm{padding:6px 12px;font-size:.82rem;min-height:32px;}
+    .btn-muted{background:#555;color:#ccc;}
+    .card{background:var(--card);border-radius:8px;padding:16px;margin-bottom:12px;
+          border:1px solid var(--border);}
+    .card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .card-title{font-size:1rem;font-weight:600;}
+    .badge{display:inline-block;padding:2px 10px;border-radius:10px;font-size:.75rem;font-weight:600;}
+    .badge-connected{background:var(--ok);color:#111;}
+    .badge-disconnected{background:#555;color:#ccc;}
+    .badge-connecting{background:var(--warn);color:#111;}
+    .badge-error{background:var(--err);color:#fff;}
+    .card-meta{font-size:.8rem;color:var(--muted,#aab2c0);margin-bottom:8px;}
+    .card-actions{display:flex;gap:6px;flex-wrap:wrap;}
+    .tools-list{margin-top:8px;font-size:.82rem;}
+    .tools-list summary{cursor:pointer;font-weight:600;margin-bottom:4px;}
+    .tool-item{padding:4px 8px;border-bottom:1px solid rgba(128,128,128,.1);font-family:monospace;font-size:.78rem;}
+    .tool-desc{color:var(--muted,#aab2c0);font-family:sans-serif;}
+    .error-text{color:var(--err);font-size:.82rem;margin-top:4px;}
+    /* modal */
+    .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;
+                   align-items:center;justify-content:center;}
+    .modal-overlay.active{display:flex;}
+    .modal{background:var(--card);border-radius:10px;padding:24px;width:min(560px,90vw);
+           max-height:85vh;overflow-y:auto;border:1px solid var(--border);}
+    .modal h2{font-size:1.1rem;margin-bottom:16px;}
+    .form-group{margin-bottom:12px;}
+    .form-group label{display:block;font-size:.82rem;font-weight:600;margin-bottom:4px;}
+    .form-group input,.form-group select,.form-group textarea{
+      width:100%;padding:8px;border-radius:6px;border:1px solid var(--border);
+      background:var(--bg);color:var(--fg);font-size:.85rem;font-family:monospace;}
+    .form-group textarea{min-height:60px;resize:vertical;}
+    .form-row{display:flex;gap:12px;}
+    .form-row .form-group{flex:1;}
+    .modal-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:16px;}
+    .transport-fields{display:none;} .transport-fields.active{display:block;}
+    #empty-msg{text-align:center;color:var(--muted,#aab2c0);padding:40px 0;}
+  </style>
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="main-content">
+    <h1 data-i18n="mcp_client.title">MCP Client</h1>
+    <div class="toolbar">
+      <button class="btn btn-primary" data-action="openAddModal" data-i18n="mcp_client.add_connection">+ Add Connection</button>
+      <button class="btn btn-sm btn-ok" id="btn-refresh" data-action="refresh" data-i18n="mcp_client.refresh">Refresh</button>
+    </div>
+    <div id="conn-list"></div>
+    <div id="empty-msg" style="display:none;" data-i18n="mcp_client.empty_message">No connections configured. Click "Add Connection" to get started.</div>
+  </main>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal-overlay" id="modal-overlay" data-action="onOverlayClick" data-action-arg="">
+    <div class="modal">
+      <h2 id="modal-title" data-i18n="mcp_client.add_connection_title">Add Connection</h2>
+      <input type="hidden" id="edit-id" value="">
+      <div class="form-group">
+        <label for="f-name" data-i18n="mcp_client.label_name">Name</label>
+        <input id="f-name" placeholder="e.g. Local Ollama" data-i18n-placeholder="mcp_client.name_placeholder">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="f-transport" data-i18n="mcp_client.label_transport">Transport</label>
+          <select id="f-transport" aria-label="Transport type" data-action="showTransportFields" data-action-event="change">
+            <option value="stdio" data-i18n="mcp_client.transport_stdio">stdio</option>
+            <option value="sse" data-i18n="mcp_client.transport_sse">SSE</option>
+            <option value="streamable_http" data-i18n="mcp_client.transport_streamable_http">Streamable HTTP</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label style="display:flex;align-items:center;gap:6px;">
+            <input type="checkbox" id="f-auto-connect" aria-label="Auto-connect on startup" style="width:auto;">
+            <span data-i18n="mcp_client.auto_connect">Auto-connect on startup</span>
+          </label>
+        </div>
+      </div>
+      <!-- stdio fields -->
+      <div class="transport-fields active" id="tf-stdio">
+        <div class="form-group"><label for="f-stdio-cmd" data-i18n="mcp_client.label_command">Command</label><input id="f-stdio-cmd" placeholder="python -m my_server" data-i18n-placeholder="mcp_client.command_placeholder"></div>
+        <div class="form-group"><label for="f-stdio-args" data-i18n="mcp_client.label_args">Args (JSON array)</label><input id="f-stdio-args" placeholder='["--port", "8080"]'></div>
+        <div class="form-group"><label for="f-stdio-env" data-i18n="mcp_client.label_env">Environment (JSON object)</label><input id="f-stdio-env" placeholder='{"KEY": "value"}'></div>
+        <div class="form-group"><label for="f-stdio-cwd" data-i18n="mcp_client.label_working_dir">Working Directory</label><input id="f-stdio-cwd" placeholder="(optional)" data-i18n-placeholder="mcp_client.optional_placeholder"></div>
+      </div>
+      <!-- sse fields -->
+      <div class="transport-fields" id="tf-sse">
+        <div class="form-group"><label for="f-sse-url" data-i18n="mcp_client.label_url">URL</label><input id="f-sse-url" placeholder="http://localhost:8080/sse"></div>
+        <div class="form-group"><label for="f-sse-headers" data-i18n="mcp_client.label_headers">Headers (JSON object)</label><input id="f-sse-headers" placeholder='{"Authorization": "Bearer ..."}'></div>
+      </div>
+      <!-- streamable_http fields -->
+      <div class="transport-fields" id="tf-streamable_http">
+        <div class="form-group"><label for="f-sh-url" data-i18n="mcp_client.label_url">URL</label><input id="f-sh-url" placeholder="http://localhost:8080/mcp"></div>
+        <div class="form-group"><label for="f-sh-headers" data-i18n="mcp_client.label_headers">Headers (JSON object)</label><input id="f-sh-headers" placeholder='{"Authorization": "Bearer ..."}'></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn btn-sm btn-muted" data-action="closeModal" data-i18n="mcp_client.cancel">Cancel</button>
+        <button class="btn btn-sm btn-primary" data-action="saveConnection" data-i18n="mcp_client.save">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <script nonce="{{ csp_nonce }}">
+    var BASE = '/ext/mcp-client';
+
+    function _hdr() { return {'Content-Type':'application/json','X-Requested-With':'XMLHttpRequest'}; }
+
+    function refresh() {
+      fetch(BASE + '/api/connections').then(function(r){ return r.json(); }).then(function(d) {
+        var list = document.getElementById('conn-list');
+        var empty = document.getElementById('empty-msg');
+        if (!d.ok || !d.connections.length) { list.innerHTML=''; empty.style.display='block'; return; }
+        empty.style.display='none';
+        list.innerHTML = d.connections.map(renderCard).join('');
+      });
+    }
+
+    function renderCard(c) {
+      var bc = 'badge-' + c.status;
+      var toolsHtml = '';
+      if (c.status === 'connected' && c.tool_count > 0) {
+        toolsHtml = '<div class="tools-list"><details><summary>' + c.tool_count + ' ' + window.tr('mcp_client.tools_available', 'tools available') + '</summary>' +
+          '<div id="tools-' + c.id + '">' + window.tr('mcp_client.loading', 'Loading...') + '</div></details></div>';
+      }
+      var errHtml = c.error ? '<div class="error-text">' + escHtml(c.error) + '</div>' : '';
+      var transport = c.transport;
+      if (transport === 'stdio') transport += ': ' + escHtml((c.stdio||{}).command||'');
+      else if (transport === 'sse') transport += ': ' + escHtml((c.sse||{}).url||'');
+      else if (transport === 'streamable_http') transport += ': ' + escHtml((c.streamable_http||{}).url||'');
+
+      return '<div class="card">' +
+        '<div class="card-header"><span class="card-title">' + escHtml(c.name) + '</span>' +
+        '<span class="badge ' + bc + '">' + window.tr('mcp_client.status_' + c.status, c.status) + '</span></div>' +
+        '<div class="card-meta">' + escHtml(transport) + (c.auto_connect ? ' | ' + window.tr('mcp_client.auto_connect_label', 'auto-connect') : '') + '</div>' +
+        errHtml + toolsHtml +
+        '<div class="card-actions">' +
+        (c.status !== 'connected'
+          ? '<button class="btn btn-sm btn-ok" data-action="doConnect" data-action-arg="' + c.id + '">' + window.tr('mcp_client.connect', 'Connect') + '</button>'
+          : '<button class="btn btn-sm btn-err" data-action="doDisconnect" data-action-arg="' + c.id + '">' + window.tr('mcp_client.disconnect', 'Disconnect') + '</button>') +
+        '<button class="btn btn-sm btn-primary" data-action="openEditModal" data-action-arg="' + c.id + '">' + window.tr('mcp_client.edit', 'Edit') + '</button>' +
+        '<button class="btn btn-sm btn-muted" data-action="doDelete" data-action-arg="' + c.id + '">' + window.tr('mcp_client.delete', 'Delete') + '</button>' +
+        '</div></div>';
+    }
+
+    function escHtml(s) { var d=document.createElement('div'); d.textContent=s||''; return d.innerHTML; }
+
+    function doConnect(id) {
+      fetch(BASE + '/api/connections/' + id + '/connect', {method:'POST', headers:_hdr()})
+        .then(function(){ refresh(); });
+    }
+    function doDisconnect(id) {
+      fetch(BASE + '/api/connections/' + id + '/disconnect', {method:'POST', headers:_hdr()})
+        .then(function(){ refresh(); });
+    }
+    function doDelete(id) {
+      if (!confirm(window.tr('mcp_client.confirm_delete', 'Delete this connection?'))) return;
+      fetch(BASE + '/api/connections/' + id, {method:'DELETE', headers:_hdr()})
+        .then(function(){ refresh(); });
+    }
+
+    /* tools lazy-load on details open */
+    document.addEventListener('toggle', function(e) {
+      if (e.target.tagName !== 'DETAILS') return;
+      var container = e.target.querySelector('[id^="tools-"]');
+      if (!container || container.dataset.loaded) return;
+      var id = container.id.replace('tools-', '');
+      container.dataset.loaded = '1';
+      fetch(BASE + '/api/connections/' + id + '/tools').then(function(r){ return r.json(); }).then(function(d) {
+        if (!d.ok || !d.tools.length) { container.textContent=window.tr('mcp_client.no_tools', 'No tools'); return; }
+        container.innerHTML = d.tools.map(function(t) {
+          return '<div class="tool-item"><strong>' + escHtml(t.name) + '</strong> <span class="tool-desc">' + escHtml(t.description) + '</span></div>';
+        }).join('');
+      });
+    }, true);
+
+    /* modal */
+    function openAddModal() {
+      document.getElementById('modal-title').textContent = window.tr('mcp_client.add_connection_title', 'Add Connection');
+      document.getElementById('edit-id').value = '';
+      clearForm();
+      showTransportFields();
+      document.getElementById('modal-overlay').classList.add('active');
+    }
+    function openEditModal(id) {
+      fetch(BASE + '/api/connections').then(function(r){ return r.json(); }).then(function(d) {
+        var c = (d.connections||[]).find(function(x){ return x.id===id; });
+        if (!c) return;
+        document.getElementById('modal-title').textContent = window.tr('mcp_client.edit_connection_title', 'Edit Connection');
+        document.getElementById('edit-id').value = id;
+        document.getElementById('f-name').value = c.name || '';
+        document.getElementById('f-transport').value = c.transport || 'stdio';
+        document.getElementById('f-auto-connect').checked = !!c.auto_connect;
+        if (c.stdio) {
+          document.getElementById('f-stdio-cmd').value = c.stdio.command || '';
+          document.getElementById('f-stdio-args').value = c.stdio.args ? JSON.stringify(c.stdio.args) : '';
+          document.getElementById('f-stdio-env').value = c.stdio.env ? JSON.stringify(c.stdio.env) : '';
+          document.getElementById('f-stdio-cwd').value = c.stdio.cwd || '';
+        }
+        if (c.sse) {
+          document.getElementById('f-sse-url').value = c.sse.url || '';
+          document.getElementById('f-sse-headers').value = c.sse.headers ? JSON.stringify(c.sse.headers) : '';
+        }
+        if (c.streamable_http) {
+          document.getElementById('f-sh-url').value = c.streamable_http.url || '';
+          document.getElementById('f-sh-headers').value = c.streamable_http.headers ? JSON.stringify(c.streamable_http.headers) : '';
+        }
+        showTransportFields();
+        document.getElementById('modal-overlay').classList.add('active');
+      });
+    }
+    function closeModal() { document.getElementById('modal-overlay').classList.remove('active'); }
+    function onOverlayClick(_arg, e) {
+      if (e.target === document.getElementById('modal-overlay')) closeModal();
+    }
+    function clearForm() {
+      ['f-name','f-stdio-cmd','f-stdio-args','f-stdio-env','f-stdio-cwd',
+       'f-sse-url','f-sse-headers','f-sh-url','f-sh-headers'].forEach(function(id){
+        document.getElementById(id).value = '';
+      });
+      document.getElementById('f-transport').value = 'stdio';
+      document.getElementById('f-auto-connect').checked = false;
+    }
+    function showTransportFields() {
+      var t = document.getElementById('f-transport').value;
+      ['stdio','sse','streamable_http'].forEach(function(k) {
+        var el = document.getElementById('tf-' + k);
+        el.classList.toggle('active', k === t);
+      });
+    }
+
+    function _tryJson(s, fallback) {
+      if (!s || !s.trim()) return fallback;
+      try { return JSON.parse(s); } catch(e) { alert(window.tr('mcp_client.invalid_json', 'Invalid JSON') + ': ' + s); return null; }
+    }
+
+    function saveConnection() {
+      var transport = document.getElementById('f-transport').value;
+      var body = {
+        name: document.getElementById('f-name').value.trim(),
+        transport: transport,
+        auto_connect: document.getElementById('f-auto-connect').checked,
+      };
+      if (!body.name) { alert(window.tr('mcp_client.name_required', 'Name is required')); return; }
+
+      if (transport === 'stdio') {
+        var args = _tryJson(document.getElementById('f-stdio-args').value, []);
+        var env = _tryJson(document.getElementById('f-stdio-env').value, {});
+        if (args === null || env === null) return;
+        body.stdio = {
+          command: document.getElementById('f-stdio-cmd').value.trim(),
+          args: args, env: env,
+          cwd: document.getElementById('f-stdio-cwd').value.trim() || null,
+        };
+      } else if (transport === 'sse') {
+        var headers = _tryJson(document.getElementById('f-sse-headers').value, {});
+        if (headers === null) return;
+        body.sse = { url: document.getElementById('f-sse-url').value.trim(), headers: headers };
+      } else if (transport === 'streamable_http') {
+        var headers2 = _tryJson(document.getElementById('f-sh-headers').value, {});
+        if (headers2 === null) return;
+        body.streamable_http = { url: document.getElementById('f-sh-url').value.trim(), headers: headers2 };
+      }
+
+      var editId = document.getElementById('edit-id').value;
+      var url, method;
+      if (editId) { url = BASE + '/api/connections/' + editId; method = 'PUT'; }
+      else { url = BASE + '/api/connections'; method = 'POST'; }
+
+      fetch(url, {method:method, headers:_hdr(), body:JSON.stringify(body)})
+        .then(function(r){ return r.json(); })
+        .then(function(d) {
+          if (!d.ok) { alert(d.error || window.tr('mcp_client.save_failed', 'Save failed')); return; }
+          closeModal();
+          refresh();
+        });
+    }
+
+    /* Esc to close modal */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeModal();
+    });
+
+    refresh();
+    setInterval(refresh, 10000);
+  </script>
+</body>
+</html>

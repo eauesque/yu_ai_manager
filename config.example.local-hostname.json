@@ -1,0 +1,53 @@
+{
+  "_comment": "LLM Router 家庭内 LAN サンプル — base_url に IP の代わりに .local ホスト名を使用。DHCP で IP が変わっても自動追従。詳細は docs/ja/llm-router/setup.md § ノード自動発見 を参照。",
+  "llm_router": {
+    "enabled": true,
+    "auth": {
+      "mode": "loopback",
+      "api_key": "",
+      "allow_loopback_bypass": true
+    },
+    "backends": [
+      {
+        "alias": "ollama-mac",
+        "base_url": "http://mac-mini.local:11434/v1",
+        "type": "ollama",
+        "auto_discover": true
+      },
+      {
+        "alias": "ollama-pi5",
+        "base_url": "http://pi5.local:11434/v1",
+        "type": "ollama",
+        "auto_discover": true
+      },
+      {
+        "alias": "ollama-win",
+        "base_url": "http://gpu-rig.local:11434/v1",
+        "type": "ollama",
+        "auto_discover": true
+      }
+    ],
+    "aliases": {
+      "local-fast": "ollama-mac/qwen2.5:7b",
+      "local-coder": "ollama-pi5/qwen2.5-coder:32b",
+      "local-big": "ollama-win/llama3.3:70b"
+    },
+    "model_metadata": {
+      "ollama-mac/qwen2.5:7b": {
+        "good_at": ["chat", "summarization"],
+        "weak_at": ["long context"],
+        "notes": "mac mini 上の軽量チャット用"
+      },
+      "ollama-pi5/qwen2.5-coder:32b": {
+        "good_at": ["code", "refactoring"],
+        "weak_at": ["poetry"],
+        "notes": "Pi5 hailo-ollama 上のコード生成"
+      },
+      "ollama-win/llama3.3:70b": {
+        "good_at": ["complex reasoning", "long context"],
+        "weak_at": ["latency-sensitive workloads"],
+        "notes": "Windows GPU 機 (RX 9070 XT x2) 上の大型モデル"
+      }
+    }
+  }
+}

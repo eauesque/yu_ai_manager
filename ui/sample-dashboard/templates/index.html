@@ -1,0 +1,154 @@
+{% extends "_base.html" %}
+{% set active = "dashboard" %}
+{% block title %}Dashboard — YU AI Manager{% endblock %}
+{% block topbar_title %}Dashboard{% endblock %}
+
+{% block head %}
+<script nonce="{{ csp_nonce }}" src="/static/vendor/chart.umd.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Quick Search -->
+<div class="dash-search">
+  <input type="text" class="dash-search-input" id="dashSearchInput"
+         placeholder="Quick search tags, prompts..." aria-label="Search">
+  <button class="dash-search-btn" id="dashSearchBtn" type="button">Search</button>
+</div>
+
+<!-- Stat Cards Row -->
+<div class="dash-cards" id="dashCards">
+  <div class="dash-card">
+    <div class="dash-card-icon" style="background:#3b82f6;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+    </div>
+    <div class="dash-card-data">
+      <div class="dash-card-value" id="statFiles">--</div>
+      <div class="dash-card-label">Total Files</div>
+    </div>
+  </div>
+  <div class="dash-card">
+    <div class="dash-card-icon" style="background:#8b5cf6;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+    </div>
+    <div class="dash-card-data">
+      <div class="dash-card-value" id="statTags">--</div>
+      <div class="dash-card-label">Total Tags</div>
+    </div>
+  </div>
+  <div class="dash-card">
+    <div class="dash-card-icon" style="background:#10b981;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+    </div>
+    <div class="dash-card-data">
+      <div class="dash-card-value" id="statSources">--</div>
+      <div class="dash-card-label">Sources</div>
+    </div>
+  </div>
+  <div class="dash-card">
+    <div class="dash-card-icon" style="background:#f59e0b;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+    </div>
+    <div class="dash-card-data">
+      <div class="dash-card-value" id="statRated">--</div>
+      <div class="dash-card-label">Rated Images</div>
+    </div>
+  </div>
+</div>
+
+<!-- Two-column row: Timeline + Source Breakdown -->
+<div class="dash-row">
+  <div class="dash-panel dash-panel-wide">
+    <div class="dash-panel-header">
+      <h3 class="dash-panel-title">Monthly Timeline</h3>
+    </div>
+    <div class="dash-panel-body">
+      <canvas id="timelineChart" height="220"></canvas>
+    </div>
+  </div>
+  <div class="dash-panel dash-panel-narrow">
+    <div class="dash-panel-header">
+      <h3 class="dash-panel-title">Source Breakdown</h3>
+    </div>
+    <div class="dash-panel-body">
+      <canvas id="sourceChart" height="220"></canvas>
+      <div id="sourceList" class="dash-source-list"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Recent Images Strip -->
+<div class="dash-panel">
+  <div class="dash-panel-header">
+    <h3 class="dash-panel-title">Recent Images</h3>
+    <a href="/search" class="dash-panel-link">View All</a>
+  </div>
+  <div class="dash-panel-body">
+    <div class="dash-recent-strip" id="recentStrip"></div>
+  </div>
+</div>
+
+<!-- Two-column row: Rating Distribution + Top Tags -->
+<div class="dash-row">
+  <div class="dash-panel dash-panel-half">
+    <div class="dash-panel-header">
+      <h3 class="dash-panel-title">Rating Distribution</h3>
+    </div>
+    <div class="dash-panel-body">
+      <div id="ratingBars" class="dash-rating-bars"></div>
+    </div>
+  </div>
+  <div class="dash-panel dash-panel-half">
+    <div class="dash-panel-header">
+      <h3 class="dash-panel-title">Top Tags</h3>
+    </div>
+    <div class="dash-panel-body">
+      <div id="topTags" class="dash-top-tags"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="lightbox-top">
+    <div class="lightbox-info" id="lightboxInfo"></div>
+    <div class="lightbox-controls">
+      <button class="lb-btn" id="lbDetail" type="button" title="Details" aria-label="Toggle details">&#9432;</button>
+      <button class="lb-btn" id="lbSlideshow" type="button" title="Slideshow" aria-label="Toggle slideshow">&#9654;</button>
+      <button class="lb-btn" id="lbClose" type="button" title="Close (Esc)" aria-label="Close">&times;</button>
+    </div>
+  </div>
+  <button class="lb-arrow lb-prev" id="lbPrev" type="button" aria-label="Previous image">&#10094;</button>
+  <button class="lb-arrow lb-next" id="lbNext" type="button" aria-label="Next image">&#10095;</button>
+  <div class="lightbox-stage" id="lightboxStage">
+    <img class="lightbox-img" id="lightboxImg" src="" alt="Full size image">
+  </div>
+  <div class="lightbox-meta" id="lightboxMeta">
+    <div class="lb-stars" id="lbStars"></div>
+  </div>
+  <div class="lightbox-detail" id="lightboxDetail" style="display:none;">
+    <div class="ld-section" id="ldPromptSection" style="display:none;">
+      <div class="ld-label">Prompt</div>
+      <div class="ld-text" id="ldPrompt"></div>
+    </div>
+    <div class="ld-section" id="ldNegSection" style="display:none;">
+      <div class="ld-label">Negative</div>
+      <div class="ld-text" id="ldNeg"></div>
+    </div>
+    <div class="ld-section" id="ldParamsSection" style="display:none;">
+      <div class="ld-label">Parameters</div>
+      <div class="ld-text" id="ldParams"></div>
+    </div>
+    <div class="ld-section" id="ldTagsSection" style="display:none;">
+      <div class="ld-label">Tags</div>
+      <div class="ld-tags" id="ldTags"></div>
+    </div>
+  </div>
+  <div class="filmstrip-wrap" id="filmstripWrap">
+    <div class="filmstrip" id="filmstrip" role="list" aria-label="Thumbnail navigation"></div>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script nonce="{{ csp_nonce }}">document.addEventListener('DOMContentLoaded', function() { DashUI.initDashboard(); });</script>
+{% endblock %}

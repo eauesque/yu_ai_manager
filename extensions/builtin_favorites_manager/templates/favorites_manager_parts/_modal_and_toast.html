@@ -1,0 +1,19 @@
+<!-- Detail modal container (shared with index) -->
+<div class="modal" id="modal" tabindex="-1" role="dialog" aria-modal="true" aria-label="Image detail" data-i18n-aria-label="favorites.image_detail_aria">
+  <div class="modal-content" id="modalContent"></div>
+</div>
+<!-- LAN Share QR modal -->
+<div class="fm-modal-overlay" id="fmLanShareModal" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="fmLanShareModalTitle">
+  <div class="fm-modal" style="max-width:380px;text-align:center;">
+    <h3 id="fmLanShareModalTitle" data-i18n="favorites.lan_share_modal_title">📡 LAN 共有</h3>
+    <p id="fmLanShareInfo" style="font-size:13px;color:var(--muted,#888);margin:0 0 12px;"></p>
+    <div id="fmQrContainer" style="margin:0 auto 12px;width:280px;height:280px;background:var(--card,#1b1f2a);border-radius:8px;display:flex;align-items:center;justify-content:center;"></div>
+    <input type="text" id="fmLanShareUrl" readonly aria-label="LAN 共有 URL" data-i18n-aria-label="favorites.lan_share_url_aria" style="width:100%;text-align:center;font-size:12px;padding:6px;margin-bottom:8px;background:var(--card,#1b1f2a);color:var(--fg,#e0e0e0);border:1px solid var(--border,#2b3240);border-radius:6px;" />
+    <div class="fm-modal-actions">
+      <button type="button" class="fm-toolbar-btn" id="fmLanShareCopyBtn" data-i18n="favorites.copy_url">URL をコピー</button>
+      <button type="button" class="fm-toolbar-btn danger" id="fmLanShareStopBtn" data-i18n="favorites.stop_sharing">共有を停止</button>
+    </div>
+  </div>
+</div>
+<!-- Toast notification -->
+<div id="toast" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>

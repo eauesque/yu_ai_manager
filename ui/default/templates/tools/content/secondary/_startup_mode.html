@@ -1,0 +1,25 @@
+    <!-- Startup settings -->
+    <details class="tool-item" id="tool-startup-mode">
+  <summary class="tool-item-header">
+    <span class="tool-item-header__title" data-i18n="tools.startup_mode">Startup Behavior</span>
+    <span class="tool-item-header__desc">Configure and run this tool.</span>
+    <span class="tool-item-header__chevron">▼</span>
+  </summary>
+  <div class="tool-item-body">
+      <p data-i18n="tools.startup_mode_desc">Choose behavior when opening the search page.</p>
+      <div>
+        <label class="tool-label">
+          <input class="tool-input" type="radio" name="startupMode" value="auto" data-action="toolsPageApi.setStartupMode" data-action-event="change" data-action-this="1" aria-label="Re-execute">
+          <span><strong><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-refresh"/></svg> <span data-i18n="tools.mode_auto">Re-execute</span></strong> — <span data-i18n="tools.mode_auto_desc">Auto-search with previous conditions</span></span>
+        </label>
+        <label class="tool-label">
+          <input class="tool-input" type="radio" name="startupMode" value="restore" data-action="toolsPageApi.setStartupMode" data-action-event="change" data-action-this="1" aria-label="Preserve">
+          <span><strong><span aria-hidden="true">📋</span> <span data-i18n="tools.mode_restore">Preserve</span></strong> — <span data-i18n="tools.mode_restore_desc">Restore previous conditions but don't auto-search</span></span>
+        </label>
+        <label class="tool-label">
+          <input class="tool-input" type="radio" name="startupMode" value="clear" data-action="toolsPageApi.setStartupMode" data-action-event="change" data-action-this="1" aria-label="Clear">
+          <span><strong><span aria-hidden="true">🧹</span> <span data-i18n="tools.mode_clear">Clear</span></strong> — <span data-i18n="tools.mode_clear_desc">Start with clean state</span></span>
+        </label>
+      </div>
+      </div>
+</details>

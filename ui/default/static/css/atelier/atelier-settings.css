@@ -1,0 +1,74 @@
+/*
+ * atelier-settings.css - Atelier theme override for the settings page.
+ *
+ * Additive; all rules scoped under #main-content so the shared _nav.html
+ * is never affected. Element selectors (input/select/textarea) MUST stay
+ * under #main-content for the same reason.
+ *
+ * Most settings inline styles use `var(--x, fallback)` and auto-theme via
+ * the atelier-tokens legacy aliases (--card/--muted/--accent). Hardcoded
+ * semantic colors (.tsr-ok green, .tsr-error red, warning amber) are kept.
+ * No !important is used.
+ */
+
+/* (1) Tabs */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .tab-bar,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .tab-bar-wrap {
+  border-color: var(--border);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .tab-btn {
+  color: var(--text-muted);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .tab-btn.active {
+  color: var(--accent-tool);
+  border-bottom-color: var(--accent-tool);
+}
+
+/* (2) Sections / cards */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .settings-section,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .tsr-card {
+  background: var(--surface);
+  border-color: var(--border);
+}
+
+/* (3) Heading (descendant combinator; verified DOM main>header>h1) */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content header h1 {
+  font-family: var(--font-display);
+}
+
+/* (4) Form controls - keep outline for keyboard focus visibility */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content input:not([type=checkbox]):not([type=radio]),
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content select,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content textarea,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .setting-input {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content input:not([type=checkbox]):not([type=radio]):focus-visible,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content select:focus-visible,
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content textarea:focus-visible {
+  outline: 2px solid var(--accent-tool);
+  outline-offset: 1px;
+}
+
+/* (5) Save bar */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .btn-save {
+  background: var(--accent-tool);
+  color: #fff;
+}
+
+/* (6) Toggle switch - on state uses the action accent */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .toggle-switch input:checked + .toggle-slider {
+  background: var(--accent-tool);
+}
+
+/* (7) Neutralize generic .btn for non-primary / non-save / non-danger */
+body:is(.theme-atelier-light, .theme-atelier-dark).atelier-tool #main-content .btn:not(.btn-primary):not(.btn-save):not(.btn-danger) {
+  background: var(--surface-raised);
+  color: var(--text);
+  border: 1px solid var(--border);
+}
+
+/* (8) Semantic status colors (.tsr-ok green / .tsr-error red, etc.)
+   are intentionally NOT redeclared. */

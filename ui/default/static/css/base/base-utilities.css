@@ -1,0 +1,36 @@
+/* base-utilities.css — Reusable utility classes */
+
+/* Visibility */
+.hidden { display: none !important; }
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Typography */
+.text-muted { color: var(--muted, #888); }
+.text-small { font-size: 12px; }
+.text-center { text-align: center; }
+/* Monospace utility — uses --font-mono token so output never falls back
+   to the browser-default monospace (e.g. Courier New on Windows). Apply
+   to any element that should render technical identifiers (engine names,
+   provider names, file hashes, version strings). */
+.mono { font-family: var(--font-mono); }
+
+/* Flexbox */
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Spacing */
+.gap-sm { gap: 4px; }
+.gap-md { gap: 8px; }

@@ -1,0 +1,8 @@
+# Python builtin `format` value -> Rust MetaResult `format` value
+# Source: confirmed from builtin source files (2026-06-13)
+mappings:
+  comfy: comfy          # builtin_comfyui -> comfyui.rs
+  sd: a1111             # builtin_a1111 -> a1111.rs (Python returns "sd"; Rust returns "a1111")
+  novelai_v4: nai_v4    # builtin_novelai_v4 -> novelai_v4.rs
+  novelai: nai_v3       # builtin_novelai_v3 PNG path (try_png_old_format) -> novelai_v3.rs
+  nai: nai_v3           # builtin_novelai_v3 chunk fallback path -> novelai_v3.rs

@@ -1,0 +1,49 @@
+<div class="fpb-content">
+  <h1 class="fpb-page-title"><span aria-hidden="true">🎬</span> <span data-i18n="fpb.heading">Freeze &amp; Pull-back Generator</span></h1>
+  <!-- Preview area -->
+  <div class="fpb-preview-area" id="fpbPreviewArea">
+    <div class="fpb-placeholder" id="fpbPlaceholder">
+      <div class="fpb-placeholder-icon">🎬</div>
+      <div class="fpb-placeholder-text" data-i18n="fpb.placeholder_instructions">
+        File ID を入力して Load をクリックしてください。<br>
+        画像上でクリックしてフォーカス点を設定できます。<br>
+        <small>Click = focus start (red) / Shift+Click = focus end (blue)</small>
+      </div>
+    </div>
+    <div class="fpb-canvas-container" id="fpbCanvasContainer" style="display:none">
+      <canvas id="fpbCanvas"></canvas>
+      <div class="fpb-focus-marker start" id="fpbMarkerStart" style="display:none"></div>
+      <div class="fpb-focus-marker end" id="fpbMarkerEnd" style="display:none"></div>
+      <!-- Waypoint marker + path SVG overlay -->
+      <svg class="fpb-wp-path" id="fpbWpPath"></svg>
+      <div id="fpbWpMarkers"></div>
+    </div>
+    <div class="fpb-focus-note" id="fpbFocusNote" style="display:none">
+      Focus: static (no tracking)
+    </div>
+    <div id="fpbErrorMsg" style="display:none"></div>
+  </div>
+
+  <!-- Progress -->
+  <div class="fpb-progress" id="fpbProgress">
+    <div class="fpb-progress-bar">
+      <div class="fpb-progress-fill" id="fpbProgressFill"></div>
+    </div>
+    <div class="fpb-progress-text" id="fpbProgressText"></div>
+  </div>
+
+  <!-- Output gallery -->
+  <div class="fpb-gallery" id="fpbGallery">
+    <h2 style="font-size:16px;" data-i18n="fpb.generated_videos">Generated Videos</h2>
+    <div class="fpb-gallery-list" id="fpbGalleryList"></div>
+  </div>
+</div>
+
+<!-- Video player overlay -->
+<div class="fpb-player-overlay" id="fpbPlayerOverlay">
+  <div class="fpb-player-inner">
+    <button class="fpb-player-close" id="fpbPlayerClose">&times;</button>
+    <video id="fpbPlayer" controls></video>
+    <img id="fpbPlayerImg" style="display:none;max-width:90vw;max-height:85vh" alt="">
+  </div>
+</div>

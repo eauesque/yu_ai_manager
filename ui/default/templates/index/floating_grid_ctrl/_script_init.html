@@ -1,0 +1,44 @@
+<script nonce="{{ csp_nonce }}">
+(function(){
+  var m = window.floatingGridApi;
+  if (!m) return;
+
+  if (m.ss) {
+    m.ss.addEventListener('input', function(){
+      var px = parseInt(this.value, 10) || 300;
+      m.applyMinSize(px);
+    });
+  }
+
+  if (m.cs) {
+    m.cs.addEventListener('input', function(){
+      var n = parseInt(this.value, 10) || 0;
+      m.applyCols(n);
+    });
+  }
+
+  if (m.re) {
+    var obs = new MutationObserver(function(){
+      m.setCtrlVisible();
+      m.updateCompactMode();
+      m.updateLiveInfo();
+    });
+    obs.observe(m.re, {childList: true, subtree: true});
+  }
+
+  window.addEventListener('resize', function(){
+    m.updateCompactMode();
+    m.updateLiveInfo();
+  });
+
+  var sv = localStorage.getItem('gridMinSize');
+  if (sv && m.ss) m.ss.value = sv;
+  m.applyMinSize(m.getCurrentMinSize());
+
+  var sc = localStorage.getItem('gridColumns');
+  if (sc && m.cs) m.cs.value = sc;
+  m.applyCols(m.getCurrentCols());
+  m.updateCompactMode();
+  m.setCtrlVisible();
+})();
+</script>

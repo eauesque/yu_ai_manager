@@ -1,0 +1,56 @@
+/* Search states: info button */
+.infoBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  font-size: 12px;
+  background: var(--btn-bg, #f0f0f0);
+  color: var(--text, #333);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.infoBtn:hover { background: var(--btn-hover, #e0e0e0); }
+
+.infoBtn .icon {
+  display: inline-block;
+  width: 1.2em;
+  text-align: center;
+}
+
+.infoBtn .label {
+  white-space: nowrap;
+  display: inline-block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .infoBtn .label {
+    max-width: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateX(-2px);
+    transition: max-width .15s ease, opacity .15s ease, transform .15s ease;
+  }
+
+  .infoBtn:hover .label,
+  .infoBtn:focus-visible .label {
+    max-width: 6em;
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (hover: none) {
+  .infoBtn .label {
+    max-width: none;
+    opacity: 1;
+    overflow: visible;
+    transform: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .infoBtn .label { transition: none !important; }
+}

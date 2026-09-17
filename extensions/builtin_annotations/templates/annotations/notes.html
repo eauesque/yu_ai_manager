@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/svg+xml" href="/static/favicon.svg">
+  <title data-i18n="annotations.notes_title">Notes</title>
+  <style nonce="{{ csp_nonce }}">
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-ui, system-ui, sans-serif);
+      background: var(--bg, #fff);
+      color: var(--fg, #111);
+      min-height: 100vh;
+    }
+    #ann-main {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: calc(var(--nav-h, 50px) + 24px) 16px 24px;
+    }
+    h1 { font-size: 1.4rem; font-weight: 600; margin-bottom: 16px; }
+    .ann-toolbar { display: flex; gap: 8px; margin-bottom: 20px; }
+    .ann-toolbar input {
+      flex: 1;
+      padding: 8px 12px;
+      border: 1px solid var(--border, #ccc);
+      border-radius: 6px;
+      font-size: 0.95rem;
+      background: var(--bg-input, #fff);
+      color: var(--fg, #111);
+    }
+    .ann-count {
+      color: var(--fg-muted, #888);
+      font-size: 0.85rem;
+      align-self: center;
+      white-space: nowrap;
+    }
+    .ann-list { display: flex; flex-direction: column; gap: 10px; }
+    .ann-item {
+      border: 1px solid var(--border, #ddd);
+      border-radius: 8px;
+      padding: 14px 16px;
+      background: var(--card, #fff);
+    }
+    .ann-item-path {
+      font-size: 0.8rem;
+      color: var(--fg-muted, #888);
+      margin-bottom: 6px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .ann-item-path a { color: var(--link, #3b82f6); text-decoration: none; }
+    .ann-item-path a:hover { text-decoration: underline; }
+    .ann-item-value {
+      font-size: 0.95rem;
+      white-space: pre-wrap;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+    .ann-item-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 10px;
+    }
+    .ann-item-date { font-size: 0.78rem; color: var(--fg-muted, #888); }
+    .ann-del-btn {
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      border: 1px solid var(--danger-border, #f87171);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--danger, #ef4444);
+      cursor: pointer;
+    }
+    .ann-del-btn:hover { background: var(--danger, #ef4444); color: #fff; }
+    .ann-empty, .ann-loading {
+      text-align: center;
+      padding: 48px 0;
+      color: var(--fg-muted, #888);
+    }
+    .ann-pagination {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      margin-top: 24px;
+    }
+    .ann-pagination button {
+      padding: 6px 16px;
+      border: 1px solid var(--border, #ccc);
+      border-radius: 6px;
+      background: var(--bg, #fff);
+      color: var(--fg, #111);
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .ann-pagination button:disabled { opacity: 0.4; cursor: default; }
+  </style>
+</head>
+<body data-1p-ignore data-lpignore="true">
+  {% include "_ext_nav.html" %}
+  <main id="ann-main">
+    <h1>📝 <span data-i18n="annotations.notes_title">Notes</span></h1>
+    <div class="ann-toolbar">
+      <input type="search" id="annSearch" placeholder="ノートを検索..."
+             data-i18n-placeholder="annotations.search_placeholder">
+      <span class="ann-count" id="annCount"></span>
+    </div>
+    <div id="annList" class="ann-list">
+      <div class="ann-loading" data-i18n="annotations.loading">読み込み中...</div>
+    </div>
+    <div class="ann-pagination" id="annPagination" style="display:none">
+      <button id="annPrevBtn" disabled data-i18n="annotations.prev">前へ</button>
+      <span id="annPageInfo"
+            style="align-self:center;font-size:0.9rem;color:var(--fg-muted,#888)"></span>
+      <button id="annNextBtn" disabled data-i18n="annotations.next">次へ</button>
+    </div>
+  </main>
+  <script nonce="{{ csp_nonce }}">
+  (function () {
+    'use strict';
+
+    var API_BASE = '/api/annotations';
+    var LIMIT = 50;
+    var currentOffset = 0;
+    var currentTotal = 0;
+    var searchTimer = null;
+
+    var elSearch = document.getElementById('annSearch');
+    var elList = document.getElementById('annList');
+    var elCount = document.getElementById('annCount');
+    var elPagination = document.getElementById('annPagination');
+    var elPrev = document.getElementById('annPrevBtn');
+    var elNext = document.getElementById('annNextBtn');
+    var elPageInfo = document.getElementById('annPageInfo');
+
+    function load(offset) {
+      currentOffset = offset || 0;
+      var q = elSearch.value.trim();
+      var params = new URLSearchParams({ limit: LIMIT, offset: currentOffset });
+      if (q) params.set('q', q);
+
+      while (elList.firstChild) elList.removeChild(elList.firstChild);
+      var loadingDiv = document.createElement('div');
+      loadingDiv.className = 'ann-loading';
+      loadingDiv.setAttribute('data-i18n', 'annotations.loading');
+      loadingDiv.textContent = '読み込み中...';
+      elList.appendChild(loadingDiv);
+
+      fetch(API_BASE + '/notes-data?' + params.toString())
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          if (data.error) {
+            while (elList.firstChild) elList.removeChild(elList.firstChild);
+            var errDiv = document.createElement('div');
+            errDiv.className = 'ann-empty';
+            errDiv.textContent = data.error;
+            elList.appendChild(errDiv);
+            return;
+          }
+          currentTotal = data.total || 0;
+          render(data.notes || []);
+          updatePagination();
+        })
+        .catch(function (e) {
+          while (elList.firstChild) elList.removeChild(elList.firstChild);
+          var errDiv = document.createElement('div');
+          errDiv.className = 'ann-empty';
+          errDiv.textContent = '読み込みエラー';
+          elList.appendChild(errDiv);
+          console.error('annotations notes error', e);
+        });
+    }
+
+    function createNoteItem(n) {
+      var item = document.createElement('div');
+      item.className = 'ann-item';
+      item.setAttribute('data-id', n.id);
+      item.setAttribute('data-file-id', n.file_id);
+
+      // Path row
+      var pathDiv = document.createElement('div');
+      pathDiv.className = 'ann-item-path';
+      if (n.path) {
+        var link = document.createElement('a');
+        link.href = '/?file_id=' + encodeURIComponent(n.file_id);
+        link.textContent = n.path;
+        pathDiv.appendChild(link);
+      } else {
+        pathDiv.textContent = '(path unknown)';
+      }
+      item.appendChild(pathDiv);
+
+      // Note value
+      var valDiv = document.createElement('div');
+      valDiv.className = 'ann-item-value';
+      valDiv.textContent = n.value || '';
+      item.appendChild(valDiv);
+
+      // Footer: date + delete button
+      var footer = document.createElement('div');
+      footer.className = 'ann-item-footer';
+
+      var dateSpan = document.createElement('span');
+      dateSpan.className = 'ann-item-date';
+      dateSpan.textContent = n.created_at ? formatDate(n.created_at) : '';
+      footer.appendChild(dateSpan);
+
+      var delBtn = document.createElement('button');
+      delBtn.className = 'ann-del-btn';
+      delBtn.setAttribute('data-i18n', 'annotations.delete');
+      delBtn.textContent = '削除';
+      delBtn.addEventListener('click', onDelete);
+      footer.appendChild(delBtn);
+
+      item.appendChild(footer);
+      return item;
+    }
+
+    function render(notes) {
+      while (elList.firstChild) elList.removeChild(elList.firstChild);
+
+      if (!notes.length) {
+        var empty = document.createElement('div');
+        empty.className = 'ann-empty';
+        empty.setAttribute('data-i18n', 'annotations.empty');
+        empty.textContent = 'ノートがありません';
+        elList.appendChild(empty);
+        elCount.textContent = '0 件';
+        return;
+      }
+
+      elCount.textContent = currentTotal + ' 件';
+      for (var i = 0; i < notes.length; i++) {
+        elList.appendChild(createNoteItem(notes[i]));
+      }
+      if (typeof window.applyI18n === 'function') window.applyI18n(elList);
+    }
+
+    function updatePagination() {
+      var totalPages = Math.ceil(currentTotal / LIMIT) || 1;
+      var currentPage = Math.floor(currentOffset / LIMIT) + 1;
+      elPageInfo.textContent = currentPage + ' / ' + totalPages;
+      elPrev.disabled = currentOffset <= 0;
+      elNext.disabled = currentOffset + LIMIT >= currentTotal;
+      elPagination.style.display = currentTotal > LIMIT ? '' : 'none';
+    }
+
+    function onDelete(e) {
+      var item = e.currentTarget.closest('.ann-item');
+      var fileId = parseInt(item.getAttribute('data-file-id'), 10);
+      var msg = typeof window.i18n !== 'undefined'
+        ? (window.i18n['annotations.delete_confirm'] || 'このノートを削除しますか？')
+        : 'このノートを削除しますか？';
+      (window.customConfirm ? window.customConfirm(msg, { danger: true }) : Promise.resolve(window.confirm(msg)))
+        .then(function (ok) {
+          if (!ok) return;
+          fetch(API_BASE + '/batch-delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: JSON.stringify({ source: 'user', file_ids: [fileId], key: 'note' }),
+          })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+              if (data.error) {
+                (window.customAlert || window.alert).call(window, data.error);
+                return;
+              }
+              load(currentOffset);
+            })
+            .catch(function (err) {
+              (window.customAlert || window.alert).call(window, '削除エラー: ' + err.message);
+            });
+        });
+    }
+
+    function formatDate(ts) {
+      if (!ts) return '';
+      var d = new Date(ts * 1000);
+      return d.toLocaleDateString('ja-JP') + ' '
+        + d.toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    elSearch.addEventListener('input', function () {
+      clearTimeout(searchTimer);
+      searchTimer = setTimeout(function () { load(0); }, 300);
+    });
+
+    elPrev.addEventListener('click', function () {
+      if (currentOffset > 0) load(Math.max(0, currentOffset - LIMIT));
+    });
+    elNext.addEventListener('click', function () {
+      if (currentOffset + LIMIT < currentTotal) load(currentOffset + LIMIT);
+    });
+
+    load(0);
+  })();
+  </script>
+</body>
+</html>

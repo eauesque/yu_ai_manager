@@ -1,0 +1,157 @@
+  <main id="main-content" class="container" style="padding-top:50px;">
+    <header>
+      <h1><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-settings"/></svg> <span data-i18n="page.settings.title">Settings</span></h1>
+    </header>
+
+    <!-- Tab bar -->
+    <div class="tab-bar-wrap">
+    <div class="tab-bar" role="tablist" aria-label="Settings tabs">
+      <!-- Basic tabs (frequently used) -->
+      <button class="tab-btn active" role="tab" aria-selected="true" data-action="settingsPageApi.switchTab" data-action-arg="server"><span aria-hidden="true">🖥️</span> <span data-i18n="settings.tab_server">Server</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="scan"><span aria-hidden="true">📂</span> <span data-i18n="settings.tab_scan">Scan</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="extensions"><span aria-hidden="true">🧩</span> <span data-i18n="settings.tab_extensions">Extensions</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="apikeys"><span aria-hidden="true">🔑</span> <span data-i18n="settings.tab_apikeys">API Keys</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="gateway-keys"><span aria-hidden="true">🔐</span> <span data-i18n="settings.tab_gateway_keys">Gateway APIキー</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="appearance"><span aria-hidden="true">🎨</span> <span data-i18n="settings.tab_appearance">Appearance</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="ui"><span aria-hidden="true">🖼️</span> <span data-i18n="settings.tab_ui">UI</span></button>
+      <!-- Divider: basic / advanced -->
+      <span class="tab-bar-divider" aria-hidden="true"></span>
+      <!-- Advanced tabs -->
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="parser"><span aria-hidden="true">🔧</span> <span data-i18n="settings.tab_parser">Parser</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="tagger"><span aria-hidden="true">🏷️</span> <span data-i18n="settings.tab_tagger">Tagger</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="tagdict"><span aria-hidden="true">📖</span> <span data-i18n="settings.tab_tagdict">Tag Dict</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="remote"><span aria-hidden="true">🌐</span> <span data-i18n="settings.tab_remote">Remote FS</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="sns"><span aria-hidden="true">📤</span> <span data-i18n="settings.tab_sns">SNS</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="secrets"><span aria-hidden="true">🔐</span> <span data-i18n="settings.tab_secrets">Secrets</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="logs"><span aria-hidden="true">📋</span> <span data-i18n="settings.tab_logs">Logs</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="json"><span aria-hidden="true">📝</span> <span data-i18n="settings.tab_json">JSON Editor</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-action="settingsPageApi.switchTab" data-action-arg="maintenance"><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-wrench"/></svg> <span data-i18n="settings.tab_maintenance">メンテナンス</span></button>
+    </div>
+    </div>
+
+    <!-- Server status & settings -->
+    <div id="tab-server" class="tab-content active">
+      <div class="settings-section">
+        <h2><span aria-hidden="true">🖥️</span> <span data-i18n="settings.server_status">Server Status</span></h2>
+        <div id="serverStatusGrid" style="font-size:13px;color:var(--muted,#aaa);">Loading...</div>
+      </div>
+      <!-- DB path change (shown when "Change DB" clicked) -->
+      <div id="dbPathChangeSection" class="settings-section" style="display:none;">
+        <h2><span aria-hidden="true">🗄️</span> <span data-i18n="settings.db_change_title">Change Database</span></h2>
+        <p style="font-size:12px;color:var(--muted,#888);margin-bottom:8px;" data-i18n="settings.db_change_desc">Enter the full path to the database file. The server will restart to apply.</p>
+        <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+          <input type="text" id="dbPathInput" placeholder="data/tags.db" style="flex:1;min-width:200px;padding:6px 10px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:var(--bg,#1a1a2e);color:var(--text,#eee);font-size:13px;" aria-label="Database path">
+          <button type="button" data-action="settingsPageApi.browseDbPath" style="padding:6px 12px;border:1px solid rgba(128,128,128,0.3);border-radius:6px;background:none;color:var(--text);cursor:pointer;font-size:12px;" data-i18n="settings.db_browse">Browse...</button>
+          <button type="button" data-action="settingsPageApi.applyDbPathChange" style="padding:6px 12px;border:1px solid var(--accent,#4a90d9);border-radius:6px;background:var(--accent,#4a90d9);color:#fff;cursor:pointer;font-size:12px;font-weight:600;" data-i18n="settings.db_apply_restart">Apply &amp; Restart</button>
+        </div>
+      </div>
+      <div id="profileSection" class="settings-section">
+        <h2><span aria-hidden="true">👤</span> <span data-i18n="settings.profile_title">Profile</span></h2>
+        <div id="profileContent">
+          <p style="color:var(--muted,#888);font-size:13px;margin:0 0 10px;" data-i18n="settings.profile_loading">読み込み中...</p>
+        </div>
+      </div>
+      <div class="settings-section">
+        <h2><svg class="icon" aria-hidden="true"><use href="/static/img/icons/icons.svg#icon-lock"/></svg> <span data-i18n="settings.server_config">Server Config</span></h2>
+        <div class="setting-item">
+          <div class="setting-label"><span data-i18n="settings.host">Host</span><small data-i18n="settings.host_hint">Fixed to 127.0.0.1 when LAN is OFF</small></div>
+          <div class="setting-input"><input type="text" id="cfg-server-host" value="127.0.0.1" disabled aria-label="Host"></div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label"><span data-i18n="settings.port">Port</span><small data-i18n="settings.port_hint">Web server port number</small></div>
+          <div class="setting-input"><input type="number" id="cfg-server-port" value="5000" min="1" max="65535" aria-label="Port"></div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <span data-i18n="settings.lan">LAN Access</span>
+            <small data-i18n="settings.lan_hint">When ON, accessible from all devices on the same network</small>
+            <span id="lanStatusBadge" style="display:inline-block;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600;"></span>
+          </div>
+          <div class="setting-input">
+            <label class="toggle-switch"><input type="checkbox" id="cfg-server-lan" data-action="settingsPageApi.onLanToggle" data-action-event="change" aria-label="LAN Access"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <!-- Timezone setting -->
+        <div class="setting-item">
+          <div class="setting-label">
+            <span data-i18n="settings.timezone">タイムゾーン</span>
+            <small data-i18n="settings.timezone_hint">ログ・統計の表示に使用</small>
+          </div>
+          <div class="setting-input">
+            <select id="cfg-timezone" name="cfg-timezone" aria-label="Timezone"
+              style="width:100%;max-width:280px;padding:6px 10px;border-radius:6px;border:1px solid rgba(128,128,128,0.3);background:var(--bg);color:var(--text);font-size:13px;">
+              <option value="">-- システム推定値 --</option>
+              <optgroup label="アジア">
+                <option value="Asia/Tokyo">Asia/Tokyo (JST +9)</option>
+                <option value="Asia/Seoul">Asia/Seoul (KST +9)</option>
+                <option value="Asia/Shanghai">Asia/Shanghai (CST +8)</option>
+                <option value="Asia/Taipei">Asia/Taipei</option>
+                <option value="Asia/Singapore">Asia/Singapore (SGT +8)</option>
+                <option value="Asia/Kolkata">Asia/Kolkata (IST +5:30)</option>
+              </optgroup>
+              <optgroup label="ヨーロッパ">
+                <option value="Europe/London">Europe/London (GMT/BST)</option>
+                <option value="Europe/Paris">Europe/Paris (CET/CEST)</option>
+                <option value="Europe/Berlin">Europe/Berlin (CET/CEST)</option>
+                <option value="Europe/Moscow">Europe/Moscow (MSK +3)</option>
+              </optgroup>
+              <optgroup label="アメリカ">
+                <option value="America/New_York">America/New_York (EST/EDT)</option>
+                <option value="America/Chicago">America/Chicago (CST/CDT)</option>
+                <option value="America/Denver">America/Denver (MST/MDT)</option>
+                <option value="America/Los_Angeles">America/Los_Angeles (PST/PDT)</option>
+                <option value="America/Sao_Paulo">America/Sao_Paulo (BRT -3)</option>
+              </optgroup>
+              <optgroup label="その他">
+                <option value="UTC">UTC</option>
+                <option value="Australia/Sydney">Australia/Sydney (AEST/AEDT)</option>
+                <option value="Pacific/Auckland">Pacific/Auckland (NZST/NZDT)</option>
+              </optgroup>
+            </select>
+            <div id="timezoneSourceNote" style="font-size:11px;color:var(--muted);margin-top:4px;"></div>
+          </div>
+        </div>
+        <form autocomplete="off" data-no-submit="1" class="setting-item">
+          <div class="setting-label"><span data-i18n="settings.pin">PIN Auth</span><small data-i18n="settings.pin_hint">Empty = disabled. When set, PIN is required to access</small></div>
+          <div class="setting-input" style="display:flex;align-items:center;gap:6px;">
+            <input type="password" id="cfg-server-pin" data-i18n-placeholder="settings.pin_placeholder" placeholder="e.g. 1234" maxlength="8" autocomplete="new-password" aria-label="PIN">
+            <button type="button" data-action="settingsPageApi.togglePinVisibilitySetting" data-i18n-aria-label="settings.pin_toggle" aria-label="Toggle PIN visibility" data-i18n-title="settings.pin_toggle" title="Toggle PIN visibility"
+                    style="border:1px solid rgba(128,128,128,0.3);background:var(--bg,#1a1a2e);color:var(--text,#eee);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:12px;line-height:1;"
+                    id="cfg-pin-eye">👁</button>
+          </div>
+        </form>
+        <div class="setting-item">
+          <div class="setting-label">
+            <span data-i18n="settings.pin_boss_ui">Boss mode style PIN login</span>
+            <small data-i18n="settings.pin_boss_ui_hint">ON: Newspaper-style login (top-right input) / OFF: Simple PIN screen (1Password friendly)</small>
+          </div>
+          <div class="setting-input">
+            <label class="toggle-switch"><input type="checkbox" id="cfg-server-pin-boss-ui" aria-label="Boss mode style PIN login"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <div class="setting-item">
+          <div class="setting-label">
+            <span data-i18n="settings.allow_remote_restart">Allow remote restart</span>
+            <small data-i18n="settings.allow_remote_restart_hint">OFF recommended. When ON, restart token is required (allows restart without SSH tunnel)</small>
+          </div>
+          <div class="setting-input">
+            <label class="toggle-switch"><input type="checkbox" id="cfg-server-allow-remote-restart" aria-label="Allow remote restart"><span class="toggle-slider"></span></label>
+          </div>
+        </div>
+        <form autocomplete="off" data-no-submit="1" class="setting-item">
+          <div class="setting-label"><span data-i18n="settings.restart_token">Restart Token</span><small data-i18n="settings.restart_token_hint">12+ chars recommended. Shared secret for remote restart</small></div>
+          <div class="setting-input" style="display:flex;align-items:center;gap:6px;">
+            <input type="password" id="cfg-server-restart-token" data-i18n-placeholder="settings.restart_token_placeholder" placeholder="e.g. long-random-token" autocomplete="new-password" aria-label="Restart token">
+            <button type="button" data-action="settingsPageApi.toggleRestartTokenVisibilitySetting" data-i18n-aria-label="settings.restart_token_toggle" aria-label="Toggle restart token visibility" data-i18n-title="settings.restart_token_toggle" title="Toggle restart token visibility"
+                    style="border:1px solid rgba(128,128,128,0.3);background:var(--bg,#1a1a2e);color:var(--text,#eee);border-radius:6px;padding:6px 8px;cursor:pointer;font-size:12px;line-height:1;"
+                    id="cfg-restart-token-eye">👁</button>
+          </div>
+        </form>
+        <div id="pinSourceNotice" style="display:none;margin-top:8px;padding:8px 10px;border-radius:8px;border:1px solid rgba(243,156,18,0.45);background:rgba(243,156,18,0.14);color:var(--status-warn,#7c4700);font-size:12px;line-height:1.5;">
+          <span data-i18n="settings.pin_cli_override">The current PIN is overridden by CLI (--pin). Changes in settings will not take effect after restart.</span>
+        </div>
+        <p style="font-size:12px;color:var(--muted,#888);margin-top:8px;">
+          <span data-i18n="settings.server_note">Server config changes take effect on next startup. CLI options (--host, --port, --lan, --pin, --allow-remote-restart, --restart-token) take precedence if specified.</span>
+        </p>
+      </div>
+    </div>
